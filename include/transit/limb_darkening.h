@@ -13,8 +13,6 @@ namespace transit {
         I0_ = M_PI * (1.0 - (2.0 * c1_ + c2) / 6.0);
       }
 
-      int size () const { return 2; }
-
       Scalar value (const Scalar& x) const {
         Scalar mu = 1.0 - sqrt(1.0 - x * x);
         return (1.0 - c1_ * mu - c2_ * mu * mu) / I0_;
