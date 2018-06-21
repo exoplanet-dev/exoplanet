@@ -3,3 +3,6 @@ test
 *.so
 build
 __pycache__
+*.egg-info
+transit/cuda
+demo

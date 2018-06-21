@@ -11,10 +11,10 @@ using GPUDevice = Eigen::GpuDevice;
 template <typename T>
 __global__
 void TransitCudaKernel(int                    grid_size,
-                       T*  __restrict__ const grid,
+                       const T*  __restrict__ const grid,
                        int                    size,
-                       T*  __restrict__ const z,
-                       T*  __restrict__ const r,
+                       const T*  __restrict__ const z,
+                       const T*  __restrict__ const r,
                        T*  __restrict__       delta)
 {
   int index = blockIdx.x * blockDim.x + threadIdx.x;
