@@ -30,12 +30,27 @@ T step_advance (T step_scale, T x1)
 
 template <typename T>
 __host__ __device__ inline
+T index_to_coord (int size, int index)
+{
+  T val = 1.0 - index / (size - 1);
+  return 1.0 - val * val;
+}
+
+template <typename T>
+__host__ __device__ inline
+T coord_to_index (int size, T coord)
+{
+  return (size - 1) * (1.0 + sqrt(1.0 - coord));
+}
+
+template <typename T>
+__host__ __device__ inline
 T compute_area (T x, T z, T r)
 {
   T rmz = r - z,
     rpz = r + z,
-    x2 = (x)*(x),
-    r2 = (r)*(r);
+    x2 = x*x,
+    r2 = r*r;
 
   if (x <= -rmz) {
     return 0.0;
@@ -45,7 +60,7 @@ T compute_area (T x, T z, T r)
     return r2;
   }
 
-  T z2 = (z)*(z);
+  T z2 = z*z;
   T u = 0.5 * (z2 + x2 - r2) / ((z) * (x));
   T v = 0.5 * (z2 + r2 - x2) / ((z) * (r));
   T w = (x + rmz) * (x - rmz) * (rpz - x) * (rpz + x);
@@ -53,9 +68,9 @@ T compute_area (T x, T z, T r)
   return (x2 * acos(u) + r2 * acos(v) - 0.5 * sqrt(w)) / M_PI;
 }
 
-template <typename T, typename LimbDarkening>
-__global__ void transit_kernel(LimbDarkening ld,
-                               T                                 step_scale,
+template <typename T>
+__global__ void transit_kernel(int                               grid_size,
+                               T*             __restrict__ const grid,
                                int                               size,
                                T*             __restrict__ const z,
                                T*             __restrict__ const r,
@@ -63,23 +78,21 @@ __global__ void transit_kernel(LimbDarkening ld,
 {
   int index = blockIdx.x * blockDim.x + threadIdx.x;
   int stride = blockDim.x * gridDim.x;
-  T xmin, xmax, x1, x2, x, A1, A2, I;
+  T xmin, xmax, x1, x2, x, A1, A2, I1, I2;
+  int indmin, indmax;
   for (int i = index; i < size; i += stride) {
-    xmin = fmax(0.0, z[i] - r[i]);
-    xmax = fmin(1.0, z[i] + r[i]);
+    indmin = max(0,           int(floor(coord_to_index(grid_size, z[i] - r[i]))));
+    indmax = min(grid_size-1, int( ceil(coord_to_index(grid_size, z[i] + r[i]))));
     delta[i] = 0.0;
-    if (xmax > xmin) {
-      x1 = xmin;
-      A1 = 0.0;
-      while (x1 < xmax) {
-        x2 = step_advance<T>(step_scale, x1);
-        x = 0.5 * (x1 + x2);
-        A2 = compute_area<T>(x2, z[i], r[i]);
-        I = ld.evaluate(x);
-        delta[i] += (A2 - A1) * I;
-        x1 = x2;
-        A1 = A2;
-      }
+    A1 = 0.0;
+    I1 = grid[indmin];
+    for (int ind = indmin+1; ind <= indmax; ++ind) {
+      x2 = index_to_coord<T>(grid_size, ind);
+      A2 = compute_area<T>(x2, z[i], r[i]);
+      I2 = grid[ind];
+      delta[i] += 0.5 * (I1 + I2) * (A2 - A1);
+      A1 = A2;
+      I1 = I2;
     }
   }
 }
@@ -91,13 +104,15 @@ int main(void)
   T step_scale = 1e-3;
   int N = 10*700000;
   /*int N = 100;*/
-  T *z, *r, *delta;
+  int grid_size = 1400;
+  T *z, *r, *delta, *grid;
   QuadraticLimbDarkening<T> ld(0.5, 0.1);
 
   // Allocate Unified Memory – accessible from CPU or GPU
   cudaMallocManaged(&z,     N*sizeof(T));
   cudaMallocManaged(&r,     N*sizeof(T));
   cudaMallocManaged(&delta, N*sizeof(T));
+  cudaMallocManaged(&grid,  grid_size*sizeof(T));
 
   /*cudaMallocManaged(&ld,    sizeof(QuadraticLimbDarkening<T>));*/
   /*ld[0] = QuadraticLimbDarkening<T>(0.5, 0.1);*/
@@ -108,20 +123,21 @@ int main(void)
     r[i] = 0.01;
   }
 
+  for (int i = 0; i < grid_size; ++i) {
+    grid[i] = ld.evaluate(index_to_coord<T>(grid_size, i));
+  }
+
   int blockSize = 128;
   int numBlocks = (N + blockSize - 1) / blockSize;
 
-  transit_kernel<<<numBlocks, blockSize>>>(ld, step_scale, N, z, r, delta);
+  transit_kernel<<<numBlocks, blockSize>>>(grid_size, grid, N, z, r, delta);
   cudaDeviceSynchronize();
-
-  // Check for errors (all values should be 3.0f)
-  /*for (int i = 0; i < N; i++)*/
-  /*  std::cout << z[i] << " " << delta[i] << "\n";*/
 
   // Free memory
   cudaFree(z);
   cudaFree(r);
   cudaFree(delta);
+  cudaFree(grid);
   /*cudaFree(ld);*/
 
   return 0;
