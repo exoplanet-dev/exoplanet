@@ -1,12 +1,13 @@
 #ifndef _TRANSIT_TRANSIT_H_
 #define _TRANSIT_TRANSIT_H_
-
 #include <cmath>
 
 namespace transit {
 
 #ifdef __CUDACC__
 #define TRANSIT_CUDA_CALLABLE __host__ __device__
+#else
+#define TRANSIT_CUDA_CALLABLE
 #endif
 
   template <typename T>
@@ -56,8 +57,11 @@ namespace transit {
       T                            z,
       T                            r)
   {
-    int indmin = max(0,           int(floor(coord_to_index(grid_size, z - r))));
-    int indmax = min(grid_size-1, int( ceil(coord_to_index(grid_size, z + r))));
+    int indmin = int(floor(coord_to_index(grid_size, z - r)));
+    int indmax = int( ceil(coord_to_index(grid_size, z + r)));
+    indmin = (indmin < 0) ? 0 : indmin;
+    indmax = (indmax > grid_size - 1) ? grid_size - 1 : indmax;
+
     T delta = 0.0;
     T A1 = 0.0;
     T I1 = grid[indmin];
