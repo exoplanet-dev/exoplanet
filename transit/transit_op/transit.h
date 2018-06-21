@@ -14,7 +14,7 @@ namespace transit {
   TRANSIT_CUDA_CALLABLE
   inline T index_to_coord (int size, int index)
   {
-    T val = 1.0 - index / (size - 1);
+    T val = 1.0 - T(index) / (size - 1);
     return 1.0 - val * val;
   }
 
@@ -22,7 +22,7 @@ namespace transit {
   TRANSIT_CUDA_CALLABLE
   inline T coord_to_index (int size, T coord)
   {
-    return (size - 1) * (1.0 + sqrt(1.0 - coord));
+    return (size - 1) * (1.0 - sqrt(1.0 - coord));
   }
 
   template <typename T>
@@ -34,7 +34,7 @@ namespace transit {
       x2 = x*x,
       r2 = r*r;
 
-    if (fabs(x - r) < z < x + r) {
+    if (fabs(rmz) < x && x < rpz) {
       T z2 = z*z;
       T u = 0.5 * (z2 + x2 - r2) / ((z) * (x));
       T v = 0.5 * (z2 + r2 - x2) / ((z) * (r));
@@ -57,9 +57,10 @@ namespace transit {
       T                            z,
       T                            r)
   {
-    int indmin = int(floor(coord_to_index(grid_size, z - r)));
-    int indmax = int( ceil(coord_to_index(grid_size, z + r)));
-    indmin = (indmin < 0) ? 0 : indmin;
+    if (z - r >= 1.0) return 0.0;
+
+    int indmin = int(floor(coord_to_index(grid_size, fmax(0.0, z - r))));
+    int indmax = int( ceil(coord_to_index(grid_size, fmin(1.0, z + r))));
     indmax = (indmax > grid_size - 1) ? grid_size - 1 : indmax;
 
     T delta = 0.0;

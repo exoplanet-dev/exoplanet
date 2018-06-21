@@ -2,3 +2,4 @@
 test
 *.so
 build
+__pycache__

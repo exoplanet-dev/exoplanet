@@ -21,7 +21,7 @@ struct TransitFunctor<CPUDevice, T> {
 
 REGISTER_OP("Transit")
   .Attr("T: {float, double}")
-  .Input("params: T")
+  .Input("grid: T")
   .Input("z: T")
   .Input("r: T")
   .Output("delta: T")
