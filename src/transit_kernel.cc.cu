@@ -104,7 +104,7 @@ int main(void)
   T step_scale = 1e-3;
   int N = 10*700000;
   /*int N = 100;*/
-  int grid_size = 1400;
+  int grid_size = 1000;
   T *z, *r, *delta, *grid;
   QuadraticLimbDarkening<T> ld(0.5, 0.1);
 
