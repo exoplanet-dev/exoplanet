@@ -35,7 +35,10 @@ class custom_build_ext(build_ext):
 compile_flags = tf.sysconfig.get_compile_flags()
 link_flags = tf.sysconfig.get_link_flags()
 
-sources = [os.path.join("transit", "transit_op", "transit_op.cc")]
+sources = [
+    os.path.join("transit", "transit_op", "transit_op.cc"),
+    os.path.join("transit", "transit_op", "transit_rev_op.cc"),
+]
 include_dirs = [".", "transit", os.path.join("transit", "transit_op")]
 
 # Check for flag and nvcc
