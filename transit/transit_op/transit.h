@@ -62,17 +62,14 @@ namespace transit {
   {
     if (z - r >= 1.0) return 0.0;
 
-    //int indmin = int(floor(coord_to_index(grid_size, fmax(0.0, z - r))));
-    //int indmax = int( ceil(coord_to_index(grid_size, fmin(1.0, z + r))));
-    //indmax = (indmax > grid_size - 1) ? grid_size - 1 : indmax;
-
     T delta = 0.0;
     T A1 = 0.0;
     T I1 = grid[indmin];
-    T x2, A2, I2;
+    T //x2,
+      A2, I2;
     for (int ind = indmin+1; ind <= indmax; ++ind) {
-      x2 = index_to_coord<T>(grid_size, ind);
-      A2 = compute_area<T>(x2, z, r);
+      // x2 = index_to_coord<T>(grid_size, ind);
+      A2 = compute_area<T>(x[ind], z, r);
       I2 = grid[ind];
       delta += 0.5 * (I1 + I2) * (A2 - A1);
       A1 = A2;
