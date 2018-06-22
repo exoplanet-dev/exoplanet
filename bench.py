@@ -20,7 +20,7 @@ x = np.linspace(0.0, 1, 1400)
 mu = 1.0 - np.sqrt(1.0 - x**2)
 I = (1.0 - c1 * mu - c2 * mu**2) / I0
 
-N = 10*70000
+N = 10*100000
 z = tf.constant(np.linspace(0, 1.1, N), dtype=T)
 r = 0.01 + tf.zeros(N, dtype=T)
 
