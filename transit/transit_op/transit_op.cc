@@ -11,10 +11,10 @@ using GPUDevice = Eigen::GpuDevice;
 
 template <typename T>
 struct TransitFunctor<CPUDevice, T> {
-  void operator()(const CPUDevice& d, int grid_size, const T* const grid,
-                  int size, const T* const z, const T* const r, T* delta) {
+  void operator()(const CPUDevice& d, int grid_size, const T* const x, const T* const grid,
+                  int size, const int* const indmin, const int* const indmax, const T* const z, const T* const r, T* delta) {
     for (int i = 0; i < size; ++i) {
-      delta[i] = transit::compute_delta<T>(grid_size, grid, z[i], r[i]);
+      delta[i] = transit::compute_delta<T>(grid_size, x, grid, indmin[i], indmax[i], z[i], r[i]);
     }
   }
 };
@@ -39,6 +39,8 @@ class TransitOp : public OpKernel {
   explicit TransitOp(OpKernelConstruction* context) : OpKernel(context) {}
 
   void Compute(OpKernelContext* context) override {
+    typedef Eigen::Map<const Eigen::Array<T, Eigen::Dynamic, 1>> ConstantArray;
+
     // Inputs
     const Tensor& grid_tensor = context->input(0);
     const Tensor& z_tensor = context->input(1);
@@ -49,6 +51,8 @@ class TransitOp : public OpKernel {
     const int64 size = z_tensor.NumElements();
     OP_REQUIRES(context, r_tensor.NumElements() == size,
         errors::InvalidArgument("z and r must have the same number of elements"));
+    OP_REQUIRES(context, size <= tensorflow::kint32max,
+                errors::InvalidArgument("Too many elements in tensor"));
 
     // Output
     Tensor* delta_tensor = NULL;
@@ -56,16 +60,19 @@ class TransitOp : public OpKernel {
 
     // Access the data
     const auto grid = grid_tensor.template flat<T>();
-    const auto z = z_tensor.template flat<T>();
-    const auto r = r_tensor.template flat<T>();
+    const auto z = ConstantArray(z_tensor.template flat<T>().data(), size, 1);
+    const auto r = ConstantArray(r_tensor.template flat<T>().data(), size, 1);
     auto delta = delta_tensor->template flat<T>();
 
-    OP_REQUIRES(context, size <= tensorflow::kint32max,
-                errors::InvalidArgument("Too many elements in tensor"));
+    auto val = 1.0 - Eigen::Array<T, Eigen::Dynamic, 1>::LinSpaced(grid_size, 0.0, 1.0);
+    Eigen::Array<T, Eigen::Dynamic, 1> x = 1.0 - val * val;
+
+    Eigen::Array<int, Eigen::Dynamic, 1> indmin = ((grid_size-1) * (1.0 - sqrt(1.0 - (z - r).max(0.0)))).floor().template cast<int>();
+    Eigen::Array<int, Eigen::Dynamic, 1> indmax = ((grid_size-1) * (1.0 - sqrt(1.0 - (z + r).min(1.0)))).ceil().template cast<int>().min(grid_size - 1);
 
     TransitFunctor<Device, T>()(context->eigen_device<Device>(),
-        static_cast<int>(grid_size), grid.data(),
-        static_cast<int>(size), z.data(), r.data(), delta.data());
+        static_cast<int>(grid_size), x.data(), grid.data(),
+        static_cast<int>(size), indmin.data(), indmax.data(), z.data(), r.data(), delta.data());
   }
 };
 

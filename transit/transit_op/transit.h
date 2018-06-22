@@ -52,16 +52,19 @@ namespace transit {
   template <typename T>
   TRANSIT_CUDA_CALLABLE
   inline T compute_delta (
-      int                          grid_size,
-      const T*  __restrict__ const grid,
-      T                            z,
-      T                            r)
+      int                         grid_size,
+      const T* __restrict__ const x,
+      const T* __restrict__ const grid,
+      int                         indmin,
+      int                         indmax,
+      T                           z,
+      T                           r)
   {
     if (z - r >= 1.0) return 0.0;
 
-    int indmin = int(floor(coord_to_index(grid_size, fmax(0.0, z - r))));
-    int indmax = int( ceil(coord_to_index(grid_size, fmin(1.0, z + r))));
-    indmax = (indmax > grid_size - 1) ? grid_size - 1 : indmax;
+    //int indmin = int(floor(coord_to_index(grid_size, fmax(0.0, z - r))));
+    //int indmax = int( ceil(coord_to_index(grid_size, fmin(1.0, z + r))));
+    //indmax = (indmax > grid_size - 1) ? grid_size - 1 : indmax;
 
     T delta = 0.0;
     T A1 = 0.0;
