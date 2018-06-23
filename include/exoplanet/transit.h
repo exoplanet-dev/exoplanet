@@ -8,6 +8,11 @@
 namespace exoplanet {
   namespace transit {
 
+    //
+    // This module computes a transit light curve for any limb darkening
+    // profile
+    //
+
     template <typename T>
     EXOPLANET_CUDA_CALLABLE
     inline T index_to_coord (int size, int index)
@@ -34,7 +39,7 @@ namespace exoplanet {
     ///
     template <typename T>
     EXOPLANET_CUDA_CALLABLE
-    inline T compute_area (T x, T z, T r)
+    inline T compute_area (T x, T r, T z)
     {
       T rmz = r - z,
         rpz = r + z,
