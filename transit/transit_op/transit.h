@@ -36,10 +36,9 @@ namespace transit {
 
     if (fabs(rmz) < x && x < rpz) {
       T z2 = z*z;
-      T u = 0.5 * (z2 + x2 - r2) / ((z) * (x));
-      T v = 0.5 * (z2 + r2 - x2) / ((z) * (r));
-      T w = (x + rmz) * (x - rmz) * (rpz - x) * (rpz + x);
-      if (w < 0.0) w = 0.0;
+      T u = 0.5 * (z2 + x2 - r2) / (z * x);
+      T v = 0.5 * (z2 + r2 - x2) / (z * r);
+      T w = fmax((x + rmz) * (x - rmz) * (rpz - x) * (rpz + x), 0.0);
       return x2 * acos(u) + r2 * acos(v) - 0.5 * sqrt(w);
     } else if (x >= rpz) {
       return M_PI * r2;
