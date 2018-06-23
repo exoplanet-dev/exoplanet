@@ -36,10 +36,11 @@ compile_flags = tf.sysconfig.get_compile_flags()
 link_flags = tf.sysconfig.get_link_flags()
 
 sources = [
-    os.path.join("transit", "transit_op", "transit_op.cc"),
-    os.path.join("transit", "transit_op", "transit_rev_op.cc"),
+    os.path.join("exoplanet", "transit_op", "transit_op.cc"),
+    os.path.join("exoplanet", "transit_op", "transit_rev_op.cc"),
 ]
-include_dirs = [".", "transit", os.path.join("transit", "transit_op")]
+include_dirs = [".", "include", "exoplanet",
+                os.path.join("exoplanet", "transit_op")]
 
 # Check for flag and nvcc
 if "--with-cuda" in sys.argv:
@@ -47,7 +48,7 @@ if "--with-cuda" in sys.argv:
     base_dir = sys.argv.pop(index+1)
     sys.argv.pop(index)
     compile_flags += ["-DGOOGLE_CUDA=1"]
-    sources += [os.path.join("transit", "transit_op", "transit_op.cc.cu")]
+    sources += [os.path.join("exoplanet", "transit_op", "transit_op.cc.cu")]
     include_dirs += [os.path.join(base_dir, "include")]
     link_flags += ["-L" + os.path.join(base_dir, "lib64")]
 
@@ -61,7 +62,7 @@ if sys.platform == "darwin":
 
 extensions = [
     Extension(
-        "transit.transit_op",
+        "exoplanet.transit_op",
         sources=sources,
         language="c++",
         include_dirs=include_dirs,
@@ -74,9 +75,9 @@ extensions = [
 ]
 
 setup(
-    name="transit",
+    name="exoplanet",
     license="MIT",
-    packages=["transit"],
+    packages=["exoplanet"],
     ext_modules=extensions,
     cmdclass={"build_ext": custom_build_ext},
     zip_safe=True,
