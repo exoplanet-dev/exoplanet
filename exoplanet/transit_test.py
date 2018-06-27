@@ -9,6 +9,7 @@ from . import transit
 
 from batman import _quadratic_ld, _nonlinear_ld
 
+constant_ld = [lambda T: transit.ConstantLimbDarkening()]
 quadratic_ld = [
     lambda T: transit.QuadraticLimbDarkening(tf.constant(0.8, dtype=T),
                                              tf.constant(0.0, dtype=T)),
@@ -27,12 +28,13 @@ nonlinear_ld = [
                                              tf.constant(0.3, dtype=T),
                                              tf.constant(0.2, dtype=T)),
 ]
+all_ld = constant_ld + quadratic_ld + nonlinear_ld
 
 
 class LimbDarkeningTest(tf.test.TestCase):
 
     dtypes = [tf.float32, tf.float64]
-    limb_darkening_profiles = quadratic_ld + nonlinear_ld
+    limb_darkening_profiles = all_ld
 
     def test_integral(self):
         with self.test_session() as sess:
@@ -79,6 +81,24 @@ class BatmanTest(tf.test.TestCase):
                     args += [1e-3, 1]
                     lc0 = _nonlinear_ld._nonlinear_ld(*args)
                     assert np.allclose(1.0 - sess.run(delta), lc0)
+
+
+class EdgeTest(tf.test.TestCase):
+
+    dtypes = [tf.float32, tf.float64]
+    rors = [0.01, 0.1, 0.5]
+
+    def test_edge(self):
+        ld = transit.ConstantLimbDarkening()
+        with self.test_session() as sess:
+            for T in self.dtypes:
+                eps = np.finfo(T.as_numpy_dtype).eps
+                for ror in self.rors:
+                    z = tf.constant([1.009697 - eps],
+                                    dtype=T)
+                    r = tf.constant(ror, dtype=T)
+                    delta = transit.transit_depth(ld, z, r, n_integrate=10000)
+                    assert np.isfinite(sess.run(delta))
 
 
 class ConvergenceTest(tf.test.TestCase):

@@ -24,6 +24,15 @@ else:
 ops = tf.load_op_library(libfile)
 
 
+class ConstantLimbDarkening(object):
+
+    def __init__(self):
+        self.inv_I0 = 1.0 / np.pi
+
+    def evaluate(self, radius):
+        return self.inv_I0 * tf.ones_like(radius)
+
+
 class QuadraticLimbDarkening(object):
 
     def __init__(self, c1, c2):

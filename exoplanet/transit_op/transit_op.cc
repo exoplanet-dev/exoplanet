@@ -15,9 +15,9 @@ using GPUDevice = Eigen::GpuDevice;
 template <typename T>
 struct TransitDepthFunctor<CPUDevice, T> {
   void operator()(const CPUDevice& d, int N, const T* const radius, const T* const intensity,
-                  int size, const int* const n_min, const int* const n_max, const T* const z, T r, T eps, T* delta) {
+                  int size, const int* const n_min, const int* const n_max, const T* const z, T r, T* delta) {
     for (int i = 0; i < size; ++i) {
-      delta[i] = transit::compute_transit_depth<T>(N, radius, intensity, n_min[i], n_max[i], z[i], r, eps);
+      delta[i] = transit::compute_transit_depth<T>(N, radius, intensity, n_min[i], n_max[i], z[i], r);
     }
   }
 };
@@ -94,11 +94,9 @@ class TransitDepthOp : public OpKernel {
     const auto r         = r_tensor.template flat<T>();
     auto delta           = delta_tensor->template flat<T>();
 
-    const T eps = std::numeric_limits<T>::epsilon();
-
     TransitDepthFunctor<Device, T>()(context->eigen_device<Device>(),
         static_cast<int>(N), radius.data(), intensity.data(),
-        static_cast<int>(size), n_min.data(), n_max.data(), z.data(), r(0), eps, delta.data());
+        static_cast<int>(size), n_min.data(), n_max.data(), z.data(), r(0), delta.data());
   }
 };
 

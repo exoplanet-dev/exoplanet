@@ -7,7 +7,7 @@
 template <typename Device, typename T>
 struct TransitDepthFunctor {
   void operator()(const Device& d, int N, const T* const radius, const T* const intensity,
-                  int size, const int* const n_min, const int* const n_max, const T* const z, T r, T eps, T* delta);
+                  int size, const int* const n_min, const int* const n_max, const T* const z, T r, T* delta);
 };
 
 template <typename Device, typename T>
@@ -21,7 +21,7 @@ struct TransitDepthRevFunctor {
 template <typename T>
 struct TransitDepthFunctor<Eigen::GpuDevice, T> {
   void operator()(const Eigen::GpuDevice& d, int N, const T* const radius, const T* const intensity,
-                  int size, const int* const n_min, const int* const n_max, const T* const z, T r, T eps, T* delta);
+                  int size, const int* const n_min, const int* const n_max, const T* const z, T r, T* delta);
 };
 #endif
 

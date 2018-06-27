@@ -2,6 +2,7 @@
 #define _EXOPLANET_TRANSIT_H_
 
 #include <cmath>
+#include <limits>
 
 #include "exoplanet/cuda_utils.h"
 
@@ -24,8 +25,9 @@ namespace exoplanet {
     ///
     template <typename T>
     EXOPLANET_CUDA_CALLABLE
-    inline T compute_area (T x, T r, T z, T eps)
+    inline T compute_area (T x, T r, T z)
     {
+      static const T eps = 4*std::numeric_limits<T>::epsilon();
       T rmz = r - z,
         rpz = r + z,
         x2 = x*x,
@@ -33,12 +35,10 @@ namespace exoplanet {
 
       if (fabs(rmz) + eps < x && x < rpz - eps) {
         T z2 = z*z;
-        T u = 0.5 * (z2 + x2 - r2) / (z * x);
-        T v = 0.5 * (z2 + r2 - x2) / (z * r);
+        T u = fmax(fmin(0.5 * (z2 + x2 - r2) / (z * x), 1.0), -1.0);
+        T v = fmax(fmin(0.5 * (z2 + r2 - x2) / (z * r), 1.0), -1.0);
         T w = fmax((x + rmz) * (x - rmz) * (rpz - x) * (rpz + x), 0.0);
-        T arg1 = (fabs(u - 1.0) <= eps) ? 0.0 : x2 * acos(u);
-        T arg2 = (fabs(v - 1.0) <= eps) ? 0.0 : r2 * acos(v);
-        return arg1 + arg2 - 0.5 * sqrt(w);
+        return x2 * acos(u) + r2 * acos(v) - 0.5 * sqrt(w);
       } else if (x >= rpz - eps) {
         return M_PI * r2;
       } else if (x <= rmz + eps) {
@@ -77,8 +77,7 @@ namespace exoplanet {
         int                         n_min,
         int                         n_max,
         T                           z,
-        T                           r,
-        T                           eps)
+        T                           r)
     {
       if (z - r >= 1.0) return 0.0;
 
@@ -86,7 +85,7 @@ namespace exoplanet {
         A1 = 0.0, A2,
         I1 = intensity[n_min], I2;
       for (int n = n_min+1; n <= n_max; ++n) {
-        A2 = compute_area<T>(radius[n], r, z, eps);
+        A2 = compute_area<T>(radius[n], r, z);
         I2 = intensity[n];
         delta += 0.5 * (I1 + I2) * (A2 - A1);
         A1 = A2;
@@ -108,8 +107,9 @@ namespace exoplanet {
     ///
     template <typename T>
     EXOPLANET_CUDA_CALLABLE
-    inline T compute_area_fwd (T x, T r, T z, T eps, T* d_r, T* d_z)
+    inline T compute_area_fwd (T x, T r, T z, T* d_r, T* d_z)
     {
+      static const T eps = 4*std::numeric_limits<T>::epsilon();
       T rmz = r - z,
         rpz = r + z,
         x2 = x*x,
@@ -122,8 +122,8 @@ namespace exoplanet {
         T z2 = z*z;
         T zx = z * x;
         T zr = z * r;
-        T u = 0.5 * (z2 + x2 - r2) / zx;
-        T v = 0.5 * (z2 + r2 - x2) / zr;
+        T u = fmax(fmin(0.5 * (z2 + x2 - r2) / zx, 1.0), -1.0);
+        T v = fmax(fmin(0.5 * (z2 + r2 - x2) / zr, 1.0), -1.0);
         T w = (x + rmz) * (x - rmz) * (rpz - x) * (rpz + x);
         if (w < 0.0) w = 0.0;
 
