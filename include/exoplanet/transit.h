@@ -13,21 +13,6 @@ namespace exoplanet {
     // profile
     //
 
-    template <typename T>
-    EXOPLANET_CUDA_CALLABLE
-    inline T index_to_coord (int size, int index)
-    {
-      T val = 1.0 - T(index) / (size - 1);
-      return 1.0 - val * val;
-    }
-
-    template <typename T>
-    EXOPLANET_CUDA_CALLABLE
-    inline T coord_to_index (int size, T coord)
-    {
-      return (size - 1) * (1.0 - sqrt(1.0 - coord));
-    }
-
     ///
     /// Compute the overlapping area of two disks
     ///
@@ -39,22 +24,24 @@ namespace exoplanet {
     ///
     template <typename T>
     EXOPLANET_CUDA_CALLABLE
-    inline T compute_area (T x, T r, T z)
+    inline T compute_area (T x, T r, T z, T eps)
     {
       T rmz = r - z,
         rpz = r + z,
         x2 = x*x,
         r2 = r*r;
 
-      if (fabs(rmz) < x && x < rpz) {
+      if (fabs(rmz) + eps < x && x < rpz - eps) {
         T z2 = z*z;
         T u = 0.5 * (z2 + x2 - r2) / (z * x);
         T v = 0.5 * (z2 + r2 - x2) / (z * r);
         T w = fmax((x + rmz) * (x - rmz) * (rpz - x) * (rpz + x), 0.0);
-        return x2 * acos(u) + r2 * acos(v) - 0.5 * sqrt(w);
-      } else if (x >= rpz) {
+        T arg1 = (fabs(u - 1.0) <= eps) ? 0.0 : x2 * acos(u);
+        T arg2 = (fabs(v - 1.0) <= eps) ? 0.0 : r2 * acos(v);
+        return arg1 + arg2 - 0.5 * sqrt(w);
+      } else if (x >= rpz - eps) {
         return M_PI * r2;
-      } else if (x <= rmz) {
+      } else if (x <= rmz + eps) {
         return M_PI * x2;
       }
       return 0.0;
@@ -90,7 +77,8 @@ namespace exoplanet {
         int                         n_min,
         int                         n_max,
         T                           z,
-        T                           r)
+        T                           r,
+        T                           eps)
     {
       if (z - r >= 1.0) return 0.0;
 
@@ -98,7 +86,7 @@ namespace exoplanet {
         A1 = 0.0, A2,
         I1 = intensity[n_min], I2;
       for (int n = n_min+1; n <= n_max; ++n) {
-        A2 = compute_area<T>(radius[n], r, z);
+        A2 = compute_area<T>(radius[n], r, z, eps);
         I2 = intensity[n];
         delta += 0.5 * (I1 + I2) * (A2 - A1);
         A1 = A2;
@@ -120,7 +108,7 @@ namespace exoplanet {
     ///
     template <typename T>
     EXOPLANET_CUDA_CALLABLE
-    inline T compute_area_fwd (T x, T r, T z, T* d_r, T* d_z)
+    inline T compute_area_fwd (T x, T r, T z, T eps, T* d_r, T* d_z)
     {
       T rmz = r - z,
         rpz = r + z,
@@ -130,7 +118,7 @@ namespace exoplanet {
       *d_z = 0.0;
       *d_r = 0.0;
 
-      if (fabs(rmz) < x && x < rpz) {
+      if (fabs(rmz) + eps < x && x < rpz - eps) {
         T z2 = z*z;
         T zx = z * x;
         T zr = z * r;
@@ -139,8 +127,10 @@ namespace exoplanet {
         T w = (x + rmz) * (x - rmz) * (rpz - x) * (rpz + x);
         if (w < 0.0) w = 0.0;
 
+
         // Some shortcuts
-        T acosv = acos(v);
+        T acosu = (fabs(u - 1.0) <= eps) ? 0.0 : acos(u);
+        T acosv = (fabs(v - 1.0) <= eps) ? 0.0 : acos(v);
         T sqrtw = sqrt(w);
 
         // Compute all the partials
@@ -153,6 +143,7 @@ namespace exoplanet {
         T dwdz = 4.0 * z * (r2 - z2 + x2);
         T dwdr = 4.0 * r * (z2 - r2 + x2);
 
+        // FIXME: what happens when u == 1 or v == 1?
         T dacosu = -1.0 / sqrt(1.0 - u * u);
         T dacosv = -1.0 / sqrt(1.0 - v * v);
 
@@ -160,11 +151,11 @@ namespace exoplanet {
         *d_z = x2 * dacosu * dudz + r2 * dacosv * dvdz - 0.25 * dwdz / sqrtw;
         *d_r = x2 * dacosu * dudr + 2.0 * r * acosv + r2 * dacosv * dvdr - 0.25 * dwdr / sqrtw;
 
-        return x2 * acos(u) + r2 * acos(v) - 0.5 * sqrt(w);
-      } else if (x >= rpz) {
+        return x2 * acosu + r2 * acosv - 0.5 * sqrt(w);
+      } else if (x >= rpz - eps) {
         *d_r = 2.0 * M_PI * r;
         return M_PI * r2;
-      } else if (x <= rmz) {
+      } else if (x <= rmz + eps) {
         return M_PI * x2;
       }
       return 0.0;

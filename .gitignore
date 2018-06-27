@@ -6,3 +6,4 @@ __pycache__
 *.egg-info
 transit/cuda
 demo
+.pytest_cache

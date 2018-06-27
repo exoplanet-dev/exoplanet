@@ -13,11 +13,11 @@ using GPUDevice = Eigen::GpuDevice;
 template <typename T>
 struct TransitDepthRevFunctor<CPUDevice, T> {
   void operator()(const CPUDevice& d, int N, const T* const radius, const T* const intensity,
-                  int size, const int* const n_min, const int* const n_max, const T* const z, const T* const r,
+                  int size, const int* const n_min, const int* const n_max, const T* const z, T r,
                   const T* const b_delta, T* b_intensity, T* b_z, T* b_r) {
     for (int i = 0; i < size; ++i) {
-      transit::compute_transit_depth_rev<T>(N, radius, intensity, n_min[i], n_max[i], z[i], r[i],
-                                            b_delta[i], b_intensity, &(b_z[i]), &(b_r[i]));
+      transit::compute_transit_depth_rev<T>(N, radius, intensity, n_min[i], n_max[i], z[i], r,
+                                            b_delta[i], b_intensity, &(b_z[i]), b_r);
     }
   }
 };
@@ -39,8 +39,9 @@ REGISTER_OP("TransitDepthRev")
     TF_RETURN_IF_ERROR(c->Merge(c->input(0), c->input(1), &shape));
     TF_RETURN_IF_ERROR(c->Merge(c->input(2), c->input(3), &shape));
     TF_RETURN_IF_ERROR(c->Merge(shape, c->input(4), &shape));
-    TF_RETURN_IF_ERROR(c->Merge(shape, c->input(5), &shape));
     TF_RETURN_IF_ERROR(c->Merge(shape, c->input(6), &shape));
+
+    TF_RETURN_IF_ERROR(c->WithRank(c->input(5), 0, &shape));
 
     c->set_output(0, c->input(0));
     c->set_output(1, c->input(4));
@@ -77,8 +78,8 @@ class TransitDepthRevOp : public OpKernel {
         errors::InvalidArgument("z and n_min must have the same number of elements"));
     OP_REQUIRES(context, n_max_tensor.NumElements() == size,
         errors::InvalidArgument("z and n_max must have the same number of elements"));
-    OP_REQUIRES(context, r_tensor.NumElements() == size,
-        errors::InvalidArgument("z and r must have the same number of elements"));
+    OP_REQUIRES(context, r_tensor.NumElements() == 1,
+        errors::InvalidArgument("r must be a scalar"));
     OP_REQUIRES(context, b_delta_tensor.NumElements() == size,
         errors::InvalidArgument("z and b_delta must have the same number of elements"));
 
@@ -108,7 +109,7 @@ class TransitDepthRevOp : public OpKernel {
 
     TransitDepthRevFunctor<Device, T>()(context->eigen_device<Device>(),
         static_cast<int>(N), radius.data(), intensity.data(),
-        static_cast<int>(size), n_min.data(), n_max.data(), z.data(), r.data(),
+        static_cast<int>(size), n_min.data(), n_max.data(), z.data(), r(0),
         b_delta.data(), b_intensity.data(), b_z.data(), b_r.data());
   }
 };

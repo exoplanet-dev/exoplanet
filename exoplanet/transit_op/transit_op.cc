@@ -2,6 +2,8 @@
 #include "tensorflow/core/framework/tensor_shape.h"
 #include "tensorflow/core/framework/shape_inference.h"
 
+#include <limits>
+
 #include "transit_op.h"
 
 using namespace tensorflow;
@@ -13,9 +15,9 @@ using GPUDevice = Eigen::GpuDevice;
 template <typename T>
 struct TransitDepthFunctor<CPUDevice, T> {
   void operator()(const CPUDevice& d, int N, const T* const radius, const T* const intensity,
-                  int size, const int* const n_min, const int* const n_max, const T* const z, const T* const r, T* delta) {
+                  int size, const int* const n_min, const int* const n_max, const T* const z, T r, T eps, T* delta) {
     for (int i = 0; i < size; ++i) {
-      delta[i] = transit::compute_transit_depth<T>(N, radius, intensity, n_min[i], n_max[i], z[i], r[i]);
+      delta[i] = transit::compute_transit_depth<T>(N, radius, intensity, n_min[i], n_max[i], z[i], r, eps);
     }
   }
 };
@@ -35,7 +37,7 @@ REGISTER_OP("TransitDepth")
     TF_RETURN_IF_ERROR(c->Merge(c->input(0), c->input(1), &shape));
     TF_RETURN_IF_ERROR(c->Merge(c->input(2), c->input(3), &shape));
     TF_RETURN_IF_ERROR(c->Merge(shape, c->input(4), &shape));
-    TF_RETURN_IF_ERROR(c->Merge(shape, c->input(5), &shape));
+    TF_RETURN_IF_ERROR(c->WithRank(c->input(5), 0, &shape));
 
     c->set_output(0, c->input(4));
     return Status::OK();
@@ -76,8 +78,8 @@ class TransitDepthOp : public OpKernel {
         errors::InvalidArgument("z and n_min must have the same number of elements"));
     OP_REQUIRES(context, n_max_tensor.NumElements() == size,
         errors::InvalidArgument("z and n_max must have the same number of elements"));
-    OP_REQUIRES(context, r_tensor.NumElements() == size,
-        errors::InvalidArgument("z and r must have the same number of elements"));
+    OP_REQUIRES(context, r_tensor.NumElements() == 1,
+        errors::InvalidArgument("r must be a scalar"));
 
     // Output
     Tensor* delta_tensor = NULL;
@@ -92,9 +94,11 @@ class TransitDepthOp : public OpKernel {
     const auto r         = r_tensor.template flat<T>();
     auto delta           = delta_tensor->template flat<T>();
 
+    const T eps = std::numeric_limits<T>::epsilon();
+
     TransitDepthFunctor<Device, T>()(context->eigen_device<Device>(),
         static_cast<int>(N), radius.data(), intensity.data(),
-        static_cast<int>(size), n_min.data(), n_max.data(), z.data(), r.data(), delta.data());
+        static_cast<int>(size), n_min.data(), n_max.data(), z.data(), r(0), eps, delta.data());
   }
 };
 
