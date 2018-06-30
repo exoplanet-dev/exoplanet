@@ -28,6 +28,7 @@ class ConstantLimbDarkening(object):
 
     def __init__(self):
         self.inv_I0 = 1.0 / np.pi
+        self.params = []
 
     def evaluate(self, radius):
         return self.inv_I0 * tf.ones_like(radius)
@@ -39,6 +40,7 @@ class QuadraticLimbDarkening(object):
         self.c1 = c1
         self.c2 = c2
         self.I0 = np.pi * (1.0 - c1 / 3.0 - c2 / 6.0)
+        self.params = [self.c1, self.c2]
 
     def evaluate(self, radius):
         mu = 1.0 - tf.sqrt(1.0 - radius**2)
@@ -53,6 +55,7 @@ class NonLinearLimbDarkening(object):
         self.c3 = c3
         self.c4 = c4
         self.I0 = np.pi * (1.0 - c1/5.0 - c2/3.0 - 3.0*c3/7.0 - c4/2.0)
+        self.params = [self.c1, self.c2, self.c3, self.c4]
 
     def evaluate(self, radius):
         mu2 = 1.0 - radius**2

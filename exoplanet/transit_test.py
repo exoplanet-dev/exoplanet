@@ -11,16 +11,10 @@ from batman import _quadratic_ld, _nonlinear_ld
 
 constant_ld = [lambda T: transit.ConstantLimbDarkening()]
 quadratic_ld = [
-    lambda T: transit.QuadraticLimbDarkening(tf.constant(0.8, dtype=T),
-                                             tf.constant(0.0, dtype=T)),
-    lambda T: transit.QuadraticLimbDarkening(tf.constant(0.0, dtype=T),
-                                             tf.constant(0.8, dtype=T)),
     lambda T: transit.QuadraticLimbDarkening(tf.constant(0.1, dtype=T),
                                              tf.constant(0.9, dtype=T)),
     lambda T: transit.QuadraticLimbDarkening(tf.constant(0.5, dtype=T),
                                              tf.constant(0.2, dtype=T)),
-    lambda T: transit.QuadraticLimbDarkening(tf.constant(0.0, dtype=T),
-                                             tf.constant(0.0, dtype=T)),
 ]
 nonlinear_ld = [
     lambda T: transit.NonLinearLimbDarkening(tf.constant(0.5, dtype=T),
@@ -100,8 +94,11 @@ class EdgeTest(tf.test.TestCase):
                     delta = transit.transit_depth(ld, z, r, n_integrate=10000)
                     assert np.isfinite(sess.run(delta))
 
+                    grad = tf.gradients(delta, [z, r])
+                    assert all(np.all(np.isfinite(v)) for v in sess.run(grad))
 
-class ConvergenceTest(tf.test.TestCase):
+
+class TransitDepthTest(tf.test.TestCase):
 
     dtypes = [tf.float32, tf.float64]
     limb_darkening_profiles = quadratic_ld + nonlinear_ld
@@ -113,7 +110,7 @@ class ConvergenceTest(tf.test.TestCase):
                 for ld_factory in self.limb_darkening_profiles:
                     ld = ld_factory(T)
                     for ror in self.rors:
-                        N = 100
+                        N = 50
                         z = tf.constant(np.linspace(0, 1+2*ror, N), dtype=T)
                         r = tf.constant(ror, dtype=T)
                         delta = transit.transit_depth(ld, z, r,
@@ -123,3 +120,25 @@ class ConvergenceTest(tf.test.TestCase):
                         assert not np.any(np.isnan(delta_exact.eval()))
                         assert np.allclose(*sess.run([delta_exact, delta]),
                                            rtol=1.0, atol=1e-6)
+
+    def test_gradient(self):
+        with self.test_session() as sess:
+            for T in self.dtypes:
+                eps = 0.001
+                for ld_factory in self.limb_darkening_profiles:
+                    ld = ld_factory(T)
+                    for ror in self.rors:
+                        N = 50
+                        z = tf.constant(np.linspace(0, 1+2*ror, N), dtype=T)
+                        r = tf.constant(ror, dtype=T)
+                        delta = transit.transit_depth(ld, z, r)
+
+                        params = ld.params + [z, r]
+                        vals = sess.run(params)
+                        shapes = [np.shape(v) for v in vals]
+                        err = tf.test.compute_gradient_error(
+                            params, shapes,
+                            delta, shapes[-2],
+                            vals, eps,
+                        )
+                        assert np.allclose(err, 0.0, atol=2*eps, rtol=1.0)

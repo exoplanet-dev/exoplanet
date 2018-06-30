@@ -27,6 +27,8 @@ namespace exoplanet {
     EXOPLANET_CUDA_CALLABLE
     inline T compute_area (T x, T r, T z)
     {
+      // MAGIC: the 4 here has been hand tuned to deal with edge cases.
+      // This won't necessarily always be correct...
       static const T eps = 4*std::numeric_limits<T>::epsilon();
       T rmz = r - z,
         rpz = r + z,
@@ -38,6 +40,7 @@ namespace exoplanet {
         T u = fmax(fmin(0.5 * (z2 + x2 - r2) / (z * x), 1.0), -1.0);
         T v = fmax(fmin(0.5 * (z2 + r2 - x2) / (z * r), 1.0), -1.0);
         T w = fmax((x + rmz) * (x - rmz) * (rpz - x) * (rpz + x), 0.0);
+        if (1.0 - u*u < eps || 1.0 - v*v < eps) return 0.0;
         return x2 * acos(u) + r2 * acos(v) - 0.5 * sqrt(w);
       } else if (x >= rpz - eps) {
         return M_PI * r2;
@@ -127,10 +130,16 @@ namespace exoplanet {
         T w = (x + rmz) * (x - rmz) * (rpz - x) * (rpz + x);
         if (w < 0.0) w = 0.0;
 
+        // Deal with the edge case...
+        T argu = 1.0 - u * u;
+        T argv = 1.0 - v * v;
+        if (argu < eps || argv < eps) return 0.0;
+        T dacosu = -1.0 / sqrt(argu);
+        T dacosv = -1.0 / sqrt(argv);
 
         // Some shortcuts
-        T acosu = (fabs(u - 1.0) <= eps) ? 0.0 : acos(u);
-        T acosv = (fabs(v - 1.0) <= eps) ? 0.0 : acos(v);
+        T acosu = acos(u);
+        T acosv = acos(v);
         T sqrtw = sqrt(w);
 
         // Compute all the partials
@@ -142,10 +151,6 @@ namespace exoplanet {
 
         T dwdz = 4.0 * z * (r2 - z2 + x2);
         T dwdr = 4.0 * r * (z2 - r2 + x2);
-
-        // FIXME: what happens when u == 1 or v == 1?
-        T dacosu = -1.0 / sqrt(1.0 - u * u);
-        T dacosv = -1.0 / sqrt(1.0 - v * v);
 
         // Combine the partials as needed
         *d_z = x2 * dacosu * dudz + r2 * dacosv * dvdz - 0.25 * dwdz / sqrtw;
