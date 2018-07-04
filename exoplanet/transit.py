@@ -93,12 +93,17 @@ def transit_depth(limb_darkening, z, r, n_integrate=1000):
                                            z.dtype))
     n_min = tf.cast(tf.floor(radius_to_index(n_integrate, z - r)), tf.int32)
     n_max = tf.cast(tf.ceil(radius_to_index(n_integrate, z + r)), tf.int32)
-
-    return ops.transit_depth(radius, limb_darkening.evaluate(radius),
-                             n_min, n_max, z, r)
+    I = limb_darkening.evaluate(radius)
+    return ops.transit_depth(radius, I, n_min, n_max, z, r)
 
 
 @tf.RegisterGradient("TransitDepth")
 def _transit_depth_grad(op, *grads):
     results = ops.transit_depth_rev(*(list(op.inputs) + [grads[0]]))
     return (None, results[0], None, None, results[1], results[2])
+
+
+@tf.RegisterGradient("OccultedArea")
+def _occulted_area_grad(op, *grads):
+    results = ops.occulted_area_rev(*(list(op.inputs) + [grads[0]]))
+    return (None, results[0], results[1])

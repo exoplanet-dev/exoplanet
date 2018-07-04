@@ -38,6 +38,8 @@ link_flags = tf.sysconfig.get_link_flags()
 sources = [
     os.path.join("exoplanet", "transit_op", "transit_op.cc"),
     os.path.join("exoplanet", "transit_op", "transit_rev_op.cc"),
+    os.path.join("exoplanet", "transit_op", "occulted_area_op.cc"),
+    os.path.join("exoplanet", "transit_op", "occulted_area_rev_op.cc"),
 ]
 include_dirs = [".", "include", "exoplanet",
                 os.path.join("exoplanet", "transit_op")]

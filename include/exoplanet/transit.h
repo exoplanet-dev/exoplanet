@@ -27,24 +27,20 @@ namespace exoplanet {
     EXOPLANET_CUDA_CALLABLE
     inline T compute_area (T x, T r, T z)
     {
-      // MAGIC: the 4 here has been hand tuned to deal with edge cases.
-      // This won't necessarily always be correct...
-      static const T eps = 4*std::numeric_limits<T>::epsilon();
       T rmz = r - z,
         rpz = r + z,
         x2 = x*x,
         r2 = r*r;
 
-      if (fabs(rmz) + eps < x && x < rpz - eps) {
+      if (fabs(rmz) < x && x < rpz) {
         T z2 = z*z;
-        T u = fmax(fmin(0.5 * (z2 + x2 - r2) / (z * x), 1.0), -1.0);
-        T v = fmax(fmin(0.5 * (z2 + r2 - x2) / (z * r), 1.0), -1.0);
-        T w = fmax((x + rmz) * (x - rmz) * (rpz - x) * (rpz + x), 0.0);
-        if (1.0 - u*u < eps || 1.0 - v*v < eps) return 0.0;
+        T u = fmax(fmin(T(0.5) * (z2 + x2 - r2) / (z * x), T(1.0)), T(-1.0));
+        T v = fmax(fmin(T(0.5) * (z2 + r2 - x2) / (z * r), T(1.0)), T(-1.0));
+        T w = fmax((x + rmz) * (x - rmz) * (rpz - x) * (rpz + x), T(0.0));
         return x2 * acos(u) + r2 * acos(v) - 0.5 * sqrt(w);
-      } else if (x >= rpz - eps) {
+      } else if (x >= rpz) {
         return M_PI * r2;
-      } else if (x <= rmz + eps) {
+      } else if (x <= rmz) {
         return M_PI * x2;
       }
       return 0.0;
@@ -112,7 +108,6 @@ namespace exoplanet {
     EXOPLANET_CUDA_CALLABLE
     inline T compute_area_fwd (T x, T r, T z, T* d_r, T* d_z)
     {
-      static const T eps = 4*std::numeric_limits<T>::epsilon();
       T rmz = r - z,
         rpz = r + z,
         x2 = x*x,
@@ -121,46 +116,26 @@ namespace exoplanet {
       *d_z = 0.0;
       *d_r = 0.0;
 
-      if (fabs(rmz) + eps < x && x < rpz - eps) {
+      if (fabs(rmz) < x && x < rpz) {
         T z2 = z*z;
         T zx = z * x;
         T zr = z * r;
-        T u = fmax(fmin(0.5 * (z2 + x2 - r2) / zx, 1.0), -1.0);
-        T v = fmax(fmin(0.5 * (z2 + r2 - x2) / zr, 1.0), -1.0);
-        T w = (x + rmz) * (x - rmz) * (rpz - x) * (rpz + x);
-        if (w < 0.0) w = 0.0;
+        T u = fmax(fmin(0.5 * (z2 + x2 - r2) / zx, T(1.0)), T(-1.0));
+        T v = fmax(fmin(0.5 * (z2 + r2 - x2) / zr, T(1.0)), T(-1.0));
+        T w = fmax((x + rmz) * (x - rmz) * (rpz - x) * (rpz + x), T(0.0));
 
-        // Deal with the edge case...
-        T argu = 1.0 - u * u;
-        T argv = 1.0 - v * v;
-        if (argu < eps || argv < eps) return 0.0;
-        T dacosu = -1.0 / sqrt(argu);
-        T dacosv = -1.0 / sqrt(argv);
-
-        // Some shortcuts
         T acosu = acos(u);
         T acosv = acos(v);
         T sqrtw = sqrt(w);
 
-        // Compute all the partials
-        T dudz = 0.5 * (1.0 / x - (x2 - r2) / (z2 * x));
-        T dudr = -r / zx;
-
-        T dvdz = 0.5 * (1.0 / r - (r2 - x2) / (z2 * r));
-        T dvdr = 0.5 * (1.0 / z - (z2 - x2) / (r2 * z));
-
-        T dwdz = 4.0 * z * (r2 - z2 + x2);
-        T dwdr = 4.0 * r * (z2 - r2 + x2);
-
-        // Combine the partials as needed
-        *d_z = x2 * dacosu * dudz + r2 * dacosv * dvdz - 0.25 * dwdz / sqrtw;
-        *d_r = x2 * dacosu * dudr + 2.0 * r * acosv + r2 * dacosv * dvdr - 0.25 * dwdr / sqrtw;
+        *d_z = -sqrtw / z;
+        *d_r = 2.0 * r * acosv;
 
         return x2 * acosu + r2 * acosv - 0.5 * sqrt(w);
-      } else if (x >= rpz - eps) {
+      } else if (x >= rpz) {
         *d_r = 2.0 * M_PI * r;
         return M_PI * r2;
-      } else if (x <= rmz + eps) {
+      } else if (x <= rmz) {
         return M_PI * x2;
       }
       return 0.0;
@@ -205,32 +180,39 @@ namespace exoplanet {
         T*                          b_z,
         T*                          b_r)
     {
-      if (z - r >= 1.0) return;
+      if (z - r >= 1.0 || n_max <= n_min) return;
 
-      T d_z, d_r;
+      T d_z = 0.0, d_r = 0.0;
+      T Am1, A0, Ap1,
+        Im1 = intensity[n_min], I0 = intensity[n_min], Ip1 = intensity[n_min+1], I;
 
-      T A2 = compute_area_fwd<T>(radius[n_max], r, z, &d_r, &d_z), A1,
-        I2 = intensity[n_max], I1, I, b_I;
-      for (int n = n_max-1; n >= n_min; --n) {
-        I1 = intensity[n];
-        I = 0.5 * (I1 + I2);
-        *b_z += b_delta * I * d_z;
-        *b_r += b_delta * I * d_r;
+      Am1 = compute_area_fwd<T>(radius[n_min], r, z, &d_r, &d_z);
+      I = -0.5 * b_delta * (Ip1 + Im1);
+      *b_z += I * d_z;
+      *b_r += I * d_r;
 
-        A1 = compute_area_fwd(radius[n], r, z, &d_r, &d_z);
+      A0 = compute_area_fwd<T>(radius[n_min+1], r, z, &d_r, &d_z);
+      b_intensity[n_min] -= 0.5 * b_delta * (A0 - Am1);
 
-        *b_z -= b_delta * I * d_z;
-        *b_r -= b_delta * I * d_r;
+      for (int n = n_min+1; n <= n_max; ++n) {
+        Im1 = I0;
+        I0 = Ip1;
+        Ip1 = intensity[n+1];
+        I = 0.5 * b_delta * (Im1 - Ip1);
+        *b_z += I * d_z;
+        *b_r += I * d_r;
 
-        b_I = 0.5 * b_delta * (A2 - A1);
-        b_intensity[n+1] += b_I;
-        b_intensity[n]   += b_I;
-
-        A2 = A1;
-        I2 = I1;
+        Ap1 = compute_area_fwd<T>(radius[n+1], r, z, &d_r, &d_z);
+        b_intensity[n] += 0.5 * b_delta * (Ap1 - Am1);
+        Am1 = A0;
+        A0 = Ap1;
       }
-    }
 
+      I = 0.5 * b_delta * (I0 + Ip1);
+      *b_z += I * d_z;
+      *b_r += I * d_r;
+      b_intensity[n_max+1] += 0.5 * b_delta * (Ap1 - A0);
+    }
   };
 };
 
