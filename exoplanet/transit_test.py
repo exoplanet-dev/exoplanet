@@ -83,64 +83,63 @@ class TransitDepthTest(tf.test.TestCase):
     limb_darkening_profiles = quadratic_ld + nonlinear_ld
     rors = [0.01, 0.1, 0.5]
 
-    # def test_convergence(self):
-    #     with self.test_session() as sess:
-    #         for T in self.dtypes:
-    #             for ld_factory in self.limb_darkening_profiles:
-    #                 ld = ld_factory(T)
-    #                 for ror in self.rors:
-    #                     N = 50
-    #                     z = tf.constant(np.linspace(0, 1+2*ror, N), dtype=T)
-    #                     r = tf.constant(ror, dtype=T)
-    #                     delta = transit.transit_depth(ld, z, r,
-    #                                                   n_integrate=1000)
-    #                     delta_exact = transit.transit_depth(
-    #                         ld, z, r, n_integrate=10000)
-    #                     assert not np.any(np.isnan(delta_exact.eval()))
-    #                     assert np.allclose(*sess.run([delta_exact, delta]),
-    #                                        rtol=1.0, atol=1e-6)
+    def test_convergence(self):
+        with self.test_session() as sess:
+            for T in self.dtypes:
+                for ld_factory in self.limb_darkening_profiles:
+                    ld = ld_factory(T)
+                    for ror in self.rors:
+                        N = 50
+                        z = tf.constant(np.linspace(0, 1+2*ror, N), dtype=T)
+                        r = tf.constant(ror, dtype=T)
+                        delta = transit.transit_depth(ld, z, r,
+                                                      n_integrate=1000)
+                        delta_exact = transit.transit_depth(
+                            ld, z, r, n_integrate=10000)
+                        assert not np.any(np.isnan(delta_exact.eval()))
+                        assert np.allclose(*sess.run([delta_exact, delta]),
+                                           rtol=1.0, atol=1e-6)
 
-    # def test_gradient(self):
-    #     with self.test_session() as sess:
-    #         for T in self.dtypes:
-    #             eps = 0.0001
-    #             for ld_factory in self.limb_darkening_profiles:
-    #                 ld = ld_factory(T)
-    #                 for ror in self.rors:
-    #                     N = 50
-    #                     z = tf.constant(np.linspace(0, 1+2*ror, N), dtype=T)
-    #                     r = tf.constant(ror, dtype=T)
-    #                     delta = transit.transit_depth(ld, z, r)
+    def test_gradient(self):
+        with self.test_session() as sess:
+            for T, eps in zip(self.dtypes, [1e-3, 1e-5]):
+                for ld_factory in self.limb_darkening_profiles:
+                    ld = ld_factory(T)
+                    for ror in self.rors:
+                        N = 50
+                        z = tf.constant(np.linspace(0, 1+2*ror, N), dtype=T)
+                        r = tf.constant(ror, dtype=T)
+                        delta = transit.transit_depth(ld, z, r)
 
-    #                     params = ld.params + [z, r]
-    #                     vals = sess.run(params)
-    #                     shapes = [np.shape(v) for v in vals]
-    #                     err = tf.test.compute_gradient_error(
-    #                         params, shapes,
-    #                         delta, shapes[-2],
-    #                         vals, eps,
-    #                     )
-    #                     assert np.allclose(err, 0.0, atol=2*eps, rtol=1.0)
+                        params = ld.params + [z, r]
+                        vals = sess.run(params)
+                        shapes = [np.shape(v) for v in vals]
+                        err = tf.test.compute_gradient_error(
+                            params, shapes,
+                            delta, shapes[-2],
+                            vals, eps,
+                        )
+                        assert np.allclose(err, 0.0, atol=2*eps, rtol=1.0)
 
-    # def test_edge(self):
-    #     ld = transit.ConstantLimbDarkening()
-    #     with self.test_session() as sess:
-    #         for T in self.dtypes:
-    #             eps = np.finfo(T.as_numpy_dtype).eps
-    #             for ror in self.rors:
-    #                 z = tf.constant([1.009697 - eps],
-    #                                 dtype=T)
-    #                 r = tf.constant(ror, dtype=T)
-    #                 delta = transit.transit_depth(ld, z, r, n_integrate=10000)
-    #                 assert np.isfinite(sess.run(delta))
+    def test_edge(self):
+        ld = transit.ConstantLimbDarkening()
+        with self.test_session() as sess:
+            for T in self.dtypes:
+                eps = np.finfo(T.as_numpy_dtype).eps
+                for ror in self.rors:
+                    z = tf.constant([1.009697 - eps],
+                                    dtype=T)
+                    r = tf.constant(ror, dtype=T)
+                    delta = transit.transit_depth(ld, z, r, n_integrate=10000)
+                    assert np.isfinite(sess.run(delta))
 
-    #                 grad = tf.gradients(delta, [z, r])
-    #                 assert all(np.all(np.isfinite(v)) for v in sess.run(grad))
+                    grad = tf.gradients(delta, [z, r])
+                    assert all(np.all(np.isfinite(v)) for v in sess.run(grad))
 
     def test_occulted_area_grad(self):
-        N = 1000
+        N = 100
         with self.test_session() as sess:
-            for T in self.dtypes[::-1]:
+            for T, eps in zip(self.dtypes, [1e-3, 1e-5]):
                 np.random.seed(42)
                 x = tf.constant(np.random.uniform(0, 1, N), dtype=T)
                 r = tf.constant(np.random.uniform(0.01, 0.5, N), dtype=T)
@@ -154,19 +153,17 @@ class TransitDepthTest(tf.test.TestCase):
 
                 err = tf.test.compute_gradient_error(params_in, shape_in, area,
                                                      shape_out, vals_in,
-                                                     delta=1e-5)
-                print(T, err)
-                assert np.allclose(err, 0.0, atol=1e-5)
+                                                     delta=eps)
+                assert np.allclose(err, 0.0, atol=eps)
 
     def test_edge_gradient(self):
         ld = transit.QuadraticLimbDarkening(0.8, 0.1)
         with self.test_session() as sess:
             T = tf.float64
-            z = tf.constant([0.6991295701851002], dtype=T)
-            # z = tf.constant([0.9943437062052946, 0.9131173044532921, 0.91311730445329], dtype=T)
+            z = tf.constant([0.9943437062052946, 0.9131173044532921,
+                             0.91311730445329], dtype=T)
             r = tf.constant(0.01, dtype=T)
             delta = transit.transit_depth(ld, z, r, n_integrate=1000)
             grad = tf.gradients(delta, z)
             g = sess.run(grad)
-            print(g)
             assert np.all(g[0] < 0.0)

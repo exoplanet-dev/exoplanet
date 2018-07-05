@@ -131,7 +131,7 @@ namespace exoplanet {
         *d_z = -sqrtw / z;
         *d_r = 2.0 * r * acosv;
 
-        return x2 * acosu + r2 * acosv - 0.5 * sqrt(w);
+        return x2 * acosu + r2 * acosv - 0.5 * sqrtw;
       } else if (x >= rpz) {
         *d_r = 2.0 * M_PI * r;
         return M_PI * r2;
@@ -180,38 +180,28 @@ namespace exoplanet {
         T*                          b_z,
         T*                          b_r)
     {
-      if (z - r >= 1.0 || n_max <= n_min) return;
+      if (z - r >= 1.0) return;
 
-      T d_z = 0.0, d_r = 0.0;
-      T Am1, A0, Ap1,
-        Im1 = intensity[n_min], I0 = intensity[n_min], Ip1 = intensity[n_min+1], I;
-
-      Am1 = compute_area_fwd<T>(radius[n_min], r, z, &d_r, &d_z);
-      I = -0.5 * b_delta * (Ip1 + Im1);
-      *b_z += I * d_z;
-      *b_r += I * d_r;
-
-      A0 = compute_area_fwd<T>(radius[n_min+1], r, z, &d_r, &d_z);
-      b_intensity[n_min] -= 0.5 * b_delta * (A0 - Am1);
-
+      T A1 = 0.0, A2,
+        I1 = intensity[n_min], I2;
+      T dA1_dr = 0.0, dA2_dr, dA1_dz = 0.0, dA2_dz, dI, I;
       for (int n = n_min+1; n <= n_max; ++n) {
-        Im1 = I0;
-        I0 = Ip1;
-        Ip1 = intensity[n+1];
-        I = 0.5 * b_delta * (Im1 - Ip1);
-        *b_z += I * d_z;
-        *b_r += I * d_r;
+        A2 = compute_area_fwd<T>(radius[n], r, z, &dA2_dr, &dA2_dz);
+        I2 = intensity[n];
 
-        Ap1 = compute_area_fwd<T>(radius[n+1], r, z, &d_r, &d_z);
-        b_intensity[n] += 0.5 * b_delta * (Ap1 - Am1);
-        Am1 = A0;
-        A0 = Ap1;
+        dI = 0.5 * b_delta * (A2 - A1);
+        b_intensity[n-1] += dI;
+        b_intensity[n]   += dI;
+
+        I = 0.5 * b_delta * (I1 + I2);
+        *b_z += I * (dA2_dz - dA1_dz);
+        *b_r += I * (dA2_dr - dA1_dr);
+
+        A1 = A2;
+        I1 = I2;
+        dA1_dz = dA2_dz;
+        dA1_dr = dA2_dr;
       }
-
-      I = 0.5 * b_delta * (I0 + Ip1);
-      *b_z += I * d_z;
-      *b_r += I * d_r;
-      b_intensity[n_max+1] += 0.5 * b_delta * (Ap1 - A0);
     }
   };
 };
