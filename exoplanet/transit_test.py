@@ -109,7 +109,8 @@ class TransitDepthTest(tf.test.TestCase):
                         N = 50
                         z = tf.constant(np.linspace(0, 1+2*ror, N), dtype=T)
                         r = tf.constant(ror, dtype=T)
-                        delta = transit.transit_depth(ld, z, r)
+                        delta = transit.transit_depth(ld, z, r,
+                                                      n_integrate=1000)
 
                         params = ld.params + [z, r]
                         vals = sess.run(params)
