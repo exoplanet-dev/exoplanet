@@ -1,0 +1,169 @@
+\documentclass[modern]{aastex62}
+
+\pdfoutput=1
+
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{natbib}
+\usepackage{multirow}
+\usepackage{graphicx}
+\bibliographystyle{aasjournal}
+
+% Matrix fix:
+% http://tex.stackexchange.com/questions/317824/letter-c-appearing-inside-pmatrix-environment-with-aastex
+\makeatletter
+\def\env@matrix{\hskip -\arraycolsep\let\@ifnextchar\new@ifnextchar\array{*{\c@MaxMatrixCols}c}}
+\makeatother
+
+% Column spacing in matrix
+% http://tex.stackexchange.com/questions/275725/adjusting-separation-between-matrix-entries
+\setlength\arraycolsep{25pt}
+
+% ------------------ %
+% end of AASTeX mods %
+% ------------------ %
+
+% Projects:
+\newcommand{\project}[1]{\textsf{#1}}
+\newcommand{\kepler}{\project{Kepler}}
+\newcommand{\ktwo}{\project{K2}}
+
+% references to text content
+\newcommand{\documentname}{\textsl{Note}}
+\newcommand{\figureref}[1]{\ref{fig:#1}}
+\newcommand{\Figure}[1]{Figure~\figureref{#1}}
+\newcommand{\figurelabel}[1]{\label{fig:#1}}
+\renewcommand{\eqref}[1]{\ref{eq:#1}}
+\newcommand{\Eq}[1]{Equation~(\eqref{#1})}
+\newcommand{\eq}[1]{\Eq{#1}}
+\newcommand{\eqalt}[1]{Equation~\eqref{#1}}
+\newcommand{\eqlabel}[1]{\label{eq:#1}}
+
+% TODOs
+\newcommand{\todo}[3]{{\color{#2}\emph{#1}: #3}}
+\newcommand{\dfmtodo}[1]{\todo{DFM}{red}{#1}}
+\newcommand{\alltodo}[1]{\todo{TEAM}{red}{#1}}
+\newcommand{\citeme}{{\color{red}(citation needed)}}
+
+% math
+\newcommand{\T}{\ensuremath{\mathrm{T}}}
+\newcommand{\dd}{\ensuremath{ \mathrm{d}}}
+\newcommand{\unit}[1]{{\ensuremath{ \mathrm{#1}}}}
+\newcommand{\bvec}[1]{{\ensuremath{\boldsymbol{#1}}}}
+\newcommand{\Gaussian}[3]{\ensuremath{\frac{1}{|2\pi #2|^\frac{1}{2}}
+            \exp\left[ -\frac{1}{2}#1^\top #2^{-1} #1 \right]}}
+
+% VECTORS AND MATRICES USED IN THIS PAPER
+\newcommand{\Normal}{\ensuremath{\mathcal{N}}}
+\newcommand{\mA}{\ensuremath{\bvec{A}}}
+\newcommand{\mC}{\ensuremath{\bvec{C}}}
+\newcommand{\mS}{\ensuremath{\bvec{\Sigma}}}
+\newcommand{\mL}{\ensuremath{\bvec{\Lambda}}}
+\newcommand{\vw}{\ensuremath{\bvec{w}}}
+\newcommand{\vy}{\ensuremath{\bvec{y}}}
+\newcommand{\vt}{\ensuremath{\bvec{\theta}}}
+\newcommand{\vm}{\ensuremath{\bvec{\mu}(\bvec{\theta})}}
+\newcommand{\vre}{\ensuremath{\bvec{r}}}
+\newcommand{\vh}{\ensuremath{\bvec{h}}}
+\newcommand{\vk}{\ensuremath{\bvec{k}}}
+
+% typography obsessions
+\setlength{\parindent}{3.0ex}
+
+\begin{document}\raggedbottom\sloppy\sloppypar\frenchspacing
+
+\title{%
+\project{exoplanet}: Software tools for characterization of exoplanets using
+transits \& radial velocities
+}
+
+\author[0000-0002-9328-5652]{Daniel Foreman-Mackey}
+\affil{Flatiron Institute, New York, NY}
+
+\begin{abstract}
+Abstract
+\end{abstract}
+
+\keywords{%
+methods: data analysis ---
+methods: statistical
+}
+
+\section{Introduction}
+
+This is a section.
+
+\section{Limb-darkened transit light curves}
+
+Based on \project{batman} \citep{Kreidberg:2015}.
+
+The transit depth:
+\begin{eqnarray}
+\delta(r,\,z) = \sum_{n=1}^{N-1} \frac{1}{2}\,\left[I(x_{n+1};\,\theta) +
+I(x_n;\,\theta)\right]\,
+\left[A(x_{n+1},\,r,\,z) - A(x_n,\,r,\,z)\right]
+\end{eqnarray}
+\dfmtodo{(quad vs trap)}.
+In this expression, $A$ is defined as
+\begin{eqnarray}
+A(x,\,r,\,z) = \left\{\begin{array}{ll}
+x^2\,\cos^{-1}(u)+r^2\,\cos^{-1}(v)-\sqrt{w}/2 &
+    \left|r-x\right| < z < r + x \\
+\pi\,r^2 & x \ge r + z \\
+\pi\,x^2 & r \ge x + z \\
+0 & \mathrm{otherwise}
+\end{array}\right.
+\end{eqnarray}
+where
+\begin{eqnarray}
+u &=& \frac{z^2+x^2-r^2}{2\,z\,x} \,,\\
+v &=& \frac{z^2-x^2+r^2}{2\,z\,r} \,,\,\mathrm{and}\\
+w &=& (x+r+z)\,(-x+r+z)\,(x-r+z)\,(x+r-z)
+\end{eqnarray}
+$A(x,\,r,\,z)$ is the area of intersection of two circles with radii $x$ and
+$r$ with a center-to-center separation of $z$ \citep{Mandel:2002,
+Kreidberg:2015}.
+
+A key component of computing the gradient of the transit light curve is the
+gradient of the occulted area.
+After some tedious algebra, we find the following surprisingly simple results
+\begin{eqnarray}
+\frac{\dd A(x,\,r,\,z)}{\dd z} &=& \left\{\begin{array}{ll}
+-\sqrt{w}/z &
+    \left|r-x\right| < z < r + x \\
+0 & \mathrm{otherwise}
+\end{array}\right.\\
+\frac{\dd A(x,\,r,\,z)}{\dd r} &=& \left\{\begin{array}{ll}
+2\,r\,\cos^{-1}(v) & \left|r-x\right| < z < r + x \\
+2\,\pi\,r & x \ge r + z \\
+0 & \mathrm{otherwise}
+\end{array}\right.\\
+\frac{\dd A(x,\,r,\,z)}{\dd x} &=& \left\{\begin{array}{ll}
+2\,x\,\cos^{-1}(u) & \left|r-x\right| < z < r + x \\
+2\,\pi\,x & r \ge x + z \\
+0 & \mathrm{otherwise}
+\end{array}\right.
+\end{eqnarray}
+
+Then the gradient expressions needed for backpropagation through the transit
+depth can be computed as
+\begin{eqnarray}
+\frac{\dd \delta(r,\,z)}{\dd I_n} = \frac{1}{2}
+    \left[A(x_{n+1},\,r,\,z) - A(x_{n-1},\,r,\,z)\right]
+\end{eqnarray}
+\begin{eqnarray}
+\frac{\dd \delta(r,\,z)}{\dd \alpha} = \sum_{n=1}^{N-1} \frac{1}{2}\,\left[
+I(x_{n+1};\,\theta) + I(x_n;\,\theta)\right]\,
+\left[\frac{\dd A(x_{n+1},\,r,\,z)}{\dd\alpha} -
+\frac{\dd A(x_n,\,r,\,z)}{\dd \alpha}\right]
+\end{eqnarray}
+
+
+
+\bibliography{exoplanet}
+
+
+\end{document}

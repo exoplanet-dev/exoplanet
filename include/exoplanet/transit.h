@@ -182,26 +182,26 @@ namespace exoplanet {
     {
       if (z - r >= 1.0) return;
 
-      T A1 = 0.0, A2,
+      T A0 = 0.0, A1 = 0.0, A2,
         I1 = intensity[n_min], I2;
-      T dA1_dr = 0.0, dA2_dr, dA1_dz = 0.0, dA2_dz, dI, I;
+      T dA1_dr = 0.0, dA2_dr, dA1_dz = 0.0, dA2_dz, I;
       for (int n = n_min+1; n <= n_max; ++n) {
         A2 = compute_area_fwd<T>(radius[n], r, z, &dA2_dr, &dA2_dz);
         I2 = intensity[n];
 
-        dI = 0.5 * b_delta * (A2 - A1);
-        b_intensity[n-1] += dI;
-        b_intensity[n]   += dI;
+        b_intensity[n-1] += 0.5 * b_delta * (A2 - A0);
 
         I = 0.5 * b_delta * (I1 + I2);
         *b_z += I * (dA2_dz - dA1_dz);
         *b_r += I * (dA2_dr - dA1_dr);
 
+        A0 = A1;
         A1 = A2;
         I1 = I2;
         dA1_dz = dA2_dz;
         dA1_dr = dA2_dr;
       }
+      b_intensity[n_max] += 0.5 * b_delta * (A2 - A0);
     }
   };
 };
