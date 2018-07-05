@@ -147,6 +147,8 @@ After some tedious algebra, we find the following surprisingly simple results
 0 & \mathrm{otherwise}
 \end{array}\right.
 \end{eqnarray}
+We won't actually use the gradient with respect to $x$, but we have included
+it here for completeness.
 
 Then the gradient expressions needed for backpropagation through the transit
 depth can be computed as
@@ -160,7 +162,7 @@ I(x_{n+1};\,\theta) + I(x_n;\,\theta)\right]\,
 \left[\frac{\dd A(x_{n+1},\,r,\,z)}{\dd\alpha} -
 \frac{\dd A(x_n,\,r,\,z)}{\dd \alpha}\right]
 \end{eqnarray}
-
+where $\alpha$ indicates one of $r$ or $z$.
 
 
 \bibliography{exoplanet}
