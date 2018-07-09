@@ -35,14 +35,20 @@ class custom_build_ext(build_ext):
 compile_flags = tf.sysconfig.get_compile_flags()
 link_flags = tf.sysconfig.get_link_flags()
 
-sources = [
+transit_sources = [
     os.path.join("exoplanet", "transit_op", "transit_op.cc"),
     os.path.join("exoplanet", "transit_op", "transit_rev_op.cc"),
     os.path.join("exoplanet", "transit_op", "occulted_area_op.cc"),
     os.path.join("exoplanet", "transit_op", "occulted_area_rev_op.cc"),
 ]
-include_dirs = [".", "include", "exoplanet",
-                os.path.join("exoplanet", "transit_op")]
+kepler_sources = [
+    os.path.join("exoplanet", "kepler_op", "kepler_op.cc"),
+]
+include_dirs = [
+    ".", "include", "exoplanet",
+    os.path.join("exoplanet", "transit_op"),
+    os.path.join("exoplanet", "kepler_op"),
+]
 
 # Check for flag and nvcc
 if "--with-cuda" in sys.argv:
@@ -50,7 +56,8 @@ if "--with-cuda" in sys.argv:
     base_dir = sys.argv.pop(index+1)
     sys.argv.pop(index)
     compile_flags += ["-DGOOGLE_CUDA=1"]
-    sources += [os.path.join("exoplanet", "transit_op", "transit_op.cc.cu")]
+    transit_sources += [
+        os.path.join("exoplanet", "transit_op", "transit_op.cc.cu")]
     include_dirs += [os.path.join(base_dir, "include")]
     link_flags += ["-L" + os.path.join(base_dir, "lib64")]
 
@@ -65,7 +72,18 @@ if sys.platform == "darwin":
 extensions = [
     Extension(
         "exoplanet.transit_op",
-        sources=sources,
+        sources=transit_sources,
+        language="c++",
+        include_dirs=include_dirs,
+        extra_compile_args=dict(
+            nvcc=nvcc_flags,
+            gcc=gcc_flags,
+        ),
+        extra_link_args=link_flags,
+    ),
+    Extension(
+        "exoplanet.kepler_op",
+        sources=kepler_sources,
         language="c++",
         include_dirs=include_dirs,
         extra_compile_args=dict(
