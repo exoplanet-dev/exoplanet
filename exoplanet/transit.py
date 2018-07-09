@@ -7,21 +7,13 @@ __all__ = [
     "transit_depth"
 ]
 
-import os
-import sysconfig
 import numpy as np
 import tensorflow as tf
 
+from .tf_utils import load_op_library
 
-# Load the ops library
-suffix = sysconfig.get_config_var("EXT_SUFFIX")
-dirname = os.path.dirname(os.path.abspath(__file__))
-libfile = os.path.join(dirname, "transit_op")
-if suffix is not None:
-    libfile += suffix
-else:
-    libfile += ".so"
-ops = tf.load_op_library(libfile)
+
+ops = load_op_library("transit_op")
 
 
 class ConstantLimbDarkening(object):
@@ -73,7 +65,7 @@ def radius_to_index(N_grid, radius):
         * (1.0 - tf.sqrt(1.0 - tf.clip_by_value(radius, 0.0, 1.0)))
 
 
-def transit_depth(limb_darkening, z, r, n_integrate=1000):
+def transit_depth(limb_darkening, z, r, direction=None, n_integrate=1000):
     """Compute the depth of a set of transit configurations
 
     Args:
@@ -81,6 +73,8 @@ def transit_depth(limb_darkening, z, r, n_integrate=1000):
         z: The projected sky distance between the star and the transiting body
         r: The radius of the transiting body in stellar units (must have the
             same shape as z)
+        direction (Optional): If ``direction > 0`` this is a transit, but if
+            ``direction <= 0`` this will always return zero.
         n_integrate (Optional): The number of annuli to use to numerically
             integrate the limb darkening profile
 
@@ -89,18 +83,20 @@ def transit_depth(limb_darkening, z, r, n_integrate=1000):
             by ``z``
 
     """
+    if direction is None:
+        direction = tf.ones_like(z)
     radius = 1.0 - tf.square(1.0 - tf.cast(tf.linspace(0.0, 1.0, n_integrate),
                                            z.dtype))
     n_min = tf.cast(tf.floor(radius_to_index(n_integrate, z - r)), tf.int32)
     n_max = tf.cast(tf.ceil(radius_to_index(n_integrate, z + r)), tf.int32)
     I = limb_darkening.evaluate(radius)
-    return ops.transit_depth(radius, I, n_min, n_max, z, r)
+    return ops.transit_depth(radius, I, n_min, n_max, z, r, direction)
 
 
 @tf.RegisterGradient("TransitDepth")
 def _transit_depth_grad(op, *grads):
     results = ops.transit_depth_rev(*(list(op.inputs) + [grads[0]]))
-    return (None, results[0], None, None, results[1], results[2])
+    return (None, results[0], None, None, results[1], results[2], None)
 
 
 @tf.RegisterGradient("OccultedArea")

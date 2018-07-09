@@ -54,7 +54,7 @@ class BatmanTest(tf.test.TestCase):
                 for ror in self.rors:
                     N = 1000
                     z = tf.constant(np.linspace(0, 1+2*ror, N), dtype=T)
-                    r = tf.constant(ror, dtype=T)
+                    r = tf.constant(ror, dtype=T) + tf.zeros(N, dtype=T)
                     delta = transit.transit_depth(ld, z, r, n_integrate=1000)
                     args = [z.eval(), ror, ld.c1.eval(), ld.c2.eval(), 1]
                     lc0 = _quadratic_ld._quadratic_ld(*args)
@@ -68,7 +68,7 @@ class BatmanTest(tf.test.TestCase):
                 for ror in self.rors:
                     N = 1000
                     z = tf.constant(np.linspace(0, 1+2*ror, N), dtype=T)
-                    r = tf.constant(ror, dtype=T)
+                    r = tf.constant(ror, dtype=T) + tf.zeros(N, dtype=T)
                     delta = transit.transit_depth(ld, z, r, n_integrate=1000)
                     args = [z.eval(), ror]
                     args += list(sess.run([ld.c1, ld.c2, ld.c3, ld.c4]))
@@ -91,7 +91,7 @@ class TransitDepthTest(tf.test.TestCase):
                     for ror in self.rors:
                         N = 50
                         z = tf.constant(np.linspace(0, 1+2*ror, N), dtype=T)
-                        r = tf.constant(ror, dtype=T)
+                        r = tf.constant(ror, dtype=T)+tf.zeros(N, dtype=T)
                         delta = transit.transit_depth(ld, z, r,
                                                       n_integrate=1000)
                         delta_exact = transit.transit_depth(
@@ -109,7 +109,7 @@ class TransitDepthTest(tf.test.TestCase):
                         N = 50
                         z = tf.constant(np.linspace(0, 1+2*ror, N), dtype=T)
                         r = tf.constant(ror, dtype=T)
-                        delta = transit.transit_depth(ld, z, r,
+                        delta = transit.transit_depth(ld, z, r+tf.zeros(N, T),
                                                       n_integrate=1000)
 
                         params = ld.params + [z, r]
@@ -130,7 +130,7 @@ class TransitDepthTest(tf.test.TestCase):
                 for ror in self.rors:
                     z = tf.constant([1.009697 - eps],
                                     dtype=T)
-                    r = tf.constant(ror, dtype=T)
+                    r = tf.constant([ror], dtype=T)
                     delta = transit.transit_depth(ld, z, r, n_integrate=10000)
                     assert np.isfinite(sess.run(delta))
 
@@ -163,7 +163,7 @@ class TransitDepthTest(tf.test.TestCase):
             T = tf.float64
             z = tf.constant([0.9943437062052946, 0.9131173044532921,
                              0.91311730445329], dtype=T)
-            r = tf.constant(0.01, dtype=T)
+            r = tf.constant([0.01, 0.01, 0.01], dtype=T)
             delta = transit.transit_depth(ld, z, r, n_integrate=1000)
             grad = tf.gradients(delta, z)
             g = sess.run(grad)
