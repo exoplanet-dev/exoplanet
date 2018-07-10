@@ -40,9 +40,6 @@ def _kepler_grad(op, *grads):
 
 
 def sky_position(period, t0, e, omega, incl, t):
-    tslice = tuple([None] * len(period.shape) + [slice(None)] * len(t.shape))
-    s = tuple([slice(None)] * len(period.shape) + [None] * len(t.shape))
-
     # Shorthands
     n = 2.0 * np.pi / period
     cos_omega = tf.cos(omega)
@@ -54,19 +51,19 @@ def sky_position(period, t0, e, omega, incl, t):
     tref = t0 - (E0 - e * tf.sin(E0)) / n
 
     # Solve Kepler's equation for the true anomaly
-    M = (t[tslice] - tref[s]) * n[s]
-    E = kepler(M, e[s] + tf.zeros_like(M))
-    f = 2.0 * tf.atan2(tf.sqrt(1.0 + e)[s] * tf.tan(0.5*E),
-                       tf.sqrt(1.0 - e)[s] + tf.zeros_like(E))
+    M = (t - tref) * n
+    E = kepler(M, e + tf.zeros_like(M))
+    f = 2.0 * tf.atan2(tf.sqrt(1.0 + e) * tf.tan(0.5*E),
+                       tf.sqrt(1.0 - e) + tf.zeros_like(E))
 
     # Rotate into sky coordinates
     cf = tf.cos(f)
     sf = tf.sin(f)
-    swpf = sin_omega[s] * cf + cos_omega[s] * sf
-    cwpf = cos_omega[s] * cf - sin_omega[s] * sf
+    swpf = sin_omega * cf + cos_omega * sf
+    cwpf = cos_omega * cf - sin_omega * sf
 
     return tf.stack([
         cwpf,
-        swpf * tf.cos(incl)[s],
-        swpf * tf.sin(incl)[s]
+        swpf * tf.cos(incl),
+        swpf * tf.sin(incl)
     ])

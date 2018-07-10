@@ -1,8 +1,10 @@
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/tensor_shape.h"
 #include "tensorflow/core/framework/shape_inference.h"
+#include "tensorflow/core/util/work_sharder.h"
 
 #include <limits>
+#include <Eigen/Core>
 
 #include "transit_op.h"
 
@@ -14,13 +16,19 @@ using GPUDevice = Eigen::GpuDevice;
 
 template <typename T>
 struct TransitDepthFunctor<CPUDevice, T> {
-  void operator()(const CPUDevice& d, int N, const T* const radius, const T* const intensity,
+  void operator()(OpKernelContext* ctx, int N, const T* const radius, const T* const intensity,
                   int size, const int* const n_min, const int* const n_max, const T* const z, const T* const r,
                   const T* const direction, T* delta) {
-    for (int i = 0; i < size; ++i) {
-      if (direction[i] > 0.0)
-        delta[i] = transit::compute_transit_depth<T>(N, radius, intensity, n_min[i], n_max[i], z[i], r[i]);
-    }
+    auto work = [N, radius, intensity, n_min, n_max, z, r, direction, delta](int64 begin, int64 end) {
+      for (int i = begin; i < end; ++i) {
+        if (direction[i] > 0.0)
+          delta[i] = transit::compute_transit_depth<T>(N, radius, intensity, n_min[i], n_max[i], z[i], r[i]);
+      }
+    };
+
+    auto worker_threads = *ctx->device()->tensorflow_cpu_worker_threads();
+    int64 cost = 100 * N;
+    Shard(worker_threads.num_threads, worker_threads.workers, size, cost, work);
   }
 };
 
@@ -102,8 +110,13 @@ class TransitDepthOp : public OpKernel {
     const auto direction = direction_tensor.template flat<T>();
     auto delta           = delta_tensor->template flat<T>();
 
+    //const int64 cost = N * 10;
+    //auto worker_threads = d->tensorflow_cpu_worker_threads();
+    //const DeviceBase::CpuWorkerThreads& worker_threads =
+    //        *context->device()->tensorflow_cpu_worker_threads();
+
     delta.setZero();
-    TransitDepthFunctor<Device, T>()(context->eigen_device<Device>(),
+    TransitDepthFunctor<Device, T>()(context,
         static_cast<int>(N), radius.data(), intensity.data(),
         static_cast<int>(size), n_min.data(), n_max.data(), z.data(), r.data(),
         direction.data(), delta.data());
