@@ -44,6 +44,9 @@ transit_sources = [
 kepler_sources = [
     os.path.join("exoplanet", "kepler_op", "kepler_op.cc"),
 ]
+search_sorted_sources = [
+    os.path.join("exoplanet", "search_sorted_op", "search_sorted_op.cc"),
+]
 include_dirs = [
     ".", "include", "exoplanet",
     os.path.join("exoplanet", "transit_op"),
@@ -84,6 +87,17 @@ extensions = [
     Extension(
         "exoplanet.kepler_op",
         sources=kepler_sources,
+        language="c++",
+        include_dirs=include_dirs,
+        extra_compile_args=dict(
+            nvcc=nvcc_flags,
+            gcc=gcc_flags,
+        ),
+        extra_link_args=link_flags,
+    ),
+    Extension(
+        "exoplanet.search_sorted_op",
+        sources=search_sorted_sources,
         language="c++",
         include_dirs=include_dirs,
         extra_compile_args=dict(
