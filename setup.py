@@ -36,21 +36,25 @@ compile_flags = tf.sysconfig.get_compile_flags()
 link_flags = tf.sysconfig.get_link_flags()
 
 transit_sources = [
-    os.path.join("exoplanet", "transit_op", "transit_op.cc"),
-    os.path.join("exoplanet", "transit_op", "transit_rev_op.cc"),
-    os.path.join("exoplanet", "transit_op", "occulted_area_op.cc"),
-    os.path.join("exoplanet", "transit_op", "occulted_area_rev_op.cc"),
+    os.path.join("exoplanet", "ops", "transit", "transit_op.cc"),
+    os.path.join("exoplanet", "ops", "transit", "transit_rev_op.cc"),
+    os.path.join("exoplanet", "ops", "transit", "occulted_area_op.cc"),
+    os.path.join("exoplanet", "ops", "transit", "occulted_area_rev_op.cc"),
 ]
 kepler_sources = [
-    os.path.join("exoplanet", "kepler_op", "kepler_op.cc"),
+    os.path.join("exoplanet", "ops", "kepler", "kepler_op.cc"),
 ]
 search_sorted_sources = [
-    os.path.join("exoplanet", "search_sorted_op", "search_sorted_op.cc"),
+    os.path.join("exoplanet", "ops", "search_sorted", "search_sorted_op.cc"),
+]
+interp_sources = [
+    os.path.join("exoplanet", "ops", "interp", "interp_op.cc"),
+    os.path.join("exoplanet", "ops", "interp", "interp_rev_op.cc"),
 ]
 include_dirs = [
     ".", "include", "exoplanet",
-    os.path.join("exoplanet", "transit_op"),
-    os.path.join("exoplanet", "kepler_op"),
+    os.path.join("exoplanet", "ops", "transit"),
+    os.path.join("exoplanet", "ops", "kepler"),
 ]
 
 # Check for flag and nvcc
@@ -98,6 +102,17 @@ extensions = [
     Extension(
         "exoplanet.search_sorted_op",
         sources=search_sorted_sources,
+        language="c++",
+        include_dirs=include_dirs,
+        extra_compile_args=dict(
+            nvcc=nvcc_flags,
+            gcc=gcc_flags,
+        ),
+        extra_link_args=link_flags,
+    ),
+    Extension(
+        "exoplanet.interp_op",
+        sources=interp_sources,
         language="c++",
         include_dirs=include_dirs,
         extra_compile_args=dict(

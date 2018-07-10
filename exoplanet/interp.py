@@ -9,20 +9,18 @@ import tensorflow as tf
 from .tf_utils import load_op_library
 
 
-ops = load_op_library("search_sorted_op")
+# ops = load_op_library("search_sorted_op")
+ops = load_op_library("interp_op")
 
 
-def interp1d(t, x, y):
-    inds = ops.search_sorted(x, t)
-    x_ext = tf.concat((x[:1], x, x[-1:]), axis=0)
-    y_ext = tf.concat((y[:1], y, y[-1:]), axis=0)
-    dx = x_ext[1:] - x_ext[:-1]
-    dy = y_ext[1:] - y_ext[:-1]
-    dx = tf.where(tf.greater(tf.abs(dx), tf.zeros_like(dx)),
-                  dx, tf.ones_like(dx))
+def interp1d(t, period, x, y):
+    return ops.interp(t, period, x, y)[0]
 
-    x0 = tf.gather(x_ext, inds)
-    y0 = tf.gather(y_ext, inds)
-    slope = tf.gather(dy / dx, inds)
 
-    return slope * (t - x0) + y0
+@tf.RegisterGradient("Interp")
+def _interp_grad(op, *grads):
+    t, period, x, y = op.inputs
+    v, a, inds = op.outputs
+    bv = grads[0]
+    bt, dp, by = ops.interp_rev(t, period, x, y, a, inds, bv)
+    return [bt, dp, None, by]
