@@ -3,9 +3,6 @@
 #include "tensorflow/core/framework/shape_inference.h"
 #include "tensorflow/core/util/work_sharder.h"
 
-#include <limits>
-#include <Eigen/Core>
-
 #include "transit_op.h"
 
 using namespace tensorflow;
@@ -27,7 +24,7 @@ struct TransitDepthFunctor<CPUDevice, T> {
     };
 
     auto worker_threads = *ctx->device()->tensorflow_cpu_worker_threads();
-    int64 cost = 100 * N;
+    int64 cost = 5 * N;
     Shard(worker_threads.num_threads, worker_threads.workers, size, cost, work);
   }
 };
