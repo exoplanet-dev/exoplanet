@@ -18,18 +18,11 @@ struct TransitDepthRevFunctor<CPUDevice, T> {
   void operator()(OpKernelContext* ctx, int N, const T* const radius, const T* const intensity,
                   int size, const int* const n_min, const int* const n_max, const T* const z, const T* const r,
                   const T* const direction, const T* const b_delta, T* b_intensity, T* b_z, T* b_r) {
-    //for (int i = 0; i < size; ++i) {
-    //  if (direction[i] > 0.0)
-    //    transit::compute_transit_depth_rev<T>(N, radius, intensity, n_min[i], n_max[i], z[i], r[i],
-    //                                          b_delta[i], b_intensity, &(b_z[i]), &(b_r[i]));
-    //}
-
 
     auto worker_threads = *ctx->device()->tensorflow_cpu_worker_threads();
-    int64 cost = 100 * N;
+    int64 cost = 5 * N;
     Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> tmp(worker_threads.num_threads, N);
     tmp.setZero();
-
     int64 num_threads = worker_threads.num_threads;
 
     const int64 block_size = (size + num_threads - 1) / num_threads;

@@ -1,6 +1,7 @@
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/platform/default/logging.h"
 #include "tensorflow/core/framework/shape_inference.h"
+#include "tensorflow/core/util/work_sharder.h"
 
 #include <algorithm>
 
@@ -107,26 +108,41 @@ class InterpOp : public OpKernel {
     for (int64 k = 0; k < size; ++k) {
       T period = p(k);
       bool flag = (period > T(0));
-      for (int64 n = 0; n < N; ++n) {
-        // Wrap into the required period
-        T value = t(k, n);
-        if (flag) {
-          T trunc_mod = std::fmod(value, period);
-          value = (value >= T(0)) ? trunc_mod : std::fmod(trunc_mod + period, period);
-        }
 
-        if (value <= x(k, 0)) {
-          v(k, n) = y(k, 0);
-          inds(k, n) = 0;
-        } else if (value >= x(k, M-1)) {
-          v(k, n) = y(k, M-1);
-          inds(k, n) = M+1;
-        } else {
-          int64 ind = inds(k, n) = search_sorted(M, &(x(k, 0)), value);
-          T a0 = a(k, n) = (value - x(k, ind-1)) / (x(k, ind) - x(k, ind-1));
-          v(k, n) = a0 * y(k, ind) + (1.0 - a0) * y(k, ind-1);
+      const T* const tk = &(t(k, 0));
+      const T* const xk = &(x(k, 0));
+      const T* const yk = &(y(k, 0));
+      T* vk = &(v(k, 0));
+      T* ak = &(a(k, 0));
+      int64* indsk = &(inds(k, 0));
+
+      auto work = [flag, M, period, &tk, &xk, &yk, &vk, &ak, &indsk](int64 begin, int64 end) {
+        for (int64 n = begin; n < end; ++n) {
+          // Wrap into the required period
+          T value = tk[n];
+          if (flag) {
+            T trunc_mod = std::fmod(value, period);
+            value = (value >= T(0)) ? trunc_mod : std::fmod(trunc_mod + period, period);
+          }
+
+          if (value <= xk[0]) {
+            vk[n] = yk[0];
+            indsk[n] = 0;
+          } else if (value >= xk[M-1]) {
+            vk[n] = yk[M-1];
+            indsk[n] = M+1;
+          } else {
+            int64 ind = indsk[n] = search_sorted(M, xk, value);
+            T a0 = ak[n] = (value - xk[ind-1]) / (xk[ind] - xk[ind-1]);
+            vk[n] = a0 * yk[ind] + (1.0 - a0) * yk[ind-1];
+          }
         }
-      }
+      };
+
+      auto worker_threads = *context->device()->tensorflow_cpu_worker_threads();
+      int64 cost = 5*M;
+      Shard(worker_threads.num_threads, worker_threads.workers, N, cost, work);
+      //work(0, size);
     }
   }
 };
