@@ -182,7 +182,7 @@ namespace exoplanet {
     {
       if (z - r >= 1.0) return;
 
-      T A0 = 0.0, A1 = 0.0, A2,
+      T A0 = 0.0, A1 = 0.0, A2 = 0.0,
         I1 = intensity[n_min], I2;
       T dA1_dr = 0.0, dA2_dr, dA1_dz = 0.0, dA2_dz, I;
       for (int n = n_min+1; n <= n_max; ++n) {
