@@ -4,7 +4,7 @@
 
 #include <limits>
 
-#include "transit_op.h"
+#include "exoplanet/transit.h"
 
 using namespace tensorflow;
 using namespace exoplanet;

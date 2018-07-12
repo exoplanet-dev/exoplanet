@@ -1,9 +1,6 @@
 #ifdef GOOGLE_CUDA
 #define EIGEN_USE_GPU
-#include "tensorflow/core/util/cuda_kernel_helper.h"
-#include "kepler.h"
-
-using namespace tensorflow;
+#include "kepler_op.h"
 
 using GPUDevice = Eigen::GpuDevice;
 
