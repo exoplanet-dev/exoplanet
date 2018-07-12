@@ -215,17 +215,17 @@ arg.shape, period.shape, phase.shape
 
 from tensorflow.python.client import timeline
 
-fd = {arg: session.run(arg), period: session.run(period)}
-
 session.run(grad)
 
 options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
 run_metadata = tf.RunMetadata()
 
-session.run(phase, options=options, run_metadata=run_metadata, feed_dict=fd)
-session.run(phase, options=options, run_metadata=run_metadata, feed_dict=fd)
+session.run(grad, options=options, run_metadata=run_metadata)
+session.run(grad, options=options, run_metadata=run_metadata)
 
 fetched_timeline = timeline.Timeline(run_metadata.step_stats)
 chrome_trace = fetched_timeline.generate_chrome_trace_format()
 with open('timeline_01.json', 'w') as f:
     f.write(chrome_trace)
+
+get_ipython().magic('timeit session.run(grad)')
