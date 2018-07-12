@@ -19,6 +19,7 @@ x = tf.constant(np.random.uniform(0, 5000, N*K).reshape((K, N)), dtype=T)
 phase = tf.mod(x, p[:, None])
 grad = tf.gradients(phase, [x, p])
 
+session.run(phase)
 session.run(grad)
 get_ipython().magic('timeit session.run(phase)')
 get_ipython().magic('timeit session.run(grad)')
