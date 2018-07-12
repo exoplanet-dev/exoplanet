@@ -11,23 +11,23 @@ using namespace exoplanet;
 using CPUDevice = Eigen::ThreadPoolDevice;
 using GPUDevice = Eigen::GpuDevice;
 
-template <typename T>
-struct TransitDepthFunctor<CPUDevice, T> {
-  void operator()(OpKernelContext* ctx, int N, const T* const radius, const T* const intensity,
-                  int size, const int* const n_min, const int* const n_max, const T* const z, const T* const r,
-                  const T* const direction, T* delta) {
-    auto work = [N, radius, intensity, n_min, n_max, z, r, direction, delta](int64 begin, int64 end) {
-      for (int i = begin; i < end; ++i) {
-        if (direction[i] > 0.0)
-          delta[i] = transit::compute_transit_depth<T>(N, radius, intensity, n_min[i], n_max[i], z[i], r[i]);
-      }
-    };
+//template <typename T>
+//struct TransitDepthFunctor<CPUDevice, T> {
+//  void operator()(OpKernelContext* ctx, int N, const T* const radius, const T* const intensity,
+//                  int size, const int* const n_min, const int* const n_max, const T* const z, const T* const r,
+//                  const T* const direction, T* delta) {
+//    auto work = [N, radius, intensity, n_min, n_max, z, r, direction, delta](int64 begin, int64 end) {
+//      for (int i = begin; i < end; ++i) {
+//        if (direction[i] > 0.0)
+//          delta[i] = transit::compute_transit_depth<T>(N, radius, intensity, n_min[i], n_max[i], z[i], r[i]);
+//      }
+//    };
 
-    auto worker_threads = *ctx->device()->tensorflow_cpu_worker_threads();
-    int64 cost = 5 * N;
-    Shard(worker_threads.num_threads, worker_threads.workers, size, cost, work);
-  }
-};
+//    auto worker_threads = *ctx->device()->tensorflow_cpu_worker_threads();
+//    int64 cost = 5 * N;
+//    Shard(worker_threads.num_threads, worker_threads.workers, size, cost, work);
+//  }
+//};
 
 REGISTER_OP("TransitDepth")
   .Attr("T: {float, double}")
@@ -59,66 +59,114 @@ REGISTER_OP("TransitDepth")
 /// ``intensity`` parameter is a function ``I(x)`` that integrates to one over
 /// a disk of radius one
 ///
-template <typename Device, typename T>
-class TransitDepthOp : public OpKernel {
- public:
-  explicit TransitDepthOp(OpKernelConstruction* context) : OpKernel(context) {}
+template <typename T>
+class TransitDepthOpBase : public OpKernel {
+  public:
+    explicit TransitDepthOpBase (OpKernelConstruction* context) : OpKernel(context) {}
 
-  void Compute(OpKernelContext* context) override {
-    // Inputs
-    const Tensor& radius_tensor    = context->input(0);
-    const Tensor& intensity_tensor = context->input(1);
-    const Tensor& n_min_tensor     = context->input(2);
-    const Tensor& n_max_tensor     = context->input(3);
-    const Tensor& z_tensor         = context->input(4);
-    const Tensor& r_tensor         = context->input(5);
-    const Tensor& direction_tensor = context->input(6);
+    struct ComputeOptions {
+      int64 N = 0;
+      const T* const radius    = nullptr;
+      const T* const intensity = nullptr;
+      int64 size = 0;
+      const int64* const n_min = nullptr;
+      const int64* const n_max = nullptr;
+      const T* const z         = nullptr;
+      const T* const r         = nullptr;
+      const T* const direction = nullptr;
+      T*             delta     = nullptr;
+    };
 
-    // Dimensions
-    const int64 N = radius_tensor.NumElements();
-    OP_REQUIRES(context, N <= tensorflow::kint32max,
-                errors::InvalidArgument("too many elements in tensor"));
-    OP_REQUIRES(context, intensity_tensor.NumElements() == N,
-        errors::InvalidArgument("radius and intensity must have the same number of elements"));
+    virtual void DoCompute (OpKernelContext* ctx, const ComputeOptions& options) = 0;
 
-    const int64 size = z_tensor.NumElements();
-    OP_REQUIRES(context, size <= tensorflow::kint32max,
-                errors::InvalidArgument("too many elements in tensor"));
-    OP_REQUIRES(context, n_min_tensor.NumElements() == size,
-        errors::InvalidArgument("z and n_min must have the same number of elements"));
-    OP_REQUIRES(context, n_max_tensor.NumElements() == size,
-        errors::InvalidArgument("z and n_max must have the same number of elements"));
-    OP_REQUIRES(context, r_tensor.NumElements() == size,
-        errors::InvalidArgument("z and r must have the same number of elements"));
-    OP_REQUIRES(context, direction_tensor.NumElements() == size,
-        errors::InvalidArgument("z and direction must have the same number of elements"));
+    void Compute(OpKernelContext* context) override {
+      // Inputs
+      const Tensor& radius_tensor    = context->input(0);
+      const Tensor& intensity_tensor = context->input(1);
+      const Tensor& n_min_tensor     = context->input(2);
+      const Tensor& n_max_tensor     = context->input(3);
+      const Tensor& z_tensor         = context->input(4);
+      const Tensor& r_tensor         = context->input(5);
+      const Tensor& direction_tensor = context->input(6);
 
-    // Output
-    Tensor* delta_tensor = NULL;
-    OP_REQUIRES_OK(context, context->allocate_output(0, z_tensor.shape(), &delta_tensor));
+      // Dimensions
+      const int64 N = radius_tensor.NumElements();
+      OP_REQUIRES(context, N <= tensorflow::kint32max,
+          errors::InvalidArgument("too many elements in tensor"));
+      OP_REQUIRES(context, intensity_tensor.NumElements() == N,
+          errors::InvalidArgument("radius and intensity must have the same number of elements"));
 
-    // Access the data
-    const auto radius    = radius_tensor.template flat<T>();
-    const auto intensity = intensity_tensor.template flat<T>();
-    const auto n_min     = n_min_tensor.flat<int>();
-    const auto n_max     = n_max_tensor.flat<int>();
-    const auto z         = z_tensor.template flat<T>();
-    const auto r         = r_tensor.template flat<T>();
-    const auto direction = direction_tensor.template flat<T>();
-    auto delta           = delta_tensor->template flat<T>();
+      const int64 size = z_tensor.NumElements();
+      OP_REQUIRES(context, size <= tensorflow::kint32max,
+          errors::InvalidArgument("too many elements in tensor"));
+      OP_REQUIRES(context, n_min_tensor.NumElements() == size,
+          errors::InvalidArgument("z and n_min must have the same number of elements"));
+      OP_REQUIRES(context, n_max_tensor.NumElements() == size,
+          errors::InvalidArgument("z and n_max must have the same number of elements"));
+      OP_REQUIRES(context, r_tensor.NumElements() == size,
+          errors::InvalidArgument("z and r must have the same number of elements"));
+      OP_REQUIRES(context, direction_tensor.NumElements() == size,
+          errors::InvalidArgument("z and direction must have the same number of elements"));
 
-    //const int64 cost = N * 10;
-    //auto worker_threads = d->tensorflow_cpu_worker_threads();
-    //const DeviceBase::CpuWorkerThreads& worker_threads =
-    //        *context->device()->tensorflow_cpu_worker_threads();
+      // Output
+      Tensor* delta_tensor = NULL;
+      OP_REQUIRES_OK(context, context->allocate_output(0, z_tensor.shape(), &delta_tensor));
 
-    delta.setZero();
-    TransitDepthFunctor<Device, T>()(context,
-        static_cast<int>(N), radius.data(), intensity.data(),
-        static_cast<int>(size), n_min.data(), n_max.data(), z.data(), r.data(),
-        direction.data(), delta.data());
-  }
+      // Access the data
+      const auto radius    = radius_tensor.template flat<T>();
+      const auto intensity = intensity_tensor.template flat<T>();
+      const auto n_min     = n_min_tensor.flat<int>();
+      const auto n_max     = n_max_tensor.flat<int>();
+      const auto z         = z_tensor.template flat<T>();
+      const auto r         = r_tensor.template flat<T>();
+      const auto direction = direction_tensor.template flat<T>();
+      auto delta           = delta_tensor->template flat<T>();
+      delta.setZero();
+
+      // Wrap up the options
+      ComputeOptions options(
+        N,
+        radius.data(),
+        intensity.data(),
+        size,
+        n_min.data(),
+        n_max.data(),
+        z.data(),
+        r.data(),
+        direction.data(),
+        delta.data()
+      );
+
+      // Perform the calculation
+      DoCompute(context, options);
+    }
+
 };
+
+template <class Device, typename T>
+class TransitDepthOp;
+
+template <typename T>
+class TransitDepthOp<CPUDevice, T> : public TransitDepthOpBase<T> {
+
+  public:
+    explicit TransitDepthOp (OpKernelConstruction* context) : TransitDepthOpBase<T>(context) {}
+
+    void DoCompute (OpKernelContext* ctx, const typename TransitDepthOpBase<T>::ComputeOptions& options) override {
+      auto work = [&options](int64 begin, int64 end) {
+        for (int i = begin; i < end; ++i) {
+          if (options.direction[i] > 0.0)
+            options.delta[i] = transit::compute_transit_depth<T>(
+                options.N, options.radius, options.intensity, options.n_min[i], options.n_max[i], options.z[i], options.r[i]);
+        }
+      };
+      auto worker_threads = *ctx->device()->tensorflow_cpu_worker_threads();
+      int64 cost = 5 * options.N;
+      Shard(worker_threads.num_threads, worker_threads.workers, options.size, cost, work);
+    }
+
+};
+
 
 #define REGISTER_CPU(type)                                                 \
   REGISTER_KERNEL_BUILDER(                                                 \
@@ -131,6 +179,21 @@ REGISTER_CPU(double);
 #undef REGISTER_CPU
 
 #ifdef GOOGLE_CUDA
+template <typename T>
+class TransitDepthOp<GPUDevice, T> : public TransitDepthOpBase<T> {
+
+  public:
+    explicit TransitDepthOp (OpKernelConstruction* context) : TransitDepthOpBase<T>(context) {}
+
+    void DoCompute (OpKernelContext* ctx, const typename TransitDepthOpBase<T>::ComputeOptions& options) override {
+      TransitDepthFunctor<T>()(
+        ctx->eigen_device<GPUDevice>(),
+        static_cast<int>(options.N), options.radius, options.intensity,
+        static_cast<int>(options.size), options.n_min, options.n_max, options.z, options.r,
+        options.direction, options.delta);
+    }
+
+};
 
 #define REGISTER_GPU(type)                                                 \
   REGISTER_KERNEL_BUILDER(                                                 \

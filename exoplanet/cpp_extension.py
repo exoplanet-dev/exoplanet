@@ -164,8 +164,10 @@ def CppExtension(name, sources, *args, **kwargs):
 
 
 def CUDAExtension(name, sources, *args, **kwargs):
-    kwargs['include_dirs'] = kwargs.get('include_dirs', []) + include_paths()
-    kwargs['library_dirs'] = kwargs.get('library_dirs', []) + library_paths()
+    kwargs['include_dirs'] = kwargs.get('include_dirs', []) \
+        + include_paths(True)
+    kwargs['library_dirs'] = kwargs.get('library_dirs', []) \
+        + library_paths(True)
     kwargs['libraries'] = kwargs.get('libraries', []) + ['cudart']
 
     kwargs = add_tf_flags(kwargs)
@@ -174,7 +176,7 @@ def CUDAExtension(name, sources, *args, **kwargs):
 
 
 def add_tf_flags(kwargs):
-    flags = list(kwargs.get('extra_compile_args', []))
+    flags = copy.deepcopy(kwargs.get('extra_compile_args', []))
     if isinstance(flags, dict):
         for k in flags:
             flags[k] += tf.sysconfig.get_compile_flags()
@@ -182,7 +184,7 @@ def add_tf_flags(kwargs):
         flags += tf.sysconfig.get_compile_flags()
     kwargs['extra_compile_args'] = flags
 
-    flags = list(kwargs.get('extra_link_args', []))
+    flags = copy.deepcopy(kwargs.get('extra_link_args', []))
     if isinstance(flags, dict):
         for k in flags:
             flags[k] += tf.sysconfig.get_link_flags()
