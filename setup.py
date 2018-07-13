@@ -34,7 +34,7 @@ def construct_op(name):
             include_dirs=[path, "include"],
             extra_compile_args={
                 "cxx": flags,
-                "nvcc": flags + ["--expt-relaxed-constexpr"],
+                "nvcc": flags + ["--expt-relaxed-constexpr", "-shared", "-x", "cu", "-Xcompiler"],
             },
             extra_link_args=flags,
         )
