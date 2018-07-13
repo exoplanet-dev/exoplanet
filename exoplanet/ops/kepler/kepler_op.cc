@@ -67,9 +67,6 @@ class KeplerOpBase : public OpKernel {
     auto E = E_tensor->template flat<T>();
 
     DoCompute(context, maxiter_, tol_, static_cast<int>(N), M.data(), e.data(), E.data());
-
-    //KeplerFunctor<Device, T>()(context->eigen_device<Device>(),
-    //    maxiter_, tol_, static_cast<int>(N), M.data(), e.data(), E.data());
   }
 
  private:
@@ -132,7 +129,6 @@ class KeplerOp<GPUDevice, T> : public KeplerOpBase<T> {
       Name("Kepler").Device(DEVICE_GPU).TypeConstraint<type>("T"),         \
       KeplerOp<GPUDevice, type>)
 
-//extern KeplerFunctor<GPUDevice, float>;
 REGISTER_GPU(float);
 REGISTER_GPU(double);
 
