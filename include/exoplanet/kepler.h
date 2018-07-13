@@ -2,7 +2,6 @@
 #define _EXOPLANET_KEPLER_H_
 
 #include <cmath>
-
 #include "exoplanet/cuda_utils.h"
 
 namespace exoplanet {

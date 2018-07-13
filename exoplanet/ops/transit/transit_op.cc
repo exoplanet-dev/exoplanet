@@ -11,24 +11,6 @@ using namespace exoplanet;
 using CPUDevice = Eigen::ThreadPoolDevice;
 using GPUDevice = Eigen::GpuDevice;
 
-//template <typename T>
-//struct TransitDepthFunctor<CPUDevice, T> {
-//  void operator()(OpKernelContext* ctx, int N, const T* const radius, const T* const intensity,
-//                  int size, const int* const n_min, const int* const n_max, const T* const z, const T* const r,
-//                  const T* const direction, T* delta) {
-//    auto work = [N, radius, intensity, n_min, n_max, z, r, direction, delta](int64 begin, int64 end) {
-//      for (int i = begin; i < end; ++i) {
-//        if (direction[i] > 0.0)
-//          delta[i] = transit::compute_transit_depth<T>(N, radius, intensity, n_min[i], n_max[i], z[i], r[i]);
-//      }
-//    };
-
-//    auto worker_threads = *ctx->device()->tensorflow_cpu_worker_threads();
-//    int64 cost = 5 * N;
-//    Shard(worker_threads.num_threads, worker_threads.workers, size, cost, work);
-//  }
-//};
-
 REGISTER_OP("TransitDepth")
   .Attr("T: {float, double}")
   .Input("radius: T")
@@ -64,20 +46,18 @@ class TransitDepthOpBase : public OpKernel {
   public:
     explicit TransitDepthOpBase (OpKernelConstruction* context) : OpKernel(context) {}
 
-    struct ComputeOptions {
-      int64 N = 0;
-      const T* const radius    = nullptr;
-      const T* const intensity = nullptr;
-      int64 size = 0;
-      const int64* const n_min = nullptr;
-      const int64* const n_max = nullptr;
-      const T* const z         = nullptr;
-      const T* const r         = nullptr;
-      const T* const direction = nullptr;
-      T*             delta     = nullptr;
-    };
-
-    virtual void DoCompute (OpKernelContext* ctx, const ComputeOptions& options) = 0;
+    virtual void DoCompute (OpKernelContext* ctx,
+      int64 N,
+      const T* const radius,
+      const T* const intensity,
+      int64 size,
+      const int* const n_min,
+      const int* const n_max,
+      const T* const z,
+      const T* const r,
+      const T* const direction,
+      T*             delta
+    ) = 0;
 
     void Compute(OpKernelContext* context) override {
       // Inputs
@@ -121,10 +101,9 @@ class TransitDepthOpBase : public OpKernel {
       const auto r         = r_tensor.template flat<T>();
       const auto direction = direction_tensor.template flat<T>();
       auto delta           = delta_tensor->template flat<T>();
-      delta.setZero();
 
-      // Wrap up the options
-      ComputeOptions options(
+      // Perform the calculation on the selected device
+      DoCompute(context,
         N,
         radius.data(),
         intensity.data(),
@@ -136,9 +115,6 @@ class TransitDepthOpBase : public OpKernel {
         direction.data(),
         delta.data()
       );
-
-      // Perform the calculation
-      DoCompute(context, options);
     }
 
 };
@@ -152,17 +128,29 @@ class TransitDepthOp<CPUDevice, T> : public TransitDepthOpBase<T> {
   public:
     explicit TransitDepthOp (OpKernelConstruction* context) : TransitDepthOpBase<T>(context) {}
 
-    void DoCompute (OpKernelContext* ctx, const typename TransitDepthOpBase<T>::ComputeOptions& options) override {
-      auto work = [&options](int64 begin, int64 end) {
+    void DoCompute (OpKernelContext* ctx,
+      int64 N,
+      const T* const radius,
+      const T* const intensity,
+      int64 size,
+      const int* const n_min,
+      const int* const n_max,
+      const T* const z,
+      const T* const r,
+      const T* const direction,
+      T*             delta
+    ) override {
+      auto work = [&](int64 begin, int64 end) {
         for (int i = begin; i < end; ++i) {
-          if (options.direction[i] > 0.0)
-            options.delta[i] = transit::compute_transit_depth<T>(
-                options.N, options.radius, options.intensity, options.n_min[i], options.n_max[i], options.z[i], options.r[i]);
+          if (direction[i] > T(0))
+            delta[i] = transit::compute_transit_depth<T>(
+                N, radius, intensity, n_min[i], n_max[i], z[i], r[i]);
+          else delta[i] = T(0);
         }
       };
       auto worker_threads = *ctx->device()->tensorflow_cpu_worker_threads();
-      int64 cost = 5 * options.N;
-      Shard(worker_threads.num_threads, worker_threads.workers, options.size, cost, work);
+      int64 cost = 5 * N;
+      Shard(worker_threads.num_threads, worker_threads.workers, size, cost, work);
     }
 
 };
@@ -185,12 +173,23 @@ class TransitDepthOp<GPUDevice, T> : public TransitDepthOpBase<T> {
   public:
     explicit TransitDepthOp (OpKernelConstruction* context) : TransitDepthOpBase<T>(context) {}
 
-    void DoCompute (OpKernelContext* ctx, const typename TransitDepthOpBase<T>::ComputeOptions& options) override {
-      TransitDepthFunctor<T>()(
+    void DoCompute (OpKernelContext* ctx,
+      int64 N,
+      const T* const radius,
+      const T* const intensity,
+      int64 size,
+      const int* const n_min,
+      const int* const n_max,
+      const T* const z,
+      const T* const r,
+      const T* const direction,
+      T*             delta
+    ) override {
+      TransitDepthCUDAFunctor<T>()(
         ctx->eigen_device<GPUDevice>(),
-        static_cast<int>(options.N), options.radius, options.intensity,
-        static_cast<int>(options.size), options.n_min, options.n_max, options.z, options.r,
-        options.direction, options.delta);
+        static_cast<int>(N), radius, intensity,
+        static_cast<int>(size), n_min, n_max, z, r,
+        direction, delta);
     }
 
 };
