@@ -49,7 +49,7 @@ def construct_op(name):
 
 
 extensions = [
-    construct_op("transit"),
+    # construct_op("transit"),
     construct_op("interp"),
     construct_op("kepler"),
 ]
