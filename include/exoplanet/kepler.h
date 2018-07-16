@@ -15,8 +15,10 @@ namespace exoplanet {
       if (fabs(e) < tol) return E;
       for (int i = 0; i < maxiter; ++i) {
         T g = E0 - e * sin(E0) - M, gp = 1.0 - e * cos(E0);
-        E = E0 - g / gp;
-        if (fabs((E - E0) / E) <= T(tol)) {
+        T delta = g / (gp + tol);
+        delta = (fabs(delta) < T(1)) ? delta : delta / fabs(delta);
+        E = E0 - delta;
+        if (fabs(E - E0) <= T(tol)) {
           return E;
         }
         E0 = E;
