@@ -3,9 +3,13 @@
 #include "tensorflow/core/framework/shape_inference.h"
 #include "tensorflow/core/util/work_sharder.h"
 
-#include <algorithm>
+#include "interp_op.h"
 
 using namespace tensorflow;
+using namespace exoplanet;
+
+using CPUDevice = Eigen::ThreadPoolDevice;
+using GPUDevice = Eigen::GpuDevice;
 
 REGISTER_OP("Interp")
   .Attr("T: {float, double}")
@@ -13,7 +17,7 @@ REGISTER_OP("Interp")
   .Input("x: T")
   .Input("y: T")
   .Output("v: T")
-  .Output("inds: int64")
+  .Output("inds: int32")
   .SetShapeFn([](shape_inference::InferenceContext* c) {
     shape_inference::ShapeHandle t, x, y;
     TF_RETURN_IF_ERROR(c->WithRankAtLeast(c->input(0), 1, &t));
@@ -31,28 +35,17 @@ REGISTER_OP("Interp")
     return Status::OK();
   });
 
-// Adapted from https://academy.realm.io/posts/how-we-beat-cpp-stl-binary-search/
 template <typename T>
-inline int64 search_sorted (int64 N, const T* const x, const T& value) {
-  int64 low = -1;
-  int64 high = N;
-  while (high - low > 1) {
-    int64 probe = (low + high) / 2;
-    T v = x[probe];
-    if (v > value)
-      high = probe;
-    else
-      low = probe;
-  }
-  return high;
-}
-
-template <typename T>
-class InterpOp : public OpKernel {
+class InterpOpBase : public OpKernel {
  public:
-  explicit InterpOp(OpKernelConstruction* context) : OpKernel(context) {}
+  explicit InterpOpBase (OpKernelConstruction* context) : OpKernel(context) {}
 
-  void Compute(OpKernelContext* context) override {
+  virtual void DoCompute (OpKernelContext* context,
+    int64 size,
+    int M, const T* const x, const T* const y,
+    int N, const T* const t, T* v, int* inds) = 0;
+
+  void Compute (OpKernelContext* context) override {
     // Inputs
     const Tensor& t_tensor = context->input(0);
     const Tensor& x_tensor = context->input(1);
@@ -79,6 +72,10 @@ class InterpOp : public OpKernel {
     // The outer dimensions
     const int64 N = t_tensor.dim_size(ndim - 1);
     const int64 M = x_tensor.dim_size(ndim - 1);
+    OP_REQUIRES(context, N <= tensorflow::kint32max,
+        errors::InvalidArgument("too many elements in tensor"));
+    OP_REQUIRES(context, M <= tensorflow::kint32max,
+        errors::InvalidArgument("too many elements in tensor"));
 
     // Output
     Tensor* v_tensor = NULL;
@@ -91,49 +88,87 @@ class InterpOp : public OpKernel {
     const auto x = x_tensor.template flat_inner_dims<T, 2>();
     const auto y = y_tensor.template flat_inner_dims<T, 2>();
     auto v       = v_tensor->template flat_inner_dims<T, 2>();
-    auto inds    = inds_tensor->flat_inner_dims<int64, 2>();
+    auto inds    = inds_tensor->flat_inner_dims<int, 2>();
 
-    for (int64 k = 0; k < size; ++k) {
-      const T* const tk = &(t(k, 0));
-      const T* const xk = &(x(k, 0));
-      const T* const yk = &(y(k, 0));
-      T* vk = &(v(k, 0));
-      int64* indsk = &(inds(k, 0));
-
-      auto work = [M, &tk, &xk, &yk, &vk, &indsk](int64 begin, int64 end) {
-        for (int64 n = begin; n < end; ++n) {
-          T value = tk[n];
-          bool low = value <= xk[0];
-          bool high = value >= xk[M-1];
-          if (!low && !high) {
-            int64 ind = indsk[n] = search_sorted(M, xk, value);
-            T a = (value - xk[ind-1]) / (xk[ind] - xk[ind-1]);
-            vk[n] = a * yk[ind] + (1.0 - a) * yk[ind-1];
-          } else if (low) {
-            vk[n] = yk[0];
-            indsk[n] = 0;
-          } else {
-            vk[n] = yk[M-1];
-            indsk[n] = M;
-          }
-        }
-      };
-
-      auto worker_threads = *context->device()->tensorflow_cpu_worker_threads();
-      int64 cost = 5*M;
-      Shard(worker_threads.num_threads, worker_threads.workers, N, cost, work);
-      //work(0, size);
-    }
+    DoCompute(context,
+      size,
+      M, x.data(), y.data(),
+      N, t.data(), v.data(), inds.data()
+    );
   }
 };
 
 
-#define REGISTER_KERNEL(type)                                              \
+
+template <class Device, typename T>
+class InterpOp;
+
+template <typename T>
+class InterpOp<CPUDevice, T> : public InterpOpBase<T> {
+
+  public:
+    explicit InterpOp (OpKernelConstruction* context) : InterpOpBase<T>(context) {}
+
+    void DoCompute (OpKernelContext* ctx,
+      int64 size,
+      int M, const T* const x, const T* const y,
+      int N, const T* const t, T* v, int* inds
+    ) override {
+
+      auto work = [&](int begin, int end) {
+        for (int i = begin; i < end; ++i) {
+          int k = i / N;
+          int off_m = k * M;
+          inds[i] = interp::interp1d(M, x + off_m, y + off_m, t[i], v + i);
+        }
+      };
+
+      auto worker_threads = *ctx->device()->tensorflow_cpu_worker_threads();
+      int64 cost = 5*M;
+      Shard(worker_threads.num_threads, worker_threads.workers, N * size, cost, work);
+    }
+
+};
+
+
+#define REGISTER_CPU(type)                                                 \
   REGISTER_KERNEL_BUILDER(                                                 \
       Name("Interp").Device(DEVICE_CPU).TypeConstraint<type>("T"),         \
-      InterpOp<type>)
+      InterpOp<CPUDevice, type>)
 
-REGISTER_KERNEL(float);
-REGISTER_KERNEL(double);
+REGISTER_CPU(float);
+REGISTER_CPU(double);
 
-#undef REGISTER_KERNEL
+#undef REGISTER_CPU
+
+#ifdef GOOGLE_CUDA
+
+template <typename T>
+class InterpOp<GPUDevice, T> : public InterpOpBase<T> {
+
+  public:
+    explicit InterpOp (OpKernelConstruction* context) : InterpOpBase<T>(context) {}
+
+    void DoCompute (OpKernelContext* ctx,
+      int64 size,
+      int M, const T* const x, const T* const y,
+      int N, const T* const t, T* v, int* inds
+    ) override {
+      OP_REQUIRES(ctx, (size * N) <= tensorflow::kint32max,
+          errors::InvalidArgument("too many elements in tensor"));
+      InterpCUDAFunctor<T>()(ctx->eigen_device<GPUDevice>(), static_cast<int>(size * N), M, x, y, N, t, v, inds);
+    }
+
+};
+
+#define REGISTER_GPU(type)                                                 \
+  REGISTER_KERNEL_BUILDER(                                                 \
+      Name("Interp").Device(DEVICE_GPU).TypeConstraint<type>("T"),         \
+      InterpOp<GPUDevice, type>)
+
+REGISTER_GPU(float);
+REGISTER_GPU(double);
+
+#undef REGISTER_GPU
+
+#endif

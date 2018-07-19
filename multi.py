@@ -205,6 +205,8 @@ opt = tf.contrib.opt.ScipyOptimizerInterface(chi2, model.get_parameters())
 
 session.run(tf.global_variables_initializer())
 
+print(session.run(grad))
+
 
 # In[8]:
 

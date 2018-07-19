@@ -11,7 +11,7 @@ REGISTER_OP("InterpRev")
   .Input("t: T")
   .Input("x: T")
   .Input("y: T")
-  .Input("inds: int64")
+  .Input("inds: int32")
   .Input("bv: T")
   .Output("bt: T")
   .Output("by: T")
@@ -74,6 +74,10 @@ class InterpRevOp : public OpKernel {
     // The outer dimensions
     const int64 N = t_tensor.dim_size(ndim - 1);
     const int64 M = x_tensor.dim_size(ndim - 1);
+    OP_REQUIRES(context, N <= tensorflow::kint32max,
+        errors::InvalidArgument("too many elements in tensor"));
+    OP_REQUIRES(context, M <= tensorflow::kint32max,
+        errors::InvalidArgument("too many elements in tensor"));
 
     // Output
     Tensor* bt_tensor = NULL;
@@ -85,7 +89,7 @@ class InterpRevOp : public OpKernel {
     const auto t    = t_tensor.template flat_inner_dims<T, 2>();
     const auto x    = x_tensor.template flat_inner_dims<T, 2>();
     const auto y    = y_tensor.template flat_inner_dims<T, 2>();
-    const auto inds = inds_tensor.flat_inner_dims<int64, 2>();
+    const auto inds = inds_tensor.flat_inner_dims<int, 2>();
     const auto bv   = bv_tensor.template flat_inner_dims<T, 2>();
     auto bt         = bt_tensor->template flat_inner_dims<T, 2>();
     auto by         = by_tensor->template flat_inner_dims<T, 2>();
@@ -96,7 +100,7 @@ class InterpRevOp : public OpKernel {
     for (int64 k = 0; k < size; ++k) {
       for (int64 n = 0; n < N; ++n) {
         T value = t(k, n);
-        int64 ind = inds(k, n);
+        int ind = inds(k, n);
         if (ind <= 0) {
           by(k, 0) += bv(k, n);
         } else if (ind >= M) {
