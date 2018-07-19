@@ -39,7 +39,7 @@ def _kepler_grad(op, *grads):
     return [bM, be]
 
 
-def sky_position(period, t0, e, omega, incl, t):
+def sky_position(period, t0, e, omega, incl, t, **kwargs):
     # Shorthands
     n = 2.0 * np.pi / period
     cos_omega = tf.cos(omega)
@@ -52,7 +52,7 @@ def sky_position(period, t0, e, omega, incl, t):
 
     # Solve Kepler's equation for the true anomaly
     M = (t - tref) * n
-    E = kepler(M, e + tf.zeros_like(M))
+    E = kepler(M, e + tf.zeros_like(M), **kwargs)
     f = 2.0 * tf.atan2(tf.sqrt(1.0 + e) * tf.tan(0.5*E),
                        tf.sqrt(1.0 - e) + tf.zeros_like(E))
 
@@ -62,8 +62,11 @@ def sky_position(period, t0, e, omega, incl, t):
     swpf = sin_omega * cf + cos_omega * sf
     cwpf = cos_omega * cf - sin_omega * sf
 
+    # Star / planet distance
+    r = (1.0 - tf.square(e)) / (1 + e * cf)
+
     return tf.stack([
-        cwpf,
-        swpf * tf.cos(incl),
-        swpf * tf.sin(incl)
+        -r * cwpf,
+        -r * swpf * tf.cos(incl),
+        r * swpf * tf.sin(incl)
     ])
