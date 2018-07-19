@@ -14,7 +14,7 @@ using CPUDevice = Eigen::ThreadPoolDevice;
 using GPUDevice = Eigen::GpuDevice;
 
 template <typename T>
-struct TransitDepthRevFunctor<CPUDevice, T> {
+struct TransitDepthRevFunctor {
   void operator()(OpKernelContext* ctx, int N, const T* const radius, const T* const intensity,
                   int size, const int* const n_min, const int* const n_max, const T* const z, const T* const r,
                   const T* const direction, const T* const b_delta, T* b_intensity, T* b_z, T* b_r) {
@@ -133,7 +133,7 @@ class TransitDepthRevOp : public OpKernel {
     b_z.setZero();
     b_r.setZero();
 
-    TransitDepthRevFunctor<Device, T>()(context,
+    TransitDepthRevFunctor<T>()(context,
         static_cast<int>(N), radius.data(), intensity.data(),
         static_cast<int>(size), n_min.data(), n_max.data(), z.data(), r.data(),
         direction.data(),
@@ -151,16 +151,16 @@ REGISTER_CPU(double);
 
 #undef REGISTER_CPU
 
-#ifdef GOOGLE_CUDA
+//#ifdef GOOGLE_CUDA
 
-#define REGISTER_GPU(type)                                                 \
-  REGISTER_KERNEL_BUILDER(                                                 \
-      Name("TransitDepthRev").Device(DEVICE_GPU).TypeConstraint<type>("T"),         \
-      TransitDepthRevOp<GPUDevice, type>)
+//#define REGISTER_GPU(type)                                                 \
+//  REGISTER_KERNEL_BUILDER(                                                 \
+//      Name("TransitDepthRev").Device(DEVICE_GPU).TypeConstraint<type>("T"),         \
+//      TransitDepthRevOp<GPUDevice, type>)
 
-REGISTER_GPU(float);
-REGISTER_GPU(double);
+//REGISTER_GPU(float);
+//REGISTER_GPU(double);
 
-#undef REGISTER_GPU
+//#undef REGISTER_GPU
 
-#endif
+//#endif

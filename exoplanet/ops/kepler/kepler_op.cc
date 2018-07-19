@@ -1,6 +1,7 @@
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/tensor_shape.h"
 #include "tensorflow/core/framework/shape_inference.h"
+#include "tensorflow/core/util/work_sharder.h"
 
 #include <limits>
 
@@ -11,15 +12,6 @@ using namespace exoplanet;
 
 using CPUDevice = Eigen::ThreadPoolDevice;
 using GPUDevice = Eigen::GpuDevice;
-
-template <typename T>
-struct KeplerFunctor<CPUDevice, T> {
-  void operator()(const CPUDevice& d, int maxiter, float tol, int size, const T* M, const T* e, T* E) {
-    for (int i = 0; i < size; ++i) {
-      E[i] = kepler::solve_kepler<T>(M[i], e[i], maxiter, tol);
-    }
-  }
-};
 
 REGISTER_OP("Kepler")
   .Attr("T: {float, double}")
@@ -35,10 +27,10 @@ REGISTER_OP("Kepler")
     return Status::OK();
   });
 
-template <typename Device, typename T>
-class KeplerOp : public OpKernel {
+template <typename T>
+class KeplerOpBase : public OpKernel {
  public:
-  explicit KeplerOp(OpKernelConstruction* context) : OpKernel(context) {
+  explicit KeplerOpBase (OpKernelConstruction* context) : OpKernel(context) {
     OP_REQUIRES_OK(context, context->GetAttr("maxiter", &maxiter_));
     OP_REQUIRES(context, maxiter_ >= 0,
                 errors::InvalidArgument("Need maxiter >= 0, got ", maxiter_));
@@ -49,6 +41,10 @@ class KeplerOp : public OpKernel {
     if (tol_ < eps) tol_ = 2 * eps;
   }
 
+  virtual void DoCompute (OpKernelContext* context,
+      int maxiter, float tol, int N, const T* const M, const T* const e, T* E) = 0;
+
+
   void Compute(OpKernelContext* context) override {
     // Inputs
     const Tensor& M_tensor = context->input(0);
@@ -56,6 +52,8 @@ class KeplerOp : public OpKernel {
 
     // Dimensions
     const int64 N = M_tensor.NumElements();
+    OP_REQUIRES(context, N <= tensorflow::kint32max,
+        errors::InvalidArgument("too many elements in tensor"));
     OP_REQUIRES(context, e_tensor.NumElements() == N,
         errors::InvalidArgument("e and M must have the same number of elements"));
 
@@ -68,16 +66,36 @@ class KeplerOp : public OpKernel {
     const auto e = e_tensor.template flat<T>();
     auto E = E_tensor->template flat<T>();
 
-    OP_REQUIRES(context, N <= tensorflow::kint32max,
-                errors::InvalidArgument("Too many elements in tensor"));
-
-    KeplerFunctor<Device, T>()(context->eigen_device<Device>(),
-        maxiter_, tol_, static_cast<int>(N), M.data(), e.data(), E.data());
+    DoCompute(context, maxiter_, tol_, static_cast<int>(N), M.data(), e.data(), E.data());
   }
 
  private:
   int maxiter_;
   float tol_;
+};
+
+template <class Device, typename T>
+class KeplerOp;
+
+template <typename T>
+class KeplerOp<CPUDevice, T> : public KeplerOpBase<T> {
+
+  public:
+    explicit KeplerOp (OpKernelConstruction* context) : KeplerOpBase<T>(context) {}
+
+    void DoCompute (OpKernelContext* ctx,
+      int maxiter, float tol, int N, const T* const M, const T* const e, T* E
+    ) override {
+      auto work = [&](int64 begin, int64 end) {
+        for (int i = begin; i < end; ++i) {
+          E[i] = kepler::solve_kepler<T>(M[i], e[i], maxiter, tol);
+        }
+      };
+      auto worker_threads = *ctx->device()->tensorflow_cpu_worker_threads();
+      int64 cost = 5;
+      Shard(worker_threads.num_threads, worker_threads.workers, N, cost, work);
+    }
+
 };
 
 #define REGISTER_CPU(type)                                                 \
@@ -92,12 +110,25 @@ REGISTER_CPU(double);
 
 #ifdef GOOGLE_CUDA
 
+template <typename T>
+class KeplerOp<GPUDevice, T> : public KeplerOpBase<T> {
+
+  public:
+    explicit KeplerOp (OpKernelConstruction* context) : KeplerOpBase<T>(context) {}
+
+    void DoCompute (OpKernelContext* ctx,
+      int maxiter, float tol, int N, const T* const M, const T* const e, T* E
+    ) override {
+      KeplerCUDAFunctor<T>()(ctx->eigen_device<GPUDevice>(), maxiter, tol, N, M, e, E);
+    }
+
+};
+
 #define REGISTER_GPU(type)                                                 \
   REGISTER_KERNEL_BUILDER(                                                 \
       Name("Kepler").Device(DEVICE_GPU).TypeConstraint<type>("T"),         \
       KeplerOp<GPUDevice, type>)
 
-//extern KeplerFunctor<GPUDevice, float>;
 REGISTER_GPU(float);
 REGISTER_GPU(double);
 
