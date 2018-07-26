@@ -13,10 +13,6 @@ from cpp_extension import (
 )
 
 
-def src_path(name, filename):
-    return os.path.join("exoplanet", "ops", name, filename)
-
-
 def construct_op(name):
     path = os.path.join("exoplanet", "ops", name)
     cpp_files = glob.glob(os.path.join(path, "*.cc"))
