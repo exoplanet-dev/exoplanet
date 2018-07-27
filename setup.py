@@ -48,6 +48,7 @@ extensions = [
     construct_op("transit"),
     construct_op("interp"),
     construct_op("kepler"),
+    construct_op("tri_diag_solve"),
 ]
 
 setup(
