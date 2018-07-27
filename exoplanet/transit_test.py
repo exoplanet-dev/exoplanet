@@ -118,7 +118,7 @@ class TransitDepthTest(tf.test.TestCase):
                         err = tf.test.compute_gradient_error(
                             params, shapes,
                             delta, shapes[-2],
-                            vals, eps,
+                            x_init_value=vals, delta=eps,
                         )
                         assert np.allclose(err, 0.0, atol=2*eps, rtol=1.0)
 
@@ -153,7 +153,8 @@ class TransitDepthTest(tf.test.TestCase):
                 shape_out = np.shape(vals_out)
 
                 err = tf.test.compute_gradient_error(params_in, shape_in, area,
-                                                     shape_out, vals_in,
+                                                     shape_out,
+                                                     x_init_value=vals_in,
                                                      delta=eps)
                 assert np.allclose(err, 0.0, atol=eps)
 
