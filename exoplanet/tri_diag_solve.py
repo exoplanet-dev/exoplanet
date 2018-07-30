@@ -9,7 +9,7 @@ import tensorflow as tf
 from .tf_utils import load_op_library
 
 
-ops = load_op_library("tri_diag_solve_op")
+ops = load_op_library("cubic_op")
 
 
 def tri_diag_solve(diag, upper, lower, y, **kwargs):
@@ -25,7 +25,7 @@ def _tri_diag_solve_grad(op, *grads):
     axes = tf.range(tf.rank(diag), tf.rank(y))
     bdiag = -tf.reduce_sum(x * by, axis=axes)
 
-    n_inner = diag.shape[-1]
+    n_inner = tf.shape(diag)[-1]
     axis = tf.rank(diag) - 1
     bupper = -tf.reduce_sum(
         tf.gather(x, tf.range(1, n_inner), axis=axis) *

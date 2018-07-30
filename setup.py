@@ -8,7 +8,7 @@ from setuptools import setup
 
 sys.path.append("exoplanet")
 
-from cpp_extension import (
+from cpp_extension import (  # NOQA
     BuildExtension, CppExtension, CUDAExtension
 )
 
@@ -48,7 +48,7 @@ extensions = [
     construct_op("transit"),
     construct_op("interp"),
     construct_op("kepler"),
-    construct_op("tri_diag_solve"),
+    construct_op("cubic"),
 ]
 
 setup(
