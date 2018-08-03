@@ -137,7 +137,47 @@ This is a section.
 
 \section{Automatic differentiation}
 
-The main limitation of gradient-based inference methods is the
+The main limitation of gradient-based inference methods is that, in order to
+use them, you must \emph{compute the gradients}!
+The fundamental quantity of interest is the first derivative (gradient) of the
+log-likelihood function (or some other goodness-of-fit function) with respect
+to the parameters of the model.
+In all but the simplest cases, symbolically deriving this gradient function is
+tedious and error-prone.
+Instead, it is generally preferable to use a method (called automatic
+differentiation) that can automatically compute the exact gradients of the
+model \emph{to machine precision} at compile time.
+I would like to emphasize the fact that I am not talking \emph{numerical}
+derivatives like finite difference methods, and there is no approximation
+being made.
+
+The basic idea behind automatic differentiation is that code is always written
+as the composition of basic functions and, if we know how to differentiate the
+subcomponents, then we can apply the chain rule to differentiate the larger
+function.
+This realization was one of the key discoveries that launched the field of
+machine learning called ``deep learning'', where automatic differentiation was
+given the name ``backpropagation'' (CITE).
+Since then, there has been a substantial research base that has made these
+methods general and computationally efficient, and from this, many open source
+libraries have been released that ease the use of these methods (e.g.\
+TensorFlow, PyTorch, Stan, ceres, Eigen, etc.\ CITATIONS).
+Despite the existence of these projects, automatic differentiation has not
+been widely adopted in the astronomical literature because there is some
+learning curve associated with porting existing code bases to a new language
+or framework.
+Furthermore, many projects in astronomy involve fitting realistic, physically
+motivated models that involve numerical solutions to differential equations
+or special functions that are not natively supported by the popular automatic
+differentiation frameworks.
+
+In this paper, I demonstrate how to incorporate exoplanet-specific functions
+into these frameworks and derive the functions needed to characterize
+exoplanets using gradient-based methods applied to radial velocity,
+astrometry, and transit datasets.
+Similar derivations would certainly be tractable for microlensing, direct
+imaging, and other exoplanet characterization methods, but these are left to a
+future paper.
 
 \section{Limb-darkened transit light curves}
 
