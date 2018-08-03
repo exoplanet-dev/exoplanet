@@ -4,11 +4,10 @@ SUFF        = pdf
 RM_TMP      = $(foreach d, ${TEX_FILES}, rm -rf $(foreach suff, ${TMP_SUFFS}, ${d}.${suff}))
 CHECK_RERUN = grep Rerun ms.log
 
-# You shouldn't need to edit below here.
-default: ms.pdf
+default: exoplanet.pdf
 
-ms.pdf: ms.tex
-	tectonic ms.tex
+exoplanet.pdf: exoplanet.tex
+	tectonic exoplanet.tex
 	#pdflatex ms
 	#bibtex ms
 	#pdflatex ms
