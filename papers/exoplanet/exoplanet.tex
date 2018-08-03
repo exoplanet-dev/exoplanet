@@ -179,6 +179,15 @@ Similar derivations would certainly be tractable for microlensing, direct
 imaging, and other exoplanet characterization methods, but these are left to a
 future paper.
 
+At present, there are many model-building libraries available in every
+programming language, and it is not clear which should be preferred.
+For this paper, I focus on implementations within TensorFlow
+\citep{Abadi:2016} because it is accessible using Python, the most widely used
+programming language in astronomy (CITE?) and because the code is
+well-supported and stable.
+This being said, the basic ideas behind each library are similar and the core
+implementation in C++ can be minimally modified to support other frameworks.
+
 \section{Limb-darkened transit light curves}
 
 Based on \project{batman} \citep{Kreidberg:2015}.
