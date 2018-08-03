@@ -76,15 +76,28 @@
 \begin{document}\raggedbottom\sloppy\sloppypar\frenchspacing
 
 \title{%
-\project{exoplanet}: Software tools for characterization of exoplanets using
-transits \& radial velocities
+Gradient-based methods for the characterization of exoplanets
 }
 
 \author[0000-0002-9328-5652]{Daniel Foreman-Mackey}
 \affil{Flatiron Institute, New York, NY}
 
 \begin{abstract}
-Abstract
+
+As larger and more precise datasets continue to be collected for the discovery
+and characterization of exoplanets, we must also develop computationally
+efficient and rigorous methods for making inferences based on these data.
+The efficiency and robustness of numerical methods for probabilistic inference
+can be improved by using derivatives of the model with respect to the
+parameters.
+In this paper, I derive methods for exploiting these gradient-based methods
+when fitting exoplanet data based on radial velocity, astrometry, and
+transits.
+Alongside the paper, I release an open source, well-tested, and
+computationally efficient implementation of these methods.
+These methods can substantially reduce the computational cost of fitting large
+datasets and systems with more than one exoplanet.
+
 \end{abstract}
 
 \keywords{%
@@ -92,9 +105,39 @@ methods: data analysis ---
 methods: statistical
 }
 
+\section{Outline}
+
+\begin{enumerate}
+
+\item Introduction to the characterization of exoplanets and gradient-based
+methods
+
+\item Automatic differentiation and inference frameworks
+
+\item Hamiltonian Monte Carlo and variants
+
+\item Custom gradients required for exoplanet datasets
+\begin{itemize}
+\item Radial velocities and Kepler's equation
+\item Astrometry
+\item Transits
+\end{itemize}
+
+\item Implementation details and benchmarks
+
+\item Examples
+
+\item Discussion
+
+\end{enumerate}
+
 \section{Introduction}
 
 This is a section.
+
+\section{Automatic differentiation}
+
+The main limitation of gradient-based inference methods is the
 
 \section{Limb-darkened transit light curves}
 
