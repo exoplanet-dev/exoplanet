@@ -4,13 +4,13 @@ from __future__ import division, print_function
 
 __all__ = ["StarryBaseOp"]
 
-import sys
-
 import pkg_resources
 
 import theano
 from theano import gof
 import theano.tensor as tt
+
+from ..build_utils import get_compile_args
 
 
 class StarryBaseOp(gof.COp):
@@ -38,19 +38,7 @@ class StarryBaseOp(gof.COp):
         ]
 
     def c_compile_args(self, compiler):
-        opts = ["-O2", "-DNDEBUG"]
-        if sys.platform == "darwin":
-            opts += ["-stdlib=libc++", "-mmacosx-version-min=10.7"]
-
-        if not any(f.startswith("-std=") for f in opts):
-            for flag in ["-std=c++14", "-std=c++11"]:
-                if compiler.has_flag(flag):
-                    opts.append(flag)
-                    break
-            else:
-                raise RuntimeError("c++11 or c++14 support is required")
-
-        return opts
+        return get_compile_args(compiler)
 
     def make_node(self, *args):
         if len(args) != self.num_input:
