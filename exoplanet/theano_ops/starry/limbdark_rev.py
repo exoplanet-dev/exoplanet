@@ -4,7 +4,6 @@ from __future__ import division, print_function
 
 __all__ = ["LimbDarkRevOp"]
 
-import theano
 from theano import gof
 import theano.tensor as tt
 
@@ -16,20 +15,16 @@ class LimbDarkRevOp(StarryBaseOp):
     __props__ = ()
     func_file = "./limbdark_rev.cc"
     func_name = "APPLY_SPECIFIC(limbdark_rev)"
-    num_input = 4
 
-    def make_node(self, *args):
-        if len(args) != self.num_input:
-            raise ValueError("expected {0} inputs".format(self.num_input))
-        dtype = theano.config.floatX
-        in_args = []
-        for a in args:
-            try:
-                a = tt.as_tensor_variable(a)
-            except tt.AsTensorError:
-                pass
-            else:
-                dtype = theano.scalar.upcast(dtype, a.dtype)
-            in_args.append(a)
-        out_args = [a.type() for a in in_args[:3]]
+    def make_node(self, c, b, r, bf):
+        in_args = [
+            tt.as_tensor_variable(c),
+            tt.as_tensor_variable(b),
+            tt.as_tensor_variable(r),
+            tt.as_tensor_variable(bf),
+        ]
+        out_args = [in_args[0].type(), in_args[1].type(), in_args[2].type()]
         return gof.Apply(self, in_args, out_args)
+
+    def infer_shape(self, node, shapes):
+        return shapes[:3]
