@@ -6,9 +6,7 @@ __all__ = ["StarryBaseOp"]
 
 import pkg_resources
 
-import theano
 from theano import gof
-import theano.tensor as tt
 
 from ..build_utils import get_compile_args
 
@@ -16,8 +14,6 @@ from ..build_utils import get_compile_args
 class StarryBaseOp(gof.COp):
 
     __props__ = ()
-    num_input = 0
-    output_ndim = ()
     func_file = None
     func_name = None
 
@@ -39,21 +35,3 @@ class StarryBaseOp(gof.COp):
 
     def c_compile_args(self, compiler):
         return get_compile_args(compiler)
-
-    def make_node(self, *args):
-        if len(args) != self.num_input:
-            raise ValueError("expected {0} inputs".format(self.num_input))
-        dtype = theano.config.floatX
-        in_args = []
-        for a in args:
-            try:
-                a = tt.as_tensor_variable(a)
-            except tt.AsTensorError:
-                pass
-            else:
-                dtype = theano.scalar.upcast(dtype, a.dtype)
-            in_args.append(a)
-        out_args = [
-            tt.TensorType(dtype=dtype, broadcastable=[False] * ndim)()
-            for ndim in self.output_ndim]
-        return gof.Apply(self, in_args, out_args)
