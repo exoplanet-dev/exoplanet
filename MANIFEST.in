@@ -1,0 +1,4 @@
+include README.md LICENSE
+include exoplanet/theano_ops/starry/starry/starry/*.h
+graft exoplanet/theano_ops/starry/include
+graft exoplanet/theano_ops/starry/lib/eigen_3.3.3

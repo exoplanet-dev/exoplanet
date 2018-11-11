@@ -7,3 +7,4 @@ __pycache__
 transit/cuda
 demo
 .pytest_cache
+dist
