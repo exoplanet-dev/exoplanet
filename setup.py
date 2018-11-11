@@ -3,59 +3,32 @@
 import os
 import sys
 import glob
-import tensorflow as tf
 from setuptools import setup
 
-sys.path.append("exoplanet")
-
-from cpp_extension import (  # NOQA
-    BuildExtension, CppExtension, CUDAExtension
-)
-
-
-def construct_op(name):
-    path = os.path.join("exoplanet", "ops", name)
-    cpp_files = glob.glob(os.path.join(path, "*.cc"))
-    cuda_files = glob.glob(os.path.join(path, "*.cu"))
-
-    flags = []
-    if sys.platform == "darwin":
-        flags += ["-mmacosx-version-min=10.9"]
-
-    if tf.test.is_built_with_cuda() and len(cuda_files):
-        flags.append("-DGOOGLE_CUDA=1")
-        return CUDAExtension(
-            "exoplanet." + name + "_op",
-            cpp_files + cuda_files,
-            include_dirs=[path, "include"],
-            extra_compile_args={
-                "cxx": flags,
-                "nvcc": flags + ["--expt-relaxed-constexpr"],
-            },
-            extra_link_args=flags,
-        )
-
-    return CppExtension(
-        "exoplanet." + name + "_op",
-        cpp_files,
-        include_dirs=[path, "include"],
-        extra_compile_args=flags,
-        extra_link_args=flags,
-    )
-
-
-extensions = [
-    construct_op("transit"),
-    construct_op("interp"),
-    construct_op("kepler"),
-    construct_op("cubic"),
-]
 
 setup(
     name="exoplanet",
+    version=exoplanet.__version__,
+    author="Daniel Foreman-Mackey",
+    author_email="foreman.mackey@gmail.com",
+    url="https://github.com/dfm/exoplanet",
     license="MIT",
-    packages=["exoplanet"],
-    ext_modules=extensions,
-    cmdclass={"build_ext": BuildExtension},
+    packages=[
+        "exoplanet",
+        "exoplanet.theano_ops",
+        "exoplanet.theano_ops.starry",
+    ],
+    description="Scalable 1D Gaussian Processes",
+    long_description=open("README.md").read(),
+    package_data={"": ["README.md", "LICENSE", "CITATION"]},
+    include_package_data=True,
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python",
+    ],
     zip_safe=True,
 )

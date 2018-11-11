@@ -1,0 +1,3 @@
+[submodule "exoplanet/starry"]
+	path = exoplanet/theano_ops/starry/starry
+	url = https://github.com/rodluger/starry.git
