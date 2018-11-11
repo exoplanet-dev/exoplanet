@@ -1,9 +1,16 @@
 #!/usr/bin/env python
 
-import os
 import sys
-import glob
 from setuptools import setup
+
+# Hackishly inject a constant into builtins to enable importing of the
+# package before the library is built.
+if sys.version_info[0] < 3:
+    import __builtin__ as builtins
+else:
+    import builtins
+builtins.__EXOPLANET_SETUP__ = True
+import exoplanet  # NOQA
 
 
 setup(
