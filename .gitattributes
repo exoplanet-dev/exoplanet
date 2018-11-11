@@ -1,2 +1,4 @@
 papers/* linguist-documentation
 *.h linguist-language=C++
+*.ipynb filter=nbstripout
+*.ipynb diff=ipynb
