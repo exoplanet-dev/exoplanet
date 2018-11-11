@@ -18,3 +18,6 @@ class GetClRevOp(StarryBaseOp):
 
     def make_node(self, bc):
         return gof.Apply(self, [tt.as_tensor_variable(bc)], [bc.type()])
+
+    def infer_shape(self, node, shapes):
+        return shapes[0],

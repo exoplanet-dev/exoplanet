@@ -26,6 +26,9 @@ class GetClOp(StarryBaseOp):
     def make_node(self, arg):
         return gof.Apply(self, [tt.as_tensor_variable(arg)], [arg.type()])
 
+    def infer_shape(self, node, shapes):
+        return shapes[0],
+
     def grad(self, inputs, gradients):
         bc, = gradients
         if isinstance(bc.type, theano.gradient.DisconnectedType):
