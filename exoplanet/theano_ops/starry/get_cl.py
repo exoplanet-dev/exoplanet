@@ -4,7 +4,6 @@ from __future__ import division, print_function
 
 __all__ = ["GetClOp"]
 
-import theano
 from theano import gof
 import theano.tensor as tt
 
@@ -30,7 +29,9 @@ class GetClOp(StarryBaseOp):
         return shapes[0],
 
     def grad(self, inputs, gradients):
-        bc, = gradients
-        if isinstance(bc.type, theano.gradient.DisconnectedType):
-            return tt.zeros_like(inputs[0]),
-        return self.grad_op(bc),
+        return self.grad_op(gradients[0]),
+
+    def R_op(self, inputs, eval_points):
+        if eval_points[0] is None:
+            return eval_points
+        return self.grad(inputs, eval_points)
