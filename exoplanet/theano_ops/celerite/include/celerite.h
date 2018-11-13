@@ -163,10 +163,11 @@ void solve (
   for (int n = 1; n < N; ++n) {
     F_.noalias() += W.row(n-1).transpose() * Z.row(n-1);
     F_ = P.row(n-1).asDiagonal() * F_;
+    Z.row(n).noalias() -= U.row(n) * F_;
+
     for (int j = 0; j < J; ++j)
       for (int k = 0; k < nrhs; ++k)
         F(n, j*nrhs+k) = F_(j, k);
-    Z.row(n).noalias() -= U.row(n) * F_;
   }
 
   Z.array().colwise() /= d.array();
@@ -176,10 +177,11 @@ void solve (
   for (int n = N-2; n >= 0; --n) {
     F_.noalias() += U.row(n+1).transpose() * Z.row(n+1);
     F_ = P.row(n).asDiagonal() * F_;
+    Z.row(n).noalias() -= W.row(n) * F_;
+
     for (int j = 0; j < J; ++j)
       for (int k = 0; k < nrhs; ++k)
         G(n, j*nrhs+k) = F_(j, k);
-    Z.row(n).noalias() -= W.row(n) * F_;
   }
 }
 
@@ -202,7 +204,7 @@ void solve_grad (
   int N = U.rows(), J = U.cols(), nrhs = Z.cols();
 
   Eigen::Matrix<typename T4::Scalar, T4::RowsAtCompileTime, T4::ColsAtCompileTime, T4::IsRowMajor> Z_ = Z;
-  typedef Eigen::Matrix<typename T1::Scalar, T1::ColsAtCompileTime, T4::ColsAtCompileTime> F_t;
+  typedef Eigen::Matrix<typename T1::Scalar, T1::ColsAtCompileTime, Eigen::RowMajor> F_t;
   F_t F_(J, nrhs), bF = F_t::Zero(J, nrhs);
 
   bY = bZ;
@@ -219,7 +221,7 @@ void solve_grad (
     Z_.row(n).noalias() += W.row(n) * F_;
 
     // Grad of: g = P.row(n).asDiagonal() * G;
-    bP.row(n).noalias() += (bF * F_.transpose()).diagonal();
+    bP.row(n).noalias() += (P.row(n).asDiagonal().inverse() * F_ * bF.transpose()).diagonal();
     bF = P.row(n).asDiagonal() * bF;
 
     // Grad of: g.noalias() += U.row(n+1).transpose() * Z.row(n+1);
@@ -244,7 +246,7 @@ void solve_grad (
     bF.noalias() -= U.row(n).transpose() * bY.row(n);
 
     // Grad of: F = P.row(n-1).asDiagonal() * F;
-    bP.row(n-1).noalias() += (bF * F_.transpose()).diagonal();
+    bP.row(n-1).noalias() += (P.row(n-1).asDiagonal().inverse() * F_ * bF.transpose()).diagonal();
     bF = P.row(n-1).asDiagonal() * bF;
 
     // Grad of: F.noalias() += W.row(n-1).transpose() * Z.row(n-1);
