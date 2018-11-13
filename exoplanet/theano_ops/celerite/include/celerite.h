@@ -221,7 +221,7 @@ void solve_grad (
     Z_.row(n).noalias() += W.row(n) * F_;
 
     // Grad of: g = P.row(n).asDiagonal() * G;
-    bP.row(n).noalias() += (P.row(n).asDiagonal().inverse() * F_ * bF.transpose()).diagonal();
+    bP.row(n).noalias() += P.row(n).asDiagonal().inverse() * (F_ * bF.transpose()).diagonal();
     bF = P.row(n).asDiagonal() * bF;
 
     // Grad of: g.noalias() += U.row(n+1).transpose() * Z.row(n+1);
@@ -246,7 +246,7 @@ void solve_grad (
     bF.noalias() -= U.row(n).transpose() * bY.row(n);
 
     // Grad of: F = P.row(n-1).asDiagonal() * F;
-    bP.row(n-1).noalias() += (P.row(n-1).asDiagonal().inverse() * F_ * bF.transpose()).diagonal();
+    bP.row(n-1).noalias() += P.row(n-1).asDiagonal().inverse() * (F_ * bF.transpose()).diagonal();
     bF = P.row(n-1).asDiagonal() * bF;
 
     // Grad of: F.noalias() += W.row(n-1).transpose() * Z.row(n-1);

@@ -2,9 +2,12 @@
 
 from __future__ import division, print_function
 
-__all__ = ["UnitVector"]
+__all__ = ["UnitVector", "Angle", "RadiusImpactParameter"]
+
+import numpy as np
 
 import pymc3 as pm
+from pymc3.distributions import draw_values
 
 from . import transforms as tr
 
@@ -34,3 +37,40 @@ class Angle(pm.Flat):
     def __init__(self, *args, **kwargs):
         kwargs["transform"] = tr.angle
         super(Angle, self).__init__(*args, **kwargs)
+
+
+class RadiusImpactParameter(pm.Flat):
+    """The Espinoza (2018) distribution over radius and impact parameter
+
+    This is an implementation of `Espinoza (2018)
+    <http://iopscience.iop.org/article/10.3847/2515-5172/aaef38/meta>`_
+    The last axis of the shape of the parameter should be exactly 2. The
+    radius ratio will be in the zeroth entry in the last dimension and
+    the impact parameter will be in the first.
+
+    """
+
+    def __init__(self, *args, **kwargs):
+        # Make sure that the shape is compatible
+        shape = kwargs.get("shape", 2)
+        try:
+            if list(shape)[-1] != 2:
+                raise ValueError("the last dimension should be exactly 2")
+        except TypeError:
+            if shape != 2:
+                raise ValueError("the last dimension should be exactly 2")
+
+        min_radius = kwargs.pop("min_radius", 0)
+        max_radius = kwargs.pop("max_radius", 1)
+        transform = tr.radius_impact(min_radius, max_radius)
+        kwargs["shape"] = shape
+        kwargs["transform"] = transform
+
+        super(RadiusImpactParameter, self).__init__(*args, **kwargs)
+
+        # Work out some reasonable starting values for the parameters
+        default = np.swapaxes(np.zeros(shape), 0, -1)
+        mn, mx = draw_values([min_radius-0., max_radius-0.])
+        default[0] = 0.5 * (mn + mx)
+        default[1] = 0.5
+        self._default = np.swapaxes(default, 0, -1)
