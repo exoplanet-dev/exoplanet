@@ -4,13 +4,12 @@ if ! command -v conda > /dev/null; then
     bash miniconda.sh -b -p $HOME/miniconda -u;
     . $HOME/miniconda/etc/profile.d/conda.sh
     conda activate
-    conda config --add channels conda-forge;
-    conda config --set always_yes yes;
-    conda update --all;
-    conda create --yes -n test python=$PYTHON_VERSION
+    conda config --set always_yes yes --set changeps1 no
+    conda update -q conda
+    conda create -q --yes -n test python=$PYTHON_VERSION
     conda activate test
-    conda install -c conda-forge numpy=$NUMPY_VERSION scipy astropy setuptools pytest pytest-cov pip pymc3 theano;
-    pip install batman-package
+    conda install -q -c conda-forge numpy=$NUMPY_VERSION scipy astropy setuptools pytest pytest-cov pip pymc3 theano
+    pip install batman-package parameterized
 fi
 
 # Display some info
