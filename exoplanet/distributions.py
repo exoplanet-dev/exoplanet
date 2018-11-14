@@ -37,6 +37,34 @@ class Angle(pm.Flat):
     def __init__(self, *args, **kwargs):
         kwargs["transform"] = tr.angle
         super(Angle, self).__init__(*args, **kwargs)
+        self._default = np.zeros(self.shape)
+
+
+class Triangle(pm.Flat):
+    """
+
+    """
+
+    def __init__(self, *args, **kwargs):
+        # Make sure that the shape is compatible
+        shape = kwargs.get("shape", 2)
+        try:
+            if list(shape)[0] != 2:
+                raise ValueError("the first dimension should be exactly 2")
+        except TypeError:
+            if shape != 2:
+                raise ValueError("the first dimension should be exactly 2")
+
+        kwargs["shape"] = shape
+        kwargs["transform"] = tr.triangle
+
+        super(Triangle, self).__init__(*args, **kwargs)
+
+        # Work out some reasonable starting values for the parameters
+        default = np.zeros(shape)
+        default[0] = np.sqrt(0.5)
+        default[1] = 0.0
+        self._default = default
 
 
 class RadiusImpactParameter(pm.Flat):
@@ -44,8 +72,8 @@ class RadiusImpactParameter(pm.Flat):
 
     This is an implementation of `Espinoza (2018)
     <http://iopscience.iop.org/article/10.3847/2515-5172/aaef38/meta>`_
-    The last axis of the shape of the parameter should be exactly 2. The
-    radius ratio will be in the zeroth entry in the last dimension and
+    The first axis of the shape of the parameter should be exactly 2. The
+    radius ratio will be in the zeroth entry in the first dimension and
     the impact parameter will be in the first.
 
     """
@@ -54,11 +82,11 @@ class RadiusImpactParameter(pm.Flat):
         # Make sure that the shape is compatible
         shape = kwargs.get("shape", 2)
         try:
-            if list(shape)[-1] != 2:
-                raise ValueError("the last dimension should be exactly 2")
+            if list(shape)[0] != 2:
+                raise ValueError("the first dimension should be exactly 2")
         except TypeError:
             if shape != 2:
-                raise ValueError("the last dimension should be exactly 2")
+                raise ValueError("the first dimension should be exactly 2")
 
         min_radius = kwargs.pop("min_radius", 0)
         max_radius = kwargs.pop("max_radius", 1)
@@ -69,8 +97,8 @@ class RadiusImpactParameter(pm.Flat):
         super(RadiusImpactParameter, self).__init__(*args, **kwargs)
 
         # Work out some reasonable starting values for the parameters
-        default = np.swapaxes(np.zeros(shape), 0, -1)
+        default = np.zeros(shape)
         mn, mx = draw_values([min_radius-0., max_radius-0.])
         default[0] = 0.5 * (mn + mx)
         default[1] = 0.5
-        self._default = np.swapaxes(default, 0, -1)
+        self._default = default
