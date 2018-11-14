@@ -16,11 +16,12 @@ class LimbDarkRevOp(StarryBaseOp):
     func_file = "./limbdark_rev.cc"
     func_name = "APPLY_SPECIFIC(limbdark_rev)"
 
-    def make_node(self, c, b, r, bf):
+    def make_node(self, c, b, r, los, bf):
         in_args = [
             tt.as_tensor_variable(c),
             tt.as_tensor_variable(b),
             tt.as_tensor_variable(r),
+            tt.as_tensor_variable(los),
             tt.as_tensor_variable(bf),
         ]
         out_args = [in_args[0].type(), in_args[1].type(), in_args[2].type()]

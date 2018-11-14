@@ -14,16 +14,13 @@ from astropy import units as u
 from .solver import KeplerOp
 
 gcc_to_sun = (constants.M_sun / constants.R_sun**3).to(u.g / u.cm**3).value
-R_sun_day_to_m_s = (1.0 * u.R_sun / u.day).to(u.m / u.s).value
 G_grav = constants.G.to(u.R_sun**3 / u.M_sun / u.day**2).value
-sqrt_G_grav_ms = np.sqrt(constants.G.to(
-    u.R_sun / u.M_sun * u.m**2 / u.second**2).value)
 
 
 class KeplerianOrbit(object):
 
     def __init__(self,
-                 period=None, a=None, rho=None,
+                 period=None, a=None, rho_star=None,
                  t0=0.0, incl=0.5*np.pi,
                  m_star=None, r_star=None,
                  ecc=None, omega=None,
@@ -36,8 +33,8 @@ class KeplerianOrbit(object):
         self.incl = tt.as_tensor_variable(incl)
         self.m_planet = tt.as_tensor_variable(m_planet)
 
-        self.a, self.period, self.rho, self.r_star, self.m_star = \
-            self._get_consistent_inputs(a, period, rho, r_star, m_star)
+        self.a, self.period, self.rho_star, self.r_star, self.m_star = \
+            self._get_consistent_inputs(a, period, rho_star, r_star, m_star)
         self.m_total = self.m_star + self.m_planet
 
         self.n = 2 * np.pi / self.period
@@ -67,7 +64,7 @@ class KeplerianOrbit(object):
 
             self.K0 /= tt.sqrt(1 - self.ecc**2)
 
-    def _get_consistent_inputs(self, a, period, rho, r_star, m_star):
+    def _get_consistent_inputs(self, a, period, rho_star, r_star, m_star):
         if a is None and period is None:
             raise ValueError("values must be provided for at least one of a "
                              "and period")
@@ -79,37 +76,38 @@ class KeplerianOrbit(object):
 
         # Compute the implied density if a and period are given
         if a is not None and period is not None:
-            if rho is not None or m_star is not None:
+            if rho_star is not None or m_star is not None:
                 raise ValueError("if both a and period are given, you can't "
-                                 "also define rho or m_star")
+                                 "also define rho_star or m_star")
             if r_star is None:
                 r_star = 1.0
-            rho = 3*np.pi*(a / r_star)**3 / (G_grav*period**2)
+            rho_star = 3*np.pi*(a / r_star)**3 / (G_grav*period**2)
+            rho_star -= 3*self.m_planet/(4*np.pi*r_star**3)
 
         # Make sure that the right combination of stellar parameters are given
         if r_star is None and m_star is None:
             r_star = 1.0
-            if rho is None:
+            if rho_star is None:
                 m_star = 1.0
-        if sum(arg is None for arg in (rho, r_star, m_star)) != 1:
+        if sum(arg is None for arg in (rho_star, r_star, m_star)) != 1:
             raise ValueError("values must be provided for exactly two of "
-                             "rho, m_star, and r_star")
+                             "rho_star, m_star, and r_star")
 
-        if rho is not None:
+        if rho_star is not None:
             # Convert density to M_sun / R_sun^3
-            rho = tt.as_tensor_variable(rho) / gcc_to_sun
+            rho_star = tt.as_tensor_variable(rho_star) / gcc_to_sun
         if r_star is not None:
             r_star = tt.as_tensor_variable(r_star)
         if m_star is not None:
             m_star = tt.as_tensor_variable(m_star)
 
         # Work out the stellar parameters
-        if rho is None:
-            rho = 3*m_star/(4*np.pi*r_star**3)
+        if rho_star is None:
+            rho_star = 3*m_star/(4*np.pi*r_star**3)
         elif r_star is None:
-            r_star = (3*m_star/(4*np.pi*rho))**(1/3)
+            r_star = (3*m_star/(4*np.pi*rho_star))**(1/3)
         else:
-            m_star = 4*np.pi*r_star**3*rho/3
+            m_star = 4*np.pi*r_star**3*rho_star/3
 
         # Work out the planet parameters
         if a is None:
@@ -117,7 +115,7 @@ class KeplerianOrbit(object):
         elif period is None:
             period = 2*np.pi*a**(3/2)/(tt.sqrt(G_grav*(m_star+self.m_planet)))
 
-        return a, period, rho * gcc_to_sun, r_star, m_star
+        return a, period, rho_star * gcc_to_sun, r_star, m_star
 
     def _rotate_vector(self, x, y):
         if self.ecc is None:
@@ -166,9 +164,9 @@ class KeplerianOrbit(object):
         return self._rotate_vector(-K*tt.sin(f), K*(tt.cos(f) + self.ecc))
 
     def get_planet_velocity(self, t):
-        """The planets' velocities in m/s"""
+        """The planets' velocities in R_sun / day"""
         return self._get_velocity(-self.m_star, t)
 
     def get_star_velocity(self, t):
-        """The star's velocity in m/s"""
+        """The star's velocity in R_sun / day"""
         return self._get_velocity(self.m_planet, t)

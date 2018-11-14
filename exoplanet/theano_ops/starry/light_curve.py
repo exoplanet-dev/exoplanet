@@ -15,8 +15,10 @@ get_cl = GetClOp()
 limbdark = LimbDarkOp()
 
 
-def light_curve(u, b, r):
+def light_curve(u, b, r, los=None):
+    if los is None:
+        los = -tt.ones_like(b)
     u_ext = tt.concatenate([-1 + tt.zeros(1, dtype=u.dtype), u])
     c = get_cl(u_ext)
     c_norm = c / (np.pi * (c[0] + 2 * c[1] / 3))
-    return limbdark(c_norm, b, r)
+    return limbdark(c_norm, b, r, los)
