@@ -2,7 +2,7 @@
 
 from __future__ import division, print_function
 
-__all__ = ["unit_vector", "angle", "radius_impact"]
+__all__ = ["unit_vector", "angle", "triangle", "radius_impact"]
 
 import numpy as np
 
@@ -50,23 +50,65 @@ class AngleTransform(tr.Transform):
     name = "angle"
 
     def backward(self, y):
-        yp = tt.swapaxes(y, 0, -1)
-        return tt.arctan2(yp[1], yp[0])
+        return tt.arctan2(y[1], y[0])
 
     def forward(self, x):
         return tt.concatenate((
-            tt.shape_padright(tt.sin(x)),
-            tt.shape_padright(tt.cos(x))
-        ), axis=-1)
+            tt.shape_padleft(tt.sin(x)),
+            tt.shape_padleft(tt.cos(x))
+        ), axis=0)
 
     def forward_val(self, x, point=None):
-        return np.swapaxes([np.sin(x), np.cos(x)], 0, -1)
+        return np.array([np.sin(x), np.cos(x)])
 
     def jacobian_det(self, y):
-        return -0.5*tt.sum(tt.square(y), axis=-1)
+        return -0.5*tt.sum(tt.square(y), axis=0)
 
 
 angle = AngleTransform()
+
+
+class TriangleTransform(tr.Transform):
+    """A triangle transformation for PyMC3
+
+    Ref: https://arxiv.org/abs/1308.0009
+
+    """
+
+    name = "triangle"
+
+    def backward(self, y):
+        q = tt.nnet.sigmoid(y)
+        sqrtq1 = tt.sqrt(q[0])
+        twoq2 = 2 * q[1]
+        u = tt.stack([
+            sqrtq1 * twoq2,
+            sqrtq1 * (1 - twoq2),
+        ])
+
+        return u
+
+    def forward(self, x):
+        usum = tt.sum(x, axis=0)
+        q = tt.stack([
+            usum ** 2,
+            0.5 * x[0] / usum,
+        ])
+        return tt.log(q) - tt.log(1 - q)
+
+    def forward_val(self, x, point=None):
+        usum = np.sum(x, axis=0)
+        q = np.array([
+            usum ** 2,
+            0.5 * x[0] / usum,
+        ])
+        return np.log(q) - np.log(1 - q)
+
+    def jacobian_det(self, y):
+        return -2 * tt.nnet.softplus(-y) - y
+
+
+triangle = TriangleTransform()
 
 
 class RadiusImpactTransform(tr.Transform):
@@ -93,7 +135,7 @@ class RadiusImpactTransform(tr.Transform):
         self.Ar = self.dr / denom
 
     def backward(self, y):
-        y = tt.nnet.sigmoid(tt.swapaxes(y, 0, -1))
+        y = tt.nnet.sigmoid(y)
         r1 = y[0]
         r2 = y[1]
         pl, pu = self.min_radius, self.max_radius
@@ -111,10 +153,9 @@ class RadiusImpactTransform(tr.Transform):
             tt.stack((p1, b1), axis=0),
             tt.stack((p2, b2), axis=0),
         )
-        return tt.swapaxes(pb, 0, -1)
+        return pb
 
     def forward(self, x):
-        x = tt.swapaxes(x, 0, -1)
         p = x[0]
         b = x[1]
         pl = self.min_radius
@@ -133,12 +174,10 @@ class RadiusImpactTransform(tr.Transform):
             tt.stack((r11, r21), axis=0),
             tt.stack((r12, r22), axis=0),
         )
-        y = tt.swapaxes(y, 0, -1)
 
         return tt.log(y) - tt.log(1 - y)
 
     def forward_val(self, x, point=None):
-        x = np.swapaxes(x, 0, -1)
         p = x[0]
         b = x[1]
         pl, Ar, dr = draw_values([self.min_radius-0., self.Ar-0., self.dr-0.],
@@ -154,7 +193,6 @@ class RadiusImpactTransform(tr.Transform):
         q2 = (pl - b[~m] + 1) / arg
         r[0, ~m] = q1 * Ar
         r[1, ~m] = q2
-        r = np.swapaxes(r, 0, -1)
 
         return np.log(r) - np.log(1 - r)
 
