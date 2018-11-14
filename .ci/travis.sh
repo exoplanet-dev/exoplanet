@@ -8,7 +8,7 @@ if ! command -v conda > /dev/null; then
     conda update -q conda
     conda create -q --yes -n test python=$PYTHON_VERSION
     conda activate test
-    conda install -q -c conda-forge numpy=$NUMPY_VERSION scipy astropy setuptools pytest pytest-cov pip pymc3 theano
+    conda install -q -c conda-forge numpy=$NUMPY_VERSION scipy astropy setuptools pytest pytest-cov pip pymc3 theano starry
     pip install batman-package parameterized nose
 fi
 
