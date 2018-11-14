@@ -4,18 +4,20 @@ int APPLY_SPECIFIC(limbdark_rev)(
     PyArrayObject* input0,   // c
     PyArrayObject* input1,   // b
     PyArrayObject* input2,   // r
-    PyArrayObject* input3,   // bf
+    PyArrayObject* input3,   // los
+    PyArrayObject* input4,   // bf
     PyArrayObject** output0, // bc
     PyArrayObject** output1, // bb
     PyArrayObject** output2) // br
 {
-  npy_intp Nc, Nb, Nr, Nf;
+  npy_intp Nc, Nb, Nr, Nlos, Nf;
   int success = get_size(input0, &Nc);
   success += get_size(input1, &Nb);
   success += get_size(input2, &Nr);
-  success += get_size(input3, &Nf);
+  success += get_size(input3, &Nlos);
+  success += get_size(input4, &Nf);
   if (success) return 1;
-  if (Nb != Nr || Nb != Nf) {
+  if (Nb != Nr || Nb != Nlos || Nb != Nf) {
     PyErr_Format(PyExc_ValueError, "dimension mismatch");
     return 1;
   }
@@ -33,7 +35,8 @@ int APPLY_SPECIFIC(limbdark_rev)(
   DTYPE_INPUT_0* c   = (DTYPE_INPUT_0*) PyArray_DATA(input0);
   DTYPE_INPUT_1* b   = (DTYPE_INPUT_1*) PyArray_DATA(input1);
   DTYPE_INPUT_2* r   = (DTYPE_INPUT_2*) PyArray_DATA(input2);
-  DTYPE_INPUT_3* bf  = (DTYPE_INPUT_3*) PyArray_DATA(input3);
+  DTYPE_INPUT_3* los = (DTYPE_INPUT_3*) PyArray_DATA(input3);
+  DTYPE_INPUT_4* bf  = (DTYPE_INPUT_4*) PyArray_DATA(input4);
   DTYPE_OUTPUT_0* bc = (DTYPE_OUTPUT_0*)PyArray_DATA(*output0);
   DTYPE_OUTPUT_1* bb = (DTYPE_OUTPUT_1*)PyArray_DATA(*output1);
   DTYPE_OUTPUT_2* br = (DTYPE_OUTPUT_2*)PyArray_DATA(*output2);
@@ -45,27 +48,19 @@ int APPLY_SPECIFIC(limbdark_rev)(
   starry::limbdark::GreensLimbDark<DTYPE_OUTPUT_0> L(Nc-1);
 
   for (npy_intp i = 0; i < Nb; ++i) {
-    auto b_ = std::abs(b[i]);
-    auto r_ = std::abs(r[i]);
-    if (b_ > 1 + r_) {
-      bb[i] = 0;
-      br[i] = 0;
-    } else {
-      L.compute(b_, r_, true);
+    bb[i] = 0;
+    br[i] = 0;
+    if (los[i] < 0) {
+      auto b_ = std::abs(b[i]);
+      auto r_ = std::abs(r[i]);
+      if (b_ < 1 + r_) {
+        L.compute(b_, r_, true);
 
-      //auto resn = L.S.dot(agol_c);
-      //for (npy_intp j = 0; j < Nu+1; ++j) {
-      //  dfdc(j) = L.S(j) * agol_c(j);
-      //}
-      ////dfdc = agol_norm * L.S.transpose().array() * agol_c.array();
-      //dfdc(0) -= resn * M_PI;
-      //dfdc(1) -= resn * 2*M_PI/3;
-      //bu_vec += bf[i] * dcdu * dfdc;
+        bc_vec += bf[i] * L.S.transpose();
 
-      bc_vec += bf[i] * L.S.transpose();
-
-      bb[i] = sgn(b[i]) * bf[i] * L.dSdb.dot(cvec);
-      br[i] = sgn(r[i]) * bf[i] * L.dSdr.dot(cvec);
+        bb[i] = sgn(b[i]) * bf[i] * L.dSdb.dot(cvec);
+        br[i] = sgn(r[i]) * bf[i] * L.dSdr.dot(cvec);
+      }
     }
   }
 
