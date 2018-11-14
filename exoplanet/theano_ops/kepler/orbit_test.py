@@ -4,8 +4,6 @@ from __future__ import division, print_function
 
 import numpy as np
 
-import astropy.units as u
-
 from batman import _rsky
 
 import theano

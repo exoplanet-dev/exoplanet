@@ -21,11 +21,12 @@ class LimbDarkOp(StarryBaseOp):
         self.grad_op = LimbDarkRevOp()
         super(LimbDarkOp, self).__init__()
 
-    def make_node(self, c, b, r):
+    def make_node(self, c, b, r, los):
         in_args = [
             tt.as_tensor_variable(c),
             tt.as_tensor_variable(b),
             tt.as_tensor_variable(r),
+            tt.as_tensor_variable(los),
         ]
         out_args = [in_args[1].type()]
         return gof.Apply(self, in_args, out_args)
@@ -34,9 +35,10 @@ class LimbDarkOp(StarryBaseOp):
         return shapes[1],
 
     def grad(self, inputs, gradients):
-        c, b, r = inputs
+        c, b, r, los = inputs
         bf, = gradients
-        return self.grad_op(c, b, r, bf)
+        bc, bb, br = self.grad_op(c, b, r, los, bf)
+        return bc, bb, br, tt.zeros_like(los)
 
     def R_op(self, inputs, eval_points):
         if eval_points[0] is None:
