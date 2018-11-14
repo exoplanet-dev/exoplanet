@@ -14,6 +14,7 @@ from astropy import units as u
 from .solver import KeplerOp
 
 gcc_to_sun = (constants.M_sun / constants.R_sun**3).to(u.g / u.cm**3).value
+R_sun_day_to_m_s = (1.0 * u.R_sun / u.day).to(u.m / u.s).value
 G_grav = constants.G.to(u.R_sun**3 / u.M_sun / u.day**2).value
 sqrt_G_grav_ms = np.sqrt(constants.G.to(
     u.R_sun / u.M_sun * u.m**2 / u.second**2).value)
@@ -43,7 +44,7 @@ class KeplerianOrbit(object):
         self.a_star = self.a * self.m_planet / self.m_total
         self.a_planet = -self.a * self.m_star / self.m_total
 
-        self.K0 = sqrt_G_grav_ms / tt.sqrt(self.m_total*self.a)
+        self.K0 = self.n * self.a / self.m_total
         self.cos_incl = tt.cos(incl)
         self.sin_incl = tt.sin(incl)
 
@@ -67,30 +68,6 @@ class KeplerianOrbit(object):
             self.K0 /= tt.sqrt(1 - self.ecc**2)
 
     def _get_consistent_inputs(self, a, period, rho, r_star, m_star):
-        """Check the consistency of the input parameters
-
-        Sample code to work out all the cases using SymPy:
-
-        .. code-block:: python
-
-            import sympy as sm
-
-            rho, a, P, Rs, Ms, G = sm.symbols(
-                "rho a period r_star m_star G_grav", positive=True)
-            eqs = [
-                sm.Eq(rho, Ms / (4 * sm.pi * Rs**3 / 3)),
-                sm.Eq((a/Rs)**3, G * rho * P**2 / (3 * sm.pi))
-            ]
-
-            syms = [rho, a, P, Rs, Ms]
-
-            for i in range(len(syms)):
-                for j in range(i+1, len(syms)):
-                    args = (syms[i], syms[j])
-                    res = sm.solve(eqs, args)
-                    print(args, sm.simplify(res))
-
-        """
         if a is None and period is None:
             raise ValueError("values must be provided for at least one of a "
                              "and period")
@@ -136,9 +113,9 @@ class KeplerianOrbit(object):
 
         # Work out the planet parameters
         if a is None:
-            a = (G_grav*m_star*period**2/(4*np.pi**2)) ** (1./3)
+            a = (G_grav*(m_star+self.m_planet)*period**2/(4*np.pi**2))**(1./3)
         elif period is None:
-            period = 2*np.pi*a**(3/2)/(np.sqrt(G_grav)*tt.sqrt(m_star))
+            period = 2*np.pi*a**(3/2)/(tt.sqrt(G_grav*(m_star+self.m_planet)))
 
         return a, period, rho * gcc_to_sun, r_star, m_star
 
@@ -176,6 +153,12 @@ class KeplerianOrbit(object):
     def get_star_position(self, t):
         """The star's position in Solar radii"""
         return self._get_position(self.a_star, t)
+
+    def get_relative_position(self, t):
+        """The planets' positions relative to the star"""
+        star = self._get_position(self.a_star, t)
+        planet = self._get_position(self.a_planet, t)
+        return tuple(b-a for a, b in zip(star, planet))
 
     def _get_velocity(self, m, t):
         f = self._get_true_anomaly(t)
