@@ -9,6 +9,7 @@ import astropy.units as u
 from batman import _rsky
 
 import theano
+import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
 from .orbit import KeplerianOrbit
@@ -34,7 +35,7 @@ def test_sky_coords():
 
     orbit = KeplerianOrbit(
         period=period, a=a, t0=t0, ecc=e, omega=omega, incl=incl, tol=1e-7)
-    func = theano.function([], orbit.get_planet_position(t[None, :]))
+    func = theano.function([], orbit.get_relative_position(t))
     x, y, z = func()
     r = np.sqrt(x**2 + y**2)
 
@@ -53,8 +54,9 @@ def test_sky_coords():
 def test_center_of_mass():
     t = np.linspace(0, 100, 1000)
     m_planet = np.array([0.5, 0.1])
+    m_star = 1.45
     orbit = KeplerianOrbit(
-        m_star=1.0,
+        m_star=m_star,
         r_star=1.0,
         t0=np.array([0.5, 17.4]),
         period=np.array([100.0, 37.3]),
@@ -68,15 +70,18 @@ def test_center_of_mass():
     star_coords = theano.function([], orbit.get_star_position(t))()
 
     com = np.sum((m_planet[None, :] * np.array(planet_coords) +
-                  np.array(star_coords)) / (1 + m_planet)[None, :], axis=0)
+                  m_star * np.array(star_coords)) /
+                 (m_star + m_planet)[None, :], axis=0)
     assert np.allclose(com, 0.0)
 
 
-def test_numerical_velocity():
+def test_velocity():
+    t_tensor = tt.dvector()
     t = np.linspace(0, 100, 1000)
     m_planet = 0.1
+    m_star = 1.3
     orbit = KeplerianOrbit(
-        m_star=1.0,
+        m_star=m_star,
         r_star=1.0,
         t0=0.5,
         period=100.0,
@@ -86,17 +91,18 @@ def test_numerical_velocity():
         m_planet=m_planet,
     )
 
-    planet_coords = theano.function([], orbit.get_planet_position(t))()
-    star_coords = theano.function([], orbit.get_star_position(t))()
-    planet_vel = theano.function([], orbit.get_star_velocity(t))()
-    star_vel = theano.function([], orbit.get_planet_velocity(t))()
-
+    star_pos = orbit.get_star_position(t_tensor)
+    star_vel = theano.function([], orbit.get_star_velocity(t))()
+    star_vel_expect = np.empty_like(star_vel)
     for i in range(3):
-        dt = np.diff(t[:-1]) + np.diff(t[1:])
-        vel_est = (star_coords[i][2:] - star_coords[i][:-2]) / dt
-        vel_est = (vel_est * u.R_sun / u.day).to(u.m / u.s).value
-        assert np.allclose(star_vel[i][1:-1], vel_est)
+        g = theano.grad(tt.sum(star_pos[i]), t_tensor)
+        star_vel_expect[i] = theano.function([t_tensor], g)(t)
+    utt.assert_allclose(star_vel, star_vel_expect)
 
-        vel_est = (planet_coords[i][2:] - planet_coords[i][:-2]) / dt
-        vel_est = (vel_est * u.R_sun / u.day).to(u.m / u.s).value
-        assert np.allclose(planet_vel[i][1:-1], vel_est)
+    planet_pos = orbit.get_planet_position(t_tensor)
+    planet_vel = theano.function([], orbit.get_planet_velocity(t))()
+    planet_vel_expect = np.empty_like(planet_vel)
+    for i in range(3):
+        g = theano.grad(tt.sum(planet_pos[i]), t_tensor)
+        planet_vel_expect[i] = theano.function([t_tensor], g)(t)
+    utt.assert_allclose(planet_vel, planet_vel_expect)
