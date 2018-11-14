@@ -11,7 +11,7 @@ import theano.tensor as tt
 from astropy import constants
 from astropy import units as u
 
-from .solver import KeplerOp
+from ..theano_ops.kepler.solver import KeplerOp
 
 gcc_to_sun = (constants.M_sun / constants.R_sun**3).to(u.g / u.cm**3).value
 G_grav = constants.G.to(u.R_sun**3 / u.M_sun / u.day**2).value
