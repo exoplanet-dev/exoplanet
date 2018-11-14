@@ -4,19 +4,17 @@ from __future__ import division, print_function
 
 import numpy as np
 
-from batman import _rsky
-
 import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
-from .kepler import KeplerOp, KeplerianOrbit
+from .solver import KeplerOp
 
 
-class TestKepler(utt.InferShapeTester):
+class TestKeplerSolver(utt.InferShapeTester):
 
     def setUp(self):
-        super(TestKepler, self).setUp()
+        super(TestKeplerSolver, self).setUp()
         self.op_class = KeplerOp
         self.op = KeplerOp()
 
@@ -62,47 +60,3 @@ class TestKepler(utt.InferShapeTester):
         M_val = np.linspace(-10, 10, 50)
         e_val = np.random.uniform(0, 0.9, len(M_val))
         utt.verify_grad(self.op, [M_val, e_val])
-
-
-def test_sky_coords():
-    t = np.linspace(-100, 100, 5000)
-
-    t0, period, a, e, omega, incl = (x.flatten() for x in np.meshgrid(
-        np.linspace(-5.0, 5.0, 2),
-        np.exp(np.linspace(np.log(5.0), np.log(50.0), 3)),
-        np.linspace(50.0, 100.0, 2),
-        np.linspace(0.0, 0.9, 5),
-        np.linspace(-np.pi, np.pi, 3),
-        np.arccos(np.linspace(0, 1, 5)[:-1]),
-    ))
-    r_batman = np.empty((len(t0), len(t)))
-
-    for i in range(len(t0)):
-        r_batman[i] = _rsky._rsky(t, t0[i], period[i], a[i], incl[i], e[i],
-                                  omega[i], 1, 1)
-    m = r_batman < 100.0
-
-    orbit = KeplerianOrbit(
-        period=period[:, None],
-        a=a[:, None],
-        t0=t0[:, None],
-        ecc=e[:, None],
-        omega=omega[:, None],
-        incl=incl[:, None],
-        tol=1e-7,
-    )
-
-    func = theano.function([], orbit.get_planet_position(t[None, :]))
-    x, y, z = func()
-    r = np.sqrt(x**2 + y**2)
-
-    # Make sure that the in-transit impact parameter matches batman
-    utt.assert_allclose(r_batman[m], r[m], atol=2e-5)
-
-    # In-transit should correspond to negative z in our parameterization
-    assert np.all(z[m] < 0)
-
-    # Therefore, when batman doesn't see a transit we shouldn't be transiting
-    no_transit = z[~m] > 0
-    no_transit |= r[~m] > 1
-    assert np.all(no_transit)
