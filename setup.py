@@ -30,6 +30,7 @@ setup(
     ],
     description="Fast & scalable MCMC for all your exoplanet needs",
     long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",
     package_data={"": ["README.md", "LICENSE", "CITATION"]},
     include_package_data=True,
     classifiers=[

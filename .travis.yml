@@ -1,0 +1,31 @@
+sudo: false
+language: c
+
+matrix:
+    include:
+        - os: linux
+          env: PYTHON_VERSION=3.6 NUMPY_VERSION=1.15
+
+install:
+    - source .ci/travis.sh
+    #- export CC=gcc-4.8
+    #- export CXX=g++-4.8
+    # Let's prevent travis time-outs for 30 minutes
+    - travis_wait 40 python setup.py develop
+
+cache:
+    directories:
+        - $HOME/miniconda
+        #- $HOME/.cache/Tectonic
+
+#before_script:
+#    - "export DISPLAY=:99.0"
+#    - "sh -e /etc/init.d/xvfb start"
+#    - sleep 3
+
+script:
+    - py.test -v -s
+
+#after_success:
+#    - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then source .ci/build-paper.sh; fi
+#    - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then source .ci/build-docs.sh; fi
