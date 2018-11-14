@@ -10,7 +10,7 @@ import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
-from .orbit import KeplerianOrbit
+from .keplerian import KeplerianOrbit
 
 
 def test_sky_coords():

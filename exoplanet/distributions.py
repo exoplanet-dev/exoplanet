@@ -41,7 +41,12 @@ class Angle(pm.Flat):
 
 
 class Triangle(pm.Flat):
-    """
+    """An uninformative prior for quadratic limb darkening parameters
+
+    This is an implementation of the `Kipping (2013)
+    <https://arxiv.org/abs/1308.0009>`_ reparameterization of the
+    two-parameter limb darkening model to allow for efficient and
+    uninformative sampling.
 
     """
 

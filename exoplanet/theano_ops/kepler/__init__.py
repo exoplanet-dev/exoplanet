@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-__all__ = ["get_eccentric_anomaly", "KeplerOp", "KeplerianOrbit"]
+__all__ = ["get_eccentric_anomaly", "KeplerOp"]
 
-from .orbit import KeplerianOrbit
 from .solver import get_eccentric_anomaly, KeplerOp
