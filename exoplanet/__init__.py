@@ -8,4 +8,6 @@ except NameError:
     __EXOPLANET_SETUP__ = False
 
 if not __EXOPLANET_SETUP__:
-    __all__ = []
+    __all__ = ["distributions", "theano_ops", "orbits"]
+
+    from . import distributions, theano_ops, orbits
