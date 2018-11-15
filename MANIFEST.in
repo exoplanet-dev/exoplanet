@@ -4,6 +4,7 @@ include exoplanet/theano_ops/starry/starry/starry/*.h
 include exoplanet/theano_ops/starry/*.cc
 graft exoplanet/theano_ops/starry/include
 graft exoplanet/theano_ops/starry/lib/eigen_3.3.3
+graft exoplanet/theano_ops/starry/lib/boost_1_66_0
 
 include exoplanet/theano_ops/celerite/*.cc
 graft exoplanet/theano_ops/celerite/include
