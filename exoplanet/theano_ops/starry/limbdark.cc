@@ -34,12 +34,11 @@ int APPLY_SPECIFIC(limbdark)(
   starry::limbdark::GreensLimbDark<DTYPE_OUTPUT_0> L(Nc-1);
 
   for (npy_intp i = 0; i < Nb; ++i) {
+    f[i] = 1;
     if (los[i] < 0) {
       auto b_ = std::abs(b[i]);
       auto r_ = std::abs(r[i]);
-      if (b_ > 1 + r_) {
-        f[i] = 1;
-      } else {
+      if (b_ < 1 + r_) {
         L.compute(b_, r_, false);
         f[i] = L.S.dot(cvec);
       }
