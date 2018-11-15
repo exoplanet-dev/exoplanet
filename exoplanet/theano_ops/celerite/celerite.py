@@ -29,7 +29,8 @@ class GP(object):
     def log_likelihood(self, y):
         self.y = y
         self.z, _, _ = self.vector_solve_op(self.U, self.P, self.d, self.W,
-                                            tt.shape_rightpad(self.y))
+                                            tt.reshape(self.y,
+                                                       (self.y.size, 1)))
         loglike = -0.5 * tt.sum(self.y * self.z[:, 0] + tt.log(self.d))
         loglike -= 0.5 * self.y.size * np.log(2*np.pi)
         return loglike

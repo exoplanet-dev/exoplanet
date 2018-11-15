@@ -21,7 +21,7 @@ class KeplerianOrbit(object):
 
     def __init__(self,
                  period=None, a=None, rho_star=None,
-                 t0=0.0, incl=0.5*np.pi,
+                 t0=0.0, incl=None, b=None,
                  m_star=None, r_star=None,
                  ecc=None, omega=None,
                  m_planet=0.0, **kwargs):
@@ -30,7 +30,6 @@ class KeplerianOrbit(object):
         # Parameters
         self.period = tt.as_tensor_variable(period)
         self.t0 = tt.as_tensor_variable(t0)
-        self.incl = tt.as_tensor_variable(incl)
         self.m_planet = tt.as_tensor_variable(m_planet)
 
         self.a, self.period, self.rho_star, self.r_star, self.m_star = \
@@ -41,9 +40,20 @@ class KeplerianOrbit(object):
         self.a_star = self.a * self.m_planet / self.m_total
         self.a_planet = -self.a * self.m_star / self.m_total
 
+        if incl is None:
+            if b is None:
+                self.incl = tt.as_tensor_variable(0.5 * np.pi)
+                self.b = tt.as_tensor_variable(0.0)
+            else:
+                self.b = tt.as_tensor_variable(b)
+                self.incl = tt.arccos(self.b / self.a_planet)
+        else:
+            self.incl = tt.as_tensor_variable(incl)
+            self.b = self.a_planet * tt.cos(self.incl)
+
         self.K0 = self.n * self.a / self.m_total
-        self.cos_incl = tt.cos(incl)
-        self.sin_incl = tt.sin(incl)
+        self.cos_incl = tt.cos(self.incl)
+        self.sin_incl = tt.sin(self.incl)
 
         # Eccentricity
         if ecc is None:
