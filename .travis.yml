@@ -9,22 +9,19 @@ addons:
             - gcc-4.8
             - g++-4.8
 
-env:
-    global:
-        - PYTHON_VERSION=3.7
-        - NUMPY_VERSION=stable
-
 matrix:
     include:
-        - os: linux
-
         - os: linux
           env: PYTHON_VERSION=3.5 NUMPY_VERSION=1.13
 
         - os: linux
           env: PYTHON_VERSION=3.6 NUMPY_VERSION=1.14
 
+        - os: linux
+          env: PYTHON_VERSION=3.7 NUMPY_VERSION=1.15
+
         - os: osx
+          env: PYTHON_VERSION=3.7 NUMPY_VERSION=1.15
 
 install:
     - export CXX=g++-4.8
