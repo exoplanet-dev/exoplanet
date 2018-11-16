@@ -8,7 +8,7 @@ import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
-from . import terms
+from ...gp import terms
 from .factor import FactorOp
 
 
