@@ -11,10 +11,10 @@ int APPLY_SPECIFIC(limbdark)(
   int success = get_size(input0, &Nc);
   success += get_size(input1, &Nb);
   success += get_size(input2, &Nr);
-  success += get_size(input3, &Nr);
+  success += get_size(input3, &Nlos);
   if (success) return 1;
   if (Nb != Nr || Nb != Nlos) {
-    PyErr_Format(PyExc_ValueError, "dimension mismatch");
+    PyErr_Format(PyExc_ValueError, "dimension mismatch %d %d %d", Nb, Nr, Nlos);
     return 1;
   }
 
