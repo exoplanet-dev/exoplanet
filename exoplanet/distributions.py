@@ -7,7 +7,7 @@ __all__ = ["UnitVector", "Angle", "RadiusImpactParameter"]
 import numpy as np
 
 import pymc3 as pm
-from pymc3.distributions import draw_values
+from pymc3.distributions import draw_values, generate_samples
 
 from . import transforms as tr
 
@@ -24,6 +24,16 @@ class UnitVector(pm.Normal):
         kwargs["transform"] = tr.unit_vector
         super(UnitVector, self).__init__(*args, **kwargs)
 
+    def _random(self, size=None):
+        x = np.random.normal(size=size)
+        return x / np.sqrt(np.sum(x**2, axis=-1, keepdims=True))
+
+    def random(self, point=None, size=None):
+        return generate_samples(self._random,
+                                dist_shape=self.shape,
+                                broadcast_shape=self.shape,
+                                size=size)
+
 
 class Angle(pm.Flat):
     """An angle constrained to be in the range -pi to pi
@@ -38,6 +48,15 @@ class Angle(pm.Flat):
         kwargs["transform"] = tr.angle
         super(Angle, self).__init__(*args, **kwargs)
         self._default = np.zeros(self.shape)
+
+    def _random(self, size=None):
+        return np.random.uniform(-np.pi, np.pi, size)
+
+    def random(self, point=None, size=None):
+        return generate_samples(self._random,
+                                dist_shape=self.shape,
+                                broadcast_shape=self.shape,
+                                size=size)
 
 
 class Triangle(pm.Flat):
@@ -71,6 +90,23 @@ class Triangle(pm.Flat):
         default[1] = 0.0
         self._default = default
 
+    def _random(self, size=None):
+        q = np.moveaxis(np.random.uniform(0, 1, size=size),
+                        0, -len(self.shape))
+        sqrtq1 = np.sqrt(q[0])
+        twoq2 = 2 * q[1]
+        u = np.stack([
+            sqrtq1 * twoq2,
+            sqrtq1 * (1 - twoq2),
+        ], axis=0)
+        return np.moveaxis(u, 0, -len(self.shape))
+
+    def random(self, point=None, size=None):
+        return generate_samples(self._random,
+                                dist_shape=self.shape,
+                                broadcast_shape=self.shape,
+                                size=size)
+
 
 class RadiusImpactParameter(pm.Flat):
     """The Espinoza (2018) distribution over radius and impact parameter
@@ -93,9 +129,9 @@ class RadiusImpactParameter(pm.Flat):
             if shape != 2:
                 raise ValueError("the first dimension should be exactly 2")
 
-        min_radius = kwargs.pop("min_radius", 0)
-        max_radius = kwargs.pop("max_radius", 1)
-        transform = tr.radius_impact(min_radius, max_radius)
+        self.min_radius = kwargs.pop("min_radius", 0)
+        self.max_radius = kwargs.pop("max_radius", 1)
+        transform = tr.radius_impact(self.min_radius, self.max_radius)
         kwargs["shape"] = shape
         kwargs["transform"] = transform
 
@@ -103,7 +139,42 @@ class RadiusImpactParameter(pm.Flat):
 
         # Work out some reasonable starting values for the parameters
         default = np.zeros(shape)
-        mn, mx = draw_values([min_radius-0., max_radius-0.])
+        mn, mx = draw_values([self.min_radius-0., self.max_radius-0.])
         default[0] = 0.5 * (mn + mx)
         default[1] = 0.5
         self._default = default
+
+    def _random(self, pl, pu, size=None):
+        r = np.moveaxis(np.random.uniform(0, 1, size=size),
+                        0, -len(self.shape))
+
+        dr = pu - pl
+        denom = 2 + pu + pl
+        Ar = dr / denom
+
+        r1 = r[0]
+        r2 = r[1]
+        m = r1 > Ar
+
+        b = np.empty_like(r1)
+        p = np.empty_like(r1)
+
+        b[m] = (1 + pl) * (1 + (r1[m] - 1) / (1 - Ar))
+        p[m] = pl + r2[m] * dr
+
+        q1 = r1[~m] / Ar
+        q2 = r2[~m]
+        b[~m] = (1 + pl) + np.sqrt(q1) * q2 * dr
+        p[~m] = pu - dr * np.sqrt(q1) * (1 - q2)
+
+        pb = np.stack([p, b], axis=0)
+
+        return np.moveaxis(pb, 0, -len(self.shape))
+
+    def random(self, point=None, size=None):
+        mn, mx = draw_values([self.min_radius-0., self.max_radius-0.],
+                             point=point)
+        return generate_samples(self._random, mn, mx,
+                                dist_shape=self.shape,
+                                broadcast_shape=self.shape,
+                                size=size)
