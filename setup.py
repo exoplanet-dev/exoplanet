@@ -22,6 +22,7 @@ setup(
     license="MIT",
     packages=[
         "exoplanet",
+        "exoplanet.gp",
         "exoplanet.orbits",
         "exoplanet.theano_ops",
         "exoplanet.theano_ops.starry",
