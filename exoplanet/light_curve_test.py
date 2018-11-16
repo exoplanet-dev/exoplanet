@@ -10,14 +10,15 @@ from theano.tests import unittest_tools as utt
 
 import starry
 
-from .light_curve import light_curve
+from .light_curve import StarryLightCurve
 
 
 def test_light_curve():
     u = tt.vector()
     b = tt.vector()
     r = tt.vector()
-    f = light_curve(u, b, r)
+    lc = StarryLightCurve(u)
+    f = lc.compute_light_curve(b, r)
     func = theano.function([u, b, r], f)
 
     u_val = np.array([0.2, 0.3, 0.1, 0.5])
@@ -38,4 +39,5 @@ def test_light_curve_grad():
     b_val = np.linspace(-1.5, 1.5, 20)
     r_val = 0.1 + np.zeros_like(b_val)
 
-    utt.verify_grad(light_curve, [u_val, b_val, r_val])
+    lc = lambda u, b, r: StarryLightCurve(u).compute_light_curve(b, r)  # NOQA
+    utt.verify_grad(lc, [u_val, b_val, r_val])
