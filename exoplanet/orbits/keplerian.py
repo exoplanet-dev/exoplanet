@@ -156,17 +156,20 @@ class KeplerianOrbit(object):
 
     def get_planet_position(self, t):
         """The planets' positions in Solar radii"""
-        return [tt.squeeze(x) for x in self._get_position(self.a_planet, t)]
+        return tuple(tt.squeeze(x)
+                     for x in self._get_position(self.a_planet, t))
 
     def get_star_position(self, t):
         """The star's position in Solar radii"""
-        return [tt.squeeze(x) for x in self._get_position(self.a_star, t)]
+        return tuple(tt.squeeze(x)
+                     for x in self._get_position(self.a_star, t))
 
     def get_relative_position(self, t):
         """The planets' positions relative to the star"""
-        star = tt.sum(self._get_position(self.a_star, t), axis=-1)
+        star = self._get_position(self.a_star, t)
         planet = self._get_position(self.a_planet, t)
-        return tuple(tt.squeeze(b-a) for a, b in zip(star, planet))
+        return tuple(tt.squeeze(b-tt.shape_padright(tt.sum(a, axis=-1)))
+                     for a, b in zip(star, planet))
 
     def _get_velocity(self, m, t):
         f = self._get_true_anomaly(t)
@@ -175,8 +178,10 @@ class KeplerianOrbit(object):
 
     def get_planet_velocity(self, t):
         """The planets' velocities in R_sun / day"""
-        return [tt.squeeze(x) for x in self._get_velocity(-self.m_star, t)]
+        return tuple(tt.squeeze(x)
+                     for x in self._get_velocity(-self.m_star, t))
 
     def get_star_velocity(self, t):
         """The star's velocity in R_sun / day"""
-        return [tt.squeeze(x) for x in self._get_velocity(self.m_planet, t)]
+        return tuple(tt.squeeze(x)
+                     for x in self._get_velocity(self.m_planet, t))
