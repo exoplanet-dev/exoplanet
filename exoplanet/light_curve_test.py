@@ -27,7 +27,7 @@ def test_light_curve():
 
     m = starry.Map(lmax=len(u_val))
     m[:] = u_val
-    expect = m.flux(xo=b_val, ro=r_val)
+    expect = m.flux(xo=b_val, ro=r_val) - 1
 
     evaluated = func(u_val, b_val, r_val)
 
