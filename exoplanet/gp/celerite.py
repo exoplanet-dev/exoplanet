@@ -7,8 +7,8 @@ __all__ = ["GP"]
 import numpy as np
 import theano.tensor as tt
 
-from .solve import SolveOp
-from .factor import FactorOp
+from ..theano_ops.celerite.solve import SolveOp
+from ..theano_ops.celerite.factor import FactorOp
 
 
 class GP(object):

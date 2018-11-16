@@ -139,11 +139,11 @@ class KeplerianOrbit(object):
     def _get_true_anomaly(self, t):
         M = (tt.shape_padright(t) - self.tref) * self.n
         if self.ecc is None:
-            return tt.squeeze(M)
+            return M
         E = self.kepler_op(M, self.ecc + tt.zeros_like(M))
         f = 2.0 * tt.arctan2(tt.sqrt(1.0 + self.ecc) * tt.tan(0.5*E),
                              tt.sqrt(1.0 - self.ecc) + tt.zeros_like(E))
-        return tt.squeeze(f)
+        return f
 
     def _get_position(self, a, t):
         f = self._get_true_anomaly(t)
@@ -156,17 +156,17 @@ class KeplerianOrbit(object):
 
     def get_planet_position(self, t):
         """The planets' positions in Solar radii"""
-        return self._get_position(self.a_planet, t)
+        return [tt.squeeze(x) for x in self._get_position(self.a_planet, t)]
 
     def get_star_position(self, t):
         """The star's position in Solar radii"""
-        return self._get_position(self.a_star, t)
+        return [tt.squeeze(x) for x in self._get_position(self.a_star, t)]
 
     def get_relative_position(self, t):
         """The planets' positions relative to the star"""
-        star = self._get_position(self.a_star, t)
+        star = tt.sum(self._get_position(self.a_star, t), axis=-1)
         planet = self._get_position(self.a_planet, t)
-        return tuple(b-a for a, b in zip(star, planet))
+        return tuple(tt.squeeze(b-a) for a, b in zip(star, planet))
 
     def _get_velocity(self, m, t):
         f = self._get_true_anomaly(t)
@@ -175,8 +175,8 @@ class KeplerianOrbit(object):
 
     def get_planet_velocity(self, t):
         """The planets' velocities in R_sun / day"""
-        return self._get_velocity(-self.m_star, t)
+        return [tt.squeeze(x) for x in self._get_velocity(-self.m_star, t)]
 
     def get_star_velocity(self, t):
         """The star's velocity in R_sun / day"""
-        return self._get_velocity(self.m_planet, t)
+        return [tt.squeeze(x) for x in self._get_velocity(self.m_planet, t)]

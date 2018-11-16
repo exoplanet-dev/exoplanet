@@ -30,6 +30,8 @@ class Term(object):
                 else tt.exp(kwargs["log_" + name], name=name)
             setattr(self, name, tt.cast(value, self.dtype))
 
+        self.coefficients = self.get_coefficients()
+
     def __add__(self, b):
         dtype = theano.scalar.upcast(self.dtype, b.dtype)
         return TermSum(self, b, dtype=dtype)
@@ -64,7 +66,7 @@ class Term(object):
     def get_celerite_matrices(self, x, diag):
         x = tt.as_tensor_variable(x)
         diag = tt.as_tensor_variable(diag)
-        ar, cr, ac, bc, cc, dc = self.get_coefficients()
+        ar, cr, ac, bc, cc, dc = self.coefficients
         a = diag + tt.sum(ar) + tt.sum(ac)
         U = tt.concatenate((
             ar[None, :] + tt.zeros_like(x)[:, None],
@@ -126,7 +128,7 @@ class TermSum(Term):
     def get_coefficients(self):
         coeffs = []
         for t in self.terms:
-            coeffs.append(t.get_coefficients())
+            coeffs.append(t.coefficients)
         return [tt.concatenate(a, axis=0) for a in zip(*coeffs)]
 
 
@@ -138,8 +140,8 @@ class TermProduct(Term):
         super(TermProduct, self).__init__(**kwargs)
 
     def get_coefficients(self):
-        c1 = self.term1.get_coefficients()
-        c2 = self.term2.get_coefficients()
+        c1 = self.term1.coefficients
+        c2 = self.term2.coefficients
 
         # First compute real terms
         ar = []
@@ -196,7 +198,7 @@ class TermDiff(Term):
         super(TermDiff, self).__init__(**kwargs)
 
     def get_coefficients(self):
-        coeffs = self.term.get_coefficients()
+        coeffs = self.term.coefficients
         a, b, c, d = coeffs[2:]
         final_coeffs = [
             -coeffs[0]*coeffs[1]**2,
