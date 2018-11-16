@@ -25,9 +25,15 @@ class StarryLightCurve(object):
         self.c_norm = self.c / (np.pi * (self.c[0] + 2 * self.c[1] / 3))
 
     def get_light_curve(self, r, orbit, t, texp=None, oversample=7, order=2):
+        r = tt.as_tensor_variable(r)
         t = tt.as_tensor_variable(t)
+
+        if r.ndim == 0:
+            r = r + tt.zeros_like(t)
+
         if texp is None:
             tgrid = t
+            rgrid = r
         else:
             texp = tt.as_tensor_variable(texp)
 
@@ -54,11 +60,12 @@ class StarryLightCurve(object):
             else:
                 dt = tt.shape_padright(texp) * dt
             tgrid = tt.shape_padright(t) + dt
+            rgrid = tt.shape_padright(r) + tt.zeros_like(tgrid)
 
         coords = orbit.get_relative_position(tgrid)
         b = tt.sqrt(coords[0]**2 + coords[1]**2)
         lc = self.compute_light_curve(
-            self.c_norm, b/self.r_star, r/self.r_star, coords[2]/self.r_star)
+            b/self.r_star, rgrid/self.r_star, coords[2]/self.r_star)
 
         if texp is not None:
             lc = tt.sum(stencil * lc, axis=-1)
