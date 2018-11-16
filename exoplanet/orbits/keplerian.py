@@ -174,6 +174,8 @@ class KeplerianOrbit(object):
     def _get_velocity(self, m, t):
         f = self._get_true_anomaly(t)
         K = self.K0 * m
+        if self.ecc is None:
+            return self._rotate_vector(-K*tt.sin(f), K*tt.cos(f))
         return self._rotate_vector(-K*tt.sin(f), K*(tt.cos(f) + self.ecc))
 
     def get_planet_velocity(self, t):
