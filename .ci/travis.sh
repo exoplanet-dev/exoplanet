@@ -1,6 +1,12 @@
 # Miniconda (cached)
 if ! command -v conda > /dev/null; then
-    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
+    else
+        export CXX=g++-4.8
+        export CC=gcc-4.8
+        wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
     bash miniconda.sh -b -p $HOME/miniconda -u;
     . $HOME/miniconda/etc/profile.d/conda.sh
     conda activate
