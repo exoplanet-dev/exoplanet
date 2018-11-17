@@ -13,8 +13,9 @@ if ! command -v conda > /dev/null; then
     conda config --set always_yes yes --set changeps1 no
     conda update -q conda
     conda create -q --yes -n test python=$PYTHON_VERSION
-    conda env create -f .ci/travis.yml python=$PYTHON_VERSION
     conda activate test
+    conda install -q -c conda-forge numpy=$NUMPY_VERSION
+    conda env update -f .ci/travis.yml
 fi
 
 # Display some info
