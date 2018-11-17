@@ -92,6 +92,11 @@ class TuningSchedule(object):
         kwargs["discard_tuned_samples"] = False
         kwargs["draws"] = 2
 
+        # Hide some of the PyMC3 logging
+        logger = logging.getLogger("pymc3")
+        propagate = logger.propagate
+        logger.propagate = False
+
         # Start by running the startup
         logging.info("running start-up...")
         step = self.get_step_for_trace(**step_kwargs)
@@ -107,6 +112,8 @@ class TuningSchedule(object):
             burnin_trace = pm.sample(
                 start=start, tune=steps, step=step, **kwargs)
             start = [t[-1] for t in burnin_trace._straces.values()]
+
+        logger.propagate = propagate
 
         self._current_trace = burnin_trace
         self._current_step = self.get_step_for_trace(burnin_trace,
