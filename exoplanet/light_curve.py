@@ -28,9 +28,6 @@ class StarryLightCurve(object):
         r = tt.as_tensor_variable(r)
         t = tt.as_tensor_variable(t)
 
-        if r.ndim == 0:
-            r = r + tt.zeros_like(t)
-
         if texp is None:
             tgrid = t
             rgrid = r
@@ -60,15 +57,21 @@ class StarryLightCurve(object):
             else:
                 dt = tt.shape_padright(texp) * dt
             tgrid = tt.shape_padright(t) + dt
-            rgrid = tt.shape_padright(r) + tt.zeros_like(tgrid)
+
+            # Madness to get the shapes to work out...
+            rgrid = tt.shape_padleft(r, tgrid.ndim + 1) \
+                + tt.shape_padright(tt.zeros_like(tgrid), r.ndim)
 
         coords = orbit.get_relative_position(tgrid)
         b = tt.sqrt(coords[0]**2 + coords[1]**2)
+
         lc = self.compute_light_curve(
             b/self.r_star, rgrid/self.r_star, coords[2]/self.r_star)
 
         if texp is not None:
-            lc = tt.sum(stencil * lc, axis=-1)
+            stencil = tt.shape_padright(tt.shape_padleft(stencil, t.ndim),
+                                        r.ndim)
+            lc = tt.sum(stencil * lc, axis=t.ndim)
 
         return lc
 

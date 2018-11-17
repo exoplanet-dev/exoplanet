@@ -1,0 +1,16 @@
+name: exoplanet
+
+channels:
+  - conda-forge
+
+dependencies:
+  - python=3.5
+  - pandoc
+  - numpy
+  - scipy
+  - astropy
+  - setuptools
+  - pymc3
+  - jupyter
+  - pip:
+      - sphinx-nameko-theme
