@@ -54,9 +54,6 @@ int APPLY_SPECIFIC(factor)(
 
   if (flag) {
     PyErr_Format(PyExc_RuntimeError, "factor failed with value %d", flag);
-    Py_XDECREF(*output0);
-    Py_XDECREF(*output1);
-    Py_XDECREF(*output2);
     return 1;
   }
 
