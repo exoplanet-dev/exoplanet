@@ -141,8 +141,6 @@ class KeplerianOrbit(object):
         if self.ecc is None:
             return M
         _, f = self.kepler_op(M, self.ecc + tt.zeros_like(M))
-        # f = 2.0 * tt.arctan2(tt.sqrt(1.0 + self.ecc) * tt.tan(0.5*E),
-        #                      tt.sqrt(1.0 - self.ecc) + tt.zeros_like(E))
         return f
 
     def _get_position(self, a, t):
