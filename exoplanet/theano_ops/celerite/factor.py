@@ -5,6 +5,7 @@ from __future__ import division, print_function
 __all__ = ["FactorOp"]
 
 import theano
+from theano import gof
 import theano.tensor as tt
 
 from .base_op import CeleriteBaseOp
@@ -22,10 +23,15 @@ class FactorOp(CeleriteBaseOp):
         self.grad_op = FactorRevOp(J=J)
         super(FactorOp, self).__init__(J=J)
 
+    def make_node(self, *args):
+        in_args, out_args = self._get_node_args(*args)
+        out_args.append(tt.iscalar().type())
+        return gof.Apply(self, in_args, out_args)
+
     def grad(self, inputs, gradients):
         a, U, V, P = inputs
-        d, W, S = self(*inputs)
-        bd, bW, bS = gradients
+        d, W, S, flag = self(*inputs)
+        bd, bW, bS, bflag = gradients
         if isinstance(bd.type, theano.gradient.DisconnectedType):
             bd = tt.zeros_like(d)
         if isinstance(bW.type, theano.gradient.DisconnectedType):

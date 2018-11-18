@@ -26,9 +26,6 @@ int APPLY_SPECIFIC(limbdark_rev)(
   success += allocate_output(PyArray_NDIM(input1), PyArray_DIMS(input1), TYPENUM_OUTPUT_1, output1);
   success += allocate_output(PyArray_NDIM(input2), PyArray_DIMS(input2), TYPENUM_OUTPUT_2, output2);
   if (success) {
-    Py_XDECREF(*output0);
-    Py_XDECREF(*output1);
-    Py_XDECREF(*output2);
     return 1;
   }
 

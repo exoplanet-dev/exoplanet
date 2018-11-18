@@ -35,7 +35,7 @@ class TestSolve(utt.InferShapeTester):
         diag = tt.vector()
         Y = tt.matrix()
         a, U, V, P = kernel.get_celerite_matrices(x, diag)
-        d, W, S = FactorOp()(a, U, V, P)
+        d, W, S, flag = FactorOp()(a, U, V, P)
 
         args = [ar, cr, ac, bc, cc, dc, x, diag, Y]
         M = theano.function(args, [U, P, d, W, Y])

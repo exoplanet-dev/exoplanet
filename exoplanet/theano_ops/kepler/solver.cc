@@ -66,8 +66,6 @@ int APPLY_SPECIFIC(solver)(
   success += allocate_output(PyArray_NDIM(input0), PyArray_DIMS(input0), TYPENUM_OUTPUT_0, output0);
   success += allocate_output(PyArray_NDIM(input0), PyArray_DIMS(input0), TYPENUM_OUTPUT_1, output1);
   if (success) {
-    Py_XDECREF(*output0);
-    Py_XDECREF(*output1);
     return 1;
   }
 

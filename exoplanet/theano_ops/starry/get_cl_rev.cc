@@ -12,7 +12,6 @@ int APPLY_SPECIFIC(get_cl_rev)(
 
   success += allocate_output(PyArray_NDIM(input0), PyArray_DIMS(input0), TYPENUM_OUTPUT_0, output0);
   if (success) {
-    Py_XDECREF(*output0);
     return 1;
   }
 
