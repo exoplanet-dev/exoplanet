@@ -141,6 +141,7 @@ class TuningSchedule(object):
         return self._current_trace
 
     def tune(self, tune=1000, start=None, step_kwargs=None, **kwargs):
+        self.count = 0
         self.warmup(start=start, step_kwargs=step_kwargs, **kwargs)
         steps = self.window
         while self.count < tune:
