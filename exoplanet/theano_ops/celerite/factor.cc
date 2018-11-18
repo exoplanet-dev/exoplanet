@@ -8,7 +8,8 @@ int APPLY_SPECIFIC(factor)(
     PyArrayObject* input3,
     PyArrayObject** output0,
     PyArrayObject** output1,
-    PyArrayObject** output2)
+    PyArrayObject** output2,
+    PyArrayObject** output3)
 {
   npy_intp N, J;
   int success = get_dimensions(input1, &N, &J);
@@ -31,10 +32,9 @@ int APPLY_SPECIFIC(factor)(
   success += allocate_output(2, shape1, TYPENUM_OUTPUT_1, output1);
   npy_intp shape2[] = {N, J*J};
   success += allocate_output(2, shape2, TYPENUM_OUTPUT_2, output2);
+  npy_intp shape3[] = {};
+  success += allocate_output(0, shape3, TYPENUM_OUTPUT_3, output3);
   if (success) {
-    Py_XDECREF(*output0);
-    Py_XDECREF(*output1);
-    Py_XDECREF(*output2);
     return 1;
   }
 
@@ -47,15 +47,12 @@ int APPLY_SPECIFIC(factor)(
   Eigen::Map<Eigen::Matrix<DTYPE_OUTPUT_1, Eigen::Dynamic, CELERITE_J, CELERITE_J_ORDER> > W((DTYPE_OUTPUT_1*)PyArray_DATA(*output1), N, J);
   Eigen::Map<Eigen::Matrix<DTYPE_OUTPUT_2, Eigen::Dynamic, CELERITE_J2, CELERITE_J_ORDER> > S((DTYPE_OUTPUT_2*)PyArray_DATA(*output2), N, J*J);
 
+  DTYPE_OUTPUT_3* flag_out = (DTYPE_OUTPUT_3*)PyArray_DATA(*output3);
+
   d = a;
   W = V;
   S.setZero();
-  int flag = celerite::factor(U, P, d, W, S);
-
-  if (flag) {
-    PyErr_Format(PyExc_RuntimeError, "factor failed with value %d", flag);
-    return 1;
-  }
+  *flag_out = celerite::factor(U, P, d, W, S);
 
   return 0;
 }

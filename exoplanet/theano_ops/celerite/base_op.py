@@ -26,8 +26,8 @@ class CeleriteBaseOp(gof.COp):
         self.n_rhs = int(n_rhs)
         super(CeleriteBaseOp, self).__init__(self.func_file, self.func_name)
 
-    def c_code_cache_version(self):
-        return (0, 0, 1)
+    # def c_code_cache_version(self):
+    #     return (0, 0, 1)
 
     def c_headers(self, compiler):
         return ["theano_helpers.h"]
@@ -61,7 +61,7 @@ class CeleriteBaseOp(gof.COp):
                 args.append("-DCELERITE_JNRHS_ORDER=Eigen::RowMajor")
         return args
 
-    def make_node(self, *args):
+    def _get_node_args(self, *args):
         if len(args) != self.num_input:
             raise ValueError("expected {0} inputs".format(self.num_input))
         dtype = theano.config.floatX
@@ -77,4 +77,7 @@ class CeleriteBaseOp(gof.COp):
         out_args = [
             tt.TensorType(dtype=dtype, broadcastable=[False] * ndim)()
             for ndim in self.output_ndim]
-        return gof.Apply(self, in_args, out_args)
+        return in_args, out_args
+
+    def make_node(self, *args):
+        return gof.Apply(self, *self._get_node_args(*args))

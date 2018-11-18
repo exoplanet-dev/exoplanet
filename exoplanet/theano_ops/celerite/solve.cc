@@ -40,9 +40,6 @@ int APPLY_SPECIFIC(solve)(
   npy_intp shape2[] = {N, J*Nrhs};
   success += allocate_output(2, shape2, TYPENUM_OUTPUT_2, output2);
   if (success) {
-    Py_XDECREF(*output0);
-    Py_XDECREF(*output1);
-    Py_XDECREF(*output2);
     return 1;
   }
 
