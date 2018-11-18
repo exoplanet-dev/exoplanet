@@ -55,11 +55,6 @@ int APPLY_SPECIFIC(solve_rev)(
   npy_intp shape4[] = {N, Nrhs};
   success += allocate_output(2, shape4, TYPENUM_OUTPUT_4, output4);
   if (success) {
-    Py_XDECREF(*output0);
-    Py_XDECREF(*output1);
-    Py_XDECREF(*output2);
-    Py_XDECREF(*output3);
-    Py_XDECREF(*output4);
     return 1;
   }
 

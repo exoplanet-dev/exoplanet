@@ -70,7 +70,7 @@ class TestFactor(utt.InferShapeTester):
 
         # Go through and backpropagate all of the gradients from the outputs
         grad0 = []
-        for i in range(len(output0) - 1):
+        for i in range(len(output0) - 2):
             grad0.append([])
             for j in range(output0[i].size):
                 ind = np.unravel_index(j, output0[i].shape)
@@ -90,7 +90,7 @@ class TestFactor(utt.InferShapeTester):
                 vals[k][inner] += eps
 
                 # Compare to the backpropagated gradients
-                for i in range(len(output0) - 1):
+                for i in range(len(output0) - 2):
                     for j in range(output0[i].size):
                         ind = np.unravel_index(j, output0[i].shape)
                         delta = 0.5 * (plus[i][ind] - minus[i][ind]) / eps
