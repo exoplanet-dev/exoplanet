@@ -20,8 +20,8 @@ class StarryBaseOp(gof.COp):
     def __init__(self):
         super(StarryBaseOp, self).__init__(self.func_file, self.func_name)
 
-    def c_code_cache_version(self):
-        return (0, 0, 1)
+    # def c_code_cache_version(self):
+    #     return (0, 0, 1)
 
     def c_headers(self, compiler):
         return ["theano_helpers.h"]

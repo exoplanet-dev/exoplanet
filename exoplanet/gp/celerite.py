@@ -21,7 +21,8 @@ class GP(object):
         self.a, self.U, self.V, self.P = self.kernel.get_celerite_matrices(
             self.x, self.diag)
         self.factor_op = FactorOp(J=self.J)
-        self.d, self.W, _ = self.factor_op(self.a, self.U, self.V, self.P)
+        self.d, self.W, _, self.flag = self.factor_op(
+            self.a, self.U, self.V, self.P)
 
         self.vector_solve_op = SolveOp(J=self.J, n_rhs=1)
         self.general_solve_op = SolveOp(J=self.J)
@@ -33,7 +34,7 @@ class GP(object):
                                                        (self.y.size, 1)))
         loglike = -0.5 * tt.sum(self.y * self.z[:, 0] + tt.log(self.d))
         loglike -= 0.5 * self.y.size * np.log(2*np.pi)
-        return loglike
+        return tt.switch(tt.eq(self.flag, 0), loglike, -np.inf)
 
     def apply_inverse(self, rhs):
         return self.general_solve_op(self.U, self.P, self.d, self.W, rhs)[0]
