@@ -1,5 +1,9 @@
 #section support_code
 
+inline double wrap_into (double x, double period) {
+    return x - period * floor(x / period);
+}
+
 int get_size(PyArrayObject* input, npy_intp* size) {
   int flag = 0;
   if (input == NULL || !PyArray_CHKFLAGS(input, NPY_ARRAY_C_CONTIGUOUS)) {
@@ -42,6 +46,7 @@ int APPLY_SPECIFIC(solver)(
     PyArrayObject*  input0,
     PyArrayObject*  input1,
     PyArrayObject** output0,
+    PyArrayObject** output1,
     PARAMS_TYPE* params)
 {
   typedef DTYPE_OUTPUT_0 T;
@@ -59,22 +64,33 @@ int APPLY_SPECIFIC(solver)(
   }
 
   success += allocate_output(PyArray_NDIM(input0), PyArray_DIMS(input0), TYPENUM_OUTPUT_0, output0);
+  success += allocate_output(PyArray_NDIM(input0), PyArray_DIMS(input0), TYPENUM_OUTPUT_1, output1);
   if (success) {
     Py_XDECREF(*output0);
+    Py_XDECREF(*output1);
     return 1;
   }
 
-  DTYPE_INPUT_0*  M_in = (DTYPE_INPUT_0*)PyArray_DATA(input0);
-  DTYPE_INPUT_1*  e_in = (DTYPE_INPUT_1*)PyArray_DATA(input1);
+  DTYPE_INPUT_0*  M_in  = (DTYPE_INPUT_0*)PyArray_DATA(input0);
+  DTYPE_INPUT_1*  e_in  = (DTYPE_INPUT_1*)PyArray_DATA(input1);
   DTYPE_OUTPUT_0* E_out = (DTYPE_OUTPUT_0*)PyArray_DATA(*output0);
+  DTYPE_OUTPUT_1* f_out = (DTYPE_OUTPUT_1*)PyArray_DATA(*output1);
 
   for (npy_intp n = 0; n < N; ++n) {
     T M = M_in[n];
     T e = e_in[n];
 
-    T E0 = M, E = M;
-    T sinE, cosE, g, gp, delta, absdelta;
-    if (fabs(e) > tol) {
+    if (e >= 1) {
+      PyErr_Format(PyExc_ValueError, "eccentricity must be 0 <= e < 1");
+      return 1;
+    }
+
+    if (e <= tol) {
+      E_out[n] = M;
+      f_out[n] = wrap_into(M + M_PI, 2 * M_PI) - M_PI;
+    } else {
+      T E0 = M, E = M;
+      T sinE, cosE, g, gp, delta, absdelta;
       for (int i = 0; i < maxiter; ++i) {
         sinE = sin(E0);
         cosE = cos(E0);
@@ -87,8 +103,9 @@ int APPLY_SPECIFIC(solver)(
         if (absdelta <= T(tol)) break;
         E0 = E;
       }
+      E_out[n] = E;
+      f_out[n] = 2.0 * atan(sqrt((1+e)/(1-e))*tan(0.5*E));
     }
-    E_out[n] = E;
   }
 
   return 0;
