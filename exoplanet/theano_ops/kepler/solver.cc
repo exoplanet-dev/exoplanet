@@ -74,9 +74,14 @@ int APPLY_SPECIFIC(solver)(
   DTYPE_OUTPUT_0* E_out = (DTYPE_OUTPUT_0*)PyArray_DATA(*output0);
   DTYPE_OUTPUT_1* f_out = (DTYPE_OUTPUT_1*)PyArray_DATA(*output1);
 
+  T M_old = M_in[0], e_old = e_in[0];
+  T M, e, E;
+  T sinE, cosE, tanE2, gp, delta;
+  int flag = 0;
+
   for (npy_intp n = 0; n < N; ++n) {
-    T M = M_in[n];
-    T e = e_in[n];
+    M = wrap_into(M_in[n] + M_PI, 2 * M_PI) - M_PI;
+    e = e_in[n];
 
     if (e >= 1) {
       PyErr_Format(PyExc_ValueError, "eccentricity must be 0 <= e < 1");
@@ -85,24 +90,36 @@ int APPLY_SPECIFIC(solver)(
 
     if (e <= tol) {
       E_out[n] = M;
-      f_out[n] = wrap_into(M + M_PI, 2 * M_PI) - M_PI;
+      f_out[n] = M;
+      flag = 0;
     } else {
-      T E0 = M, E = M;
-      T sinE, cosE, g, gp, delta, absdelta;
-      for (int i = 0; i < maxiter; ++i) {
-        sinE = sin(E0);
-        cosE = cos(E0);
-        g = E0 - e * sinE - M;
-        gp = 1.0 - e * cosE;
-        delta = g / (gp + tol);
-        absdelta = fabs(delta);
-        delta = (absdelta < T(1)) ? delta : delta / absdelta;
-        E = E0 - delta;
-        if (absdelta <= T(tol)) break;
-        E0 = E;
+
+      if (flag) {
+        T dM = M - M_old;
+        delta = ((e - e_old) * sinE + dM) / gp;
+        E += delta;
+      } else {
+        E = M;
       }
+
+      sinE = sin(E);
+      cosE = cos(E);
+      for (int i = 0; i < maxiter; ++i) {
+        gp = 1 - e * cosE;
+        delta = (E - e * sinE - M) / gp;
+        if (fabs(delta) <= T(tol)) break;
+        E -= delta;
+        sinE = sin(E);
+        cosE = cos(E);
+      }
+
       E_out[n] = E;
-      f_out[n] = 2.0 * atan(sqrt((1+e)/(1-e))*tan(0.5*E));
+      tanE2 = sinE / (1 + cosE);  // tan(0.5*E)
+      f_out[n] = 2 * atan(sqrt((1+e)/(1-e))*tanE2);
+
+      flag = 1;
+      e_old = e;
+      M_old = M;
     }
   }
 
