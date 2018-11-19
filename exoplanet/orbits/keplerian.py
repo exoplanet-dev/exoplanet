@@ -11,6 +11,7 @@ import theano.tensor as tt
 from astropy import constants
 from astropy import units as u
 
+from ..citations import CITATIONS
 from ..theano_ops.kepler.solver import KeplerOp
 
 gcc_to_sun = (constants.M_sun / constants.R_sun**3).to(u.g / u.cm**3).value
@@ -18,6 +19,13 @@ G_grav = constants.G.to(u.R_sun**3 / u.M_sun / u.day**2).value
 
 
 class KeplerianOrbit(object):
+    """A system of bodies on Keplerian orbits around a common central
+
+    """
+
+    __citations__ = [
+        CITATIONS["astropy"],
+    ]
 
     def __init__(self,
                  period=None, a=None, rho_star=None,

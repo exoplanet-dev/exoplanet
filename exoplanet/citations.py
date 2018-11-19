@@ -1,0 +1,5 @@
+CITATIONS = {
+    "astropy": """
+
+"""
+}

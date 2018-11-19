@@ -17,6 +17,16 @@ limbdark = LimbDarkOp()
 
 class StarryLightCurve(object):
 
+    """A limb darkened light curve computed using starry
+
+    Args:
+        u (vector): A vector of limb darkening coefficients.
+        r_star (Optional[scalar]): The stellar radius. If not given, this is
+            assumed to be ``1`` so all coordinates should be given in stellar
+            radii.
+
+    """
+
     def __init__(self, u, r_star=1.0):
         self.r_star = tt.as_tensor_variable(r_star)
         self.u = tt.as_tensor_variable(u)
@@ -25,6 +35,39 @@ class StarryLightCurve(object):
         self.c_norm = self.c / (np.pi * (self.c[0] + 2 * self.c[1] / 3))
 
     def get_light_curve(self, r, orbit, t, texp=None, oversample=7, order=2):
+        """Get the light curve for an orbit at a set of times
+
+        Args:
+            r (tensor): The radius of the transiting body in the same units as
+                ``r_star``. This should have a shape that is consistent with
+                the coordinates returned by ``orbit``. In general, this means
+                that it should probably be a scalar or a vector with one entry
+                for each body in ``orbit``.
+            orbit: An object with a ``get_relative_position`` method that
+                takes a tensor of times and returns a list of Cartesian
+                coordinates of a set of bodies relative to the central source.
+                This method should return three tensors (one for each
+                coordinate dimension) and each tensor should have the shape
+                ``append(t.shape, r.shape)`` or ``append(t.shape, oversample,
+                r.shape)`` when ``texp`` is given. The first two coordinate
+                dimensions are treated as being in the plane of the sky and the
+                third coordinate is the line of sight with positive values
+                pointing *away* from the observer. For an example, take a look
+                at :class:`orbits.KeplerianOrbit`.
+            t (tensor): The times where the light curve should be evaluated.
+            texp (Optional[tensor]): The exposure time of each observation.
+                This can be a scalar or a tensor with the same shape as ``t``.
+                If ``texp`` is provided, ``t`` is assumed to indicate the
+                timestamp at the *middle* of an exposure of length ``texp``.
+            oversample (Optional[int]): The number of function evaluations to
+                use when numerically integrating the exposure time.
+            order (Optional[int]): The order of the numerical integration
+                scheme. This must be one of the following: ``0`` for a
+                centered Riemann sum (equivalent to the "resampling" procedure
+                suggested by Kipping 2010), ``1`` for the trapezoid rule, or
+                ``2`` for Simpson's rule.
+
+        """
         r = tt.as_tensor_variable(r)
         t = tt.as_tensor_variable(t)
 
@@ -76,6 +119,19 @@ class StarryLightCurve(object):
         return lc
 
     def compute_light_curve(self, b, r, los=None):
+        """Compute the light curve for a set of impact parameters and radii
+
+        .. note:: The stellar radius is *not* included in this method so the
+            coordinates should be in units of the star's radius.
+
+        Args:
+            b (tensor): A tensor of impact parameter values.
+            r (tensor): A tensor of radius ratios with the same shape as ``b``.
+            los (Optional[tensor]): The coordinates of the body along the
+                line-of-sight. If ``los < 0`` the body is between the observer
+                and the source.
+
+        """
         if los is None:
             los = -tt.ones_like(b)
         return limbdark(self.c_norm, b, r, los)
