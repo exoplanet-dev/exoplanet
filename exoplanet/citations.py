@@ -21,6 +21,14 @@ def add_citations_to_model(citations, model=None):
 
 
 def get_citations_for_model(model=None):
+    """Get the citations for the components used an exoplanet PyMC3
+
+    Returns:
+        txt: The acknowledgement text for exoplanet and its dependencies.
+        bib: A string containing the BibTeX entries for the citations in
+            ``txt``.
+
+    """
     model = pm.modelcontext(model)
     if not hasattr(model, "__citations__"):
         logging.warning("no citations registered with model")
