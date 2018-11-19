@@ -27,9 +27,10 @@ exoplanet
 
 .. toctree::
    :maxdepth: 2
-   :caption: API Documentation
+   :caption: User Documentation
 
-    api/install
+   user/install
+   user/api
 
 
 License & Attribution
