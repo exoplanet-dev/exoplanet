@@ -32,7 +32,8 @@ def test_sky_coords():
     m = r_batman < 100.0
 
     orbit = KeplerianOrbit(
-        period=period, a=a, t0=t0, ecc=e, omega=omega, incl=incl, tol=1e-7)
+        period=period, a=a, t0=t0, ecc=e, omega=omega, incl=incl, tol=1e-8,
+        maxiter=5000)
     func = theano.function([], orbit.get_relative_position(t))
     x, y, z = func()
     r = np.sqrt(x**2 + y**2)
@@ -45,7 +46,7 @@ def test_sky_coords():
 
     # Therefore, when batman doesn't see a transit we shouldn't be transiting
     no_transit = z[~m] > 0
-    no_transit |= r[~m] > 1
+    no_transit |= r[~m] > 2
     assert np.all(no_transit)
 
 
