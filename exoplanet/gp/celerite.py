@@ -7,13 +7,18 @@ __all__ = ["GP"]
 import numpy as np
 import theano.tensor as tt
 
+from ..citations import add_citations_to_model
 from ..theano_ops.celerite.solve import SolveOp
 from ..theano_ops.celerite.factor import FactorOp
 
 
 class GP(object):
 
-    def __init__(self, kernel, x, diag, J=-1):
+    __citations__ = ("celerite", )
+
+    def __init__(self, kernel, x, diag, J=-1, model=None):
+        add_citations_to_model(self.__citations__, model=model)
+
         self.kernel = kernel
         self.J = J
         self.x = x

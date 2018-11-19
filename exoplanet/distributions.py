@@ -10,6 +10,7 @@ import pymc3 as pm
 from pymc3.distributions import draw_values, generate_samples
 
 from . import transforms as tr
+from .citations import add_citations_to_model
 
 
 class UnitVector(pm.Normal):
@@ -69,7 +70,11 @@ class Triangle(pm.Flat):
 
     """
 
+    __citations__ = ("kipping13", )
+
     def __init__(self, *args, **kwargs):
+        add_citations_to_model(self.__citations__, kwargs.get("model", None))
+
         # Make sure that the shape is compatible
         shape = kwargs.get("shape", 2)
         try:
@@ -118,8 +123,11 @@ class RadiusImpactParameter(pm.Flat):
     the impact parameter will be in the first.
 
     """
+    __citations__ = ("espinoza18", )
 
     def __init__(self, *args, **kwargs):
+        add_citations_to_model(self.__citations__, kwargs.get("model", None))
+
         # Make sure that the shape is compatible
         shape = kwargs.get("shape", 2)
         try:
@@ -178,3 +186,76 @@ class RadiusImpactParameter(pm.Flat):
                                 dist_shape=self.shape,
                                 broadcast_shape=self.shape,
                                 size=size)
+
+
+def get_joint_r_and_b_distribution(name="", N_planets=None,
+                                   min_radius=0, max_radius=1,
+                                   r_star=None, testval_r=None, testval_b=None,
+                                   model=None, **kwargs):
+    """Get the joint distribution over radius and impact parameter
+
+    This uses the Espinoza (2018) parameterization of the distribution (see
+    :class:`distributions.RadiusImpactParameter` for more details).
+
+    Args:
+        name (Optional[str]): A prefix that is added to all distribution names
+            used in this parameterization. For example, if ``name`` is
+            ``param_``, vars will be added to the PyMC3 model with names:
+            ``param_rb`` (for the joint distribution), ``param_b``,
+            ``param_r``, and optionally ``param_ror`` if ``r_star`` is given.
+        N_planets (Optional[int]): The number of planets. If not provided, it
+            will be inferred from the ``testval_*`` parameters or assumed to
+            be 1.
+        min_radius (Optional[float]): The minimum allowed radius.
+        max_radius (Optional[float]): The maximum allowed radius.
+        r_star (Optional[scalar]): The radius of the star (or a PyMC3 variable
+            giving the stellar radius). If given, the radius parameter will be
+            treated as a radius ratio instead of the physical radius.
+        testval_r (Optional[float or array]): An initial guess for the radius
+            parameter. This should be a ``float`` or an array with
+            ``N_planets`` entries.
+        testval_b (Optional[float or array]): An initial guess for the impact
+            parameter. This should be a ``float`` or an array with
+            ``N_planets`` entries.
+
+    Returns:
+        r (Deterministic): The planet radius parameter.
+        b (Deterministic): The impact parameter.
+
+    """
+    if N_planets is None:
+        if testval_r is not None:
+            N_planets = len(np.atleast_1d(testval_r))
+        elif testval_b is not None:
+            N_planets = len(np.atleast_1d(testval_b))
+        else:
+            N_planets = 1
+    N_planets = int(N_planets)
+
+    # Set up the testval for the rb parameter
+    rb_test = np.zeros((2, N_planets))
+    if testval_r is None:
+        rb_test[0, :] = 0.5 * (min_radius + max_radius)
+    else:
+        rb_test[0, :] = testval_r
+    if testval_b is None:
+        rb_test[1, :] = 0.5
+    else:
+        rb_test[1, :] = testval_b
+
+    # Construct the join distribution
+    rb = RadiusImpactParameter(
+        name + "rb", min_radius=min_radius, max_radius=max_radius,
+        shape=(2, N_planets), testval=rb_test, model=model, **kwargs)
+
+    # Extract the individual components
+    b = pm.Deterministic(name + "b", rb[1], model=model)
+
+    # Determine if the radius parameter is the radius or the radius ratio
+    if r_star is None:
+        r = pm.Deterministic(name + "r", rb[0], model=model)
+    else:
+        ror = pm.Deterministic(name + "ror", rb[0])
+        r = pm.Deterministic(name + "r", ror * r_star)
+
+    return r, b
