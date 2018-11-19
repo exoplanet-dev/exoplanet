@@ -11,7 +11,7 @@ import theano.tensor as tt
 from astropy import constants
 from astropy import units as u
 
-from ..citations import CITATIONS
+from ..citations import add_citations_to_model
 from ..theano_ops.kepler.solver import KeplerOp
 
 gcc_to_sun = (constants.M_sun / constants.R_sun**3).to(u.g / u.cm**3).value
@@ -23,16 +23,16 @@ class KeplerianOrbit(object):
 
     """
 
-    __citations__ = [
-        CITATIONS["astropy"],
-    ]
+    __citations__ = ("astropy", )
 
     def __init__(self,
                  period=None, a=None, rho_star=None,
                  t0=0.0, incl=None, b=None,
                  m_star=None, r_star=None,
                  ecc=None, omega=None,
-                 m_planet=0.0, **kwargs):
+                 m_planet=0.0, model=None, **kwargs):
+        add_citations_to_model(self.__citations__, model=model)
+
         self.kepler_op = KeplerOp(**kwargs)
 
         # Parameters

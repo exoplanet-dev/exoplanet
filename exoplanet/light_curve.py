@@ -8,6 +8,7 @@ import numpy as np
 
 import theano.tensor as tt
 
+from .citations import add_citations_to_model
 from .theano_ops.starry.get_cl import GetClOp
 from .theano_ops.starry.limbdark import LimbDarkOp
 
@@ -27,7 +28,11 @@ class StarryLightCurve(object):
 
     """
 
-    def __init__(self, u, r_star=1.0):
+    __citations__ = ("starry", )
+
+    def __init__(self, u, r_star=1.0, model=None):
+        add_citations_to_model(self.__citations__, model=model)
+
         self.r_star = tt.as_tensor_variable(r_star)
         self.u = tt.as_tensor_variable(u)
         u_ext = tt.concatenate([-1 + tt.zeros(1, dtype=self.u.dtype), self.u])
@@ -73,7 +78,8 @@ class StarryLightCurve(object):
 
         if texp is None:
             tgrid = t
-            rgrid = r
+            rgrid = tt.shape_padleft(r, tgrid.ndim) \
+                + tt.shape_padright(tt.zeros_like(tgrid), r.ndim)
         else:
             texp = tt.as_tensor_variable(texp)
 
