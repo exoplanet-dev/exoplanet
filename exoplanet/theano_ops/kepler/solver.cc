@@ -89,19 +89,23 @@ int APPLY_SPECIFIC(solver)(
     }
 
     if (e <= tol) {
+
+      // Special case for zero eccentricity
       E_out[n] = M;
       f_out[n] = M;
       flag = 0;
+
     } else {
 
+      // Estimate the initialization using the first order Taylor series
       if (flag) {
-        T dM = M - M_old;
-        delta = ((e - e_old) * sinE + dM) / gp;
+        delta = ((e - e_old) * sinE + (M - M_old)) / gp;
         E += delta;
       } else {
         E = M;
       }
 
+      // Do some iterations of Newton Raphson
       sinE = sin(E);
       cosE = cos(E);
       for (int i = 0; i < maxiter; ++i) {
@@ -113,6 +117,7 @@ int APPLY_SPECIFIC(solver)(
         cosE = cos(E);
       }
 
+      // Save the result and compute the true anomaly
       E_out[n] = E;
       tanE2 = sinE / (1 + cosE);  // tan(0.5*E)
       f_out[n] = 2 * atan(sqrt((1+e)/(1-e))*tanE2);
