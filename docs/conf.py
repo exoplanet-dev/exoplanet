@@ -38,10 +38,13 @@ import exoplanet  # NOQA
 # Convert the tutorials
 for fn in glob.glob("_static/notebooks/*.ipynb"):
     name = os.path.splitext(os.path.split(fn)[1])[0]
+    outfn = os.path.join("tutorials", name + ".rst")
     print("Building {0}...".format(name))
     subprocess.check_call(
         "jupyter nbconvert --template tutorials/tutorial_rst --to rst "
         + fn + " --output-dir tutorials", shell=True)
+    subprocess.check_call(
+        "python fix_internal_links.py " + outfn, shell=True)
 
 extensions = [
     "sphinx.ext.autodoc",

@@ -2,7 +2,7 @@
 
 from __future__ import division, print_function
 
-__all__ = ["KeplerianOrbit"]
+__all__ = ["KeplerianOrbit", "get_true_anomaly"]
 
 import numpy as np
 
@@ -303,3 +303,17 @@ class KeplerianOrbit(object):
         mask = tt.any(tt.abs_(dt) < tol, axis=-1)
 
         return tt.arange(t.size)[mask]
+
+
+def get_true_anomaly(M, e, **kwargs):
+    """Get the true anomaly for a tensor of mean anomalies and eccentricities
+
+    Args:
+        M: The mean anomaly.
+        e: The eccentricity. This should have the same shape as ``M``.
+
+    Returns:
+        The true anomaly of the orbit.
+
+    """
+    return KeplerOp()(M, e)[1]
