@@ -33,3 +33,16 @@ Distributions
 .. autoclass:: exoplanet.distributions.Triangle
 .. autoclass:: exoplanet.distributions.RadiusImpactParameter
 
+
+Utilities
+---------
+
+.. autofunction:: exoplanet.utils.eval_in_model
+
+
+Citations
+---------
+
+.. autofunction:: exoplanet.citations.get_citations_for_model
+
+
