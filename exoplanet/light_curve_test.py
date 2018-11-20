@@ -10,6 +10,7 @@ from theano.tests import unittest_tools as utt
 
 import starry
 
+from .orbits import KeplerianOrbit
 from .light_curve import StarryLightCurve
 
 
@@ -41,3 +42,32 @@ def test_light_curve_grad():
 
     lc = lambda u, b, r: StarryLightCurve(u).compute_light_curve(b, r)  # NOQA
     utt.verify_grad(lc, [u_val, b_val, r_val])
+
+
+def test_approx_in_transit():
+    t = np.linspace(-20, 20, 1000)
+    m_planet = np.array([0.3, 0.5])
+    m_star = 1.45
+    orbit = KeplerianOrbit(
+        m_star=m_star,
+        r_star=1.5,
+        t0=np.array([0.5, 17.4]),
+        period=np.array([10.0, 5.3]),
+        ecc=np.array([0.1, 0.8]),
+        omega=np.array([0.5, 1.3]),
+        m_planet=m_planet,
+    )
+    u = np.array([0.2, 0.3, 0.1, 0.5])
+    r = np.array([0.1, 0.01])
+
+    lc = StarryLightCurve(u)
+    model1 = lc.get_light_curve(r, orbit, t)
+    model2 = lc.get_light_curve(r, orbit, t, use_approx_in_transit=False)
+    vals = theano.function([], [model1, model2])()
+    utt.assert_allclose(*vals)
+
+    model1 = lc.get_light_curve(r, orbit, t, texp=0.1)
+    model2 = lc.get_light_curve(r, orbit, t, texp=0.1,
+                                use_approx_in_transit=False)
+    vals = theano.function([], [model1, model2])()
+    utt.assert_allclose(*vals)

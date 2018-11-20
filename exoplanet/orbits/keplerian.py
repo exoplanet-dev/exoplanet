@@ -30,7 +30,10 @@ class KeplerianOrbit(object):
                  t0=0.0, incl=None, b=None,
                  m_star=None, r_star=None,
                  ecc=None, omega=None,
-                 m_planet=0.0, model=None, **kwargs):
+                 m_planet=0.0, model=None,
+                 m_planet_units=None,
+                 rho_units=None,
+                 **kwargs):
         add_citations_to_model(self.__citations__, model=model)
 
         self.kepler_op = KeplerOp(**kwargs)
@@ -39,9 +42,12 @@ class KeplerianOrbit(object):
         self.period = tt.as_tensor_variable(period)
         self.t0 = tt.as_tensor_variable(t0)
         self.m_planet = tt.as_tensor_variable(m_planet)
+        if m_planet_units is not None:
+            self.m_planet *= (1 * m_planet_units).to(u.M_sun).value
 
         self.a, self.period, self.rho_star, self.r_star, self.m_star = \
-            self._get_consistent_inputs(a, period, rho_star, r_star, m_star)
+            self._get_consistent_inputs(a, period, rho_star, r_star, m_star,
+                                        rho_units)
         self.m_total = self.m_star + self.m_planet
 
         self.n = 2 * np.pi / self.period
@@ -82,7 +88,8 @@ class KeplerianOrbit(object):
 
             self.K0 /= tt.sqrt(1 - self.ecc**2)
 
-    def _get_consistent_inputs(self, a, period, rho_star, r_star, m_star):
+    def _get_consistent_inputs(self, a, period, rho_star, r_star, m_star,
+                               rho_units):
         if a is None and period is None:
             raise ValueError("values must be provided for at least one of a "
                              "and period")
@@ -101,6 +108,7 @@ class KeplerianOrbit(object):
                 r_star = 1.0
             rho_star = 3*np.pi*(a / r_star)**3 / (G_grav*period**2)
             rho_star -= 3*self.m_planet/(4*np.pi*r_star**3)
+            rho_units = None
 
         # Make sure that the right combination of stellar parameters are given
         if r_star is None and m_star is None:
@@ -112,8 +120,9 @@ class KeplerianOrbit(object):
                              "rho_star, m_star, and r_star")
 
         if rho_star is not None:
-            # Convert density to M_sun / R_sun^3
-            rho_star = tt.as_tensor_variable(rho_star) / gcc_to_sun
+            rho_star = tt.as_tensor_variable(rho_star)
+            if rho_units is not None:
+                rho_star *= (1 * rho_units).to(u.M_sun / u.R_sun**3).value
         if r_star is not None:
             r_star = tt.as_tensor_variable(r_star)
         if m_star is not None:
@@ -161,17 +170,44 @@ class KeplerianOrbit(object):
         return self._rotate_vector(r * cosf, r * tt.sin(f))
 
     def get_planet_position(self, t):
-        """The planets' positions in Solar radii"""
+        """The planets' positions in the barycentric frame
+
+        Args:
+            t: The times where the position should be evaluated.
+
+        Returns:
+            x, y, z: The components of the position vector at ``t`` in units
+                of ``R_sun``.
+
+        """
         return tuple(tt.squeeze(x)
                      for x in self._get_position(self.a_planet, t))
 
     def get_star_position(self, t):
-        """The star's position in Solar radii"""
+        """The star's position in the barycentric frame
+
+        Args:
+            t: The times where the position should be evaluated.
+
+        Returns:
+            x, y, z: The components of the position vector at ``t`` in units
+                of ``R_sun``.
+
+        """
         return tuple(tt.squeeze(x)
                      for x in self._get_position(self.a_star, t))
 
     def get_relative_position(self, t):
-        """The planets' positions relative to the star"""
+        """The planets' positions relative to the star
+
+        Args:
+            t: The times where the position should be evaluated.
+
+        Returns:
+            x, y, z: The components of the position vector at ``t`` in units
+                of ``R_sun``.
+
+        """
         star = self._get_position(self.a_star, t)
         planet = self._get_position(self.a_planet, t)
         return tuple(tt.squeeze(b-tt.shape_padright(tt.sum(a, axis=-1)))
@@ -185,11 +221,81 @@ class KeplerianOrbit(object):
         return self._rotate_vector(-K*tt.sin(f), K*(tt.cos(f) + self.ecc))
 
     def get_planet_velocity(self, t):
-        """The planets' velocities in R_sun / day"""
+        """Get the planets' velocity vector
+
+        Args:
+            t: The times where the velocity should be evaluated.
+
+        Returns:
+            vx, vy, vz: The components of the velocity vector at ``t`` in units
+                of ``M_sun/day``.
+
+        """
         return tuple(tt.squeeze(x)
                      for x in self._get_velocity(-self.m_star, t))
 
     def get_star_velocity(self, t):
-        """The star's velocity in R_sun / day"""
+        """Get the star's velocity vector
+
+        Args:
+            t: The times where the velocity should be evaluated.
+
+        Returns:
+            vx, vy, vz: The components of the velocity vector at ``t`` in units
+                of ``M_sun/day``.
+
+        """
         return tuple(tt.squeeze(x)
                      for x in self._get_velocity(self.m_planet, t))
+
+    def get_radial_velocity(self, t, output_units=None):
+        """Get the radial velocity of the star
+
+        Args:
+            t: The times where the radial velocity should be evaluated.
+            output_units (Optional): An AstroPy velocity unit. If not given,
+                the output will be evaluated in ``m/s``.
+
+        Returns:
+            vrad: The radial velocity evaluated at ``t`` in units of
+                ``output_units``.
+
+        """
+        if output_units is None:
+            output_units = u.m / u.s
+        conv = (1 * u.R_sun / u.day).to(output_units).value
+        v = self.get_star_velocity(t)
+        return conv * v[2]
+
+    def approx_in_transit(self, t, r=0.0, duration_factor=3):
+        """Get a list of timestamps that are expected to be in transit
+
+        Args:
+            t (vector): A vector of timestamps to be evaluated.
+            r (Optional): The radii of the planets.
+            duration_factor (Optional[float]): The factor by which to multiply
+                the approximate duration when computing the in transit points.
+                Larger values will be more conservative and might be needed for
+                large planets or very eccentric orbits.
+
+        Returns:
+            inds (vector): The indices of the timestamps that are expected to
+                be in transit.
+
+        """
+        # Estimate the maximum duration of the transit using the equations
+        # from Winn (2010)
+        arg = (self.r_star + r) / (-self.a_planet)
+        max_dur = self.period * tt.arcsin(arg) / np.pi
+        if self.ecc is not None:
+            max_dur *= tt.sqrt(1-self.ecc**2) / (1+self.ecc*self.sin_omega)
+
+        # Wrap the times into time since transit
+        hp = 0.5 * self.period
+        dt = tt.mod(tt.shape_padright(t) - self.t0 + hp, self.period) - hp
+
+        # Estimate the data points that are within the maximum duration of the
+        # transit
+        mask = tt.any(tt.abs_(dt) < 0.5 * duration_factor * max_dur, axis=-1)
+
+        return tt.arange(t.size)[mask]

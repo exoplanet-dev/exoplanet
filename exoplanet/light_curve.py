@@ -39,7 +39,8 @@ class StarryLightCurve(object):
         self.c = get_cl(u_ext)
         self.c_norm = self.c / (np.pi * (self.c[0] + 2 * self.c[1] / 3))
 
-    def get_light_curve(self, r, orbit, t, texp=None, oversample=7, order=2):
+    def get_light_curve(self, r, orbit, t, texp=None, oversample=7, order=2,
+                        use_approx_in_transit=True, duration_factor=3):
         """Get the light curve for an orbit at a set of times
 
         Args:
@@ -71,10 +72,20 @@ class StarryLightCurve(object):
                 centered Riemann sum (equivalent to the "resampling" procedure
                 suggested by Kipping 2010), ``1`` for the trapezoid rule, or
                 ``2`` for Simpson's rule.
+            use_approx_in_transit (Optional[bool]): If ``True``, the model will
+                only be evaluated for the data points expected to be in transit
+                as computed using the ``approx_in_transit`` method on
+                ``orbit``.
 
         """
         r = tt.as_tensor_variable(r)
         t = tt.as_tensor_variable(t)
+
+        if use_approx_in_transit:
+            transit_model = tt.zeros_like(t)
+            inds = orbit.approx_in_transit(t, r=r,
+                                           duration_factor=duration_factor)
+            t = t[inds]
 
         if texp is None:
             tgrid = t
@@ -121,8 +132,13 @@ class StarryLightCurve(object):
             stencil = tt.shape_padright(tt.shape_padleft(stencil, t.ndim),
                                         r.ndim)
             lc = tt.sum(stencil * lc, axis=t.ndim)
+        lc = tt.sum(lc, axis=-1)
 
-        return lc
+        if use_approx_in_transit:
+            transit_model = tt.set_subtensor(transit_model[inds], lc)
+            return transit_model
+        else:
+            return lc
 
     def compute_light_curve(self, b, r, los=None):
         """Compute the light curve for a set of impact parameters and radii

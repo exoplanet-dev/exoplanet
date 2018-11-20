@@ -105,3 +105,26 @@ def test_velocity():
         g = theano.grad(tt.sum(planet_pos[i]), t_tensor)
         planet_vel_expect[i] = theano.function([t_tensor], g)(t)
     utt.assert_allclose(planet_vel, planet_vel_expect)
+
+
+def test_approx_in_transit():
+    t = np.linspace(-20, 20, 1000)
+    m_planet = np.array([0.3, 0.5])
+    m_star = 1.45
+    orbit = KeplerianOrbit(
+        m_star=m_star,
+        r_star=1.5,
+        t0=np.array([0.5, 17.4]),
+        period=np.array([10.0, 5.3]),
+        ecc=np.array([0.1, 0.8]),
+        omega=np.array([0.5, 1.3]),
+        m_planet=m_planet,
+    )
+
+    coords = theano.function([], orbit.get_relative_position(t))()
+    r = np.sqrt(coords[0]**2 + coords[1]**2)
+    inds = theano.function([], orbit.approx_in_transit(t))()
+    m = np.isin(np.arange(len(t)), inds)
+    ok = (r[~m] > 2) | (coords[2][~m] > 0)
+
+    assert np.all(ok)
