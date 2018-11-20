@@ -13,45 +13,49 @@ from pymc3.step_methods.hmc import quadpotential as quad
 
 
 class TuningSchedule(object):
+    """A custom tuning scheduler for PyMC3 with support for dense mass matrices
+
+    This schedule is based on the method used by as described in Section 34.2
+    of the `Stan Manual <http://mc-stan.org/users/documentation/>`_.
+
+    Args:
+        start (int): The number of steps to run as an initial burn-in to find
+            the typical set.
+        window (int): The length of the first mass matrix tuning phase.
+            Subsequent tuning windows will be powers of two times this size.
+        finish (int): The number of tuning steps to run to learn the step size
+            after tuning the mass matrix.
+        dense (bool): Fit for the off-diagonal elements of the mass matrix.
+
+    """
+
     # Ref: src/stan/mcmc/windowed_adaptation.hpp in stan repo
 
     def __init__(self, start=75, finish=50, window=25, dense=True):
         self.dense = dense
 
-        # self.warmup = int(warmup)
         self.start = int(start)
         self.finish = int(finish)
         self.window = int(window)
         self.count = 0
-        self._last_window = 0
-
-        # if self.start + self.finish + self.window > self.warmup:
-        #     logging.warning("not enough warmup samples for requested "
-        #                     "tuning schedule")
-        #     start = int(0.15 * self.warmup)
-        #     finish = int(0.1 * self.warmup)
-        #     window = int(warmup - start - finish)
-
-        # tune = self.warmup - self.start - self.finish
-        # if self.window + 2 * self.window >= tune:
-        #     windows = [tune]
-        # else:
-        #     windows = [self.window]
-        # count = sum(windows)
-        # while count < tune:
-        #     next_window = windows[-1] * 2
-        #     if count + next_window + 2 * next_window >= tune:
-        #         next_window = tune - count
-        #     windows.append(next_window)
-        #     count += next_window
-        # self.windows = np.array(windows, dtype=int)
-
         self._current_step = None
         self._current_trace = None
 
     def get_step_for_trace(self, trace=None, model=None,
                            regular_window=5, regular_variance=1e-3,
                            **kwargs):
+        """Get a PyMC3 NUTS step tuned for a given burn-in trace
+
+        Args:
+            trace: The ``MultiTrace`` output from a previous run of
+                ``pymc3.sample``.
+            regular_window: The weight (in units of number of steps) to use
+                when regularizing the mass matrix estimate.
+            regular_variance: The amplitude of the regularization for the mass
+                matrix. This will be added to the diagonal of the covariance
+                matrix with weight given by ``regular_window``.
+
+        """
         model = pm.modelcontext(model)
 
         # If not given, use the trivial metric
@@ -85,8 +89,7 @@ class TuningSchedule(object):
 
         return pm.NUTS(potential=potential, **kwargs)
 
-    def _extend(self, steps, start=None, step=None,
-                **kwargs):
+    def _extend(self, steps, start=None, step=None, **kwargs):
 
         kwargs["compute_convergence_checks"] = False
         kwargs["discard_tuned_samples"] = False
@@ -105,6 +108,7 @@ class TuningSchedule(object):
         logger.propagate = propagate
 
     def warmup(self, start=None, step_kwargs=None, **kwargs):
+        """Run an initial warmup phase to find the typical set"""
         if step_kwargs is None:
             step_kwargs = {}
         step = self.get_step_for_trace(**step_kwargs)
@@ -131,6 +135,15 @@ class TuningSchedule(object):
 
     def extend_tune(self, steps, start=None,
                     step_kwargs=None, trace=None, step=None, **kwargs):
+        """Extend the tuning phase by a given number of steps
+
+        After running the sampling, the mass matrix is re-estimated based on
+        this run.
+
+        Args:
+            steps (int): The number of steps to run.
+
+        """
         if step_kwargs is None:
             step_kwargs = {}
         start, step = self._get_start_and_step(
@@ -141,6 +154,15 @@ class TuningSchedule(object):
         return self._current_trace
 
     def tune(self, tune=1000, start=None, step_kwargs=None, **kwargs):
+        """Run the full tuning run for the mass matrix
+
+        This will run ``start`` steps of warmup followed by exponentially
+        increasing chains to tune the mass matrix.
+
+        Args:
+            tune (int): The total number of steps to run.
+
+        """
         self.count = 0
         self.warmup(start=start, step_kwargs=step_kwargs, **kwargs)
         steps = self.window
