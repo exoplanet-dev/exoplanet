@@ -267,7 +267,7 @@ class KeplerianOrbit(object):
         v = self.get_star_velocity(t)
         return conv * v[2]
 
-    def approx_in_transit(self, t, r=0.0, duration_factor=3):
+    def approx_in_transit(self, t, r=0.0, duration_factor=3, texp=None):
         """Get a list of timestamps that are expected to be in transit
 
         Args:
@@ -277,6 +277,7 @@ class KeplerianOrbit(object):
                 the approximate duration when computing the in transit points.
                 Larger values will be more conservative and might be needed for
                 large planets or very eccentric orbits.
+            texp (Optional[float]): The exposure time.
 
         Returns:
             inds (vector): The indices of the timestamps that are expected to
@@ -296,6 +297,9 @@ class KeplerianOrbit(object):
 
         # Estimate the data points that are within the maximum duration of the
         # transit
-        mask = tt.any(tt.abs_(dt) < 0.5 * duration_factor * max_dur, axis=-1)
+        tol = 0.5 * duration_factor * max_dur
+        if texp is not None:
+            tol += 0.5 * texp
+        mask = tt.any(tt.abs_(dt) < tol, axis=-1)
 
         return tt.arange(t.size)[mask]
