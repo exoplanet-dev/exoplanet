@@ -83,7 +83,7 @@ class StarryLightCurve(object):
 
         if use_approx_in_transit:
             transit_model = tt.zeros_like(t)
-            inds = orbit.approx_in_transit(t, r=r,
+            inds = orbit.approx_in_transit(t, r=r, texp=texp,
                                            duration_factor=duration_factor)
             t = t[inds]
 
