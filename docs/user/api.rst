@@ -19,6 +19,21 @@ Light curve models
    :inherited-members:
 
 
+Scalable Gaussian processes
+---------------------------
+
+.. autoclass:: exoplanet.gp.GP
+   :inherited-members:
+
+.. autoclass:: exoplanet.gp.terms.Term
+   :inherited-members:
+
+.. autoclass:: exoplanet.gp.terms.RealTerm
+.. autoclass:: exoplanet.gp.terms.ComplexTerm
+.. autoclass:: exoplanet.gp.terms.SHOTerm
+.. autoclass:: exoplanet.gp.terms.Matern32Term
+
+
 Estimators
 ----------
 
@@ -39,10 +54,11 @@ Utilities
 
 .. autofunction:: exoplanet.utils.eval_in_model
 
+.. autoclass:: exoplanet.sampling.TuningSchedule
+   :inherited-members:
+
 
 Citations
 ---------
 
 .. autofunction:: exoplanet.citations.get_citations_for_model
-
-
