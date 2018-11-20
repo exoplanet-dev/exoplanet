@@ -156,8 +156,8 @@ class TuningSchedule(object):
     def tune(self, tune=1000, start=None, step_kwargs=None, **kwargs):
         """Run the full tuning run for the mass matrix
 
-        This will run ``start`` steps of warmup followed by exponentially
-        increasing chains to tune the mass matrix.
+        This will run ``start`` steps of warmup followed by chains with
+        exponentially increasing chains to tune the mass matrix.
 
         Args:
             tune (int): The total number of steps to run.
