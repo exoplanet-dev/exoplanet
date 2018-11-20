@@ -6,11 +6,11 @@ __all__ = ["eval_in_model"]
 
 import theano
 
-from pymc3.model import modelcontext
+import pymc3 as pm
 
 
 def eval_in_model(var, point=None, model=None, return_func=False, **kwargs):
-    model = modelcontext(model)
+    model = pm.modelcontext(model)
     if point is None:
         point = model.test_point
     kwargs["on_unused_input"] = kwargs.get("on_unused_input", "ignore")
