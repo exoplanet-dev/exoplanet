@@ -70,6 +70,3 @@ class KeplerOp(gof.COp):
         if eval_points[0] is None:
             return eval_points
         return self.grad(inputs, eval_points)
-
-    def c_compile_args(self, compiler):
-        return ["-O3"]
