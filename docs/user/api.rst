@@ -32,6 +32,7 @@ Scalable Gaussian processes
 .. autoclass:: exoplanet.gp.terms.ComplexTerm
 .. autoclass:: exoplanet.gp.terms.SHOTerm
 .. autoclass:: exoplanet.gp.terms.Matern32Term
+.. autoclass:: exoplanet.gp.terms.RotationTerm
 
 
 Estimators

@@ -5,7 +5,7 @@ from __future__ import division, print_function
 __all__ = [
     "Term", "TermSum", "TermProduct", "TermDiff",
     "RealTerm", "ComplexTerm",
-    "SHOTerm", "Matern32Term",
+    "SHOTerm", "Matern32Term", "RotationTerm",
 ]
 
 import numpy as np
@@ -17,6 +17,12 @@ from theano.ifelse import ifelse
 
 
 class Term(object):
+    """The abstract base "term" that is the superclass of all other terms
+
+    Subclasses should overload the :func:`terms.Term.get_real_coefficients`
+    and :func:`terms.Term.get_complex_coefficients` methods.
+
+    """
 
     parameter_names = tuple()
 
@@ -27,7 +33,7 @@ class Term(object):
                 raise ValueError(("Missing required parameter {0}. "
                                   "Provide {0} or log_{0}").format(name))
             value = kwargs[name] if name in kwargs \
-                else tt.exp(kwargs["log_" + name], name=name)
+                else tt.exp(kwargs["log_" + name])
             setattr(self, name, tt.cast(value, self.dtype))
 
         self.coefficients = self.get_coefficients()
@@ -211,6 +217,27 @@ class TermDiff(Term):
 
 
 class RealTerm(Term):
+    r"""The simplest celerite term
+
+    This term has the form
+
+    .. math::
+
+        k(\tau) = a_j\,e^{-c_j\,\tau}
+
+    with the parameters ``a`` and ``c``.
+
+    Strictly speaking, for a sum of terms, the parameter ``a`` could be
+    allowed to go negative but since it is somewhat subtle to ensure positive
+    definiteness, we recommend keeping both parameters strictly positive.
+    Advanced users can build a custom term that has negative coefficients but
+    care should be taken to ensure positivity.
+
+    Args:
+        a or log_a: The lamplitude of the term.
+        c or log_c: The lexponent of the term.
+
+    """
 
     parameter_names = ("a", "c")
 
@@ -222,6 +249,27 @@ class RealTerm(Term):
 
 
 class ComplexTerm(Term):
+    r"""A general celerite term
+
+    This term has the form
+
+    .. math::
+
+        k(\tau) = \frac{1}{2}\,\left[(a_j + b_j)\,e^{-(c_j+d_j)\,\tau}
+         + (a_j - b_j)\,e^{-(c_j-d_j)\,\tau}\right]
+
+    with the parameters ``a``, ``b``, ``c``, and ``d``.
+
+    This term will only correspond to a positive definite kernel (on its own)
+    if :math:`a_j\,c_j \ge b_j\,d_j`.
+
+    Args:
+        a or log_a: The real part of amplitude.
+        b or log_b: The imaginary part of amplitude.
+        c or log_c: The real part of the exponent.
+        d or log_d: The imaginary part of exponent.
+
+    """
 
     parameter_names = ("a", "b", "c", "d")
 
@@ -235,6 +283,23 @@ class ComplexTerm(Term):
 
 
 class SHOTerm(Term):
+    r"""A term representing a stochastically-driven, damped harmonic oscillator
+
+    The PSD of this term is
+
+    .. math::
+
+        S(\omega) = \sqrt{\frac{2}{\pi}} \frac{S_0\,\omega_0^4}
+        {(\omega^2-{\omega_0}^2)^2 + {\omega_0}^2\,\omega^2/Q^2}
+
+    with the parameters ``S0``, ``Q``, and ``w0``.
+
+    Args:
+        S0 or log_S0: The parameter :math:`S_0`.
+        Q or log_Q: The parameter :math:`Q`.
+        w0 or log_w0: The parameter :math:`\omega_0`.
+
+    """
 
     parameter_names = ("S0", "w0", "Q")
 
@@ -275,6 +340,34 @@ class SHOTerm(Term):
 
 
 class Matern32Term(Term):
+    r"""A term that approximates a Matern-3/2 function
+
+    This term is defined as
+
+    .. math::
+
+        k(\tau) = \sigma^2\,\left[
+            \left(1+1/\epsilon\right)\,e^{-(1-\epsilon)\sqrt{3}\,\tau/\rho}
+            \left(1-1/\epsilon\right)\,e^{-(1+\epsilon)\sqrt{3}\,\tau/\rho}
+        \right]
+
+    with the parameters ``sigma`` and ``rho``. The parameter ``eps``
+    controls the quality of the approximation since, in the limit
+    :math:`\epsilon \to 0` this becomes the Matern-3/2 function
+
+    .. math::
+
+        \lim_{\epsilon \to 0} k(\tau) = \sigma^2\,\left(1+
+        \frac{\sqrt{3}\,\tau}{\rho}\right)\,
+        \exp\left(-\frac{\sqrt{3}\,\tau}{\rho}\right)
+
+    Args:
+        sigma or log_sigma: The parameter :math:`\sigma`.
+        rho or log_rho: The parameter :math:`\rho`.
+        eps (Optional[float]): The value of the parameter :math:`\epsilon`.
+            (default: `0.01`)
+
+    """
 
     parameter_names = ("sigma", "rho")
 
@@ -294,3 +387,45 @@ class Matern32Term(Term):
             tt.reshape(w0, (w0.size,)),
             tt.reshape(self.eps, (w0.size,))
         )
+
+
+class RotationTerm(TermSum):
+    r"""A mixture of two SHO terms that can be used to model stellar rotation
+
+    This term has two modes in Fourier space: one at ``period`` and one at
+    ``0.5 * period``. This can be a good descriptive model for a wide range of
+    stochastic variability in stellar time series from rotation to pulsations.
+
+    Args:
+        amp or log_amp: The amplitude of the variability.
+        period or log_period: The primary period of variability.
+        Q0 or log_Q0: The quality factor (or really the quality factor minus
+            one half) for the secondary oscillation.
+        deltaQ or log_deltaQ: The difference between the quality factors of
+            the first and the second modes. This parameterization (if
+            ``deltaQ > 0``) ensures that the primary mode alway has higher
+            quality.
+        mix: The fractional amplitude of the secondary mode compared to the
+            primary. This should probably always be ``0 < mix < 1``.
+
+    """
+
+    parameter_names = ("amp", "Q0", "deltaQ", "period", "mix")
+
+    def __init__(self, **kwargs):
+        super(RotationTerm, self).__init__(**kwargs)
+
+        # One term with a period of period
+        Q1 = 0.5 + self.Q0 + self.deltaQ
+        w1 = 4*np.pi*Q1/(self.period * tt.sqrt(4*Q1**2-1))
+        S1 = self.amp / (w1 * Q1)
+
+        # Another term at half the period
+        Q2 = 0.5 + self.Q0
+        w2 = 8*np.pi*Q2/(self.period * tt.sqrt(4*Q2**2-1))
+        S2 = self.mix * self.amp / (w1 * Q2)
+
+        self.terms = (
+            SHOTerm(S0=S1, w0=w1, Q=Q1),
+            SHOTerm(S0=S2, w0=w2, Q=Q2))
+        self.coefficients = self.get_coefficients()
