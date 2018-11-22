@@ -176,6 +176,12 @@ class TuningSchedule(object):
 
     def sample(self, trace=None, step=None, start=None, step_kwargs=None,
                **kwargs):
+        """Run the production sampling using the tuned mass matrix
+
+        This is a light wrapper around ``pymc3.sample`` and any arguments used
+        there (for example ``draws``) can be used as input to this method too.
+
+        """
         start, step = self._get_start_and_step(
             start=start, step_kwargs=step_kwargs, trace=trace, step=step)
         kwargs["tune"] = self.finish
