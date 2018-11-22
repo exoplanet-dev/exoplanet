@@ -24,6 +24,7 @@ exoplanet
 
    tutorials/quickstart
    tutorials/intro-to-pymc3
+   tutorials/gp
 
 
 .. toctree::
