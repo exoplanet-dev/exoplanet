@@ -2,7 +2,9 @@
 
 from __future__ import division, print_function
 
-__all__ = ["eval_in_model"]
+__all__ = ["eval_in_model", "get_samples_from_trace"]
+
+import numpy as np
 
 import theano
 
@@ -50,3 +52,17 @@ def eval_in_model(var, point=None, return_func=False, model=None, **kwargs):
     if return_func:
         return func(*args), func, args
     return func(*args)
+
+
+def get_samples_from_trace(trace, size=1):
+    """Generate random samples from a PyMC3 MultiTrace
+
+    Args:
+        trace: The ``MultiTrace``.
+        size: The number of samples to generate.
+
+    """
+    for i in range(size):
+        chain_idx = np.random.randint(len(trace.chains))
+        sample_idx = np.random.randint(len(trace))
+        yield trace._straces[chain_idx][sample_idx]
