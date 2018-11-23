@@ -16,7 +16,6 @@
 
 
 int get_dimensions(PyArrayObject* input, npy_intp* N, npy_intp* J) {
-  int flag = 0;
   if (input == NULL || PyArray_NDIM(input) != 2 || !PyArray_CHKFLAGS(input, NPY_ARRAY_C_CONTIGUOUS)) {
     PyErr_Format(PyExc_ValueError, "dimension mismatch");
     return 1;
@@ -27,7 +26,6 @@ int get_dimensions(PyArrayObject* input, npy_intp* N, npy_intp* J) {
 }
 
 int check_input(int ndim, npy_intp* shape, PyArrayObject* input) {
-  int flag = 0;
   if (input == NULL || PyArray_NDIM(input) != ndim || !PyArray_CHKFLAGS(input, NPY_ARRAY_C_CONTIGUOUS)) {
     PyErr_Format(PyExc_ValueError, "dimension mismatch");
     return 1;

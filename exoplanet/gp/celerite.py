@@ -10,6 +10,10 @@ import theano.tensor as tt
 from ..citations import add_citations_to_model
 from ..theano_ops.celerite.solve import SolveOp
 from ..theano_ops.celerite.factor import FactorOp
+from ..theano_ops.celerite.diag_dot import DiagDotOp
+
+
+diag_dot = DiagDotOp()
 
 
 class GP(object):
@@ -44,8 +48,27 @@ class GP(object):
     def apply_inverse(self, rhs):
         return self.general_solve_op(self.U, self.P, self.d, self.W, rhs)[0]
 
-    def predict(self, t=None):
+    def predict(self, t=None, return_var=False, return_cov=False):
         if t is None:
-            return self.y - self.diag * self.z[:, 0]
-        Ks = self.kernel.value(t[:, None] - self.x[None, :])
-        return tt.dot(Ks, self.z)
+            mu = self.y - self.diag * self.z[:, 0]
+            t = self.x
+            Kxs = self.kernel.value(self.x[:, None] - self.x[None, :])
+            KxsT = Kxs
+            Kss = Kxs
+        else:
+            KxsT = self.kernel.value(t[None, :] - self.x[:, None])
+            Kxs = tt.transpose(KxsT)
+            Kss = self.kernel.value(t[:, None] - t[None, :])
+            mu = tt.dot(Kxs, self.z)[:, 0]
+
+        if not (return_var or return_cov):
+            return mu
+
+        KinvKxsT = self.apply_inverse(KxsT)
+        if return_var:
+            var = -diag_dot(Kxs, KinvKxsT)  # tt.sum(KxsT*KinvKxsT, axis=0)
+            var += self.kernel.value(0)
+            return mu, var
+
+        cov = Kss - tt.dot(Kxs, KinvKxsT)
+        return mu, cov
