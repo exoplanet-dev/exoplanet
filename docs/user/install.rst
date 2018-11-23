@@ -3,6 +3,11 @@
 Installation
 ============
 
+*exoplanet* doesn't have a compiled component.
+
+Dependencies
+------------
+
 The core implementation of celerite is written in C++ so this will need to be
 compiled to be called from Python. The easiest way for a new user to do this
 will be by following the directions in the :ref:`using-conda` section below.

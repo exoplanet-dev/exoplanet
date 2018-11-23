@@ -20,19 +20,18 @@ exoplanet
 
 .. toctree::
    :maxdepth: 2
-   :caption: Tutorials
-
-   tutorials/quickstart
-   tutorials/intro-to-pymc3
-   tutorials/gp
-
-
-.. toctree::
-   :maxdepth: 2
    :caption: User Documentation
 
    user/install
    user/api
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Tutorials
+
+   tutorials/intro-to-pymc3
+   tutorials/gp
 
 
 License & Attribution
