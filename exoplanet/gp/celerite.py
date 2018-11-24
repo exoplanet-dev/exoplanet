@@ -48,17 +48,25 @@ class GP(object):
     def apply_inverse(self, rhs):
         return self.general_solve_op(self.U, self.P, self.d, self.W, rhs)[0]
 
-    def predict(self, t=None, return_var=False, return_cov=False):
-        if t is None:
+    def predict(self, t=None, return_var=False, return_cov=False, kernel=None):
+        mu = None
+        if t is None and kernel is None:
             mu = self.y - self.diag * self.z[:, 0]
+
+        if kernel is None:
+            kernel = self.kernel
+
+        if t is None:
             t = self.x
-            Kxs = self.kernel.value(self.x[:, None] - self.x[None, :])
+            Kxs = kernel.value(self.x[:, None] - self.x[None, :])
             KxsT = Kxs
             Kss = Kxs
         else:
-            KxsT = self.kernel.value(t[None, :] - self.x[:, None])
+            KxsT = kernel.value(t[None, :] - self.x[:, None])
             Kxs = tt.transpose(KxsT)
-            Kss = self.kernel.value(t[:, None] - t[None, :])
+            Kss = kernel.value(t[:, None] - t[None, :])
+
+        if mu is None:
             mu = tt.dot(Kxs, self.z)[:, 0]
 
         if not (return_var or return_cov):
@@ -67,7 +75,7 @@ class GP(object):
         KinvKxsT = self.apply_inverse(KxsT)
         if return_var:
             var = -diag_dot(Kxs, KinvKxsT)  # tt.sum(KxsT*KinvKxsT, axis=0)
-            var += self.kernel.value(0)
+            var += kernel.value(0)
             return mu, var
 
         cov = Kss - tt.dot(Kxs, KinvKxsT)
