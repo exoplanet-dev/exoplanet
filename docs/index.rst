@@ -31,6 +31,7 @@ exoplanet
    :caption: Tutorials
 
    tutorials/intro-to-pymc3
+   tutorials/pymc3-extras
    tutorials/gp
 
 
