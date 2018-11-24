@@ -1,0 +1,18 @@
+name: exoplanet
+channels:
+  - defaults
+  - conda-forge
+prefix: /Users/dforeman/anaconda/envs/exoplanet
+dependencies:
+  - python=3.7
+  - numpy
+  - pandas
+  - matplotlib
+  - jupyter
+  - jupyterlab
+  - pymc3
+  - astropy
+  - starry
+  - pip:
+      - batman-package
+      - neovim

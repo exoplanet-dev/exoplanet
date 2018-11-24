@@ -3,7 +3,8 @@
 Installation
 ============
 
-*exoplanet* doesn't have a compiled component.
+*exoplanet* doesn't have a compiled components so it can be easily installed
+using.
 
 Dependencies
 ------------
