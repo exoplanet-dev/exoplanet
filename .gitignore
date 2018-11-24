@@ -8,3 +8,4 @@ transit/cuda
 demo
 .pytest_cache
 dist
+for_ed
