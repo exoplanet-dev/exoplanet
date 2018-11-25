@@ -191,7 +191,7 @@ class RadiusImpactParameter(pm.Flat):
 def get_joint_r_and_b_distribution(name="", N_planets=None,
                                    min_radius=0, max_radius=1,
                                    r_star=None, testval_r=None, testval_b=None,
-                                   model=None, **kwargs):
+                                   **kwargs):
     """Get the joint distribution over radius and impact parameter
 
     This uses the Espinoza (2018) parameterization of the distribution (see
@@ -246,14 +246,14 @@ def get_joint_r_and_b_distribution(name="", N_planets=None,
     # Construct the join distribution
     rb = RadiusImpactParameter(
         name + "rb", min_radius=min_radius, max_radius=max_radius,
-        shape=(2, N_planets), testval=rb_test, model=model, **kwargs)
+        shape=(2, N_planets), testval=rb_test, **kwargs)
 
     # Extract the individual components
-    b = pm.Deterministic(name + "b", rb[1], model=model)
+    b = pm.Deterministic(name + "b", rb[1])
 
     # Determine if the radius parameter is the radius or the radius ratio
     if r_star is None:
-        r = pm.Deterministic(name + "r", rb[0], model=model)
+        r = pm.Deterministic(name + "r", rb[0])
     else:
         ror = pm.Deterministic(name + "ror", rb[0])
         r = pm.Deterministic(name + "r", ror * r_star)
