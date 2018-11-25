@@ -113,8 +113,6 @@ class TuningSchedule(object):
             step_kwargs = {}
         step = self.get_step_for_trace(**step_kwargs)
         self._extend(self.start, start=start, step=step, **kwargs)
-        self._current_step = self.get_step_for_trace(self._current_trace,
-                                                     **step_kwargs)
         return self._current_trace
 
     def _get_start_and_step(self, start=None, step_kwargs=None, trace=None,

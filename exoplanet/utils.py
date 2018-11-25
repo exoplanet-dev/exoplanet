@@ -38,15 +38,8 @@ def eval_in_model(var, point=None, return_func=False, model=None, **kwargs):
     if point is None:
         point = model.test_point
 
-    # Cache the function if it has previously been compiled
-    if not hasattr(model, "_exoplanet_eval_funcs"):
-        model._exoplanet_eval_funcs = dict()
     kwargs["on_unused_input"] = kwargs.get("on_unused_input", "ignore")
-    func = model._exoplanet_eval_funcs.get(
-        var, theano.function(model.vars, var, **kwargs))
-    model._exoplanet_eval_funcs[var] = func
-
-    # Work out the arguments
+    func = theano.function(model.vars, var, **kwargs)
     args = [point[k.name] for k in model.vars]
 
     if return_func:
