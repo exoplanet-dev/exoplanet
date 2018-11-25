@@ -18,6 +18,9 @@ exoplanet
     </p>
 
 
+User guide
+----------
+
 .. toctree::
    :maxdepth: 2
    :caption: User Documentation
@@ -26,16 +29,18 @@ exoplanet
    user/api
 
 
+Tutorials
+---------
+
 .. toctree::
    :maxdepth: 2
-   :caption: Tutorials
 
    tutorials/intro-to-pymc3
    tutorials/pymc3-extras
    tutorials/gp
 
 
-License & Attribution
+License & attribution
 ---------------------
 
 Copyright 2018, Daniel Foreman-Mackey.

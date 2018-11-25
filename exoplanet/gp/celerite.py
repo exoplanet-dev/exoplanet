@@ -25,8 +25,8 @@ class GP(object):
 
         self.kernel = kernel
         self.J = J
-        self.x = x
-        self.diag = diag
+        self.x = tt.as_tensor_variable(x)
+        self.diag = tt.as_tensor_variable(diag)
         self.a, self.U, self.V, self.P = self.kernel.get_celerite_matrices(
             self.x, self.diag)
         self.factor_op = FactorOp(J=self.J)
@@ -52,6 +52,8 @@ class GP(object):
         mu = None
         if t is None and kernel is None:
             mu = self.y - self.diag * self.z[:, 0]
+            if not (return_var or return_cov):
+                return mu
 
         if kernel is None:
             kernel = self.kernel
@@ -62,6 +64,7 @@ class GP(object):
             KxsT = Kxs
             Kss = Kxs
         else:
+            t = tt.as_tensor_variable(t)
             KxsT = kernel.value(t[None, :] - self.x[:, None])
             Kxs = tt.transpose(KxsT)
             Kss = kernel.value(t[:, None] - t[None, :])
