@@ -208,9 +208,6 @@ def get_joint_r_and_b_distribution(name="", N_planets=None,
             be 1.
         min_radius (Optional[float]): The minimum allowed radius.
         max_radius (Optional[float]): The maximum allowed radius.
-        r_star (Optional[scalar]): The radius of the star (or a PyMC3 variable
-            giving the stellar radius). If given, the radius parameter will be
-            treated as a radius ratio instead of the physical radius.
         testval_r (Optional[float or array]): An initial guess for the radius
             parameter. This should be a ``float`` or an array with
             ``N_planets`` entries.
@@ -249,13 +246,7 @@ def get_joint_r_and_b_distribution(name="", N_planets=None,
         shape=(2, N_planets), testval=rb_test, **kwargs)
 
     # Extract the individual components
+    r = pm.Deterministic(name + "r", rb[0])
     b = pm.Deterministic(name + "b", rb[1])
-
-    # Determine if the radius parameter is the radius or the radius ratio
-    if r_star is None:
-        r = pm.Deterministic(name + "r", rb[0])
-    else:
-        ror = pm.Deterministic(name + "ror", rb[0])
-        r = pm.Deterministic(name + "r", ror * r_star)
 
     return r, b
