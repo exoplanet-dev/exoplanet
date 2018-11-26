@@ -56,9 +56,10 @@ Testing
 To run the unit tests, install the following dependencies using pip or conda
 (you'll need to use the ``conda-forge`` channel to get starry):
 
-.. code-block::
+.. code-block:: bash
 
-    numpy scipy astropy pymc3 pytest starry batman-package parameterized nose
+    conda install -c conda-forge numpy scipy astropy pymc3 pytest starry pip
+    pip install batman-package parameterized nose
 
 and then execute:
 

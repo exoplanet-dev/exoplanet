@@ -11,6 +11,12 @@ Orbits
 .. autoclass:: exoplanet.orbits.KeplerianOrbit
    :inherited-members:
 
+.. autoclass:: exoplanet.orbits.TTVOrbit
+   :inherited-members:
+
+.. autoclass:: exoplanet.orbits.SimpleTransitOrbit
+   :inherited-members:
+
 
 Light curve models
 ------------------

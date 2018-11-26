@@ -20,6 +20,7 @@ class Mock(MagicMock):
 
 MOCK_MODULES = [
     "numpy",
+    "scipy",
     "astropy",
     "astropy.stats",
     "astropy.units",
