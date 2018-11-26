@@ -21,18 +21,53 @@ G_grav = constants.G.to(u.R_sun**3 / u.M_sun / u.day**2).value
 class KeplerianOrbit(object):
     """A system of bodies on Keplerian orbits around a common central
 
+    Given the input parameters, the values of all other parameters will be
+    computed so a ``KeplerianOrbit`` instance will always have attributes for
+    each argument. Note that the units of the computed attributes will all be
+    in the standard units of this class (``R_sun``, ``M_sun``, and ``days``)
+    except for ``rho_star`` which will be in ``g / cm^3``.
+
+    There are only specific combinations of input parameters that can be used:
+
+    1. First, either ``period`` or ``a`` must be given. If values are given
+       for both parameters, then neither ``m_star`` or ``rho_star`` can be
+       defined because the stellar density implied by each planet will be
+       computed in ``rho_star``.
+    2. Only one of ``incl`` and ``b`` can be given.
+    3. If a value is given for ``ecc`` then ``omega`` must also be given.
+    4. If no stellar parameters are given, the central body is assumed to be
+       the sun. If only ``rho_star`` is defined, the radius of the central is
+       assumed to be ``1 * R_sun``. Otherwise, at most two of ``m_star``,
+       ``r_star``, and ``rho_star`` can be defined.
+
+    Args:
+        period: The orbital periods of the bodies in days.
+        a: The semimajor axes of the orbits in ``R_sun``.
+        t0: The time of a reference transit for each orbits in days.
+        incl: The inclinations of the orbits in radians.
+        b: The impact parameters of the orbits.
+        ecc: The eccentricities of the orbits. Must be ``0 <= ecc < 1``.
+        omega: The arguments of periastron for the orbits in radians.
+        m_planet: The masses of the planets in units of ``m_planet_units``.
+        m_star: The mass of the star in ``M_sun``.
+        r_star: The radius of the star in ``R_sun``.
+        rho_star: The density of the star in units of ``rho_star_units``.
+        m_planet_units: An ``astropy.units`` compatible unit object giving the
+            units of the planet masses. If not given, the default is ``M_sun``.
+        rho_star_units: An ``astropy.units`` compatible unit object giving the
+            units of the stellar density. If not given, the default is
+            ``g / cm^3``.
+
     """
 
     __citations__ = ("astropy", )
 
     def __init__(self,
-                 period=None, a=None, rho_star=None,
-                 t0=0.0, incl=None, b=None,
-                 m_star=None, r_star=None,
-                 ecc=None, omega=None,
-                 m_planet=0.0, model=None,
-                 m_planet_units=None,
-                 rho_units=None,
+                 period=None, a=None, t0=0.0, incl=None, b=None,
+                 ecc=None, omega=None, m_planet=0.0,
+                 m_star=None, r_star=None, rho_star=None,
+                 m_planet_units=None, rho_star_units=None,
+                 model=None,
                  **kwargs):
         add_citations_to_model(self.__citations__, model=model)
 
@@ -47,7 +82,7 @@ class KeplerianOrbit(object):
 
         self.a, self.period, self.rho_star, self.r_star, self.m_star = \
             self._get_consistent_inputs(a, period, rho_star, r_star, m_star,
-                                        rho_units)
+                                        rho_star_units)
         self.m_total = self.m_star + self.m_planet
 
         self.n = 2 * np.pi / self.period
@@ -62,6 +97,8 @@ class KeplerianOrbit(object):
                 self.b = tt.as_tensor_variable(b)
                 self.incl = tt.arccos(self.b / self.a_planet)
         else:
+            if b is not None:
+                raise ValueError("only one of 'incl' and 'b' can be given")
             self.incl = tt.as_tensor_variable(incl)
             self.b = self.a_planet * tt.cos(self.incl)
 
@@ -89,7 +126,7 @@ class KeplerianOrbit(object):
             self.K0 /= tt.sqrt(1 - self.ecc**2)
 
     def _get_consistent_inputs(self, a, period, rho_star, r_star, m_star,
-                               rho_units):
+                               rho_star_units):
         if a is None and period is None:
             raise ValueError("values must be provided for at least one of a "
                              "and period")
@@ -108,7 +145,7 @@ class KeplerianOrbit(object):
                 r_star = 1.0
             rho_star = 3*np.pi*(a / r_star)**3 / (G_grav*period**2)
             rho_star -= 3*self.m_planet/(4*np.pi*r_star**3)
-            rho_units = None
+            rho_star_units = None
 
         # Make sure that the right combination of stellar parameters are given
         if r_star is None and m_star is None:
@@ -121,8 +158,10 @@ class KeplerianOrbit(object):
 
         if rho_star is not None:
             rho_star = tt.as_tensor_variable(rho_star)
-            if rho_units is not None:
-                rho_star *= (1 * rho_units).to(u.M_sun / u.R_sun**3).value
+            if rho_star_units is not None:
+                rho_star *= (1 * rho_star_units).to(u.M_sun / u.R_sun**3).value
+            else:
+                rho_star /= gcc_to_sun
         if r_star is not None:
             r_star = tt.as_tensor_variable(r_star)
         if m_star is not None:
@@ -153,8 +192,11 @@ class KeplerianOrbit(object):
             b = self.sin_omega * x + self.cos_omega * y
         return (a, self.cos_incl * b, self.sin_incl * b)
 
+    def _warp_times(self, t):
+        return tt.shape_padright(t)
+
     def _get_true_anomaly(self, t):
-        M = (tt.shape_padright(t) - self.tref) * self.n
+        M = (self._warp_times(t) - self.tref) * self.n
         if self.ecc is None:
             return M
         _, f = self.kepler_op(M, self.ecc + tt.zeros_like(M))
@@ -293,7 +335,7 @@ class KeplerianOrbit(object):
 
         # Wrap the times into time since transit
         hp = 0.5 * self.period
-        dt = tt.mod(tt.shape_padright(t) - self.t0 + hp, self.period) - hp
+        dt = tt.mod(self._warp_times(t) - self.t0 + hp, self.period) - hp
 
         # Estimate the data points that are within the maximum duration of the
         # transit
