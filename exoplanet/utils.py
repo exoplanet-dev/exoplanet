@@ -11,6 +11,19 @@ import theano
 import pymc3 as pm
 
 
+def get_args_for_theano_function(point=None, model=None):
+    model = pm.modelcontext(model)
+    if point is None:
+        point = model.test_point
+    return [point[k.name] for k in model.vars]
+
+
+def get_theano_function_for_var(var, model=None, **kwargs):
+    model = pm.modelcontext(model)
+    kwargs["on_unused_input"] = kwargs.get("on_unused_input", "ignore")
+    return theano.function(model.vars, var, **kwargs)
+
+
 def eval_in_model(var, point=None, return_func=False, model=None, **kwargs):
     """Evaluate a Theano tensor or PyMC3 variable in a PyMC3 model
 
@@ -34,14 +47,8 @@ def eval_in_model(var, point=None, return_func=False, model=None, **kwargs):
         or this value, the Theano function, and the input arguments.
 
     """
-    model = pm.modelcontext(model)
-    if point is None:
-        point = model.test_point
-
-    kwargs["on_unused_input"] = kwargs.get("on_unused_input", "ignore")
-    func = theano.function(model.vars, var, **kwargs)
-    args = [point[k.name] for k in model.vars]
-
+    func = get_theano_function_for_var(var, model=model, **kwargs)
+    args = get_args_for_theano_function(point=point, model=model)
     if return_func:
         return func(*args), func, args
     return func(*args)
