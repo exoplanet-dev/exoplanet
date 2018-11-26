@@ -309,17 +309,17 @@ class KeplerianOrbit(object):
         v = self.get_star_velocity(t)
         return conv * v[2]
 
-    def approx_in_transit(self, t, r=0.0, duration_factor=3, texp=None):
+    def approx_in_transit(self, t, r=0.0, texp=None, duration_factor=3):
         """Get a list of timestamps that are expected to be in transit
 
         Args:
             t (vector): A vector of timestamps to be evaluated.
             r (Optional): The radii of the planets.
+            texp (Optional[float]): The exposure time.
             duration_factor (Optional[float]): The factor by which to multiply
                 the approximate duration when computing the in transit points.
                 Larger values will be more conservative and might be needed for
                 large planets or very eccentric orbits.
-            texp (Optional[float]): The exposure time.
 
         Returns:
             inds (vector): The indices of the timestamps that are expected to
