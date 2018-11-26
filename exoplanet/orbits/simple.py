@@ -8,18 +8,29 @@ import theano.tensor as tt
 
 
 class SimpleTransitOrbit(object):
+    """An orbit representing a set of planets transiting a common central
 
-    def __init__(self, period=None, t0=0.0, b=0.0, duration=None,
-                 r=None, r_star=1.0):
+    This orbit is parameterized by the observables of a transiting system,
+    period, phase, duration, and impact parameter.
+
+    Args:
+        period: The orbital period of the planets in days.
+        t0: The midpoint time of a reference transit for each planet in days.
+        b: The impact parameters of the orbits.
+        duration: The durations of the transits in days.
+        r_star: The radius of the star in ``R_sun``.
+
+    """
+
+    def __init__(self, period=None, t0=0.0, b=0.0, duration=None, r_star=1.0):
         self.period = tt.as_tensor_variable(period)
         self.t0 = tt.as_tensor_variable(t0)
         self.b = tt.as_tensor_variable(b)
         self.duration = tt.as_tensor_variable(duration)
-        self.r = tt.as_tensor_variable(r)
         self.r_star = tt.as_tensor_variable(r_star)
 
         self._b_norm = self.b * self.r_star
-        x2 = (self.r + self.r_star)**2 - self._b_norm**2
+        x2 = self.r_star**2 - self._b_norm**2
         self.speed = 2 * tt.sqrt(x2) / self.duration
         self._half_period = 0.5 * self.period
         self._ref_time = self.t0 - self._half_period
@@ -72,11 +83,13 @@ class SimpleTransitOrbit(object):
             inds (vector): The indices of the timestamps that are in transit.
 
         """
-        if r is None:
-            r = self.r
         dt = tt.mod(tt.shape_padright(t) - self._ref_time, self.period)
         dt -= self._half_period
-        tol = self.duration
+        if self.r is None:
+            tol = 0.5 * self.duration
+        else:
+            x = (r + self.r_star)**2 - self._b_norm**2
+            tol = tt.sqrt(x) / self.speed
         if texp is not None:
             tol += 0.5 * texp
         mask = tt.any(tt.abs_(dt) < tol, axis=-1)
