@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__version__ = "0.0.1"
+from .exoplanet_version import __version__  # NOQA
 
 try:
     __EXOPLANET_SETUP__
