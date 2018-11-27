@@ -23,9 +23,6 @@ class TestKeplerSolver(utt.InferShapeTester):
         f = 2 * np.arctan(np.sqrt((1+e)/(1-e)) * np.tan(0.5*E))
         return M, f
 
-    def _wrap_E(self, E):
-        return (E + np.pi) % (2*np.pi) - np.pi
-
     def test_edge(self):
         E = np.array([0.0, 2*np.pi, -226.2])
         e = (1 - 1e-6) * np.ones_like(E)
@@ -37,7 +34,7 @@ class TestKeplerSolver(utt.InferShapeTester):
         E0, f0 = func(M, e)
 
         assert np.all(np.isfinite(E0))
-        utt.assert_allclose(self._wrap_E(E), E0)
+        utt.assert_allclose(E, E0)
         assert np.all(np.isfinite(f0))
         utt.assert_allclose(f, f0)
 
@@ -52,7 +49,12 @@ class TestKeplerSolver(utt.InferShapeTester):
         e_t = tt.matrix()
         func = theano.function([M_t, e_t], self.op(M_t, e_t))
         E0, f0 = func(M, e)
-        utt.assert_allclose(self._wrap_E(E), E0)
+
+        delta = np.abs(E - E0)
+        ind = np.unravel_index(np.argmax(delta), delta.shape)
+        print(M[ind], e[ind], E[ind], E0[ind])
+
+        utt.assert_allclose(E, E0)
         utt.assert_allclose(f, f0)
 
     def test_infer_shape(self):

@@ -18,7 +18,7 @@ class KeplerOp(gof.COp):
     func_file = "./solver.cc"
     func_name = "APPLY_SPECIFIC(solver)"
 
-    def __init__(self, tol=1e-8, maxiter=2000, **kwargs):
+    def __init__(self, tol=1e-12, maxiter=1000, **kwargs):
         self.tol = float(tol)
         self.maxiter = int(maxiter)
         super(KeplerOp, self).__init__(self.func_file, self.func_name)
