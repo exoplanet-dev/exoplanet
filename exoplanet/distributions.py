@@ -2,7 +2,10 @@
 
 from __future__ import division, print_function
 
-__all__ = ["UnitVector", "Angle", "RadiusImpactParameter"]
+__all__ = [
+    "UnitVector", "Angle", "RadiusImpact", "QuadLimbDark",
+    "get_joint_radius_impact",
+]
 
 import numpy as np
 
@@ -60,7 +63,7 @@ class Angle(pm.Flat):
                                 size=size)
 
 
-class Triangle(pm.Flat):
+class QuadLimbDark(pm.Flat):
     """An uninformative prior for quadratic limb darkening parameters
 
     This is an implementation of the `Kipping (2013)
@@ -85,9 +88,9 @@ class Triangle(pm.Flat):
                 raise ValueError("the first dimension should be exactly 2")
 
         kwargs["shape"] = shape
-        kwargs["transform"] = tr.triangle
+        kwargs["transform"] = tr.quad_limb_dark
 
-        super(Triangle, self).__init__(*args, **kwargs)
+        super(QuadLimbDark, self).__init__(*args, **kwargs)
 
         # Work out some reasonable starting values for the parameters
         default = np.zeros(shape)
@@ -113,7 +116,7 @@ class Triangle(pm.Flat):
                                 size=size)
 
 
-class RadiusImpactParameter(pm.Flat):
+class RadiusImpact(pm.Flat):
     """The Espinoza (2018) distribution over radius and impact parameter
 
     This is an implementation of `Espinoza (2018)
@@ -121,6 +124,10 @@ class RadiusImpactParameter(pm.Flat):
     The first axis of the shape of the parameter should be exactly 2. The
     radius ratio will be in the zeroth entry in the first dimension and
     the impact parameter will be in the first.
+
+    Args:
+        min_radius: The minimum allowed radius.
+        max_radius: The maximum allowed radius.
 
     """
     __citations__ = ("espinoza18", )
@@ -143,7 +150,7 @@ class RadiusImpactParameter(pm.Flat):
         kwargs["shape"] = shape
         kwargs["transform"] = transform
 
-        super(RadiusImpactParameter, self).__init__(*args, **kwargs)
+        super(RadiusImpact, self).__init__(*args, **kwargs)
 
         # Work out some reasonable starting values for the parameters
         default = np.zeros(shape)
@@ -188,10 +195,10 @@ class RadiusImpactParameter(pm.Flat):
                                 size=size)
 
 
-def get_joint_r_and_b_distribution(name="", N_planets=None,
-                                   min_radius=0, max_radius=1,
-                                   r_star=None, testval_r=None, testval_b=None,
-                                   **kwargs):
+def get_joint_radius_impact(name="", N_planets=None,
+                            min_radius=0, max_radius=1,
+                            testval_r=None, testval_b=None,
+                            **kwargs):
     """Get the joint distribution over radius and impact parameter
 
     This uses the Espinoza (2018) parameterization of the distribution (see
@@ -201,8 +208,8 @@ def get_joint_r_and_b_distribution(name="", N_planets=None,
         name (Optional[str]): A prefix that is added to all distribution names
             used in this parameterization. For example, if ``name`` is
             ``param_``, vars will be added to the PyMC3 model with names:
-            ``param_rb`` (for the joint distribution), ``param_b``,
-            ``param_r``, and optionally ``param_ror`` if ``r_star`` is given.
+            ``param_rb`` (for the joint distribution), ``param_b``, and
+            ``param_r``.
         N_planets (Optional[int]): The number of planets. If not provided, it
             will be inferred from the ``testval_*`` parameters or assumed to
             be 1.
@@ -241,7 +248,7 @@ def get_joint_r_and_b_distribution(name="", N_planets=None,
         rb_test[1, :] = testval_b
 
     # Construct the join distribution
-    rb = RadiusImpactParameter(
+    rb = RadiusImpact(
         name + "rb", min_radius=min_radius, max_radius=max_radius,
         shape=(2, N_planets), testval=rb_test, **kwargs)
 
