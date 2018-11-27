@@ -23,10 +23,9 @@ def add_citations_to_model(citations, model=None):
 def get_citations_for_model(model=None):
     """Get the citations for the components used an exoplanet PyMC3
 
-    Returns:
-        txt: The acknowledgement text for exoplanet and its dependencies.
-        bib: A string containing the BibTeX entries for the citations in
-            ``txt``.
+    Returns: The acknowledgement text for exoplanet and its dependencies and a
+    string containing the BibTeX entries for the citations in the
+    acknowledgement.
 
     """
     model = pm.modelcontext(model)
@@ -34,8 +33,8 @@ def get_citations_for_model(model=None):
         logging.warning("no citations registered with model")
         return "", ""
 
-    cite = list(CITATIONS["pymc3"][0])
-    bib = [CITATIONS["pymc3"][1]]
+    cite = list(CITATIONS["pymc3"][0]) + list(CITATIONS["theano"][0])
+    bib = [CITATIONS["pymc3"][1], CITATIONS["theano"][1]]
     for k, v in model.__citations__.items():
         cite += list(v[0])
         bib.append(v[1])
@@ -58,6 +57,19 @@ CITATIONS = {
     pages={e55},
      year={2016},
 publisher={PeerJ Inc.}
+}
+"""),
+
+    "theano": (("exoplanet:theano", ), r"""
+@article{exoplanet:theano,
+    title="{Theano: A {Python} framework for fast computation of mathematical
+            expressions}",
+   author={{Theano Development Team}},
+  journal={arXiv e-prints},
+   volume={abs/1605.02688},
+     year=2016,
+    month=may,
+      url={http://arxiv.org/abs/1605.02688}
 }
 """),
 
