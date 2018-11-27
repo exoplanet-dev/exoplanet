@@ -202,12 +202,12 @@ def get_joint_radius_impact(name="", N_planets=None,
     """Get the joint distribution over radius and impact parameter
 
     This uses the Espinoza (2018) parameterization of the distribution (see
-    :class:`distributions.RadiusImpactParameter` for more details).
+    :class:`distributions.RadiusImpact` for more details).
 
     Args:
         name (Optional[str]): A prefix that is added to all distribution names
             used in this parameterization. For example, if ``name`` is
-            ``param_``, vars will be added to the PyMC3 model with names:
+            ``param_``, vars will be added to the PyMC3 model with names
             ``param_rb`` (for the joint distribution), ``param_b``, and
             ``param_r``.
         N_planets (Optional[int]): The number of planets. If not provided, it
@@ -223,8 +223,8 @@ def get_joint_radius_impact(name="", N_planets=None,
             ``N_planets`` entries.
 
     Returns:
-        r (Deterministic): The planet radius parameter.
-        b (Deterministic): The impact parameter.
+        Two ``pymc3.Deterministic`` variables for the planet radius and impact
+        parameter.
 
     """
     if N_planets is None:
