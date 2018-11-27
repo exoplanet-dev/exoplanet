@@ -46,8 +46,8 @@ def estimate_minimum_mass(periods, x, y, yerr=None, t0s=None, m_star=1):
             if not an AstroPy Quantity.
 
     Returns:
-        msini: An estimate of the minimum mass of each planet as an AstroPy
-            Quantity with units of ``M_jupiter``.
+        An estimate of the minimum mass of each planet as an AstroPy Quantity
+        with units of ``M_jupiter``.
 
     """
     if yerr is None:
@@ -157,7 +157,7 @@ def autocorr_function(x):
         x: The series as a 1-D numpy array.
 
     Returns:
-        array: The autocorrelation function of the time series.
+        The autocorrelation function of the time series.
 
     """
     x = np.atleast_1d(x)

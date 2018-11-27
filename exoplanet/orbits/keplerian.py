@@ -221,8 +221,8 @@ class KeplerianOrbit(object):
             t: The times where the position should be evaluated.
 
         Returns:
-            x, y, z: The components of the position vector at ``t`` in units
-                of ``R_sun``.
+            The components of the position vector at ``t`` in units of
+            ``R_sun``.
 
         """
         return tuple(tt.squeeze(x)
@@ -235,8 +235,8 @@ class KeplerianOrbit(object):
             t: The times where the position should be evaluated.
 
         Returns:
-            x, y, z: The components of the position vector at ``t`` in units
-                of ``R_sun``.
+            The components of the position vector at ``t`` in units of
+            ``R_sun``.
 
         """
         return tuple(tt.squeeze(x)
@@ -249,8 +249,8 @@ class KeplerianOrbit(object):
             t: The times where the position should be evaluated.
 
         Returns:
-            x, y, z: The components of the position vector at ``t`` in units
-                of ``R_sun``.
+            The components of the position vector at ``t`` in units of
+            ``R_sun``.
 
         """
         star = self._get_position(self.a_star, t)
@@ -272,8 +272,8 @@ class KeplerianOrbit(object):
             t: The times where the velocity should be evaluated.
 
         Returns:
-            vx, vy, vz: The components of the velocity vector at ``t`` in units
-                of ``M_sun/day``.
+            The components of the velocity vector at ``t`` in units of
+            ``M_sun/day``.
 
         """
         return tuple(tt.squeeze(x)
@@ -286,8 +286,8 @@ class KeplerianOrbit(object):
             t: The times where the velocity should be evaluated.
 
         Returns:
-            vx, vy, vz: The components of the velocity vector at ``t`` in units
-                of ``M_sun/day``.
+            The components of the velocity vector at ``t`` in units of
+            ``M_sun/day``.
 
         """
         return tuple(tt.squeeze(x)
@@ -302,8 +302,8 @@ class KeplerianOrbit(object):
                 the output will be evaluated in ``m/s``.
 
         Returns:
-            vrad: The radial velocity evaluated at ``t`` in units of
-                ``output_units``.
+            The radial velocity evaluated at ``t`` in units of
+            ``output_units``.
 
         """
         if output_units is None:
@@ -325,8 +325,7 @@ class KeplerianOrbit(object):
                 large planets or very eccentric orbits.
 
         Returns:
-            inds (vector): The indices of the timestamps that are expected to
-                be in transit.
+            The indices of the timestamps that are expected to be in transit.
 
         """
         # Estimate the maximum duration of the transit using the equations
