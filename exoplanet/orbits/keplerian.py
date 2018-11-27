@@ -14,9 +14,6 @@ from astropy import units as u
 from ..citations import add_citations_to_model
 from ..theano_ops.kepler.solver import KeplerOp
 
-gcc_to_sun = (constants.M_sun / constants.R_sun**3).to(u.g / u.cm**3).value
-G_grav = constants.G.to(u.R_sun**3 / u.M_sun / u.day**2).value
-
 
 class KeplerianOrbit(object):
     """A system of bodies on Keplerian orbits around a common central
@@ -70,6 +67,10 @@ class KeplerianOrbit(object):
                  model=None,
                  **kwargs):
         add_citations_to_model(self.__citations__, model=model)
+
+        self.gcc_to_sun = (
+            (constants.M_sun / constants.R_sun**3).to(u.g / u.cm**3).value)
+        self.G_grav = constants.G.to(u.R_sun**3 / u.M_sun / u.day**2).value
 
         self.kepler_op = KeplerOp(**kwargs)
 
@@ -143,7 +144,7 @@ class KeplerianOrbit(object):
                                  "also define rho_star or m_star")
             if r_star is None:
                 r_star = 1.0
-            rho_star = 3*np.pi*(a / r_star)**3 / (G_grav*period**2)
+            rho_star = 3*np.pi*(a / r_star)**3 / (self.G_grav*period**2)
             rho_star -= 3*self.m_planet/(4*np.pi*r_star**3)
             rho_star_units = None
 
@@ -161,7 +162,7 @@ class KeplerianOrbit(object):
             if rho_star_units is not None:
                 rho_star *= (1 * rho_star_units).to(u.M_sun / u.R_sun**3).value
             else:
-                rho_star /= gcc_to_sun
+                rho_star /= self.gcc_to_sun
         if r_star is not None:
             r_star = tt.as_tensor_variable(r_star)
         if m_star is not None:
@@ -177,11 +178,13 @@ class KeplerianOrbit(object):
 
         # Work out the planet parameters
         if a is None:
-            a = (G_grav*(m_star+self.m_planet)*period**2/(4*np.pi**2))**(1./3)
+            a = (self.G_grav*(m_star+self.m_planet)*period**2 /
+                 (4*np.pi**2))**(1./3)
         elif period is None:
-            period = 2*np.pi*a**(3/2)/(tt.sqrt(G_grav*(m_star+self.m_planet)))
+            period = 2*np.pi*a**(3/2)/(
+                tt.sqrt(self.G_grav*(m_star+self.m_planet)))
 
-        return a, period, rho_star * gcc_to_sun, r_star, m_star
+        return a, period, rho_star * self.gcc_to_sun, r_star, m_star
 
     def _rotate_vector(self, x, y):
         if self.ecc is None:
