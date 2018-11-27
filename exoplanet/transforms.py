@@ -2,7 +2,7 @@
 
 from __future__ import division, print_function
 
-__all__ = ["unit_vector", "angle", "triangle", "radius_impact"]
+__all__ = ["unit_vector", "angle", "quad_limb_dark", "radius_impact"]
 
 import numpy as np
 
@@ -68,14 +68,14 @@ class AngleTransform(tr.Transform):
 angle = AngleTransform()
 
 
-class TriangleTransform(tr.Transform):
+class QuadLimbDarkTransform(tr.Transform):
     """A triangle transformation for PyMC3
 
     Ref: https://arxiv.org/abs/1308.0009
 
     """
 
-    name = "triangle"
+    name = "quadlimbdark"
 
     def backward(self, y):
         q = tt.nnet.sigmoid(y)
@@ -108,7 +108,7 @@ class TriangleTransform(tr.Transform):
         return -2 * tt.nnet.softplus(-y) - y
 
 
-triangle = TriangleTransform()
+quad_limb_dark = QuadLimbDarkTransform()
 
 
 class RadiusImpactTransform(tr.Transform):
