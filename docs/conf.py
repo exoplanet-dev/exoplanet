@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import glob
 import subprocess
 
@@ -14,8 +15,6 @@ autodoc_mock_imports = [
     "pymc3",
     "theano",
 ]
-
-import exoplanet  # NOQA
 
 # Convert the tutorials
 for fn in glob.glob("_static/notebooks/*.ipynb"):
@@ -50,8 +49,11 @@ project = "exoplanet"
 author = "Dan Foreman-Mackey"
 copyright = "2018, " + author
 
-version = exoplanet.__version__
-release = exoplanet.__version__
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__))), "exoplanet"))
+from exoplanet_version import __version__  # NOQA
+version = __version__
+release = __version__
 
 exclude_patterns = ["_build"]
 pygments_style = "sphinx"
