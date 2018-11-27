@@ -234,8 +234,8 @@ class RealTerm(Term):
     care should be taken to ensure positivity.
 
     Args:
-        a or log_a: The lamplitude of the term.
-        c or log_c: The lexponent of the term.
+        tensor a or log_a: The amplitude of the term.
+        tensor c or log_c: The exponent of the term.
 
     """
 
@@ -264,10 +264,10 @@ class ComplexTerm(Term):
     if :math:`a_j\,c_j \ge b_j\,d_j`.
 
     Args:
-        a or log_a: The real part of amplitude.
-        b or log_b: The imaginary part of amplitude.
-        c or log_c: The real part of the exponent.
-        d or log_d: The imaginary part of exponent.
+        tensor a or log_a: The real part of amplitude.
+        tensor b or log_b: The imaginary part of amplitude.
+        tensor c or log_c: The real part of the exponent.
+        tensor d or log_d: The imaginary part of exponent.
 
     """
 
@@ -295,9 +295,9 @@ class SHOTerm(Term):
     with the parameters ``S0``, ``Q``, and ``w0``.
 
     Args:
-        S0 or log_S0: The parameter :math:`S_0`.
-        Q or log_Q: The parameter :math:`Q`.
-        w0 or log_w0: The parameter :math:`\omega_0`.
+        tensor S0 or log_S0: The parameter :math:`S_0`.
+        tensor Q or log_Q: The parameter :math:`Q`.
+        tensor w0 or log_w0: The parameter :math:`\omega_0`.
 
     """
 
@@ -362,8 +362,8 @@ class Matern32Term(Term):
         \exp\left(-\frac{\sqrt{3}\,\tau}{\rho}\right)
 
     Args:
-        sigma or log_sigma: The parameter :math:`\sigma`.
-        rho or log_rho: The parameter :math:`\rho`.
+        tensor sigma or log_sigma: The parameter :math:`\sigma`.
+        tensor rho or log_rho: The parameter :math:`\rho`.
         eps (Optional[float]): The value of the parameter :math:`\epsilon`.
             (default: `0.01`)
 
@@ -397,12 +397,12 @@ class RotationTerm(TermSum):
     stochastic variability in stellar time series from rotation to pulsations.
 
     Args:
-        amp or log_amp: The amplitude of the variability.
-        period or log_period: The primary period of variability.
-        Q0 or log_Q0: The quality factor (or really the quality factor minus
-            one half) for the secondary oscillation.
-        deltaQ or log_deltaQ: The difference between the quality factors of
-            the first and the second modes. This parameterization (if
+        tensor amp or log_amp: The amplitude of the variability.
+        tensor period or log_period: The primary period of variability.
+        tensor Q0 or log_Q0: The quality factor (or really the quality factor
+            minus one half) for the secondary oscillation.
+        tensor deltaQ or log_deltaQ: The difference between the quality factors
+            of the first and the second modes. This parameterization (if
             ``deltaQ > 0``) ensures that the primary mode alway has higher
             quality.
         mix: The fractional amplitude of the secondary mode compared to the

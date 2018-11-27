@@ -49,8 +49,8 @@ class SimpleTransitOrbit(object):
             t: The times where the position should be evaluated.
 
         Returns:
-            x, y, z: The components of the position vector at ``t`` in units
-                of ``R_sun``.
+            The components of the position vector at ``t`` in units of
+            ``R_sun``.
 
         """
         dt = tt.mod(tt.shape_padright(t) - self._ref_time, self.period)
@@ -80,7 +80,7 @@ class SimpleTransitOrbit(object):
             texp (Optional[float]): The exposure time.
 
         Returns:
-            inds (vector): The indices of the timestamps that are in transit.
+            The indices of the timestamps that are in transit.
 
         """
         dt = tt.mod(tt.shape_padright(t) - self._ref_time, self.period)
