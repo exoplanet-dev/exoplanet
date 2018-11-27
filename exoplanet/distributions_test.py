@@ -18,8 +18,15 @@ class TestDistributions(object):
     def setup_class(cls):
         np.random.seed(cls.random_seed)
 
+    @classmethod
+    def teardown_class(cls):
+        pm.theanof.set_theano_conf({"compute_test_value": "off"})
+
     def setup_method(self):
         np.random.seed(self.random_seed)
+
+    def teardown_method(self, method):
+        pm.theanof.set_theano_conf({"compute_test_value": "off"})
 
     def _sample(self, **kwargs):
         logger = logging.getLogger("pymc3")
@@ -28,8 +35,11 @@ class TestDistributions(object):
         kwargs["progressbar"] = kwargs.get("progressbar", False)
         return pm.sample(**kwargs)
 
+    def _model(self, **kwargs):
+        return pm.Model(**kwargs)
+
     def test_unit_vector(self):
-        with pm.Model():
+        with self._model():
             UnitVector("x", shape=(2, 3))
             trace = self._sample()
 
@@ -55,7 +65,7 @@ class TestDistributions(object):
             assert s < 0.05
 
     def test_angle(self):
-        with pm.Model():
+        with self._model():
             Angle("theta", shape=(5, 2))
             trace = self._sample()
 
@@ -68,7 +78,7 @@ class TestDistributions(object):
             assert s < 0.05
 
     def test_quad_limb_dark(self):
-        with pm.Model():
+        with self._model():
             QuadLimbDark("u", shape=2)
             trace = self._sample()
 
@@ -92,7 +102,7 @@ class TestDistributions(object):
     def test_radius_impact(self):
         min_radius = 0.01
         max_radius = 0.1
-        with pm.Model():
+        with self._model():
             RadiusImpact("rb", min_radius=min_radius, max_radius=max_radius)
             trace = self._sample()
 
