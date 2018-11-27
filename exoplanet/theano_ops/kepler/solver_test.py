@@ -50,10 +50,6 @@ class TestKeplerSolver(utt.InferShapeTester):
         func = theano.function([M_t, e_t], self.op(M_t, e_t))
         E0, f0 = func(M, e)
 
-        delta = np.abs(E - E0)
-        ind = np.unravel_index(np.argmax(delta), delta.shape)
-        print(M[ind], e[ind], E[ind], E0[ind])
-
         utt.assert_allclose(E, E0)
         utt.assert_allclose(f, f0)
 
