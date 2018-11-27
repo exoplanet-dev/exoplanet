@@ -1,5 +1,9 @@
 #section support_code
 
+inline int sign(double x) {
+  return (x > 0) - (x < 0);
+}
+
 inline double wrap_into (double x, double period) {
     return x - period * floor(x / period);
 }
@@ -74,13 +78,10 @@ int APPLY_SPECIFIC(solver)(
   DTYPE_OUTPUT_0* E_out = (DTYPE_OUTPUT_0*)PyArray_DATA(*output0);
   DTYPE_OUTPUT_1* f_out = (DTYPE_OUTPUT_1*)PyArray_DATA(*output1);
 
-  T M_old = M_in[0], e_old = e_in[0];
-  T M, e, E;
-  T sinE, cosE, tanE2, gp, delta;
-  int flag = 0;
+  T M, e, E, delta, f, fp, fpp, fppp, ffp, fp2, arg, arg2, sinE, tanE2;
 
   for (npy_intp n = 0; n < N; ++n) {
-    M = wrap_into(M_in[n] + M_PI, 2 * M_PI) - M_PI;
+    M = M_in[n];
     e = e_in[n];
 
     if (e >= 1) {
@@ -92,39 +93,23 @@ int APPLY_SPECIFIC(solver)(
 
       // Special case for zero eccentricity
       E_out[n] = M;
-      f_out[n] = M;
-      flag = 0;
+      f_out[n] = wrap_into(M + M_PI, 2 * M_PI) - M_PI;
 
     } else {
 
-      // Estimate the initialization using the first order Taylor series
-      if (flag) {
-        delta = ((e - e_old) * sinE + (M - M_old)) / gp;
-        E += delta;
-      } else {
-        E = M;
-      }
-
-      // Do some iterations of Newton Raphson
+      E = M + e*sin(M);
       sinE = sin(E);
-      cosE = cos(E);
-      for (int i = 0; i < maxiter; ++i) {
-        gp = 1 - e * cosE;
-        delta = (E - e * sinE - M) / gp;
-        if (fabs(delta) <= T(tol)) break;
-        E -= delta;
+      for (int n = 0; n < maxiter; ++n) {
+        delta = e * sinE + M;
+        E -= (E - delta) / (1 - e * cos(E));
         sinE = sin(E);
-        cosE = cos(E);
+        if (fabs(E - e * sinE - M) <= tol) break;
       }
 
       // Save the result and compute the true anomaly
       E_out[n] = E;
-      tanE2 = sinE / (1 + cosE);  // tan(0.5*E)
+      tanE2 = sinE / (1 + cos(E));  // tan(0.5*E)
       f_out[n] = 2 * atan(sqrt((1+e)/(1-e))*tanE2);
-
-      flag = 1;
-      e_old = e;
-      M_old = M;
     }
   }
 
