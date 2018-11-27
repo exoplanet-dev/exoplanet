@@ -39,8 +39,8 @@ def get_citations_for_model(model=None):
         cite += list(v[0])
         bib.append(v[1])
 
-    txt = ("This research made use of \\textsf{{exoplanet}} (Foreman-Mackey "
-           "et al.\ in prep.) and its dependencies \citep{{{0}}}.")
+    txt = (r"This research made use of \textsf{{exoplanet}} (Foreman-Mackey "
+           r"et al.\ in prep.) and its dependencies \citep{{{0}}}.")
     txt = txt.format(",".join(sorted(cite)))
 
     return txt, "\n".join(bib)
