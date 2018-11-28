@@ -39,6 +39,8 @@ magnitude.
 .. raw:: html
 
     <p>
+    <a href="https://github.com/dfm/exoplanet"><img src="https://img.shields.io/badge/GitHub-dfm%2Fexoplanet-blue.svg?style=flat"/></a>
+    <a href="https://github.com/dfm/exoplanet/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat"/></a>
     <a href="https://travis-ci.org/dfm/exoplanet"><img src="https://img.shields.io/travis/dfm/exoplanet/master.svg?style=flat"/></a>
     <a href="https://travis-ci.org/dfm/exoplanet"><img src="https://img.shields.io/readthedocs/exoplanet.svg?style=flat"/></a>
     <br>
