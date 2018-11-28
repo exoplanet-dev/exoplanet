@@ -30,9 +30,8 @@ setup(
         "exoplanet.theano_ops.celerite",
     ],
     description="Fast & scalable MCMC for all your exoplanet needs",
-    long_description=open("README.md").read(),
-    long_description_content_type="text/markdown",
-    package_data={"": ["README.md", "LICENSE", "CITATION"]},
+    long_description=open("README.rst").read(),
+    package_data={"": ["README.rst", "LICENSE"]},
     include_package_data=True,
     classifiers=[
         "Development Status :: 3 - Alpha",
