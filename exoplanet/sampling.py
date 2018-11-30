@@ -2,7 +2,7 @@
 
 from __future__ import division, print_function
 
-__all__ = ["TuningSchedule"]
+__all__ = ["PyMC3Sampler"]
 
 import logging
 
@@ -12,8 +12,8 @@ import pymc3 as pm
 from pymc3.step_methods.hmc import quadpotential as quad
 
 
-class TuningSchedule(object):
-    """A custom tuning scheduler for PyMC3 with support for dense mass matrices
+class PyMC3Sampler(object):
+    """A sampling wrapper for PyMC3 with support for dense mass matrices
 
     This schedule is based on the method used by as described in Section 34.2
     of the `Stan Manual <http://mc-stan.org/users/documentation/>`_.
