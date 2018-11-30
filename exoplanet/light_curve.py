@@ -39,7 +39,7 @@ class StarryLightCurve(object):
         self.c = get_cl(u_ext)
         self.c_norm = self.c / (np.pi * (self.c[0] + 2 * self.c[1] / 3))
 
-    def get_light_curve(self, r, orbit, t, texp=None, oversample=7, order=2,
+    def get_light_curve(self, r, orbit, t, texp=None, oversample=7, order=0,
                         use_approx_in_transit=True, duration_factor=3):
         """Get the light curve for an orbit at a set of times
 
