@@ -282,6 +282,10 @@ class KeplerianOrbit(object):
     def get_star_velocity(self, t):
         """Get the star's velocity vector
 
+        .. note:: For a system with multiple planets, this will return one
+            column per planet with the contributions from each planet. The
+            total velocity can be found by summing along the last axis.
+
         Args:
             t: The times where the velocity should be evaluated.
 
@@ -293,19 +297,36 @@ class KeplerianOrbit(object):
         return tuple(tt.squeeze(x)
                      for x in self._get_velocity(self.m_planet, t))
 
-    def get_radial_velocity(self, t, output_units=None):
+    def get_radial_velocity(self, t, K=None, output_units=None):
         """Get the radial velocity of the star
 
         Args:
             t: The times where the radial velocity should be evaluated.
+            K (Optional): The semi-amplitudes of the orbits. If provided, the
+                ``m_planet`` and ``incl`` parameters will be ignored and this
+                amplitude will be used instead.
             output_units (Optional): An AstroPy velocity unit. If not given,
-                the output will be evaluated in ``m/s``.
+                the output will be evaluated in ``m/s``. This is ignored if a
+                value is given for ``K``.
 
         Returns:
-            The radial velocity evaluated at ``t`` in units of
-            ``output_units``.
+            The reflex radial velocity evaluated at ``t`` in units of
+            ``output_units``. For multiple planets, this will have one row for
+            each planet.
 
         """
+
+        # Special case for K given: m_planet, incl, etc. is ignored
+        if K is not None:
+            f = self._get_true_anomaly(t)
+            if self.ecc is None:
+                return tt.squeeze(K * tt.cos(f))
+            # cos(w + f) + e * cos(w) from Lovis & Fischer
+            return tt.squeeze(
+                K * (self.cos_omega*tt.cos(f) - self.sin_omega*tt.sin(f) +
+                     self.ecc * self.cos_omega))
+
+        # Compute the velocity using the full orbit solution
         if output_units is None:
             output_units = u.m / u.s
         conv = (1 * u.R_sun / u.day).to(output_units).value
