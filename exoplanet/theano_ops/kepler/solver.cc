@@ -84,7 +84,7 @@ int APPLY_SPECIFIC(solver)(
     M = M_in[n];
     e = e_in[n];
 
-    if (e >= 1) {
+    if (e > 1) {
       PyErr_Format(PyExc_ValueError, "eccentricity must be 0 <= e < 1");
       return 1;
     }
