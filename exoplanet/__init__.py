@@ -8,9 +8,11 @@ except NameError:
     __EXOPLANET_SETUP__ = False
 
 if not __EXOPLANET_SETUP__:
-    __all__ = ["distributions", "gp", "orbits", "sampling", "utils",
-               "estimators",
-               "StarryLightCurve"]
+    __all__ = ["distributions", "gp", "orbits"]
 
-    from . import distributions, gp, orbits, sampling, utils, estimators
-    from .light_curve import StarryLightCurve
+    from .utils import *  # NOQA
+    from .sampling import *  # NOQA
+    from .estimators import *  # NOQA
+    from .light_curves import *  # NOQA
+
+    from . import distributions, gp, orbits
