@@ -11,7 +11,7 @@ from theano.tests import unittest_tools as utt
 import starry
 
 from .orbits import KeplerianOrbit
-from .light_curve import StarryLightCurve
+from .light_curves import StarryLightCurve
 
 
 def test_light_curve():

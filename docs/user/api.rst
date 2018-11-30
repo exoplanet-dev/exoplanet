@@ -21,7 +21,7 @@ Orbits
 Light curve models
 ------------------
 
-.. autoclass:: exoplanet.light_curve.StarryLightCurve
+.. autoclass:: exoplanet.StarryLightCurve
    :inherited-members:
 
 
@@ -44,9 +44,10 @@ Scalable Gaussian processes
 Estimators
 ----------
 
-.. autofunction:: exoplanet.estimators.estimate_minimum_mass
-.. autofunction:: exoplanet.estimators.lomb_scargle_estimator
-.. autofunction:: exoplanet.estimators.autocorr_estimator
+.. autofunction:: exoplanet.estimate_semi_amplitude
+.. autofunction:: exoplanet.estimate_minimum_mass
+.. autofunction:: exoplanet.lomb_scargle_estimator
+.. autofunction:: exoplanet.autocorr_estimator
 
 
 Distributions
@@ -62,9 +63,9 @@ Distributions
 Utilities
 ---------
 
-.. autofunction:: exoplanet.utils.eval_in_model
-
-.. autoclass:: exoplanet.sampling.TuningSchedule
+.. autofunction:: exoplanet.eval_in_model
+.. autofunction:: exoplanet.get_samples_from_trace
+.. autoclass:: exoplanet.PyMC3Sampler
    :inherited-members:
 
 
