@@ -120,8 +120,9 @@ class KeplerianOrbit(object):
             self.cos_omega = tt.cos(self.omega)
             self.sin_omega = tt.sin(self.omega)
 
-            E0 = 2.0 * tt.arctan2(tt.sqrt(1.0-self.ecc)*self.cos_omega,
-                                  tt.sqrt(1.0+self.ecc)*(1.0+self.sin_omega))
+            opsw = 1 + self.sin_omega
+            E0 = 2 * tt.arctan2(tt.sqrt(1-self.ecc)*self.cos_omega,
+                                tt.sqrt(1+self.ecc)*opsw)
             self.tref = self.t0 - (E0 - self.ecc * tt.sin(E0)) / self.n
 
             self.K0 /= tt.sqrt(1 - self.ecc**2)
@@ -231,6 +232,11 @@ class KeplerianOrbit(object):
     def get_star_position(self, t):
         """The star's position in the barycentric frame
 
+        .. note:: If there are multiple planets in the system, this will
+            return one column per planet with each planet's contribution to
+            the motion. The star's full position can be computed by summing
+            over the last axis.
+
         Args:
             t: The times where the position should be evaluated.
 
@@ -245,6 +251,10 @@ class KeplerianOrbit(object):
     def get_relative_position(self, t):
         """The planets' positions relative to the star
 
+        .. note:: This treats each planet independently and does not take the
+            other planets into account when computing the position of the
+            star. This is fine as long as the planet masses are small.
+
         Args:
             t: The times where the position should be evaluated.
 
@@ -253,10 +263,8 @@ class KeplerianOrbit(object):
             ``R_sun``.
 
         """
-        star = self._get_position(self.a_star, t)
-        planet = self._get_position(self.a_planet, t)
-        return tuple(tt.squeeze(b-tt.shape_padright(tt.sum(a, axis=-1)))
-                     for a, b in zip(star, planet))
+        return tuple(tt.squeeze(x)
+                     for x in self._get_position(-self.a, t))
 
     def _get_velocity(self, m, t):
         f = self._get_true_anomaly(t)

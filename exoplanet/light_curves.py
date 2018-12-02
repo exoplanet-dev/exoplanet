@@ -39,16 +39,12 @@ class StarryLightCurve(object):
         self.c = get_cl(u_ext)
         self.c_norm = self.c / (np.pi * (self.c[0] + 2 * self.c[1] / 3))
 
-    def get_light_curve(self, r, orbit, t, texp=None, oversample=7, order=0,
+    def get_light_curve(self, orbit=None, r=None, t=None,
+                        texp=None, oversample=7, order=0,
                         use_approx_in_transit=True, duration_factor=3):
         """Get the light curve for an orbit at a set of times
 
         Args:
-            r (tensor): The radius of the transiting body in the same units as
-                ``r_star``. This should have a shape that is consistent with
-                the coordinates returned by ``orbit``. In general, this means
-                that it should probably be a scalar or a vector with one entry
-                for each body in ``orbit``.
             orbit: An object with a ``get_relative_position`` method that
                 takes a tensor of times and returns a list of Cartesian
                 coordinates of a set of bodies relative to the central source.
@@ -60,6 +56,11 @@ class StarryLightCurve(object):
                 third coordinate is the line of sight with positive values
                 pointing *away* from the observer. For an example, take a look
                 at :class:`orbits.KeplerianOrbit`.
+            r (tensor): The radius of the transiting body in the same units as
+                ``r_star``. This should have a shape that is consistent with
+                the coordinates returned by ``orbit``. In general, this means
+                that it should probably be a scalar or a vector with one entry
+                for each body in ``orbit``.
             t (tensor): The times where the light curve should be evaluated.
             texp (Optional[tensor]): The exposure time of each observation.
                 This can be a scalar or a tensor with the same shape as ``t``.
@@ -78,6 +79,13 @@ class StarryLightCurve(object):
                 ``orbit``.
 
         """
+        if orbit is None:
+            raise ValueError("missing required argument 'orbit'")
+        if r is None:
+            raise ValueError("missing required argument 'r'")
+        if t is None:
+            raise ValueError("missing required argument 't'")
+
         r = tt.as_tensor_variable(r)
         r = tt.reshape(r, (r.size,))
         t = tt.as_tensor_variable(t)
@@ -128,7 +136,7 @@ class StarryLightCurve(object):
         b = tt.reshape(b, rgrid.shape)
         los = tt.reshape(coords[2], rgrid.shape)
 
-        lc = self.compute_light_curve(
+        lc = self._compute_light_curve(
             b/self.r_star, rgrid/self.r_star, los/self.r_star)
 
         if texp is not None:
@@ -142,7 +150,7 @@ class StarryLightCurve(object):
         else:
             return lc
 
-    def compute_light_curve(self, b, r, los=None):
+    def _compute_light_curve(self, b, r, los=None):
         """Compute the light curve for a set of impact parameters and radii
 
         .. note:: The stellar radius is *not* included in this method so the
