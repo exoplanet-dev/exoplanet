@@ -26,22 +26,24 @@ class TestContactPoints(utt.InferShapeTester):
         r = 0.1
         R = 1.1
 
-        f_expect = [
-            -0.012742089585723981,
-            -0.010625255673145872,
-            0.010695194623367321,
-            0.012842804902413185
-        ]
+        f_expect = np.array([
+            4.599646890798966,
+            4.601763724711544,
+            4.623084175008057,
+            4.625231785287103,
+        ])
+        E_expect = 2 * np.arctan(np.sqrt((1-e)/(1+e))*np.tan(0.5*f_expect))
+        M_expect = E_expect - e * np.sin(E_expect)
 
-        f_calc = self.op(a, e, w, i, r, R).eval()
+        M_calc = theano.function([], self.op(a, e, w, i, r, R))()
 
-        utt.assert_allclose(f_expect, f_calc)
+        utt.assert_allclose(M_expect, M_calc)
 
-    # def test_infer_shape(self):
-    #     np.random.seed(42)
-    #     args = [tt.vector() for i in range(6)]
-    #     vals = [np.random.rand(50) for i in range(6)]
-    #     self._compile_and_check(args,
-    #                             self.op(*args),
-    #                             vals,
-    #                             self.op_class)
+    def test_infer_shape(self):
+        np.random.seed(42)
+        args = [tt.vector() for i in range(6)]
+        vals = [np.random.rand(50) for i in range(6)]
+        self._compile_and_check(args,
+                                self.op(*args),
+                                vals,
+                                self.op_class)

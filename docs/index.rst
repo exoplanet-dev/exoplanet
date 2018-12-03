@@ -22,6 +22,7 @@ Tutorials
    tutorials/pymc3-extras
    tutorials/rv
    tutorials/gp
+   tutorials/stellar-variability
 
 
 License & attribution

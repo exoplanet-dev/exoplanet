@@ -51,10 +51,11 @@ class ContactPointsOp(gof.COp):
             else:
                 dtype = theano.scalar.upcast(dtype, a.dtype)
             in_args.append(a)
-        out_args = [
-            tt.TensorType(dtype=dtype,
-                          broadcastable=[False] * (in_args[0].ndim+1))()]
+        out_args = [in_args[0].type() for i in range(4)]
         return gof.Apply(self, in_args, out_args)
+
+    def infer_shape(self, node, shapes):
+        return shapes[0], shapes[0], shapes[0], shapes[0]
 
     # def grad(self, inputs, gradients):
     #     M, e = inputs
