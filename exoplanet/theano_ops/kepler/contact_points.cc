@@ -8,6 +8,9 @@ int APPLY_SPECIFIC(contact_points)(
     PyArrayObject*  input4,
     PyArrayObject*  input5,
     PyArrayObject** output0,
+    PyArrayObject** output1,
+    PyArrayObject** output2,
+    PyArrayObject** output3,
     PARAMS_TYPE* params)
 {
   typedef DTYPE_OUTPUT_0 T;
@@ -35,10 +38,11 @@ int APPLY_SPECIFIC(contact_points)(
   if (success) return 1;
 
   npy_intp ndim = PyArray_NDIM(input0);
-  std::vector<npy_intp> shape(ndim+1);
-  for (npy_intp n = 0; n < ndim; ++n) shape[n] = PyArray_DIM(input0, n);
-  shape[ndim] = 4;
-  success += allocate_output(ndim + 1, &(shape[0]), TYPENUM_OUTPUT_0, output0);
+  npy_intp* shape = PyArray_DIMS(input0);
+  success += allocate_output(ndim, shape, TYPENUM_OUTPUT_0, output0);
+  success += allocate_output(ndim, shape, TYPENUM_OUTPUT_1, output1);
+  success += allocate_output(ndim, shape, TYPENUM_OUTPUT_2, output2);
+  success += allocate_output(ndim, shape, TYPENUM_OUTPUT_3, output3);
   if (success) {
     return 1;
   }
@@ -50,12 +54,14 @@ int APPLY_SPECIFIC(contact_points)(
   DTYPE_INPUT_4*  r_in  = (DTYPE_INPUT_4*)PyArray_DATA(input4);
   DTYPE_INPUT_5*  R_in  = (DTYPE_INPUT_5*)PyArray_DATA(input5);
 
-  DTYPE_OUTPUT_0* f_out = (DTYPE_OUTPUT_0*)PyArray_DATA(*output0);
+  DTYPE_OUTPUT_0* M1_out = (DTYPE_OUTPUT_0*)PyArray_DATA(*output0);
+  DTYPE_OUTPUT_1* M2_out = (DTYPE_OUTPUT_1*)PyArray_DATA(*output1);
+  DTYPE_OUTPUT_2* M3_out = (DTYPE_OUTPUT_2*)PyArray_DATA(*output2);
+  DTYPE_OUTPUT_3* M4_out = (DTYPE_OUTPUT_3*)PyArray_DATA(*output3);
 
   for (npy_intp n = 0; n < N; ++n) {
-    T* f0 = &(f_out[n*4]);
     contact_points::ContactPoint<T> solver(a_in[n], e_in[n], w_in[n], i_in[n]);
-    solver.find_contacts(R_in[n], r_in[n], f0, &(f0[1]), &(f0[2]), &(f0[3]), maxiter, tol);
+    solver.find_contacts(R_in[n], r_in[n], &(M1_out[n]), &(M2_out[n]), &(M3_out[n]), &(M4_out[n]), maxiter, tol);
   }
 
   return 0;
