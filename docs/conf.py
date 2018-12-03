@@ -8,6 +8,11 @@ import subprocess
 
 import sphinx_nameko_theme
 
+
+def setup(app):
+    app.add_stylesheet("css/exoplanet.css")
+
+
 autodoc_mock_imports = [
     "numpy",
     "scipy",
