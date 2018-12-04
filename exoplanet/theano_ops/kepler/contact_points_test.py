@@ -37,7 +37,6 @@ class TestContactPoints(utt.InferShapeTester):
 
         M_expect = np.array([0.88452506, 0.8863776, 0.90490204, 0.90675455])
         M_calc = theano.function([], self.op(a, e, w, i, r, R))()
-        print(M_expect, M_calc)
 
         utt.assert_allclose(M_calc, M_expect)
 
@@ -68,6 +67,5 @@ class TestCircularContactPoints(utt.InferShapeTester):
 
         M_circ = theano.function([], self.op(a, i, r, R))()
         M_gen = theano.function([], ContactPointsOp()(a, e, w, i, r, R))()
-        print(M_circ, M_gen)
 
         utt.assert_allclose(M_circ, M_gen)
