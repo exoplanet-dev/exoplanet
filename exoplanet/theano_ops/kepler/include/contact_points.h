@@ -81,10 +81,10 @@ class CircularContactPoint {
         f3 = find_root(R2, 0, f4, false, maxiter, tol);
       }
 
-      *M1 = df_to_M(f1);
-      *M2 = df_to_M(f2);
-      *M3 = df_to_M(f3);
-      *M4 = df_to_M(f4);
+      *M1 = this->df_to_M(f1);
+      *M2 = this->df_to_M(f2);
+      *M3 = this->df_to_M(f3);
+      *M4 = this->df_to_M(f4);
 
       return 0;
     }
