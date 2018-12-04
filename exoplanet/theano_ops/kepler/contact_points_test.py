@@ -20,7 +20,7 @@ class TestContactPoints(utt.InferShapeTester):
 
     def test_infer_shape(self):
         np.random.seed(42)
-        args = [tt.vector() for i in range(6)]
+        args = [tt.dvector() for i in range(6)]
         vals = [np.random.rand(50) for i in range(6)]
         self._compile_and_check(args,
                                 self.op(*args),
@@ -28,17 +28,18 @@ class TestContactPoints(utt.InferShapeTester):
                                 self.op_class)
 
     def test_basic(self):
-        a = 100.0
-        e = 0.3
-        w = 0.1
-        i = 0.5*np.pi
-        r = 0.1
-        R = 1.1
+        a = np.float64(100.0)
+        e = np.float64(0.3)
+        w = np.float64(0.1)
+        i = np.float64(0.5*np.pi)
+        r = np.float64(0.1)
+        R = np.float64(1.1)
 
         M_expect = np.array([0.88452506, 0.8863776, 0.90490204, 0.90675455])
         M_calc = theano.function([], self.op(a, e, w, i, r, R))()
+        print(M_expect, M_calc)
 
-        utt.assert_allclose(M_expect, M_calc)
+        utt.assert_allclose(M_calc, M_expect)
 
 
 class TestCircularContactPoints(utt.InferShapeTester):
@@ -50,7 +51,7 @@ class TestCircularContactPoints(utt.InferShapeTester):
 
     def test_infer_shape(self):
         np.random.seed(42)
-        args = [tt.vector() for i in range(4)]
+        args = [tt.dvector() for i in range(4)]
         vals = [np.random.rand(50) for i in range(4)]
         self._compile_and_check(args,
                                 self.op(*args),
@@ -58,14 +59,15 @@ class TestCircularContactPoints(utt.InferShapeTester):
                                 self.op_class)
 
     def test_basic(self):
-        a = 100.0
-        e = 0.0
-        w = 0.0
-        i = 0.5*np.pi
-        r = 0.1
-        R = 1.1
+        a = np.float64(100.0)
+        e = np.float64(0.0)
+        w = np.float64(0.0)
+        i = np.float64(0.5*np.pi)
+        r = np.float64(0.1)
+        R = np.float64(1.1)
 
         M_circ = theano.function([], self.op(a, i, r, R))()
         M_gen = theano.function([], ContactPointsOp()(a, e, w, i, r, R))()
+        print(M_circ, M_gen)
 
         utt.assert_allclose(M_circ, M_gen)
