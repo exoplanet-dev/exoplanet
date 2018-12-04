@@ -12,7 +12,8 @@ from astropy import constants
 from astropy import units as u
 
 from ..citations import add_citations_to_model
-from ..theano_ops.kepler.solver import KeplerOp
+from ..theano_ops.kepler import (
+    KeplerOp, CircularContactPointsOp, ContactPointsOp)
 
 
 class KeplerianOrbit(object):
@@ -65,6 +66,7 @@ class KeplerianOrbit(object):
                  m_star=None, r_star=None, rho_star=None,
                  m_planet_units=None, rho_star_units=None,
                  model=None,
+                 contact_points_kwargs=None,
                  **kwargs):
         add_citations_to_model(self.__citations__, model=model)
 
@@ -107,10 +109,18 @@ class KeplerianOrbit(object):
         self.cos_incl = tt.cos(self.incl)
         self.sin_incl = tt.sin(self.incl)
 
+        # Set up the contact points calculation
+        if contact_points_kwargs is None:
+            contact_points_kwargs = dict()
+
         # Eccentricity
         if ecc is None:
             self.ecc = None
-            self.tref = self.t0 - 0.5 * np.pi / self.n
+            self.M0 = 0.5 * np.pi + tt.zeros_like(self.n)
+            self.tref = self.t0 - self.M0 / self.n
+
+            self.contact_points_op = \
+                CircularContactPointsOp(**contact_points_kwargs)
         else:
             self.ecc = tt.as_tensor_variable(ecc)
             if omega is None:
@@ -123,7 +133,9 @@ class KeplerianOrbit(object):
             opsw = 1 + self.sin_omega
             E0 = 2 * tt.arctan2(tt.sqrt(1-self.ecc)*self.cos_omega,
                                 tt.sqrt(1+self.ecc)*opsw)
-            self.tref = self.t0 - (E0 - self.ecc * tt.sin(E0)) / self.n
+            self.M0 = E0 - self.ecc * tt.sin(E0)
+            self.tref = self.t0 - self.M0 / self.n
+            self.contact_points_op = ContactPointsOp(**contact_points_kwargs)
 
             self.K0 /= tt.sqrt(1 - self.ecc**2)
 
@@ -357,25 +369,51 @@ class KeplerianOrbit(object):
             The indices of the timestamps that are expected to be in transit.
 
         """
-        # Estimate the maximum duration of the transit using the equations
-        # from Winn (2010)
-        arg = (self.r_star + r) / (-self.a_planet)
-        max_dur = self.period * tt.arcsin(arg) / np.pi
-        if self.ecc is not None:
-            max_dur *= tt.sqrt(1-self.ecc**2) / (1+self.ecc*self.sin_omega)
+        z = tt.zeros_like(self.a)
+        r = tt.as_tensor_variable(r) + z
+        R = self.r_star + z
+
+        if self.ecc is None:
+            M_contact = self.contact_points_op(
+                self.a, self.incl + z, r, R)
+        else:
+            M_contact = self.contact_points_op(
+                self.a, self.ecc, self.omega, self.incl + z, r, R)
 
         # Wrap the times into time since transit
         hp = 0.5 * self.period
+        t_start = (M_contact[0] - self.M0) / self.n
+        t_start = tt.mod(t_start + hp, self.period) - hp
+        t_end = (M_contact[3] - self.M0) / self.n
+        t_end = tt.mod(t_end + hp, self.period) - hp
         dt = tt.mod(self._warp_times(t) - self.t0 + hp, self.period) - hp
-
-        # Estimate the data points that are within the maximum duration of the
-        # transit
-        tol = 0.5 * duration_factor * max_dur
         if texp is not None:
-            tol += 0.5 * texp
-        mask = tt.any(tt.abs_(dt) < tol, axis=-1)
+            t_start -= 0.5*texp
+            t_end += 0.5*texp
+
+        mask = tt.any(tt.and_(dt >= t_start, dt <= t_end), axis=-1)
 
         return tt.arange(t.size)[mask]
+
+        # Estimate the maximum duration of the transit using the equations
+        # from Winn (2010)
+        # arg = (self.r_star + r) / (-self.a_planet)
+        # max_dur = self.period * tt.arcsin(arg) / np.pi
+        # if self.ecc is not None:
+        #     max_dur *= tt.sqrt(1-self.ecc**2) / (1+self.ecc*self.sin_omega)
+
+        # # Wrap the times into time since transit
+        # hp = 0.5 * self.period
+        # dt = tt.mod(self._warp_times(t) - self.t0 + hp, self.period) - hp
+
+        # # Estimate the data points that are within the maximum duration of the
+        # # transit
+        # tol = 0.5 * duration_factor * max_dur
+        # if texp is not None:
+        #     tol += 0.5 * texp
+        # mask = tt.any(tt.abs_(dt) < tol, axis=-1)
+
+        # return tt.arange(t.size)[mask]
 
 
 def get_true_anomaly(M, e, **kwargs):
