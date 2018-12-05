@@ -5,8 +5,8 @@ User guide
 
 .. toctree::
    :maxdepth: 2
-   :caption: User Documentation
 
+   user/what
    user/install
    tutorials/citation
    user/api
@@ -21,6 +21,7 @@ Tutorials
    tutorials/intro-to-pymc3
    tutorials/pymc3-extras
    tutorials/rv
+   tutorials/transit
    tutorials/gp
    tutorials/stellar-variability
 
