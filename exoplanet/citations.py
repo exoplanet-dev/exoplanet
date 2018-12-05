@@ -5,6 +5,7 @@ from __future__ import division, print_function
 __all__ = ["add_citations_to_model", "CITATIONS"]
 
 import logging
+import textwrap
 import pymc3 as pm
 
 
@@ -20,7 +21,7 @@ def add_citations_to_model(citations, model=None):
         pass
 
 
-def get_citations_for_model(model=None):
+def get_citations_for_model(model=None, width=79):
     """Get the citations for the components used an exoplanet PyMC3
 
     Returns: The acknowledgement text for exoplanet and its dependencies and a
@@ -41,9 +42,10 @@ def get_citations_for_model(model=None):
 
     txt = (r"This research made use of \textsf{{exoplanet}} (Foreman-Mackey "
            r"et al.\ in prep.) and its dependencies \citep{{{0}}}.")
-    txt = txt.format(",".join(sorted(cite)))
+    txt = txt.format(", ".join(sorted(cite)))
+    txt = textwrap.wrap(txt, width=width)
 
-    return txt, "\n".join(bib)
+    return "\n".join(txt), "\n".join(bib)
 
 
 CITATIONS = {
