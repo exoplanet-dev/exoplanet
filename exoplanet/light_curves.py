@@ -166,4 +166,4 @@ class StarryLightCurve(object):
         """
         if los is None:
             los = -tt.ones_like(b)
-        return limbdark(self.c_norm, b, r, los)
+        return limbdark(self.c_norm, b, r, los)[0]
