@@ -353,20 +353,16 @@ class KeplerianOrbit(object):
         v = self.get_star_velocity(t)
         return conv * v[2]
 
-    def approx_in_transit(self, t, r=0.0, texp=None, duration_factor=3):
-        """Get a list of timestamps that are expected to be in transit
+    def in_transit(self, t, r=0.0, texp=None):
+        """Get a list of timestamps that are in transit
 
         Args:
             t (vector): A vector of timestamps to be evaluated.
             r (Optional): The radii of the planets.
             texp (Optional[float]): The exposure time.
-            duration_factor (Optional[float]): The factor by which to multiply
-                the approximate duration when computing the in transit points.
-                Larger values will be more conservative and might be needed for
-                large planets or very eccentric orbits.
 
         Returns:
-            The indices of the timestamps that are expected to be in transit.
+            The indices of the timestamps that are in transit.
 
         """
         z = tt.zeros_like(self.a)
@@ -394,26 +390,6 @@ class KeplerianOrbit(object):
         mask = tt.any(tt.and_(dt >= t_start, dt <= t_end), axis=-1)
 
         return tt.arange(t.size)[mask]
-
-        # Estimate the maximum duration of the transit using the equations
-        # from Winn (2010)
-        # arg = (self.r_star + r) / (-self.a_planet)
-        # max_dur = self.period * tt.arcsin(arg) / np.pi
-        # if self.ecc is not None:
-        #     max_dur *= tt.sqrt(1-self.ecc**2) / (1+self.ecc*self.sin_omega)
-
-        # # Wrap the times into time since transit
-        # hp = 0.5 * self.period
-        # dt = tt.mod(self._warp_times(t) - self.t0 + hp, self.period) - hp
-
-        # # Estimate the data points that are within the maximum duration of the
-        # # transit
-        # tol = 0.5 * duration_factor * max_dur
-        # if texp is not None:
-        #     tol += 0.5 * texp
-        # mask = tt.any(tt.abs_(dt) < tol, axis=-1)
-
-        # return tt.arange(t.size)[mask]
 
 
 def get_true_anomaly(M, e, **kwargs):

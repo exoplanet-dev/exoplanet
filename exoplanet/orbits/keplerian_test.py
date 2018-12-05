@@ -107,7 +107,7 @@ def test_velocity():
     utt.assert_allclose(planet_vel, planet_vel_expect)
 
 
-def test_approx_in_transit():
+def test_in_transit():
     t = np.linspace(-20, 20, 1000)
     m_planet = np.array([0.3, 0.5])
     m_star = 1.45
@@ -125,7 +125,7 @@ def test_approx_in_transit():
     r_pl = np.array([0.1, 0.03])
     coords = theano.function([], orbit.get_relative_position(t))()
     r2 = coords[0]**2 + coords[1]**2
-    inds = theano.function([], orbit.approx_in_transit(t, r=r_pl))()
+    inds = theano.function([], orbit.in_transit(t, r=r_pl))()
 
     m = np.isin(np.arange(len(t)), inds)
     in_ = r2[inds] <= ((r_star + r_pl)**2)[None, :]

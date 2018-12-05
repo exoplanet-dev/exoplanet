@@ -42,7 +42,7 @@ class PyMC3Sampler(object):
         self._current_trace = None
 
     def get_step_for_trace(self, trace=None, model=None,
-                           regular_window=5, regular_variance=1e-3,
+                           regular_window=0, regular_variance=1e-3,
                            **kwargs):
         """Get a PyMC3 NUTS step tuned for a given burn-in trace
 
@@ -77,14 +77,17 @@ class PyMC3Sampler(object):
             if self.dense:
                 # Compute the regularized sample covariance
                 cov = np.cov(samples, rowvar=0)
-                cov = cov * N / (N + regular_window)
-                cov[np.diag_indices_from(cov)] += \
-                    regular_variance * regular_window / (N + regular_window)
+                if regular_window > 0:
+                    cov = cov * N / (N + regular_window)
+                    cov[np.diag_indices_from(cov)] += \
+                        regular_variance * regular_window / (N+regular_window)
                 potential = quad.QuadPotentialFull(cov)
             else:
                 var = np.var(samples, axis=0)
-                var = var * N / (N + regular_window)
-                var += regular_variance * regular_window / (N + regular_window)
+                if regular_window > 0:
+                    var = var * N / (N + regular_window)
+                    var += \
+                        regular_variance * regular_window / (N+regular_window)
                 potential = quad.QuadPotentialDiag(cov)
 
         return pm.NUTS(potential=potential, **kwargs)
