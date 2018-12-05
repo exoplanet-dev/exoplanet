@@ -69,10 +69,8 @@ class SimpleTransitOrbit(object):
     def get_radial_velocity(self, t, output_units=None):
         raise NotImplementedError("a SimpleTransitOrbit has no velocity")
 
-    def approx_in_transit(self, t, r=None, texp=None, duration_factor=None):
+    def in_transit(self, t, r=None, texp=None):
         """Get a list of timestamps that are in transit
-
-        For this orbit, this function is exact.
 
         Args:
             t (vector): A vector of timestamps to be evaluated.

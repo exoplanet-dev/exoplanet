@@ -44,7 +44,7 @@ def test_light_curve_grad():
     utt.verify_grad(lc, [u_val, b_val, r_val])
 
 
-def test_approx_in_transit():
+def test_in_transit():
     t = np.linspace(-20, 20, 1000)
     m_planet = np.array([0.3, 0.5])
     m_star = 1.45
@@ -62,13 +62,12 @@ def test_approx_in_transit():
 
     lc = StarryLightCurve(u)
     model1 = lc.get_light_curve(r=r, orbit=orbit, t=t)
-    model2 = lc.get_light_curve(r=r, orbit=orbit, t=t,
-                                use_approx_in_transit=False)
+    model2 = lc.get_light_curve(r=r, orbit=orbit, t=t, use_in_transit=False)
     vals = theano.function([], [model1, model2])()
     utt.assert_allclose(*vals)
 
     model1 = lc.get_light_curve(r=r, orbit=orbit, t=t, texp=0.1)
     model2 = lc.get_light_curve(r=r, orbit=orbit, t=t, texp=0.1,
-                                use_approx_in_transit=False)
+                                use_in_transit=False)
     vals = theano.function([], [model1, model2])()
     utt.assert_allclose(*vals)

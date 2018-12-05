@@ -41,7 +41,7 @@ class StarryLightCurve(object):
 
     def get_light_curve(self, orbit=None, r=None, t=None,
                         texp=None, oversample=7, order=0,
-                        use_approx_in_transit=True, duration_factor=3):
+                        use_in_transit=True):
         """Get the light curve for an orbit at a set of times
 
         Args:
@@ -73,10 +73,9 @@ class StarryLightCurve(object):
                 centered Riemann sum (equivalent to the "resampling" procedure
                 suggested by Kipping 2010), ``1`` for the trapezoid rule, or
                 ``2`` for Simpson's rule.
-            use_approx_in_transit (Optional[bool]): If ``True``, the model will
-                only be evaluated for the data points expected to be in transit
-                as computed using the ``approx_in_transit`` method on
-                ``orbit``.
+            use_in_transit (Optional[bool]): If ``True``, the model will only
+                be evaluated for the data points expected to be in transit
+                as computed using the ``in_transit`` method on ``orbit``.
 
         """
         if orbit is None:
@@ -90,10 +89,10 @@ class StarryLightCurve(object):
         r = tt.reshape(r, (r.size,))
         t = tt.as_tensor_variable(t)
 
-        if use_approx_in_transit:
-            transit_model = tt.zeros_like(t)
-            inds = orbit.approx_in_transit(t, r=r, texp=texp,
-                                           duration_factor=duration_factor)
+        if use_in_transit:
+            transit_model = tt.shape_padleft(tt.zeros_like(r), t.ndim) \
+                + tt.shape_padright(tt.zeros_like(t), r.ndim)
+            inds = orbit.in_transit(t, r=r, texp=texp)
             t = t[inds]
 
         if texp is None:
@@ -142,9 +141,8 @@ class StarryLightCurve(object):
         if texp is not None:
             stencil = tt.shape_padright(tt.shape_padleft(stencil, t.ndim), 1)
             lc = tt.sum(stencil * lc, axis=t.ndim)
-        lc = tt.sum(lc, axis=-1)
 
-        if use_approx_in_transit:
+        if use_in_transit:
             transit_model = tt.set_subtensor(transit_model[inds], lc)
             return transit_model
         else:
