@@ -34,14 +34,17 @@ def get_citations_for_model(model=None, width=79):
         logging.warning("no citations registered with model")
         return "", ""
 
-    cite = list(CITATIONS["pymc3"][0]) + list(CITATIONS["theano"][0])
-    bib = [CITATIONS["pymc3"][1], CITATIONS["theano"][1]]
+    cite = list(CITATIONS["exoplanet"][0]) + \
+        list(CITATIONS["pymc3"][0]) + \
+        list(CITATIONS["theano"][0])
+    bib = [CITATIONS["exoplanet"][1], CITATIONS["pymc3"][1],
+           CITATIONS["theano"][1]]
     for k, v in model.__citations__.items():
         cite += list(v[0])
         bib.append(v[1])
 
-    txt = (r"This research made use of \textsf{{exoplanet}} (Foreman-Mackey "
-           r"et al.\ in prep.) and its dependencies \citep{{{0}}}.")
+    txt = (r"This research made use of \textsf{{exoplanet}} "
+           r"\citep{{exoplanet}} and its dependencies \citep{{{0}}}.")
     txt = txt.format(", ".join(sorted(cite)))
     txt = textwrap.wrap(txt, width=width)
 
@@ -49,6 +52,17 @@ def get_citations_for_model(model=None, width=79):
 
 
 CITATIONS = {
+
+    "exoplanet": (("exoplanet:exoplanet", ), r"""
+@misc{exoplanet:exoplanet,
+    title={exoplanet v0.1.0},
+   author={Foreman-Mackey, Daniel},
+    month={dec},
+     year={2018},
+      doi={10.5281/zenodo.1998448},
+      url={https://doi.org/10.5281/zenodo.1998448}
+}
+"""),
 
     "pymc3": (("exoplanet:pymc3", ), r"""
 @article{exoplanet:pymc3,
