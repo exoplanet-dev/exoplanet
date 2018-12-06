@@ -77,7 +77,7 @@ int APPLY_SPECIFIC(solver)(
           if (fabs(delta) < M_PI) {
             E -= delta;
           } else {
-            E -= M_PI * ((delta >= 0) - (delta < 0));
+            E -= M_PI * sign(delta);
           }
 
           esinE = e * sin(E);
@@ -93,7 +93,10 @@ int APPLY_SPECIFIC(solver)(
         tanE2 = esinE / denom;  // tan(0.5*E)
         f_out[n] = 2 * atan(sqrt((1+e)/(1-e))*tanE2);
       } else {
-        f_out[n] = M_PI;
+        if (fabs(esinE) > tol)
+          f_out[n] = M_PI * sign(esinE);
+        else
+          f_out[n] = 0;
       }
 
     }
