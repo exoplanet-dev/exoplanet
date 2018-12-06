@@ -24,6 +24,7 @@ Tutorials
    tutorials/transit
    tutorials/gp
    tutorials/stellar-variability
+   tutorials/together
 
 
 License & attribution
