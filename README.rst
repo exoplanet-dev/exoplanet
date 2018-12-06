@@ -8,6 +8,7 @@ exoplanet
     <a href="https://github.com/dfm/exoplanet/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat"/></a>
     <a href="https://travis-ci.org/dfm/exoplanet"><img src="https://img.shields.io/travis/dfm/exoplanet/master.svg?style=flat"/></a>
     <a href="https://exoplanet.dfm.io"><img src="https://img.shields.io/readthedocs/exoplanet.svg?style=flat"/></a>
+    <a href="https://zenodo.org/badge/latestdoi/138077978"><img src="https://zenodo.org/badge/138077978.svg" alt="DOI"></a>
     <br>
     <a href="https://rodluger.github.io/starry"><img src="https://img.shields.io/badge/powered_by-starry-EB5368.svg?style=flat"/></a>
     <a href="https://celerite.readthedocs.io"><img src="https://img.shields.io/badge/powered_by-celerite-EB5368.svg?style=flat"/></a>
