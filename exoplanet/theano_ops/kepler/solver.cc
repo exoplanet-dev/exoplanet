@@ -32,11 +32,12 @@ int APPLY_SPECIFIC(solver)(
   DTYPE_OUTPUT_0* E_out = (DTYPE_OUTPUT_0*)PyArray_DATA(*output0);
   DTYPE_OUTPUT_1* f_out = (DTYPE_OUTPUT_1*)PyArray_DATA(*output1);
 
-  T M, e, E, delta, f, fp, fpp, fppp, ffp, fp2, arg, arg2, sinE, tanE2;
-
+  T M, e, E, delta, sinE, tanE2, denom;
   for (npy_intp n = 0; n < N; ++n) {
     M = M_in[n];
     e = e_in[n];
+    E_out[n] = M;
+    f_out[n] = M;
 
     if (e > 1) {
       PyErr_Format(PyExc_ValueError, "eccentricity must be 0 <= e < 1");
@@ -50,20 +51,36 @@ int APPLY_SPECIFIC(solver)(
       f_out[n] = wrap_into(M + M_PI, 2 * M_PI) - M_PI;
 
     } else {
-
       E = M + e*sin(M);
       sinE = sin(E);
-      for (int n = 0; n < maxiter; ++n) {
-        delta = e * sinE + M;
-        E -= (E - delta) / (1 - e * cos(E));
-        sinE = sin(E);
-        if (fabs(E - e * sinE - M) <= tol) break;
+
+      if (e < 0.99) {
+        for (int n = 0; n < maxiter; ++n) {
+          delta = e * sinE + M;
+          E -= (E - delta) / (fmax(1 - e * cos(E), tol));
+          sinE = sin(E);
+          if (fabs(E - e * sinE - M) <= tol) break;
+        }
+      } else {
+        // Slower but more robust version for high eccentricity
+        for (int n = 0; n < maxiter; ++n) {
+          delta = e * sinE + M;
+          E -= (E - delta) / (1 - e * cos(E));
+          sinE = sin(E);
+          if (fabs(E - e * sinE - M) <= tol) break;
+        }
       }
 
       // Save the result and compute the true anomaly
       E_out[n] = E;
-      tanE2 = sinE / (1 + cos(E));  // tan(0.5*E)
-      f_out[n] = 2 * atan(sqrt((1+e)/(1-e))*tanE2);
+      denom = 1 + cos(E);
+      if (fabs(denom) > tol) {
+        tanE2 = sinE / denom;  // tan(0.5*E)
+        f_out[n] = 2 * atan(sqrt((1+e)/(1-e))*tanE2);
+      } else {
+        f_out[n] = M_PI;
+      }
+
     }
   }
 
