@@ -29,7 +29,6 @@ install:
 
 cache:
     directories:
-        - $HOME/.theano
         - $HOME/miniconda
 
 script:
