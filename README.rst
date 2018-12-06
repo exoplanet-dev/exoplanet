@@ -1,21 +1,25 @@
 exoplanet
 =========
 
-.. raw:: html
+.. image:: https://img.shields.io/badge/GitHub-dfm%2Fexoplanet-blue.svg?style=flat
+   :target: https://github.com/dfm/exoplanet
+.. image:: https://img.shields.io/badge/license-MIT-blue.svg?style=flat
+   :target: https://github.com/dfm/exoplanet/blob/master/LICENSE
+.. image:: https://img.shields.io/travis/dfm/exoplanet/master.svg?style=flat
+   :target: https://travis-ci.org/dfm/exoplanet
+.. image:: https://img.shields.io/readthedocs/exoplanet.svg?style=flat
+   :target: https://exoplanet.dfm.io
+.. image:: https://zenodo.org/badge/138077978.svg
+   :target: https://zenodo.org/badge/latestdoi/138077978
 
-    <p>
-    <a href="https://github.com/dfm/exoplanet"><img src="https://img.shields.io/badge/GitHub-dfm%2Fexoplanet-blue.svg?style=flat"/></a>
-    <a href="https://github.com/dfm/exoplanet/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat"/></a>
-    <a href="https://travis-ci.org/dfm/exoplanet"><img src="https://img.shields.io/travis/dfm/exoplanet/master.svg?style=flat"/></a>
-    <a href="https://exoplanet.dfm.io"><img src="https://img.shields.io/readthedocs/exoplanet.svg?style=flat"/></a>
-    <a href="https://zenodo.org/badge/latestdoi/138077978"><img src="https://zenodo.org/badge/138077978.svg" alt="DOI"></a>
-    <br>
-    <a href="https://rodluger.github.io/starry"><img src="https://img.shields.io/badge/powered_by-starry-EB5368.svg?style=flat"/></a>
-    <a href="https://celerite.readthedocs.io"><img src="https://img.shields.io/badge/powered_by-celerite-EB5368.svg?style=flat"/></a>
-    <a href="https://docs.pymc.io"><img src="https://img.shields.io/badge/powered_by-PyMC3-EB5368.svg?style=flat"/></a>
-    <a href="http://www.astropy.org"><img src="https://img.shields.io/badge/powered_by-AstroPy-EB5368.svg?style=flat"/></a>
-    </p>
-
+.. image:: https://img.shields.io/badge/powered_by-starry-EB5368.svg?style=flat
+   :target: https://rodluger.github.io/starry
+.. image:: https://img.shields.io/badge/powered_by-celerite-EB5368.svg?style=flat
+   :target: https://celerite.readthedocs.io
+.. image:: https://img.shields.io/badge/powered_by-PyMC3-EB5368.svg?style=flat
+   :target: https://docs.pymc.io
+.. image:: https://img.shields.io/badge/powered_by-AstroPy-EB5368.svg?style=flat
+   :target: http://www.astropy.org
 
 *exoplanet* is a toolkit for probabilistic modeling of transit and/or radial
 velocity observations of `exoplanets <https://en.wikipedia.org/wiki/Exoplanet>`_
