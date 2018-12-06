@@ -31,6 +31,7 @@ class TestDistributions(object):
     def _sample(self, **kwargs):
         logger = logging.getLogger("pymc3")
         logger.propagate = False
+        logger.setLevel(logging.ERROR)
         kwargs["draws"] = kwargs.get("draws", 1000)
         kwargs["progressbar"] = kwargs.get("progressbar", False)
         return pm.sample(**kwargs)

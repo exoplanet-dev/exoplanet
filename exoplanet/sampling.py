@@ -102,6 +102,7 @@ class PyMC3Sampler(object):
         logger = logging.getLogger("pymc3")
         propagate = logger.propagate
         logger.propagate = False
+        logger.setLevel(logging.ERROR)
 
         self._current_trace = pm.sample(
             start=start, tune=steps, step=step, **kwargs)
