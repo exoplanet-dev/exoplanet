@@ -12,7 +12,6 @@ exoplanet
 .. image:: https://zenodo.org/badge/138077978.svg
    :target: https://zenodo.org/badge/latestdoi/138077978
 
-|
 .. image:: https://img.shields.io/badge/powered_by-starry-EB5368.svg?style=flat
    :target: https://rodluger.github.io/starry
 .. image:: https://img.shields.io/badge/powered_by-celerite-EB5368.svg?style=flat
