@@ -3,7 +3,7 @@ language: c
 
 env:
     global:
-        - THEANO_FLAGS='floatX=float36'
+        - THEANO_FLAGS='floatX=float64'
 
 matrix:
     include:
