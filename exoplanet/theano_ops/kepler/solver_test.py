@@ -51,7 +51,6 @@ class TestKeplerSolver(utt.InferShapeTester):
         E0, f0 = func(M, e)
 
         ind = np.unravel_index(np.argmax(E0), E0.shape)
-        print(E[ind], e[ind], M[ind], f[ind], E0[ind], f0[ind])
 
         utt.assert_allclose(E, E0)
         utt.assert_allclose(f, f0)
