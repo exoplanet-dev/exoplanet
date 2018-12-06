@@ -24,8 +24,9 @@ class TestKeplerSolver(utt.InferShapeTester):
         return M, f
 
     def test_edge(self):
-        E = np.array([0.0, 2*np.pi, -226.2])
+        E = np.array([0.0, 2*np.pi, -226.2, -170.4])
         e = (1 - 1e-6) * np.ones_like(E)
+        e[-1] = 0.9939879759519037
         M, f = self._get_M_and_f(e, E)
 
         M_t = tt.vector()
@@ -51,6 +52,7 @@ class TestKeplerSolver(utt.InferShapeTester):
         E0, f0 = func(M, e)
 
         ind = np.unravel_index(np.argmax(E0), E0.shape)
+        print(e[ind], M[ind], E[ind], f[ind], E0[ind], f0[ind])
 
         utt.assert_allclose(E, E0)
         utt.assert_allclose(f, f0)
