@@ -6,7 +6,6 @@ User guide
 .. toctree::
    :maxdepth: 2
 
-   user/what
    user/install
    tutorials/citation
    user/api
