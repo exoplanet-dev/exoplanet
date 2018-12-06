@@ -1,5 +1,10 @@
 #include <math.h>
 
+template <typename T>
+inline int sign (T x) {
+  return (x > 0) - (x < 0);
+}
+
 inline double wrap_into (double x, double period) {
     return x - period * floor(x / period);
 }
