@@ -91,11 +91,11 @@ def estimate_minimum_mass(periods, x, y, yerr=None, t0s=None, m_star=1):
         with units of ``M_jupiter``.
 
     """
+    periods = u.Quantity(np.atleast_1d(periods), unit=u.day)
     m_star = u.Quantity(m_star, unit=u.M_sun)
     K = estimate_semi_amplitude(periods, x, y, yerr=yerr, t0s=t0s)
     m_J = K / 28.4329 * m_star.value**(2./3)
     m_J *= (periods.to(u.year)).value**(1./3)
-
     return m_J * u.M_jupiter
 
 
