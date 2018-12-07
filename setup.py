@@ -1,21 +1,27 @@
 #!/usr/bin/env python
 
+import numpy as np
+
+import os
 import sys
 from setuptools import setup
 
-# Hackishly inject a constant into builtins to enable importing of the
-# package before the library is built.
-if sys.version_info[0] < 3:
-    import __builtin__ as builtins
-else:
-    import builtins
-builtins.__EXOPLANET_SETUP__ = True
-import exoplanet  # NOQA
+dirname = os.path.dirname(os.path.realpath(__file__))
+sys.insert(0, os.path.join(dirname, "exoplanet"))
+from exoplanet_version import __version__
+
+
+with open(os.path.join(dirname, "requirements.txt"), "r") as f:
+    install_requires = f.read().splitlines()
+
+
+with open(os.path.join(dirname, "README.rst"), encoding="utf-8") as f:
+    readme = f.read()
 
 
 setup(
     name="exoplanet",
-    version=exoplanet.__version__,
+    version=__version__,
     author="Daniel Foreman-Mackey",
     author_email="foreman.mackey@gmail.com",
     url="https://github.com/dfm/exoplanet",
@@ -30,7 +36,8 @@ setup(
         "exoplanet.theano_ops.celerite",
     ],
     description="Fast & scalable MCMC for all your exoplanet needs",
-    long_description=open("README.rst").read(),
+    long_description=readme,
+    install_requires=install_requires,
     package_data={"": ["README.rst", "LICENSE"]},
     include_package_data=True,
     classifiers=[
