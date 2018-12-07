@@ -1,4 +1,6 @@
-include README.md LICENSE
+include README.rst
+include LICENSE
+include requirements.txt
 
 include exoplanet/theano_ops/kepler/*.cc
 include exoplanet/theano_ops/kepler/include/*.h
