@@ -9,3 +9,7 @@ rcParams["text.usetex"] = False
 rcParams["font.family"] = ["sans-serif"]
 rcParams["font.sans-serif"] = ["cmss10"]
 rcParams["axes.unicode_minus"] = False
+
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
