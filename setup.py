@@ -7,7 +7,7 @@ import sys
 from setuptools import setup
 
 dirname = os.path.dirname(os.path.realpath(__file__))
-sys.insert(0, os.path.join(dirname, "exoplanet"))
+sys.path.insert(0, os.path.join(dirname, "exoplanet"))
 from exoplanet_version import __version__
 
 
