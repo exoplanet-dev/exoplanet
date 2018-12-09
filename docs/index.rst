@@ -24,6 +24,7 @@ Tutorials
    tutorials/gp
    tutorials/stellar-variability
    tutorials/together
+   tutorials/tess
 
 
 License & attribution
