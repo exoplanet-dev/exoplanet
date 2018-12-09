@@ -101,6 +101,7 @@ class PyMC3Sampler(object):
         # Hide some of the PyMC3 logging
         logger = logging.getLogger("pymc3")
         propagate = logger.propagate
+        level = logger.getEffectiveLevel()
         logger.propagate = False
         logger.setLevel(logging.ERROR)
 
@@ -110,6 +111,7 @@ class PyMC3Sampler(object):
         self.count += steps
 
         logger.propagate = propagate
+        logger.setLevel(level)
 
     def warmup(self, start=None, step_kwargs=None, **kwargs):
         """Run an initial warmup phase to find the typical set"""
