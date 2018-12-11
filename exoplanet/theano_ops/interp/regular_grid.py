@@ -94,46 +94,20 @@ class RegularGridOp(gof.COp):
             tt.TensorType(dtype=dtype,
                           broadcastable=[False, False])(),
             tt.TensorType(dtype=dtype,
-                          broadcastable=[False] * (self.ndim + 1))(),
+                          broadcastable=[False, False, False])(),
         ]
         return gof.Apply(self, in_args, out_args)
 
-    # def infer_shape(self, node, shapes):
-    #     return shapes[-1], [self.ndim + 1]
+    def grad(self, inputs, gradients):
+        xi = inputs[0]
+        zi, dz = self(*inputs)
+        bz = gradients[0]
 
-    # def grad(self, inputs, gradients):
-    #     M, e = inputs
-    #     E, f = self(M, e)
+        bx = tt.sum(tt.reshape(bz, (xi.shape[0], 1, zi.shape[1])) * dz,
+                    axis=-1)
+        return tuple([bx] + [tt.zeros_like(i) for i in inputs[1:]])
 
-    #     bM = tt.zeros_like(M)
-    #     be = tt.zeros_like(M)
-    #     ecosE = e * tt.cos(E)
-
-    #     if not isinstance(gradients[0].type, theano.gradient.DisconnectedType):
-    #         # Backpropagate E_bar
-    #         bM = gradients[0] / (1 - ecosE)
-    #         be = tt.sin(E) * bM
-
-    #     if not isinstance(gradients[1].type, theano.gradient.DisconnectedType):
-    #         # Backpropagate f_bar
-    #         sinf2 = tt.sin(0.5*f)
-    #         cosf2 = tt.cos(0.5*f)
-    #         tanf2 = sinf2 / cosf2
-    #         e2 = e**2
-    #         ome2 = 1 - e2
-    #         ome = 1 - e
-    #         ope = 1 + e
-    #         cosf22 = cosf2**2
-    #         twoecosf22 = 2 * e * cosf22
-    #         factor = tt.sqrt(ope/ome)
-    #         inner = (twoecosf22+ome) * tt.as_tensor_variable(gradients[1])
-
-    #         bM += factor*(ome*tanf2**2+ope)*inner*cosf22/(ope*ome2)
-    #         be += -2*cosf22*tanf2/ome2**2*inner*(ecosE-2+e2)
-
-    #     return [bM, be]
-
-    # def R_op(self, inputs, eval_points):
-    #     if eval_points[0] is None:
-    #         return eval_points
-    #     return self.grad(inputs, eval_points)
+    def R_op(self, inputs, eval_points):
+        if eval_points[0] is None:
+            return eval_points
+        return self.grad(inputs, eval_points)
