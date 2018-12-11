@@ -44,7 +44,7 @@ int APPLY_SPECIFIC(regular_grid)(
 
   // Sort out the values shape
   // must be (nx, ny, ..., nout)
-  if (values_obj == NULL || PyArray_NDIM(values_obj) != REGULAR_GRID_NDIM + 1 || !PyArray_CHKFLAGS(values_obj, NPY_ARRAY_C_CONTIGUOUS)) {
+  if (values_obj == NULL || PyArray_NDIM(values_obj) != (REGULAR_GRID_NDIM + 1) || !PyArray_CHKFLAGS(values_obj, NPY_ARRAY_C_CONTIGUOUS)) {
     PyErr_Format(PyExc_ValueError, "dimension mismatch (values)");
     return 1;
   }
@@ -64,7 +64,7 @@ int APPLY_SPECIFIC(regular_grid)(
 
   // Sort out the test points
   // must be (ntest, ndim)
-  if (xi_obj == NULL || PyArray_NDIM(xi_obj) != 2 || PyArray_DIM(xi_obj, 1) != ndim || !PyArray_CHKFLAGS(values_obj, NPY_ARRAY_C_CONTIGUOUS)) {
+  if (xi_obj == NULL || PyArray_NDIM(xi_obj) != 2 || PyArray_DIM(xi_obj, 1) != ndim || !PyArray_CHKFLAGS(xi_obj, NPY_ARRAY_C_CONTIGUOUS)) {
     PyErr_Format(PyExc_ValueError, "dimension mismatch (xi)");
     return 1;
   }
@@ -84,7 +84,6 @@ int APPLY_SPECIFIC(regular_grid)(
   // Outputs
   Eigen::Map<Eigen::Matrix<DTYPE_OUTPUT_0, Eigen::Dynamic, REGULAR_GRID_NOUT, REGULAR_GRID_NOUT_ORDER>> zi((DTYPE_OUTPUT_0*)PyArray_DATA(*zi_obj), ntest, nout);
   Eigen::Map<Eigen::Matrix<DTYPE_OUTPUT_1, Eigen::Dynamic, REGULAR_GRID_NDIM_NOUT, REGULAR_GRID_NDIM_NOUT_ORDER>> dz((DTYPE_OUTPUT_1*)PyArray_DATA(*dz_obj), ntest, ndim*nout);
-  dz.setZero();
 
   // Allocate temporary arrays to store indices and weights
   typedef DTYPE_OUTPUT_0 T;
@@ -123,7 +122,6 @@ int APPLY_SPECIFIC(regular_grid)(
     // Find where the point should be inserted into the grid
     for (npy_intp n = 0; n < ntest; ++n) {
       bool out_of_bounds = false;
-      std::cout << dim << " " << n << " " << xi(n, dim) << "\n";
       npy_intp ind = search_sorted<T>(N, (T*)points.data(), xi(n, dim)) - 1;
       if (ind < 0) {
         out_of_bounds = true;
@@ -146,38 +144,38 @@ int APPLY_SPECIFIC(regular_grid)(
   }
 
   // Loop over test points and compute the interpolation for that point
-  //unsigned ncorner = pow(2, ndim_);
-  //for (int n = 0; n < ntest; ++n) {
+  unsigned ncorner = pow(2, ndim);
+  for (int n = 0; n < ntest; ++n) {
 
-  //  // Madness to find the coordinates of every corner
-  //  zi.row(n).setZero();
-  //  dz.row(n).setZero();
-  //  for (unsigned corner = 0; corner < ncorner; ++corner) {
-  //    int64 factor = 1;
-  //    int64 ind = 0;
-  //    T weight = T(1.0);
-  //    for (int dim = ndim_-1; dim >= 0; --dim) {
-  //      unsigned offset = (corner >> unsigned(dim)) & 1;
-  //      ind += factor * (inds(n, dim) + offset);
-  //      factor *= grid_dims(dim);
-  //      if (offset == 1) {
-  //        weight *= numerator(n, dim) / denominator(n, dim);
-  //        accumulator(dim) = numerator(n, dim);
-  //      } else {
-  //        //T norm_dist = T(1.0) - numerator(n, dim) / denominator(n, dim);
-  //        weight *= T(1.0) - numerator(n, dim) / denominator(n, dim);
-  //        accumulator(dim) = (numerator(n, dim) - denominator(n, dim));
-  //      }
-  //    }
+    // Madness to find the coordinates of every corner
+    zi.row(n).setZero();
+    dz.row(n).setZero();
+    for (unsigned corner = 0; corner < ncorner; ++corner) {
+      npy_intp factor = 1;
+      npy_intp ind = 0;
+      T weight = T(1.0);
+      for (int dim = ndim-1; dim >= 0; --dim) {
+        unsigned offset = (corner >> unsigned(dim)) & 1;
+        ind += factor * (inds(n, dim) + offset);
+        factor *= shape[dim];
+        if (offset == 1) {
+          weight *= numerator(n, dim) / denominator(n, dim);
+          accumulator(dim) = numerator(n, dim);
+        } else {
+          //T norm_dist = T(1.0) - numerator(n, dim) / denominator(n, dim);
+          weight *= T(1.0) - numerator(n, dim) / denominator(n, dim);
+          accumulator(dim) = (numerator(n, dim) - denominator(n, dim));
+        }
+      }
 
-  //    if (std::abs(weight) > std::numeric_limits<T>::epsilon()) {
-  //      zi.row(n).noalias() += weight * values.row(ind);
-  //      for (int dim = 0; dim < ndim_; ++dim) {
-  //        dz.block(n, dim * nout, 1, nout).noalias() += (weight / accumulator(dim)) * values.row(ind);
-  //      }
-  //    }
-  //  }
-  //}
+      if (std::abs(weight) > std::numeric_limits<T>::epsilon()) {
+        zi.row(n).noalias() += weight * values.row(ind);
+        for (int dim = 0; dim < ndim; ++dim) {
+          dz.block(n, dim * nout, 1, nout).noalias() += (weight / accumulator(dim)) * values.row(ind);
+        }
+      }
+    }
+  }
 
   return 0;
 }

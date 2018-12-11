@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division, print_function
-
-__all__ = ["kepler", "celerite", "starry"]
+__all__ = ["kepler", "celerite", "starry", "interp"]
 
 from . import kepler
 from . import celerite
 from . import starry
+from . import interp
