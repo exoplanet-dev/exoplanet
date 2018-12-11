@@ -37,25 +37,42 @@ class RegularGridOp(gof.COp):
     # def c_code_cache_version(self):
     #     return (0, 0, 1)
 
-    # def c_headers(self, compiler):
-    #     return ["theano_helpers.h"]
+    def c_headers(self, compiler):
+        return ["theano_helpers.h"]
 
-    # def c_header_dirs(self, compiler):
-    #     return [
-    #         pkg_resources.resource_filename(__name__, "include"),
-    #     ]
+    def c_header_dirs(self, compiler):
+        return [
+            pkg_resources.resource_filename(__name__, "include"),
+            pkg_resources.resource_filename("exoplanet.theano_ops.starry",
+                                            "starry/lib/eigen_3.3.3")
+        ]
 
     def c_compile_args(self, compiler):
         args = get_compile_args(compiler)
         args.append("-DREGULAR_GRID_NDIM={0}".format(self.ndim))
-        if self.nout == 1:
-            args.append("-DREGULAR_GRID_NOUT=1")
-            args.append("-DREGULAR_GRID_NOUT_ORDER=Eigen::ColMajor")
-        elif 1 < self.nout <= 16:
+        if self.ndim == 1:
+            args.append("-DREGULAR_GRID_NDIM_ORDER=Eigen::ColMajor")
+        else:
+            args.append("-DREGULAR_GRID_NDIM_ORDER=Eigen::RowMajor")
+
+        if 0 < self.nout <= 16:
             args.append("-DREGULAR_GRID_NOUT={0}".format(self.nout))
+        if self.nout == 1:
+            args.append("-DREGULAR_GRID_NOUT_ORDER=Eigen::ColMajor")
+        else:
             args.append("-DREGULAR_GRID_NOUT_ORDER=Eigen::RowMajor")
+
+        ndim_nout = self.ndim * self.nout
+        if 0 < ndim_nout <= 16:
+            args.append("-DREGULAR_GRID_NDIM_NOUT={0}".format(ndim_nout))
+        if ndim_nout == 1:
+            args.append("-DREGULAR_GRID_NDIM_NOUT_ORDER=Eigen::ColMajor")
+        else:
+            args.append("-DREGULAR_GRID_NDIM_NOUT_ORDER=Eigen::RowMajor")
+
         for i in range(self.ndim):
             args.append("-DREGULAR_GRID_{0}".format(i))
+
         return args
 
     def make_node(self, *args):
@@ -81,8 +98,8 @@ class RegularGridOp(gof.COp):
         ]
         return gof.Apply(self, in_args, out_args)
 
-    def infer_shape(self, node, shapes):
-        return shapes[-1], [self.ndim + 1]
+    # def infer_shape(self, node, shapes):
+    #     return shapes[-1], [self.ndim + 1]
 
     # def grad(self, inputs, gradients):
     #     M, e = inputs
