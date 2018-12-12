@@ -10,7 +10,7 @@ import theano
 from theano import gof
 import theano.tensor as tt
 
-from ..build_utils import get_compile_args
+from ..build_utils import get_compile_args, get_cache_version
 
 
 class CeleriteBaseOp(gof.COp):
@@ -26,8 +26,8 @@ class CeleriteBaseOp(gof.COp):
         self.n_rhs = int(n_rhs)
         super(CeleriteBaseOp, self).__init__(self.func_file, self.func_name)
 
-    # def c_code_cache_version(self):
-    #     return (0, 0, 1)
+    def c_code_cache_version(self):
+        return get_cache_version()
 
     def c_headers(self, compiler):
         return ["theano_helpers.h"]

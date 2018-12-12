@@ -2,9 +2,10 @@
 
 from __future__ import division, print_function
 
-__all__ = ["get_compile_args"]
+__all__ = ["get_compile_args", "get_cache_version"]
 
 import sys
+from ..exoplanet_version import __version__
 
 
 def get_compile_args(compiler):
@@ -13,3 +14,9 @@ def get_compile_args(compiler):
         opts += ["-stdlib=libc++", "-mmacosx-version-min=10.7"]
 
     return opts
+
+
+def get_cache_version():
+    if "dev" in __version__:
+        return ()
+    return tuple(map(int, __version__.split(".")))

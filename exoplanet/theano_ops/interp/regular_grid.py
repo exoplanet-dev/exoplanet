@@ -10,7 +10,7 @@ import theano
 from theano import gof
 import theano.tensor as tt
 
-from ..build_utils import get_compile_args
+from ..build_utils import get_compile_args, get_cache_version
 
 
 class RegularGridOp(gof.COp):
@@ -34,8 +34,8 @@ class RegularGridOp(gof.COp):
         self.bounds_error = bool(bounds_error)
         super(RegularGridOp, self).__init__(self.func_file, self.func_name)
 
-    # def c_code_cache_version(self):
-    #     return (0, 0, 1)
+    def c_code_cache_version(self):
+        return get_cache_version()
 
     def c_headers(self, compiler):
         return ["theano_helpers.h"]
