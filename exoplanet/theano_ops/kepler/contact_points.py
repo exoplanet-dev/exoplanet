@@ -10,6 +10,8 @@ import theano
 from theano import gof
 import theano.tensor as tt
 
+from ..build_utils import get_cache_version
+
 
 class CircularContactPointsOp(gof.COp):
     params_type = gof.ParamsType(
@@ -27,8 +29,8 @@ class CircularContactPointsOp(gof.COp):
         super(CircularContactPointsOp, self).__init__(
             self.func_file, self.func_name)
 
-    # def c_code_cache_version(self):
-    #     return (0, 0, 1)
+    def c_code_cache_version(self):
+        return get_cache_version()
 
     def c_headers(self, compiler):
         return ["theano_helpers.h", "contact_points.h"]
