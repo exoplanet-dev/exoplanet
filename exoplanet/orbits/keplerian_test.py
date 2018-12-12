@@ -30,6 +30,7 @@ def test_sky_coords():
         r_batman[:, i] = _rsky._rsky(t, t0[i], period[i], a[i], incl[i], e[i],
                                      omega[i], 1, 1)
     m = r_batman < 100.0
+    assert m.sum() > 0
 
     orbit = KeplerianOrbit(
         period=period, a=a, t0=t0, ecc=e, omega=omega, incl=incl, tol=1e-8,
@@ -135,3 +136,35 @@ def test_in_transit():
     out = r2[~m] > ((r_star + r_pl)**2)[None, :]
     out |= coords[2][~m] >= 0
     assert np.all(out)
+
+
+def test_small_star():
+    # u_star = [0.2, 0.1]
+    # r = 0.04221468
+
+    m_star = 0.151
+    r_star = 0.189
+    period = 0.4626413
+    t0 = 0.2
+    b = 0.5
+    ecc = 0.1
+    omega = 0.1
+    t = np.linspace(0, period, 500)
+
+    orbit = KeplerianOrbit(
+        r_star=r_star, m_star=m_star,
+        period=period, t0=t0, b=b,
+        ecc=ecc, omega=omega)
+    a = orbit.a.eval()
+    incl = orbit.incl.eval()
+
+    r_batman = _rsky._rsky(t, t0, period, a, incl, ecc, omega, 1, 1)
+    m = r_batman < 100.0
+    assert m.sum() > 0
+
+    func = theano.function([], orbit.get_relative_position(t))
+    x, y, z = func()
+    r = np.sqrt(x**2 + y**2)
+
+    # Make sure that the in-transit impact parameter matches batman
+    utt.assert_allclose(r_batman[m], r[m], atol=2e-5)

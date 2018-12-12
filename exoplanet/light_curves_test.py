@@ -9,6 +9,7 @@ import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
 import starry
+import batman
 
 from .orbits import KeplerianOrbit
 from .light_curves import StarryLightCurve
@@ -71,3 +72,48 @@ def test_in_transit():
                                 use_in_transit=False)
     vals = theano.function([], [model1, model2])()
     utt.assert_allclose(*vals)
+
+
+def test_small_star():
+    u_star = [0.2, 0.1]
+    r = 0.04221468
+
+    m_star = 0.151
+    r_star = 0.189
+    period = 0.4626413
+    t0 = 0.2
+    b = 0.5
+    ecc = 0.1
+    omega = 0.1
+    t = np.linspace(0, period, 500)
+
+    r_pl = r * r_star
+
+    orbit = KeplerianOrbit(
+        r_star=r_star, m_star=m_star,
+        period=period, t0=t0, b=b,
+        ecc=ecc, omega=omega)
+    a = orbit.a.eval()
+    incl = orbit.incl.eval()
+
+    lc = StarryLightCurve(u_star)
+
+    model1 = lc.get_light_curve(r=r_pl, orbit=orbit, t=t)
+    model2 = lc.get_light_curve(r=r_pl, orbit=orbit, t=t, use_in_transit=False)
+    vals = theano.function([], [model1, model2])()
+    utt.assert_allclose(*vals)
+
+    params = batman.TransitParams()
+    params.t0 = t0
+    params.per = period
+    params.rp = r
+    params.a = a / r_star
+    params.inc = np.degrees(incl)
+    params.ecc = ecc
+    params.w = np.degrees(omega)
+    params.u = u_star
+    params.limb_dark = "quadratic"
+
+    model = batman.TransitModel(params, t)
+    flux = model.light_curve(params)
+    utt.assert_allclose(vals[0][:, 0], flux - 1)
