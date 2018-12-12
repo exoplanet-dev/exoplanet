@@ -88,7 +88,7 @@ class PyMC3Sampler(object):
                     var = var * N / (N + regular_window)
                     var += \
                         regular_variance * regular_window / (N+regular_window)
-                potential = quad.QuadPotentialDiag(cov)
+                potential = quad.QuadPotentialDiag(var)
 
         return pm.NUTS(potential=potential, **kwargs)
 
