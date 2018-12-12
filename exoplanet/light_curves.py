@@ -22,9 +22,6 @@ class StarryLightCurve(object):
 
     Args:
         u (vector): A vector of limb darkening coefficients.
-        r_star (Optional[scalar]): The stellar radius. If not given, this is
-            assumed to be ``1`` so all coordinates should be given in stellar
-            radii.
 
     """
 
@@ -32,8 +29,6 @@ class StarryLightCurve(object):
 
     def __init__(self, u, r_star=1.0, model=None):
         add_citations_to_model(self.__citations__, model=model)
-
-        self.r_star = tt.as_tensor_variable(r_star)
         self.u = tt.as_tensor_variable(u)
         u_ext = tt.concatenate([-1 + tt.zeros(1, dtype=self.u.dtype), self.u])
         self.c = get_cl(u_ext)
@@ -136,7 +131,7 @@ class StarryLightCurve(object):
         los = tt.reshape(coords[2], rgrid.shape)
 
         lc = self._compute_light_curve(
-            b/self.r_star, rgrid/self.r_star, los/self.r_star)
+            b/orbit.r_star, rgrid/orbit.r_star, los/orbit.r_star)
 
         if texp is not None:
             stencil = tt.shape_padright(tt.shape_padleft(stencil, t.ndim), 1)

@@ -98,12 +98,12 @@ class KeplerianOrbit(object):
                 self.b = tt.as_tensor_variable(0.0)
             else:
                 self.b = tt.as_tensor_variable(b)
-                self.incl = tt.arccos(self.b / self.a_planet)
+                self.incl = tt.arccos(self.b * self.r_star / self.a_planet)
         else:
             if b is not None:
                 raise ValueError("only one of 'incl' and 'b' can be given")
             self.incl = tt.as_tensor_variable(incl)
-            self.b = self.a_planet * tt.cos(self.incl)
+            self.b = self.a_planet * tt.cos(self.incl) / self.r_star
 
         self.K0 = self.n * self.a / self.m_total
         self.cos_incl = tt.cos(self.incl)
