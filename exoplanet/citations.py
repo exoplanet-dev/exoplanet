@@ -55,12 +55,12 @@ CITATIONS = {
 
     "exoplanet": (("exoplanet:exoplanet", ), r"""
 @misc{exoplanet:exoplanet,
-    title={exoplanet v0.1.0},
+    title={exoplanet v0.1.2},
    author={Foreman-Mackey, Daniel},
     month={dec},
      year={2018},
-      doi={10.5281/zenodo.1998448},
-      url={https://doi.org/10.5281/zenodo.1998448}
+      doi={10.5281/zenodo.2249795},
+      url={https://doi.org/10.5281/zenodo.2249795}
 }
 """),
 
