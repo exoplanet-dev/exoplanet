@@ -1,7 +1,0 @@
-name: exoplanet
-dependencies:
-  - python=3.5
-  - pandoc
-  - jupyter
-  - pip:
-      - sphinx-nameko-theme
