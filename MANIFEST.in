@@ -8,6 +8,9 @@ include exoplanet/theano_ops/kepler/include/*.h
 include exoplanet/theano_ops/celerite/*.cc
 include exoplanet/theano_ops/celerite/include/*.h
 
+include exoplanet/theano_ops/interp/*.cc
+include exoplanet/theano_ops/interp/include/*.h
+
 include exoplanet/theano_ops/starry/starry/starry/*.h
 include exoplanet/theano_ops/starry/*.cc
 include exoplanet/theano_ops/starry/include/*.h
