@@ -1,5 +1,5 @@
-0.1.2 (upcoming)
-++++++++++++++++
+0.1.2 (2018-12-13)
+++++++++++++++++++
 
 - Adds regular grid interpolation Op for Theano
 - Fixes major bug in handling of the stellar radius for transits
