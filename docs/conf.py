@@ -21,10 +21,10 @@ autodoc_mock_imports = [
     "theano",
 ]
 
-dirname = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, dirname)
-sys.path.insert(0, os.path.join(dirname, "exoplanet"))
-from exoplanet_version import __version__  # NOQA
+# dirname = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# sys.path.insert(0, dirname)
+# sys.path.insert(0, os.path.join(dirname, "exoplanet"))
+# from exoplanet_version import __version__  # NOQA
 
 # Convert the tutorials
 for fn in glob.glob("_static/notebooks/*.ipynb"):
