@@ -29,8 +29,8 @@ class TestKeplerSolver(utt.InferShapeTester):
         e[-1] = 0.9939879759519037
         M, f = self._get_M_and_f(e, E)
 
-        M_t = tt.vector()
-        e_t = tt.vector()
+        M_t = tt.dvector()
+        e_t = tt.dvector()
         func = theano.function([M_t, e_t], self.op(M_t, e_t))
         E0, f0 = func(M, e)
 
@@ -56,8 +56,8 @@ class TestKeplerSolver(utt.InferShapeTester):
 
     def test_infer_shape(self):
         np.random.seed(42)
-        M = tt.vector()
-        e = tt.vector()
+        M = tt.dvector()
+        e = tt.dvector()
         M_val = np.linspace(-10, 10, 50)
         e_val = np.random.uniform(0, 0.9, len(M_val))
         self._compile_and_check([M, e],
