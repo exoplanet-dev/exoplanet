@@ -32,7 +32,7 @@ int APPLY_SPECIFIC(solver)(
   DTYPE_OUTPUT_0* E_out = (DTYPE_OUTPUT_0*)PyArray_DATA(*output0);
   DTYPE_OUTPUT_1* f_out = (DTYPE_OUTPUT_1*)PyArray_DATA(*output1);
 
-  T M0, M, e, E, delta, func, esinE, tanE2, denom;
+  T M, e, E, delta, func, esinE, tanE2, denom;
   for (npy_intp n = 0; n < N; ++n) {
     M = M_in[n];
     e = e_in[n];
@@ -51,44 +51,11 @@ int APPLY_SPECIFIC(solver)(
       f_out[n] = wrap_into(M + M_PI, 2 * M_PI) - M_PI;
 
     } else {
-      // Shift M for numerical stability
-      M0 = 2*M_PI*floor(M / (2*M_PI));
-      M -= M0;
 
-      E = M + e*sin(M);
-      esinE = e * sin(E);
-
-      if (e < 0.99) {
-        for (long n = 0; n < maxiter; ++n) {
-          delta = func / (1 - e * cos(E));
-          E -= delta;
-          esinE = e * sin(E);
-          func = E - esinE - M;
-          if (fabs(func) <= tol) break;
-        }
-      } else {
-        // Use a more robust method for large eccentricity
-        for (long n = 0; n < maxiter; ++n) {
-          delta = func / (1 - e * cos(E));
-
-          // If the change is large, that normally means that the gradient is
-          // close to zero. We can jump out of this region with a move of Pi
-          // in the right direction.
-          if (fabs(delta) < M_PI) {
-            E -= delta;
-          } else {
-            E -= M_PI * sign(delta);
-          }
-
-          esinE = e * sin(E);
-          func = E - esinE - M;
-          if (fabs(func) <= tol) break;
-        }
-      }
-
-      // Save the result and compute the true anomaly
-      E_out[n] = E + M0;
+      E = exoplanet::solve_kepler(M, e);
+      E_out[n] = E;
       denom = e * (1 + cos(E));
+      esinE = e * sin(E);
       if (fabs(denom) > tol) {
         tanE2 = esinE / denom;  // tan(0.5*E)
         f_out[n] = 2 * atan(sqrt((1+e)/(1-e))*tanE2);
