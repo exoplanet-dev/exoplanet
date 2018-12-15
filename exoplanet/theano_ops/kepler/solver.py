@@ -31,12 +31,10 @@ class KeplerOp(gof.COp):
         return get_cache_version()
 
     def c_headers(self, compiler):
-        return ["theano_helpers.h"]
+        return ["theano_helpers.h", "solver.h"]
 
     def c_header_dirs(self, compiler):
-        return [
-            pkg_resources.resource_filename(__name__, "include"),
-        ]
+        return [pkg_resources.resource_filename(__name__, "include")]
 
     def make_node(self, mean_anom, eccen):
         in_args = [tt.as_tensor_variable(mean_anom),
