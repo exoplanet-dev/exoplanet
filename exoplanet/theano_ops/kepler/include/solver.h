@@ -76,6 +76,7 @@ namespace exoplanet {
     bool big = u > M_PI_2;
     T v = (big) ? M_PI_2 - u : u;
     T w = v * v;
+
     T ss = T(1);
     T cc = T(1);
     for (int i = 9; i >= 1; --i) {
