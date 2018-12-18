@@ -27,7 +27,7 @@ class StarryLightCurve(object):
 
     __citations__ = ("starry", )
 
-    def __init__(self, u, r_star=1.0, model=None):
+    def __init__(self, u, model=None):
         add_citations_to_model(self.__citations__, model=model)
         self.u = tt.as_tensor_variable(u)
         u_ext = tt.concatenate([-1 + tt.zeros(1, dtype=self.u.dtype), self.u])
