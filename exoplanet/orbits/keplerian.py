@@ -92,22 +92,7 @@ class KeplerianOrbit(object):
         self.a_star = self.a * self.m_planet / self.m_total
         self.a_planet = -self.a * self.m_star / self.m_total
 
-        if incl is None:
-            if b is None:
-                self.incl = tt.as_tensor_variable(0.5 * np.pi)
-                self.b = tt.as_tensor_variable(0.0)
-            else:
-                self.b = tt.as_tensor_variable(b)
-                self.incl = tt.arccos(self.b * self.r_star / self.a_planet)
-        else:
-            if b is not None:
-                raise ValueError("only one of 'incl' and 'b' can be given")
-            self.incl = tt.as_tensor_variable(incl)
-            self.b = self.a_planet * tt.cos(self.incl) / self.r_star
-
         self.K0 = self.n * self.a / self.m_total
-        self.cos_incl = tt.cos(self.incl)
-        self.sin_incl = tt.sin(self.incl)
 
         # Set up the contact points calculation
         if contact_points_kwargs is None:
@@ -121,6 +106,8 @@ class KeplerianOrbit(object):
 
             self.contact_points_op = \
                 CircularContactPointsOp(**contact_points_kwargs)
+
+            incl_factor = 1
         else:
             self.ecc = tt.as_tensor_variable(ecc)
             if omega is None:
@@ -137,7 +124,27 @@ class KeplerianOrbit(object):
             self.tref = self.t0 - self.M0 / self.n
             self.contact_points_op = ContactPointsOp(**contact_points_kwargs)
 
-            self.K0 /= tt.sqrt(1 - self.ecc**2)
+            ome2 = 1 - self.ecc**2
+            self.K0 /= tt.sqrt(ome2)
+            incl_factor = (1 + self.ecc * self.sin_omega) / ome2
+
+        if incl is None:
+            if b is None:
+                zla = tt.zeros_like(self.a)
+                self.incl = 0.5 * np.pi + zla
+                self.cos_incl = zla
+                self.b = zla
+            else:
+                self.b = tt.as_tensor_variable(b)
+                self.cos_incl = incl_factor*self.b*self.r_star/self.a_planet
+                self.incl = tt.arccos(self.cos_incl)
+        else:
+            if b is not None:
+                raise ValueError("only one of 'incl' and 'b' can be given")
+            self.incl = tt.as_tensor_variable(incl)
+            self.cos_incl = tt.cos(self.incl)
+            self.b = self.a_planet*self.cos_incl/(incl_factor*self.r_star)
+        self.sin_incl = tt.sin(self.incl)
 
     def _get_consistent_inputs(self, a, period, rho_star, r_star, m_star,
                                rho_star_units):
