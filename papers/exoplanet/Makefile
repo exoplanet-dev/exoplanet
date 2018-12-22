@@ -7,11 +7,11 @@ CHECK_RERUN = grep Rerun ms.log
 default: exoplanet.pdf
 
 exoplanet.pdf: exoplanet.tex
-	tectonic exoplanet.tex
-	#pdflatex ms
-	#bibtex ms
-	#pdflatex ms
-	#pdflatex ms
+	#tectonic exoplanet.tex
+	pdflatex exoplanet
+	bibtex   exoplanet
+	pdflatex exoplanet
+	pdflatex exoplanet
 
 clean:
 	$(RM_TMP)

@@ -190,4 +190,5 @@ class PyMC3Sampler(object):
         start, step = self._get_start_and_step(
             start=start, step_kwargs=step_kwargs, trace=trace, step=step)
         kwargs["tune"] = self.finish
-        return pm.sample(start=start, step=step, **kwargs)
+        self._current_trace = pm.sample(start=start, step=step, **kwargs)
+        return self._current_trace
