@@ -4,12 +4,11 @@ from __future__ import division, print_function
 
 import numpy as np
 
-import starry
-import batman
-
 import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
+
+import starry
 
 from .orbits import KeplerianOrbit
 from .light_curves import StarryLightCurve
@@ -75,6 +74,7 @@ def test_in_transit():
 
 
 def test_small_star():
+    from batman.transitmodel import TransitModel, TransitParams
     u_star = [0.2, 0.1]
     r = 0.04221468
 
@@ -103,7 +103,7 @@ def test_small_star():
     vals = theano.function([], [model1, model2])()
     utt.assert_allclose(*vals)
 
-    params = batman.TransitParams()
+    params = TransitParams()
     params.t0 = t0
     params.per = period
     params.rp = r
@@ -114,6 +114,6 @@ def test_small_star():
     params.u = u_star
     params.limb_dark = "quadratic"
 
-    model = batman.TransitModel(params, t)
+    model = TransitModel(params, t)
     flux = model.light_curve(params)
     utt.assert_allclose(vals[0][:, 0], flux - 1)
