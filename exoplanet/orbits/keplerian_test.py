@@ -2,7 +2,6 @@
 
 from __future__ import division, print_function
 
-import pytest
 import numpy as np
 
 import theano
@@ -13,11 +12,7 @@ from .keplerian import KeplerianOrbit
 
 
 def test_sky_coords():
-    try:
-        from batman import _rsky
-    except ImportError:
-        pytest.xfail("issues with batman import on Travis")
-        raise
+    from batman import _rsky
     t = np.linspace(-100, 100, 1000)
 
     t0, period, a, e, omega, incl = (x.flatten() for x in np.meshgrid(
@@ -143,12 +138,7 @@ def test_in_transit():
 
 
 def test_small_star():
-    try:
-        from batman import _rsky
-    except ImportError:
-        pytest.xfail("issues with batman import on Travis")
-        raise
-
+    from batman import _rsky
     m_star = 0.151
     r_star = 0.189
     period = 0.4626413
