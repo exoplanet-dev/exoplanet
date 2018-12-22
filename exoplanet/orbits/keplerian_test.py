@@ -139,9 +139,6 @@ def test_in_transit():
 
 
 def test_small_star():
-    # u_star = [0.2, 0.1]
-    # r = 0.04221468
-
     m_star = 0.151
     r_star = 0.189
     period = 0.4626413
@@ -168,3 +165,22 @@ def test_small_star():
 
     # Make sure that the in-transit impact parameter matches batman
     utt.assert_allclose(r_batman[m], r[m], atol=2e-5)
+
+
+def test_impact():
+    m_star = 0.151
+    r_star = 0.189
+    period = 0.4626413
+    t0 = 0.2
+    b = 0.5
+    ecc = 0.8
+    omega = 0.1
+
+    orbit = KeplerianOrbit(
+        r_star=r_star, m_star=m_star,
+        period=period, t0=t0, b=b,
+        ecc=ecc, omega=omega)
+    coords = orbit.get_relative_position(t0)
+    utt.assert_allclose((tt.sqrt(coords[0]**2 + coords[1]**2) / r_star).eval(),
+                        b)
+    assert coords[2].eval() < 0
