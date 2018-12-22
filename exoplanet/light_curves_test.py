@@ -2,6 +2,7 @@
 
 from __future__ import division, print_function
 
+import pytest
 import numpy as np
 
 import theano
@@ -74,7 +75,11 @@ def test_in_transit():
 
 
 def test_small_star():
-    from batman.transitmodel import TransitModel, TransitParams
+    try:
+        from batman.transitmodel import TransitModel, TransitParams
+    except ImportError:
+        pytest.xfail("issues with batman import on Travis")
+        raise
     u_star = [0.2, 0.1]
     r = 0.04221468
 
