@@ -15,9 +15,7 @@ if ! command -v conda > /dev/null; then
     conda create -q --yes -n test python=$PYTHON_VERSION
     conda activate test
     conda install -q -c conda-forge numpy=$NUMPY_VERSION  scipy astropy setuptools pymc3 pytest pytest-cov starry pip
-    pip install parameterized nose
-    pip uninstall -y batman-package
-    pip install https://github.com/lkreidberg/batman/archive/master.zip
+    pip install batman-package parameterized nose
 fi
 
 # Display some info
