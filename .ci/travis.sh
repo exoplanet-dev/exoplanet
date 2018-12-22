@@ -16,9 +16,11 @@ if ! command -v conda > /dev/null; then
     conda activate test
     conda install -q -c conda-forge numpy=$NUMPY_VERSION  scipy astropy setuptools pymc3 pytest pytest-cov starry pip
     pip install parameterized nose
+    pip uninstall -y batman-package
     git clone https://github.com/lkreidberg/batman.git
     cd batman
-    CFLAGS=-fPIC python setup.py install
+    git apply $TRAVIS_BUILD_DIR/.ci/batman-patch.diff
+    python setup.py install
     cd ..
 fi
 
