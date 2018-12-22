@@ -16,6 +16,7 @@ if ! command -v conda > /dev/null; then
     conda activate test
     conda install -q -c conda-forge numpy=$NUMPY_VERSION  scipy astropy setuptools pymc3 pytest pytest-cov starry pip
     pip install parameterized nose
+    pip uninstall batman-package
     pip install https://github.com/lkreidberg/batman/archive/master.zip
 fi
 
