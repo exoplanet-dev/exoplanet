@@ -4,12 +4,12 @@ from __future__ import division, print_function
 
 import numpy as np
 
+import starry
+import batman
+
 import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
-
-import starry
-import batman
 
 from .orbits import KeplerianOrbit
 from .light_curves import StarryLightCurve
