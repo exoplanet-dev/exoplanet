@@ -4,8 +4,6 @@ from __future__ import division, print_function
 
 import numpy as np
 
-from batman import _rsky
-
 import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
@@ -14,6 +12,7 @@ from .keplerian import KeplerianOrbit
 
 
 def test_sky_coords():
+    from batman import _rsky
     t = np.linspace(-100, 100, 1000)
 
     t0, period, a, e, omega, incl = (x.flatten() for x in np.meshgrid(
@@ -139,6 +138,8 @@ def test_in_transit():
 
 
 def test_small_star():
+    from batman import _rsky
+
     m_star = 0.151
     r_star = 0.189
     period = 0.4626413
