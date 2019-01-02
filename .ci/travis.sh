@@ -15,7 +15,7 @@ if ! command -v conda > /dev/null; then
     conda create -q --yes -n test python=$PYTHON_VERSION
     conda activate test
     conda install -q -c conda-forge numpy=$NUMPY_VERSION  scipy astropy setuptools pymc3 pytest pytest-cov starry pip
-    pip install parameterized nose
+    pip install parameterized nose coveralls
     pip uninstall -y batman-package
     git clone https://github.com/lkreidberg/batman.git
     cd batman
