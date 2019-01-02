@@ -6,11 +6,16 @@
 \begin{document}\raggedbottom\sloppy\sloppypar\frenchspacing
 
 \title{%
-Gradient-based methods for the characterization of exoplanets
+\project{exoplanet}:
+A toolkit for scalable inference for exoplanetary systems using transits \&
+radial velocities
+%An efficient and robust toolkit for gradient-based
+%probabilistic characterization of exoplanets using transits and radial
+%velocities
 }
 
 \author[0000-0002-9328-5652]{Daniel Foreman-Mackey}
-\affil{Flatiron Institute, New York, NY}
+\affil{Center for Computational Astrophysics, Flatiron Institute, New York, NY}
 
 \begin{abstract}
 
@@ -35,35 +40,61 @@ methods: data analysis ---
 methods: statistical
 }
 
-\section{Outline}
+%\section{Outline}
 
-\begin{enumerate}
+%\begin{enumerate}
 
-\item Introduction to the characterization of exoplanets and gradient-based
-methods
+%\item Introduction to the characterization of exoplanets and gradient-based
+%methods
 
-\item Automatic differentiation and inference frameworks
+%\item Automatic differentiation and inference frameworks
 
-\item Hamiltonian Monte Carlo and variants
+%\item Hamiltonian Monte Carlo and variants
 
-\item Custom gradients required for exoplanet datasets
-\begin{itemize}
-\item Radial velocities and Kepler's equation
-\item Astrometry
-\item Transits
-\end{itemize}
+%\item Custom gradients required for exoplanet datasets
+%\begin{itemize}
+%\item Radial velocities and Kepler's equation
+%\item Astrometry
+%\item Transits
+%\end{itemize}
 
-\item Implementation details and benchmarks
+%\item Implementation details and benchmarks
 
-\item Examples
+%\item Examples
 
-\item Discussion
+%\item Discussion
 
-\end{enumerate}
+%\end{enumerate}
 
 \section{Introduction}
 
-This is a section.
+Datasets are getting larger and more precise and this leads to an interest in
+more ambitious questions about these systems.
+The existing inference methods are no longer up to the task when the datasets
+are large and when the number of parameters is large.
+Many probabilistic inferences in astronomy have been limited by the existing
+tools that can't scale e.g.\ emcee.
+However, in other fields such as ML, methods have been developed that can
+scale to datasets too large to fit into memory and millions of parameters.
+The key ingredient in all of these methods is that it must be possible to
+efficiently evaluate the derivative of the model with respect to the physical
+parameters.
+This can often be intractable for applications astrophysics because the models
+generally include a physically motivated component that can't be trivially
+differentiated.
+However, we can take advantage of the substantial development that has been
+invested in automating this process.
+
+This paper presents an example of how these tools and methods can be
+exploited in the specific astronomical application of fitting exoplanet
+datasets.
+We go through the derivation and implementation of the custom functions and
+their gradients that are required for gradient-based characterization of
+exoplanets.
+
+These methods and their implementation are not an all-in-one package designed
+to do the fitting.
+Instead, it provided the framework needed to use these tools within pipelines.
 
 \section{Automatic differentiation}
 
@@ -118,74 +149,55 @@ well-supported and stable.
 This being said, the basic ideas behind each library are similar and the core
 implementation in C++ can be minimally modified to support other frameworks.
 
-\section{Limb-darkened transit light curves}
+\section{The custom operations provided by exoplanet}
 
-Based on \project{batman} \citep{Kreidberg:2015}.
+\subsection{A solver for Kepler's equation}
 
-The transit depth:
+A key assumption that is often made when fitting exoplanets is that the
+planets are orbiting the central star on independent bound Keplerian orbits
+(CITE).
+To compute the coordinates of a planet on its orbit, we must solve Kepler's
+equation
 \begin{eqnarray}
-\delta(r,\,z) = \sum_{n=1}^{N-1} \frac{1}{2}\,\left[I(x_{n+1};\,\theta) +
-I(x_n;\,\theta)\right]\,
-\left[A(x_{n+1},\,r,\,z) - A(x_n,\,r,\,z)\right]
+M &=& E - e\,\sin E
 \end{eqnarray}
-\dfmtodo{(quad vs trap)}.
-In this expression, $A$ is defined as
-\begin{eqnarray}
-A(x,\,r,\,z) = \left\{\begin{array}{ll}
-x^2\,\cos^{-1}(u)+r^2\,\cos^{-1}(v)-\sqrt{w}/2 &
-    \left|r-x\right| < z < r + x \\
-\pi\,r^2 & x \ge r + z \\
-\pi\,x^2 & r \ge x + z \\
-0 & \mathrm{otherwise}
-\end{array}\right.
-\end{eqnarray}
-where
-\begin{eqnarray}
-u &=& \frac{z^2+x^2-r^2}{2\,z\,x} \,,\\
-v &=& \frac{z^2-x^2+r^2}{2\,z\,r} \,,\,\mathrm{and}\\
-w &=& (x+r+z)\,(-x+r+z)\,(x-r+z)\,(x+r-z)
-\end{eqnarray}
-$A(x,\,r,\,z)$ is the area of intersection of two circles with radii $x$ and
-$r$ with a center-to-center separation of $z$ \citep{Mandel:2002,
-Kreidberg:2015}.
+for the eccentric anomaly $E$ at fixed eccentricity $e$ and mean anomaly $M$.
+This equation must be solved numerically and there is a rich literature
+discussing methods for this implementation.
+We have found the method from CITE to provide the right balance of numerical
+stability (with a relative accuracy of about $10^{-20}$ for all values of $M$
+and $e$) and computational efficiency.
 
-A key component of computing the gradient of the transit light curve is the
-gradient of the occulted area.
-After some tedious algebra, we find the following surprisingly simple results
+As well as solving Kepler's equation, we must also efficiently evaluate the
+gradients (or, more precisely, \emph{back-propagate} the gradients) of $E$
+with respect to $e$ and $M$.
+After solving for $E$, this can be computed efficiently and robustly using
+implicit differentiation.
+For numerical methods like this, it is often possible to compute the gradients
+without applying automatic differentiation to the implementation directly and
+that is generally preferred for the purposes of numerical stability.
+In this case, the relevant gradients are
 \begin{eqnarray}
-\frac{\dd A(x,\,r,\,z)}{\dd z} &=& \left\{\begin{array}{ll}
--\sqrt{w}/z &
-    \left|r-x\right| < z < r + x \\
-0 & \mathrm{otherwise}
-\end{array}\right.\\
-\frac{\dd A(x,\,r,\,z)}{\dd r} &=& \left\{\begin{array}{ll}
-2\,r\,\cos^{-1}(v) & \left|r-x\right| < z < r + x \\
-2\,\pi\,r & x \ge r + z \\
-0 & \mathrm{otherwise}
-\end{array}\right.\\
-\frac{\dd A(x,\,r,\,z)}{\dd x} &=& \left\{\begin{array}{ll}
-2\,x\,\cos^{-1}(u) & \left|r-x\right| < z < r + x \\
-2\,\pi\,x & r \ge x + z \\
-0 & \mathrm{otherwise}
-\end{array}\right.
+\frac{\dd E}{\dd e} &=& \frac{\sin E}{1 - e\,\cos E} \\
+\frac{\dd E}{\dd M} &=& \frac{1}{1 - e\,\cos E} \quad.
 \end{eqnarray}
-We won't actually use the gradient with respect to $x$, but we have included
-it here for completeness.
 
-Then the gradient expressions needed for backpropagation through the transit
-depth can be computed as
-\begin{eqnarray}
-\frac{\dd \delta(r,\,z)}{\dd I_n} = \frac{1}{2}
-    \left[A(x_{n+1},\,r,\,z) - A(x_{n-1},\,r,\,z)\right]
-\end{eqnarray}
-\begin{eqnarray}
-\frac{\dd \delta(r,\,z)}{\dd \alpha} = \sum_{n=1}^{N-1} \frac{1}{2}\,\left[
-I(x_{n+1};\,\theta) + I(x_n;\,\theta)\right]\,
-\left[\frac{\dd A(x_{n+1},\,r,\,z)}{\dd\alpha} -
-\frac{\dd A(x_n,\,r,\,z)}{\dd \alpha}\right]
-\end{eqnarray}
-where $\alpha$ indicates one of $r$ or $z$.
+\paragraph{Implementation details}
 
+We find that directly evaluating the true anomaly $f$
+%\begin{eqnarray}
+%f &=& 2\,\tan^{-1}\,left(\frac{\sqrt{1+e}}{\sqrt{1-e}}\,\tan \frac{E}{2}\right)
+%\end{eqnarray}
+when solving Kepler's equation is more efficient than evaluating it separately
+within Theano.
+This means that we must also provide a method for evaluating the derivative of
+$f$ with respect to $e$ and $M$.
+
+
+
+\subsection{Limb-darkened light curves}
+
+\subsection{Scalable Gaussian Processes for time series}
 
 \bibliography{exoplanet}
 
