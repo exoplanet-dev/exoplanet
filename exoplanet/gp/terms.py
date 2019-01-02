@@ -372,11 +372,8 @@ class Matern32Term(Term):
     parameter_names = ("sigma", "rho")
 
     def __init__(self, **kwargs):
-        eps = kwargs.pop("eps", None)
+        self.eps = tt.as_tensor_variable(kwargs.pop("eps", 0.01))
         super(Matern32Term, self).__init__(**kwargs)
-        if eps is None:
-            eps = tt.as_tensor_variable(0.01)
-        self.eps = tt.cast(eps, self.dtype)
 
     def get_complex_coefficients(self):
         w0 = np.sqrt(3.0) / self.rho
