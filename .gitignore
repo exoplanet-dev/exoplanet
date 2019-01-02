@@ -9,3 +9,4 @@ demo
 .pytest_cache
 dist
 for_ed
+.coverage*
