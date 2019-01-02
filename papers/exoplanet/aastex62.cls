@@ -699,6 +699,11 @@ Typeset using a modified AASTeX62}
 %%
 \iftwocolstyle
 % DFM DOES NOT APPROVE
+\message{****************************************}
+\message{****************************************}
+\message{* DO YOU REALLY WANT TO USE TWOCOLUMN? *}
+\message{****************************************}
+\message{****************************************}
 \vspace*{-\headsep}\vspace*{\headheight}
 \noindent\begin{minipage}{0.5\textwidth}
 \flushleft
