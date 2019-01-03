@@ -107,7 +107,6 @@ class PyMC3Sampler(object):
 
         self._current_trace = pm.sample(
             start=start, tune=steps, step=step, **kwargs)
-        start = [t[-1] for t in self._current_trace._straces.values()]
         self.count += steps
 
         logger.propagate = propagate
@@ -119,7 +118,6 @@ class PyMC3Sampler(object):
             step_kwargs = {}
         step = self.get_step_for_trace(**step_kwargs)
         self._extend(self.start, start=start, step=step, **kwargs)
-        self._current_step = self.get_step_for_trace(**step_kwargs)
         return self._current_trace
 
     def _get_start_and_step(self, start=None, step_kwargs=None, trace=None,
@@ -154,8 +152,7 @@ class PyMC3Sampler(object):
         start, step = self._get_start_and_step(
             start=start, step_kwargs=step_kwargs, trace=trace, step=step)
         self._extend(steps, start=start, step=step, **kwargs)
-        self._current_step = self.get_step_for_trace(self._current_trace,
-                                                     **step_kwargs)
+        self._current_step = step
         return self._current_trace
 
     def tune(self, tune=1000, start=None, step_kwargs=None, **kwargs):
@@ -171,12 +168,19 @@ class PyMC3Sampler(object):
         self.count = 0
         self.warmup(start=start, step_kwargs=step_kwargs, **kwargs)
         steps = self.window
+        trace = None
         while self.count < tune:
-            self.extend_tune(start=start, step_kwargs=step_kwargs, steps=steps,
-                             **kwargs)
+            trace = self.extend_tune(start=start, step_kwargs=step_kwargs,
+                                     steps=steps, trace=trace, **kwargs)
             steps *= 2
             if self.count + steps + steps*2 > tune:
                 steps = tune - self.count
+
+        # Final tuning stage for step size
+        self.extend_tune(start=start, step_kwargs=step_kwargs,
+                         steps=self.finish, trace=trace, **kwargs)
+        self._current_step.stop_tuning()
+
         return self._current_trace
 
     def sample(self, trace=None, step=None, start=None, step_kwargs=None,
@@ -188,7 +192,10 @@ class PyMC3Sampler(object):
 
         """
         start, step = self._get_start_and_step(
-            start=start, step_kwargs=step_kwargs, trace=trace, step=step)
-        kwargs["tune"] = self.finish
-        self._current_trace = pm.sample(start=start, step=step, **kwargs)
+            start=start, step_kwargs=step_kwargs, step=step)
+        if trace is not None:
+            start = None
+        kwargs["tune"] = kwargs.get("tune", 0)
+        self._current_trace = pm.sample(start=start, step=step, trace=trace,
+                                        **kwargs)
         return self._current_trace
