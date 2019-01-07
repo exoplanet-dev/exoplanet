@@ -22,6 +22,7 @@ os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["THEANO_FLAGS"] = \
     "compiledir=./{0}/cache".format(dirname)
 
+import h5py                      # NOQA
 import time                      # NOQA
 import emcee                     # NOQA
 import string                    # NOQA
@@ -130,16 +131,18 @@ def check_convergence(samples):
 
 # Run the PyMC3 sampler
 chains = 2
-sampler = xo.PyMC3Sampler(finish=200, window=200)
+sampler = xo.PyMC3Sampler(start=500, finish=500, window=500)
 with model:
-    burnin = sampler.tune(tune=20000, start=map_soln, chains=chains, cores=1)
+    burnin = sampler.tune(tune=100000, start=map_soln, chains=chains, cores=1,
+                          progressbar=False)
 
 tottime = 0
 trace = None
 with model:
     while True:
         strt = time.time()
-        trace = sampler.sample(draws=2000, trace=trace, chains=chains, cores=1)
+        trace = sampler.sample(draws=2000, trace=trace, chains=chains, cores=1,
+                               progressbar=False)
         tottime += time.time() - strt
 
         samples = np.array(trace.get_values("P", combine=False))
@@ -152,6 +155,9 @@ with model:
     time_ind_pymc = tottime / n_eff
     n_eff_pymc = n_eff
 
+# Save the trace file
+df = pm.trace_to_dataframe(trace)
+df.to_hdf(os.path.join(dirname, "pymc-trace.h5"), "trace")
 
 # Make the plots
 for n, letter in enumerate(string.ascii_lowercase[1:N_pl+1]):
@@ -225,7 +231,7 @@ with model:
     tottime = 0
     for i in range(1000):
         strt = time.time()
-        sampler.run_mcmc(coords, 500, thin_by=thin_by, progress=True)
+        sampler.run_mcmc(coords, 500, thin_by=thin_by, progress=False)
         tottime += time.time() - strt
 
         samples = sampler.get_blobs()["P"]
@@ -236,6 +242,10 @@ with model:
     time_emcee = tottime
     time_ind_emcee = tottime / n_eff
     n_eff_emcee = n_eff
+
+blobs = sampler.get_blobs()
+with h5py.File(os.path.join(dirname, "emcee-trace.h5"), "w") as f:
+    f.create_dataset("trace", data=blobs)
 
 print("time per ind. sample, emcee: {0}".format(time_ind_emcee))
 print("time per ind. sample, pymc: {0}".format(time_ind_pymc))
