@@ -28,7 +28,7 @@ cache:
         - $HOME/miniconda
 
 script:
-    - py.test -v -s
+    - py.test -v -s exoplanet
 
 after_success:
     - coveralls
