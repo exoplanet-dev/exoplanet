@@ -19,8 +19,8 @@ else:
 os.makedirs(dirname, exist_ok=True)
 
 os.environ["OMP_NUM_THREADS"] = "1"
-# os.environ["THEANO_FLAGS"] = \
-#     "compiledir=./{0}/cache".format(dirname)
+os.environ["THEANO_FLAGS"] = \
+    "compiledir=./{0}/cache".format(dirname)
 
 import time                      # NOQA
 import emcee                     # NOQA
@@ -132,7 +132,7 @@ def check_convergence(samples):
 chains = 2
 sampler = xo.PyMC3Sampler(finish=200, window=200)
 with model:
-    burnin = sampler.tune(tune=5000, start=map_soln, chains=chains, cores=1)
+    burnin = sampler.tune(tune=20000, start=map_soln, chains=chains, cores=1)
 
 tottime = 0
 trace = None
