@@ -1,3 +1,11 @@
+0.1.3 (2019-01-09)
+++++++++++++++++++
+
+- Adds a more robust and faster Kepler solver (`ref
+  <http://adsabs.harvard.edu/abs/1991CeMDA..51..319N>`_)
+- Fixes minor behavioral bugs in PyMC3 sampler wrapper
+
+
 0.1.2 (2018-12-13)
 ++++++++++++++++++
 

@@ -36,14 +36,14 @@ import theano.tensor as tt       # NOQA
 import exoplanet as xo           # NOQA
 
 # Parameters
-target_n_eff = 500
+target_n_eff = 2000
 np.random.seed(1234 + version)
 
 # Simulate the planet properties
 periods = np.exp(np.random.uniform(np.log(1), np.log(100), size=N_pl))
 t0s = periods * np.random.rand(N_pl)
 Ks = np.sort(np.exp(np.random.uniform(np.log(2), np.log(10), N_pl)))[::-1]
-eccs = np.random.uniform(0, 0.1, N_pl)
+eccs = np.random.uniform(0.25, 0.5, N_pl)
 omegas = np.random.uniform(-np.pi, np.pi, N_pl)
 
 # Simulate the time sampling
@@ -79,7 +79,7 @@ with pm.Model() as model:
     omega = xo.distributions.Angle("omega", shape=N_pl, testval=omegas)
 
     # Jitter & a quadratic RV trend
-    logs = pm.Normal("logs", mu=np.log(np.median(yerr)), sd=5.0)
+    # logs = pm.Normal("logs", mu=np.log(np.median(yerr)), sd=5.0)
     trend = pm.Normal("trend", mu=0, sd=10.0**-np.arange(3)[::-1], shape=3)
 
     # Set up the orbit
@@ -113,7 +113,8 @@ with pm.Model() as model:
     rv_model_pred = tt.sum(vrad_pred, axis=-1) + bkg_pred
 
     # Likelihood
-    err = tt.sqrt(yerr**2 + tt.exp(2*logs))
+    err = yerr
+    # err = tt.sqrt(yerr**2 + tt.exp(2*logs))
     pm.Normal("obs", mu=rv_model, sd=err, observed=y)
 
     # Optimize
