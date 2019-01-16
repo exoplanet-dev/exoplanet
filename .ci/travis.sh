@@ -14,8 +14,7 @@ if ! command -v conda > /dev/null; then
     conda update -q conda
     conda create -q --yes -n test python=$PYTHON_VERSION
     conda activate test
-    conda install -q -c conda-forge pip numpy=$NUMPY_VERSION  scipy astropy setuptools Theano==1.0.3 pymc3 pytest==4.1.0 pluggy==0.8.0
-    # starry celerite
+    conda install -q -c conda-forge pip numpy=$NUMPY_VERSION  scipy astropy setuptools Theano pymc3 pytest starry celerite
     pip install parameterized nose coveralls pytest-cov>=2.6.1
     pip uninstall -y batman-package
     git clone https://github.com/lkreidberg/batman.git
