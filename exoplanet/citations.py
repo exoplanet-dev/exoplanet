@@ -59,8 +59,8 @@ CITATIONS = {
    author={Foreman-Mackey, Daniel},
     month={dec},
      year={2018},
-      doi={10.5281/zenodo.2249795},
-      url={https://doi.org/10.5281/zenodo.2249795}
+      doi={10.5281/zenodo.2536576},
+      url={https://doi.org/10.5281/zenodo.2536576}
 }
 """),
 
