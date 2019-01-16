@@ -8,8 +8,8 @@ import numpy as np
 import theano
 import theano.tensor as tt
 
-import celerite
-import celerite.terms as cterms
+# import celerite
+# import celerite.terms as cterms
 
 from . import terms
 from .celerite import GP
