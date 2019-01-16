@@ -21,6 +21,8 @@ matrix:
 
 install:
     - source .ci/travis.sh
+    - conda env export
+    - python -c 'import theano; print(theano.__version__)'
     - python setup.py develop
 
 #cache:
