@@ -23,9 +23,9 @@ install:
     - source .ci/travis.sh
     - python setup.py develop
 
-cache:
-    directories:
-        - $HOME/miniconda
+#cache:
+#    directories:
+#        - $HOME/miniconda
 
 script:
     - py.test -v -s exoplanet
