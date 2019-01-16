@@ -10,3 +10,4 @@ demo
 dist
 for_ed
 .coverage*
+backups
