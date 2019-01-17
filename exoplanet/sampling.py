@@ -165,6 +165,11 @@ class PyMC3Sampler(object):
             tune (int): The total number of steps to run.
 
         """
+        ntot = self.start + self.window + self.finish
+        if tune < ntot:
+            raise ValueError("'tune' must be at least {0}".format(ntot) +
+                             "(start + window + finish)")
+
         self.count = 0
         self.warmup(start=start, step_kwargs=step_kwargs, **kwargs)
         steps = self.window
