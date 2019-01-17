@@ -15,13 +15,22 @@ if ! command -v conda > /dev/null; then
     conda create -q --yes -n test python=$PYTHON_VERSION
     conda activate test
     conda install -q -c conda-forge pip numpy=$NUMPY_VERSION  scipy astropy setuptools Theano pymc3 pytest starry
-    pip install celerite parameterized nose coveralls pytest-cov>=2.6.1
+    pip install parameterized nose coveralls pytest-cov>=2.6.1
+
     pip uninstall -y batman-package
     git clone https://github.com/lkreidberg/batman.git
     cd batman
     git apply $TRAVIS_BUILD_DIR/.ci/batman-patch.diff
     python setup.py install
     cd ..
+
+    pip uninstall -y celerite
+    git clone https://github.com/dfm/celerite.git
+    cd celerite
+    python setup.py install
+    cd ..
+
+
 fi
 
 # Display some info
