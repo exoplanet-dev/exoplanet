@@ -14,7 +14,7 @@ if ! command -v conda > /dev/null; then
     conda update -q conda
     conda create -q --yes -n test python=$PYTHON_VERSION
     conda activate test
-    conda install -q -c conda-forge pip numpy=$NUMPY_VERSION  scipy astropy setuptools Theano pymc3 pytest starry
+    conda install -q -c conda-forge pip numpy=$NUMPY_VERSION  scipy astropy setuptools Theano pymc3 pytest starry pybind11
     pip install parameterized nose coveralls pytest-cov>=2.6.1
 
     pip uninstall -y batman-package
