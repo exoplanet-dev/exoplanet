@@ -15,3 +15,12 @@ rcParams["axes.unicode_minus"] = False
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
+
+import theano
+print("theano version: {0}".format(theano.__version__))
+
+import pymc3
+print("pymc3 version: {0}".format(pymc3.__version__))
+
+import exoplanet
+print("exoplanet version: {0}".format(exoplanet.__version__))
