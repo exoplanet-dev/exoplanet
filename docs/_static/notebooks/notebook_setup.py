@@ -12,9 +12,15 @@ rcParams["font.family"] = ["sans-serif"]
 rcParams["font.sans-serif"] = ["cmss10"]
 rcParams["axes.unicode_minus"] = False
 
+# Hide deprecation warnings from Theano
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
+
+# Hide Theano compilelock warnings
+import logging
+logger = logging.getLogger("theano.gof.compilelock")
+logger.setLevel(logging.ERROR)
 
 import theano
 print("theano version: {0}".format(theano.__version__))
