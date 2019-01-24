@@ -2,13 +2,19 @@
 
 from __future__ import division, print_function
 
-__all__ = ["eval_in_model", "get_samples_from_trace"]
+__all__ = ["eval_in_model", "get_samples_from_trace", "optimize",
+           "get_args_for_theano_function", "get_theano_function_for_var"]
 
 import numpy as np
 
 import theano
 
 import pymc3 as pm
+
+from pymc3.model import Point
+from pymc3.theanof import inputvars
+from pymc3.util import update_start_vals, get_default_varnames
+from pymc3.blocking import DictToArrayBijection, ArrayOrdering
 
 
 def get_args_for_theano_function(point=None, model=None):
@@ -66,3 +72,81 @@ def get_samples_from_trace(trace, size=1):
         chain_idx = np.random.randint(len(trace.chains))
         sample_idx = np.random.randint(len(trace))
         yield trace._straces[chain_idx][sample_idx]
+
+
+def optimize(start=None, vars=None, model=None, return_info=False,
+             verbose=True, **kwargs):
+    """Maximize the log prob of a PyMC3 model using scipy
+
+    All extra arguments are passed directly to the ``scipy.optimize.minimize``
+    function.
+
+    Args:
+        start: The PyMC3 coordinate dictionary of the starting position
+        vars: The variables to optimize
+        model: The PyMC3 model
+        return_info: Return both the coordinate dictionary and the result of
+            ``scipy.optimize.minimize``
+        verbose: Print the success flag and log probability to the screen
+
+    """
+    from scipy.optimize import minimize
+
+    model = pm.modelcontext(model)
+
+    # Work out the full starting coordinates
+    if start is None:
+        start = model.test_point
+    else:
+        update_start_vals(start, model.test_point, model)
+
+    # Fit all the parameters by default
+    if vars is None:
+        vars = model.cont_vars
+    vars = inputvars(vars)
+    allinmodel(vars, model)
+
+    # Work out the relevant bijection map
+    start = Point(start, model=model)
+    bij = DictToArrayBijection(ArrayOrdering(vars), start)
+
+    # Pre-compile the theano model and gradient
+    nlp = -model.logpt
+    grad = theano.grad(nlp, vars, disconnected_inputs='ignore')
+    func = get_theano_function_for_var([nlp] + grad, model=model)
+
+    # This returns the objective function and its derivatives
+    def objective(vec):
+        res = func(*get_args_for_theano_function(bij.rmap(vec), model=model))
+        d = dict(zip((v.name for v in vars), res[1:]))
+        g = bij.map(d)
+        return res[0], g
+
+    # Optimize using scipy.optimize
+    x0 = bij.map(start)
+    initial = objective(x0)[0]
+    kwargs["jac"] = True
+    info = minimize(objective, x0, **kwargs)
+
+    # Only accept the output if it is better than it was
+    x = info.x if (np.isfinite(info.fun) and info.fun < initial) else x0
+
+    # Coerce the output into the right format
+    vars = get_default_varnames(model.unobserved_RVs, True)
+    point = {var.name: value
+             for var, value in zip(vars, model.fastfn(vars)(bij.rmap(x)))}
+
+    if verbose:
+        print("success: {0}".format(info.success))
+        print("initial logp: {0}".format(-initial))
+        print("final logp: {0}".format(-info.fun))
+
+    if return_info:
+        return point, info
+    return point
+
+
+def allinmodel(vars, model):
+    notin = [v for v in vars if v not in model.vars]
+    if notin:
+        raise ValueError("Some variables not in the model: " + str(notin))
