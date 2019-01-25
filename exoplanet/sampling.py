@@ -165,6 +165,8 @@ class PyMC3Sampler(object):
             tune (int): The total number of steps to run.
 
         """
+        model = pm.modelcontext(kwargs.get("model", None))
+
         ntot = self.start + self.window + self.finish
         if tune < ntot:
             raise ValueError("'tune' must be at least {0}".format(ntot) +
@@ -184,7 +186,13 @@ class PyMC3Sampler(object):
         # Final tuning stage for step size
         self.extend_tune(start=start, step_kwargs=step_kwargs,
                          steps=self.finish, trace=trace, **kwargs)
+
+        # Copy across the step size from the parallel runs
         self._current_step.stop_tuning()
+        expected = []
+        for chain in self._current_trace._straces.values():
+            expected.append(chain.get_sampler_stats("step_size")[-1])
+        self._current_step.step_size = np.mean(expected) * model.ndim**(1./4)
 
         return self._current_trace
 
