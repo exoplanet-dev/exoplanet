@@ -17,10 +17,10 @@ matrix:
           env: PYTHON_VERSION=3.7 NUMPY_VERSION=1.16
 
 install:
-    - theano-cache purge
     - source .ci/travis.sh
     - conda env export
     - python -c 'import theano; print(theano.__version__)'
+    - theano-cache purge
     - python setup.py develop
 
 #cache:
