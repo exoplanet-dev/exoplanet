@@ -55,7 +55,7 @@ CITATIONS = {
 
     "exoplanet": (("exoplanet:exoplanet", ), r"""
 @misc{exoplanet:exoplanet,
-    title={exoplanet v0.1.2},
+    title={exoplanet v0.1.3},
    author={Foreman-Mackey, Daniel},
     month={dec},
      year={2018},
