@@ -1,10 +1,6 @@
 sudo: false
 language: c
 
-env:
-    global:
-        - THEANO_FLAGS='floatX=float64,compute_test_value=ignore'
-
 matrix:
     include:
         - os: linux
