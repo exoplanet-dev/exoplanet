@@ -3,7 +3,7 @@ language: c
 
 env:
     global:
-        - THEANO_FLAGS='floatX=float64'
+        - THEANO_FLAGS='floatX=float64,compute_test_value=ignore'
 
 matrix:
     include:
@@ -20,8 +20,6 @@ install:
     - source .ci/travis.sh
     - conda env export
     - python -c 'import theano; print(theano.__version__)'
-    #- python -c 'import celerite; print(celerite.__version__)'
-    #- python -c 'import starry; print(starry.__version__)'
     - python setup.py develop
 
 #cache:
