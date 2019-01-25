@@ -18,15 +18,15 @@ class TestDistributions(object):
     def setup_class(cls):
         np.random.seed(cls.random_seed)
 
-    # @classmethod
-    # def teardown_class(cls):
-    #     pm.theanof.set_theano_conf({"compute_test_value": "off"})
+    @classmethod
+    def teardown_class(cls):
+        pm.theanof.set_theano_conf({"compute_test_value": "off"})
 
     def setup_method(self):
         np.random.seed(self.random_seed)
 
-    # def teardown_method(self, method):
-    #     pm.theanof.set_theano_conf({"compute_test_value": "off"})
+    def teardown_method(self, method):
+        pm.theanof.set_theano_conf({"compute_test_value": "off"})
 
     def _sample(self, **kwargs):
         logger = logging.getLogger("pymc3")
