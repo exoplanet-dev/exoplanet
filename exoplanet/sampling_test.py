@@ -16,7 +16,7 @@ def test_tuning():
     with pm.Model() as model:
         pm.Normal("x", sd=np.exp(np.random.uniform(-10, 0, ndim)), shape=ndim)
 
-        trace = sampler.tune(tune=200)
+        trace = sampler.tune(tune=200, progressbar=False)
 
         start, step = sampler._get_start_and_step(
             start=None, step=None)
