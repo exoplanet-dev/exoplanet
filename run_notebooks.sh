@@ -17,3 +17,5 @@ python run_notebooks.py
 
 git -c user.name='exoplanetbot' -c user.email='exoplanetbot' commit -am "updating notebooks [ci skip]"
 git push -q -f https://dfm:`cat .github_api_key`@github.com/dfm/exoplanet.git auto_notebooks
+
+git checkout master
