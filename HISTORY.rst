@@ -1,3 +1,11 @@
+0.1.4 (upcoming)
+++++++++++++++++
+
+- Improves the reliability of the PyMC3Sampler
+- Adds a new ``optimize`` function since the ``find_MAP`` method
+  in PyMC3 is deprecated
+
+
 0.1.3 (2019-01-09)
 ++++++++++++++++++
 
