@@ -37,3 +37,7 @@ singlehtml:
 	$(SPHINXBUILD) -b singlehtml $(ALLSPHINXOPTS) $(BUILDDIR)/singlehtml
 	@echo
 	@echo "Build finished. The HTML page is in $(BUILDDIR)/singlehtml."
+
+.PHONY: runallnotebooks
+runallnotebooks:
+	ls _static/notebooks/*.ipynb | xargs -I '{}' jupyter nbconvert --to=notebook --inplace --ExecutePreprocessor.enabled=True --ExecutePreprocessor.timeout=-1 {}

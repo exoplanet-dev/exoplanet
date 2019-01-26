@@ -11,3 +11,5 @@ dist
 for_ed
 .coverage*
 backups
+.ipynb_checkpoints
+.cache
