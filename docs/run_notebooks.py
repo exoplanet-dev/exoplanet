@@ -3,6 +3,7 @@
 
 from __future__ import division, print_function
 
+import re
 import glob
 
 import nbformat
@@ -11,7 +12,7 @@ from nbconvert.preprocessors import ExecutePreprocessor, CellExecutionError
 
 errors = []
 
-for filename in ["_static/notebooks/pymc3-extras.ipynb"]:  # glob.glob("_static/notebooks/*.ipynb"):
+for filename in ["_static/notebooks/citation.ipynb"]:  # glob.glob("_static/notebooks/*.ipynb"):
     with open(filename) as f:
         notebook = nbformat.read(f, as_version=4)
 
@@ -29,6 +30,9 @@ for filename in ["_static/notebooks/pymc3-extras.ipynb"]:  # glob.glob("_static/
         with open(filename, mode="wt") as f:
             nbformat.write(notebook, f)
 
+txt = "\n\n".join(errors)
+ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
+txt = ansi_escape.sub("", txt)
 
 with open("notebook_errors.log", "wb") as f:
-    f.write("\n\n".join(errors).encode("utf-8"))
+    f.write(txt.encode("utf-8"))
