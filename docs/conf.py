@@ -5,6 +5,7 @@ import os
 import sys
 import glob
 import subprocess
+from itertools import chain
 
 import sphinx_nameko_theme
 
@@ -22,7 +23,8 @@ autodoc_mock_imports = [
 ]
 
 # Convert the tutorials
-for fn in glob.glob("_static/notebooks/*.ipynb"):
+for fn in chain(glob.glob("_static/notebooks/*.ipynb"),
+                glob.glob("_static/notebooks/gallery/*.ipynb")):
     name = os.path.splitext(os.path.split(fn)[1])[0]
     outfn = os.path.join("tutorials", name + ".rst")
     print("Building {0}...".format(name))
@@ -52,7 +54,7 @@ master_doc = "index"
 # General information about the project.
 project = "exoplanet"
 author = "Dan Foreman-Mackey"
-copyright = "2018, " + author
+copyright = "2018, 2019, " + author
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__))), "exoplanet"))
