@@ -1,20 +1,5 @@
 #!/bin/bash
 
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-#__conda_setup="$('/mnt/home/dforeman/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
-#if [ $? -eq 0 ]; then
-#    eval "$__conda_setup"
-#else
-#    if [ -f "/mnt/home/dforeman/miniconda3/etc/profile.d/conda.sh" ]; then
-#        . "/mnt/home/dforeman/miniconda3/etc/profile.d/conda.sh"
-#    else
-#        export PATH="/mnt/home/dforeman/miniconda3/bin:$PATH"
-#    fi
-#fi
-#unset __conda_setup
-# <<< conda initialize <<<
-
 conda shell.bash hook
 
 cd /mnt/home/dforeman/research/projects/dfm/exoplanet_auto
