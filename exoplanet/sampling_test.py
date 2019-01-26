@@ -25,7 +25,7 @@ def test_tuning():
         expected = []
         for chain in trace._straces.values():
             expected.append(chain.get_sampler_stats("step_size")[-1])
-        expected = np.mean(expected) * model.ndim**(1./4)
+        expected = np.mean(expected)
         assert np.allclose(step.step_size, expected)
 
         # Make sure that it's not still the default

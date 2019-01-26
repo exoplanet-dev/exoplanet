@@ -192,7 +192,17 @@ class PyMC3Sampler(object):
         expected = []
         for chain in self._current_trace._straces.values():
             expected.append(chain.get_sampler_stats("step_size")[-1])
-        self._current_step.step_size = np.mean(expected) * model.ndim**(1./4)
+
+        step = self._current_step
+        if step_kwargs is None:
+            step_kwargs = dict()
+        else:
+            step_kwargs = dict(step_kwargs)
+        step_kwargs["model"] = model
+        step_kwargs["step_scale"] = np.mean(expected) * model.ndim ** 0.25
+        step_kwargs["adapt_step_size"] = False
+        step_kwargs["potential"] = step.potential
+        self._current_step = pm.NUTS(**step_kwargs)
 
         return self._current_trace
 
