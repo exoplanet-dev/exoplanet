@@ -1,5 +1,8 @@
 #!/bin/bash
 
+cd /mnt/home/dforeman/research/projects/dfm/exoplanet_auto
+conda activate autoexoplanet
+
 git checkout master
 git pull origin master
 python setup.py develop
