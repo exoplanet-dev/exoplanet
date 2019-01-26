@@ -12,7 +12,7 @@ from nbconvert.preprocessors import ExecutePreprocessor, CellExecutionError
 
 errors = []
 
-for filename in ["_static/notebooks/citation.ipynb"]:  # glob.glob("_static/notebooks/*.ipynb"):
+for filename in glob.glob("_static/notebooks/*.ipynb"):
     with open(filename) as f:
         notebook = nbformat.read(f, as_version=4)
 
