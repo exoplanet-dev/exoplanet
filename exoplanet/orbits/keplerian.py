@@ -61,7 +61,8 @@ class KeplerianOrbit(object):
     __citations__ = ("astropy", )
 
     def __init__(self,
-                 period=None, a=None, t0=0.0, incl=None, b=None,
+                 period=None, a=None, t0=0.0,
+                 incl=None, b=None, duration=None,
                  ecc=None, omega=None, m_planet=0.0,
                  m_star=None, r_star=None, rho_star=None,
                  m_planet_units=None, rho_star_units=None,
@@ -128,22 +129,40 @@ class KeplerianOrbit(object):
             self.K0 /= tt.sqrt(ome2)
             incl_factor = (1 + self.ecc * self.sin_omega) / ome2
 
-        if incl is None:
-            if b is None:
-                zla = tt.zeros_like(self.a)
-                self.incl = 0.5 * np.pi + zla
-                self.cos_incl = zla
-                self.b = zla
-            else:
-                self.b = tt.as_tensor_variable(b)
-                self.cos_incl = incl_factor*self.b*self.r_star/self.a_planet
-                self.incl = tt.arccos(self.cos_incl)
-        else:
-            if b is not None:
-                raise ValueError("only one of 'incl' and 'b' can be given")
+        if b is not None:
+            if incl is not None or duration is not None:
+                raise ValueError("only one of 'incl', 'b', and 'duration' can "
+                                 "be given")
+            self.b = tt.as_tensor_variable(b)
+            self.cos_incl = incl_factor*self.b*self.r_star/self.a_planet
+            self.incl = tt.arccos(self.cos_incl)
+        elif incl is not None:
+            if duration is not None:
+                raise ValueError("only one of 'incl', 'b', and 'duration' can "
+                                 "be given")
             self.incl = tt.as_tensor_variable(incl)
             self.cos_incl = tt.cos(self.incl)
             self.b = self.a_planet*self.cos_incl/(incl_factor*self.r_star)
+        elif duration is not None:
+            if self.ecc is None:
+                raise ValueError("fitting with duration only works for "
+                                 "eccentric orbits")
+            self.duration = tt.as_tensor_variable(duration)
+            c = tt.sin(np.pi * self.duration * incl_factor / self.period)
+            c2 = c * c
+            aor = self.a_planet / self.r_star
+            esinw = self.ecc * self.sin_omega
+            self.b = tt.sqrt((aor**2*c2 - 1)/(c2*esinw**2 + 2*c2*esinw + c2 -
+                                              self.ecc**4 + 2*self.ecc**2 - 1))
+            self.b *= (1-self.ecc**2)
+            self.cos_incl = incl_factor*self.b*self.r_star/self.a_planet
+            self.incl = tt.arccos(self.cos_incl)
+        else:
+            zla = tt.zeros_like(self.a)
+            self.incl = 0.5 * np.pi + zla
+            self.cos_incl = zla
+            self.b = zla
+
         self.sin_incl = tt.sin(self.incl)
 
     def _get_consistent_inputs(self, a, period, rho_star, r_star, m_star,
