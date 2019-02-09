@@ -4,15 +4,21 @@
 from __future__ import division, print_function
 
 import re
+import sys
 import glob
 
 import nbformat
 from nbconvert.preprocessors import ExecutePreprocessor, CellExecutionError
 
+if len(sys.argv) >= 2:
+    pattern = sys.argv[1]
+else:
+    pattern = "_static/notebooks/*.ipynb"
+
 
 errors = []
 
-for filename in glob.glob("_static/notebooks/*.ipynb"):
+for filename in glob.glob(pattern):
     with open(filename) as f:
         notebook = nbformat.read(f, as_version=4)
 
