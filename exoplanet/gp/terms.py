@@ -420,7 +420,7 @@ class RotationTerm(TermSum):
         # Another term at half the period
         Q2 = 0.5 + self.Q0
         w2 = 8*np.pi*Q2/(self.period * tt.sqrt(4*Q2**2-1))
-        S2 = self.mix * self.amp / (w1 * Q2)
+        S2 = self.mix * self.amp / (w2 * Q2)
 
         self.terms = (
             SHOTerm(S0=S1, w0=w1, Q=Q1),
