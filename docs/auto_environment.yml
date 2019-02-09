@@ -1,16 +1,18 @@
 name: autoexoplanet
 channels:
+  - astropy
   - defaults
 dependencies:
   - asn1crypto=0.24.0=py37_0
   - astropy=3.1.1=py37h7b6447c_0
+  - astroquery=0.3.9=py_1000
   - atomicwrites=1.2.1=py37_0
   - attrs=18.2.0=py37h28b3542_0
   - backcall=0.1.0=py37_0
+  - beautifulsoup4=4.7.1=py37_1
   - binutils_impl_linux-64=2.31.1=h6176602_1
   - binutils_linux-64=2.31.1=h6176602_6
   - blas=1.0=mkl
-  - bleach=3.1.0=py37_0
   - ca-certificates=2018.12.5=0
   - certifi=2018.11.29=py37_0
   - cffi=1.11.5=py37he75722e_1
@@ -33,6 +35,7 @@ dependencies:
   - gxx_linux-64=7.3.0=h553295d_6
   - h5py=2.9.0=py37h7918eee_0
   - hdf5=1.10.4=hb1b8bf9_0
+  - html5lib=1.0.1=py37_0
   - icu=58.2=h9c2bf20_1
   - idna=2.8=py37_0
   - intel-openmp=2019.1=144
@@ -41,6 +44,7 @@ dependencies:
   - ipython_genutils=0.2.0=py37_0
   - ipywidgets=7.4.2=py37_0
   - jedi=0.13.2=py37_0
+  - jeepney=0.4=py37_0
   - jinja2=2.10=py37_0
   - joblib=0.12.5=py37_0
   - jpeg=9b=h024ee3a_2
@@ -49,6 +53,9 @@ dependencies:
   - jupyter_client=5.2.4=py37_0
   - jupyter_console=6.0.0=py37_0
   - jupyter_core=4.4.0=py37_0
+  - jupyterlab=0.35.3=py37_0
+  - jupyterlab_server=0.2.0=py37_0
+  - keyring=17.1.1=py37_0
   - kiwisolver=1.0.1=py37hf484d3e_0
   - libedit=3.1.20181209=hc058e9b_0
   - libffi=3.2.1=hd88cf55_4
@@ -61,7 +68,6 @@ dependencies:
   - libuuid=1.0.3=h1bed415_2
   - libxcb=1.13=h1bed415_1
   - libxml2=2.9.9=he19cac6_0
-  - mako=1.0.7=py37_0
   - markupsafe=1.1.0=py37h7b6447c_0
   - matplotlib=3.0.2=py37h5429711_0
   - mistune=0.8.4=py37h7b6447c_0
@@ -115,14 +121,15 @@ dependencies:
   - readline=7.0=h7b6447c_5
   - requests=2.21.0=py37_0
   - scipy=1.2.0=py37h7c811a0_0
+  - secretstorage=3.1.0=py37_0
   - send2trash=1.5.0=py37_0
   - setuptools=40.6.3=py37_0
   - sip=4.19.8=py37hf484d3e_0
   - six=1.12.0=py37_0
+  - soupsieve=1.7.1=py37_0
   - sqlite=3.26.0=h7b6447c_0
   - terminado=0.8.1=py37_1
   - testpath=0.4.2=py37_0
-  - theano=1.0.3=py37hfd86e86_0
   - tk=8.6.8=hbc83047_0
   - tornado=5.1.1=py37h7b6447c_0
   - tqdm=4.29.1=py_0
@@ -135,5 +142,9 @@ dependencies:
   - xz=5.2.4=h14c3975_4
   - zeromq=4.2.5=hf484d3e_1
   - zlib=1.2.11=h7b6447c_3
+  - pip:
+    - corner==2.0.1
+    - mako==1.0.7
+    - theano==1.0.4
 prefix: /mnt/home/dforeman/miniconda3/envs/autoexoplanet
 
