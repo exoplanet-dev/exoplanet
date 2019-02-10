@@ -55,12 +55,14 @@ CITATIONS = {
 
     "exoplanet": (("exoplanet:exoplanet", ), r"""
 @misc{exoplanet:exoplanet,
-    title={exoplanet v0.1.3},
-   author={Foreman-Mackey, Daniel},
-    month={dec},
-     year={2018},
-      doi={10.5281/zenodo.2536576},
-      url={https://doi.org/10.5281/zenodo.2536576}
+  author = {Dan Foreman-Mackey and
+            Geert Barentsen and
+            Tom Barclay},
+   title = {dfm/exoplanet: exoplanet v0.1.4},
+   month = feb,
+    year = 2019,
+     doi = {10.5281/zenodo.2561395},
+     url = {https://doi.org/10.5281/zenodo.2561395}
 }
 """),
 
