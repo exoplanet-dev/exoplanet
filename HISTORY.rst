@@ -1,9 +1,10 @@
-0.1.4 (upcoming)
-++++++++++++++++
+0.1.4 (2019-02-10)
+++++++++++++++++++
 
 - Improves the reliability of the PyMC3Sampler
 - Adds a new ``optimize`` function since the ``find_MAP`` method
   in PyMC3 is deprecated
+- Adds cronjob script for automatically updating tutorials.
 
 
 0.1.3 (2019-01-09)
