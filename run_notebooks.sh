@@ -17,7 +17,7 @@ git checkout -b auto_notebooks master
 cd docs
 conda env export > auto_environment.yml
 
-python run_notebooks.py
+python run_notebooks.py $*
 
 git -c user.name='exoplanetbot' -c user.email='exoplanetbot' commit -am "updating notebooks [ci skip]"
 git push -q -f https://dfm:`cat .github_api_key`@github.com/dfm/exoplanet.git auto_notebooks
