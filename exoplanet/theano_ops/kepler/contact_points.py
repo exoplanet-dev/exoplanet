@@ -53,7 +53,11 @@ class CircularContactPointsOp(gof.COp):
             else:
                 dtype = theano.scalar.upcast(dtype, a.dtype)
             in_args.append(a)
-        out_args = [in_args[0].type() for i in range(4)]
+        ndim = in_args[0].ndim
+        out_args = [
+            tt.TensorType(dtype=dtype,
+                          broadcastable=[False] * ndim)()
+            for i in range(4)]
         return gof.Apply(self, in_args, out_args)
 
     def infer_shape(self, node, shapes):
