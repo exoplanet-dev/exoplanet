@@ -50,7 +50,7 @@ class AngleTransform(tr.Transform):
     name = "angle"
 
     def backward(self, y):
-        return tt.arctan2(y[1], y[0])
+        return tt.arctan2(y[0], y[1])
 
     def forward(self, x):
         return tt.concatenate((
