@@ -9,6 +9,8 @@ __all__ = [
 
 import numpy as np
 
+import theano.tensor as tt
+
 import pymc3 as pm
 from pymc3.distributions import draw_values, generate_samples
 
@@ -39,7 +41,7 @@ class UnitVector(pm.Normal):
                                 size=size)
 
 
-class Angle(pm.Flat):
+class Angle(pm.Continuous):
     """An angle constrained to be in the range -pi to pi
 
     The actual sampling is performed in the two dimensional vector space
@@ -49,9 +51,14 @@ class Angle(pm.Flat):
     """
 
     def __init__(self, *args, **kwargs):
-        kwargs["transform"] = tr.angle
+        kwargs["transform"] = kwargs.pop("transform", tr.angle)
+        shape = kwargs.get("shape", None)
+        if shape is None:
+            testval = 0.0
+        else:
+            testval = np.zeros(shape)
+        kwargs["testval"] = kwargs.pop("testval", testval)
         super(Angle, self).__init__(*args, **kwargs)
-        self._default = np.zeros(self.shape)
 
     def _random(self, size=None):
         return np.random.uniform(-np.pi, np.pi, size)
@@ -61,6 +68,9 @@ class Angle(pm.Flat):
                                 dist_shape=self.shape,
                                 broadcast_shape=self.shape,
                                 size=size)
+
+    def logp(self, value):
+        return tt.zeros_like(value)
 
 
 class QuadLimbDark(pm.Flat):
