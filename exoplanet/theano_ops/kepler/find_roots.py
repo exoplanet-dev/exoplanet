@@ -10,48 +10,88 @@ import numpy as np
 def find_roots(semimajor, ecc, omega, incl, Ls, tol=1e-6):
     Ls = np.atleast_1d(Ls) / semimajor
 
-    Efactor = np.sqrt((1 - ecc) / (1 + ecc))
-    ome2 = 1 - ecc**2
-    sinw = np.sin(omega)
-    cosw = np.cos(omega)
-    sin2w = sinw*sinw
-    cos2w = cosw*cosw
     sini = np.sin(incl)
     cosi = np.cos(incl)
     cos2i = cosi * cosi
 
-    f0 = 2 * np.arctan2(cosw, 1 + sinw)
+    circular = np.abs(ecc) < tol
+    if circular:
+        Efactor = 1.0
+        ome2 = 1.0
+        sinw = 0.0
+        cosw = 1.0
+        sin2w = 0.0
+        cos2w = 1.0
 
-    # a = 1
-    # b = 0
-    c = 1 / ome2
-    d = -2*ecc
-    # e = 0
-    f = -ome2
+        f0 = 0.5 * np.pi
 
-    A = cos2i*sin2w + cos2w
-    B = 2*cosw*sinw*(cos2i - 1)
-    C = cos2i*cos2w + sin2w
-    # D = 0
-    # E = 0
+        # a = 1
+        # b = 0
+        # c = 1
+        # d = 0
+        # e = 0
+        f = -semimajor**2
+
+        # A = 1
+        # B = 0
+        C = cosi**2
+        # D = 0
+        # E = 0
+    else:
+        Efactor = np.sqrt((1 - ecc) / (1 + ecc))
+        ome2 = 1 - ecc**2
+        sinw = np.sin(omega)
+        cosw = np.cos(omega)
+        sin2w = sinw*sinw
+        cos2w = cosw*cosw
+
+        f0 = 2 * np.arctan2(cosw, 1 + sinw)
+
+        # a = 1
+        # b = 0
+        c = 1 / ome2
+        d = -2*ecc
+        # e = 0
+        f = -ome2
+
+        A = cos2i*sin2w + cos2w
+        B = 2*cosw*sinw*(cos2i - 1)
+        C = cos2i*cos2w + sin2w
+        # D = 0
+        # E = 0
 
     results = []
     for L in Ls:
         F = -L*L
 
-        # Warning: special case for constant a, b, e, D, and E
-        a0 = C**2*f**2 - 2*C*F*c*f + F**2*c**2
-        a1 = 2*C*d*(C*f - F*c)
-        a2 = -2*A*C*c*f+2*A*F*c**2+B**2*c*f+C**2*d**2 + 2*C**2*f - 2*C*F*c
-        a3 = d*(-2*A*C*c + B**2*c + 2*C**2)
-        a4 = A**2*c**2 - 2*A*C*c + B**2*c + C**2
+        if circular:
+            # Warning: special case for ecc = 0 and omega = 0
+            a0 = C**2*f**2 - 2*C*F*f + F**2
+            # a1 = 0
+            a2 = 2*C**2*f - 2*C*F - 2*C*f + 2*F
+            # a3 = 0
+            a4 = C**2 - 2*C + 1
 
-        comp = np.eye(4, k=-1)
-        comp[0, -1] = -a0 / a4
-        comp[1, -1] = -a1 / a4
-        comp[2, -1] = -a2 / a4
-        comp[3, -1] = -a3 / a4
-        roots = np.linalg.eigvals(comp)
+            denom = 0.5 / a4
+            first = -a2 * denom
+            second = np.sqrt(a2 * a2 - 4 * a0 * a4 + 0j)
+            roots = np.array([first + second, first - second, 0, 0])
+            roots[2:] = -roots[:2]
+
+        else:
+            # Warning: special case for constant a, b, e, D, and E
+            a0 = C**2*f**2 - 2*C*F*c*f + F**2*c**2
+            a1 = 2*C*d*(C*f - F*c)
+            a2 = -2*A*C*c*f+2*A*F*c**2+B**2*c*f+C**2*d**2 + 2*C**2*f - 2*C*F*c
+            a3 = d*(-2*A*C*c + B**2*c + 2*C**2)
+            a4 = A**2*c**2 - 2*A*C*c + B**2*c + C**2
+
+            comp = np.eye(4, k=-1)
+            comp[0, -1] = -a0 / a4
+            comp[1, -1] = -a1 / a4
+            comp[2, -1] = -a2 / a4
+            comp[3, -1] = -a3 / a4
+            roots = np.linalg.eigvals(comp)
 
         # Only select real roots
         roots = np.real(roots[np.abs(np.imag(roots)) < tol])
