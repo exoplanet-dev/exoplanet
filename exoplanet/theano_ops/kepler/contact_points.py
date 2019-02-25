@@ -4,41 +4,24 @@ from __future__ import division, print_function
 
 __all__ = ["CircularContactPointsOp", "ContactPointsOp"]
 
-import pkg_resources
+
+import numpy as np
 
 import theano
 from theano import gof
 import theano.tensor as tt
 
-from ..build_utils import get_cache_version
+from .find_roots import find_roots
 
 
-class CircularContactPointsOp(gof.COp):
-    params_type = gof.ParamsType(
-        maxiter=theano.scalar.int64,
-        tol=theano.scalar.float64,
-    )
-    __props__ = ("tol", "maxiter")
+class CircularContactPointsOp(tt.Op):
+
+    __props__ = ("tol", )
     num_inputs = 4
-    func_file = "./circular_contact_points.cc"
-    func_name = "APPLY_SPECIFIC(circular_contact_points)"
 
-    def __init__(self, tol=1e-12, maxiter=1000, **kwargs):
+    def __init__(self, tol=1e-6, **kwargs):
         self.tol = float(tol)
-        self.maxiter = int(maxiter)
-        super(CircularContactPointsOp, self).__init__(
-            self.func_file, self.func_name)
-
-    def c_code_cache_version(self):
-        return get_cache_version()
-
-    def c_headers(self, compiler):
-        return ["theano_helpers.h", "contact_points.h"]
-
-    def c_header_dirs(self, compiler):
-        return [
-            pkg_resources.resource_filename(__name__, "include"),
-        ]
+        super(CircularContactPointsOp, self).__init__(**kwargs)
 
     def make_node(self, *args):
         if len(args) != self.num_inputs:
@@ -63,8 +46,32 @@ class CircularContactPointsOp(gof.COp):
     def infer_shape(self, node, shapes):
         return shapes[0], shapes[0], shapes[0], shapes[0]
 
+    def perform(self, node, inputs, outputs):
+        a, i, r, R = inputs
+        n_pl = a.size
+        for n in range(n_pl):
+            print(n)
+            roots = find_roots(
+                a.flat[n], 0.0, 0.0, i.flat[n],
+                [R.flat[n] - r.flat[n], R.flat[n] + r.flat[n]],
+                tol=self.tol)
+            roots = np.sort(np.array(roots).flatten())
+            for m in range(4):
+                outputs[m][0] = np.float64(roots[m])
+
 
 class ContactPointsOp(CircularContactPointsOp):
     num_inputs = 6
-    func_file = "./contact_points.cc"
-    func_name = "APPLY_SPECIFIC(contact_points)"
+
+    def perform(self, node, inputs, outputs):
+        a, e, w, i, r, R = inputs
+        n_pl = a.size
+        print(n_pl)
+        for n in range(n_pl):
+            roots = find_roots(
+                a.flat[n], e.flat[n], w.flat[n], i.flat[n],
+                [R.flat[n] - r.flat[n], R.flat[n] + r.flat[n]],
+                tol=self.tol)
+            roots = np.sort(np.array(roots).flatten())
+            for m in range(4):
+                outputs[m][0] = np.float64(roots[m])
