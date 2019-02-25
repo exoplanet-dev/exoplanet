@@ -49,15 +49,17 @@ class CircularContactPointsOp(tt.Op):
     def perform(self, node, inputs, outputs):
         a, i, r, R = inputs
         n_pl = a.size
+
+        results = []
         for n in range(n_pl):
-            print(n)
             roots = find_roots(
                 a.flat[n], 0.0, 0.0, i.flat[n],
                 [R.flat[n] - r.flat[n], R.flat[n] + r.flat[n]],
                 tol=self.tol)
-            roots = np.sort(np.array(roots).flatten())
-            for m in range(4):
-                outputs[m][0] = np.float64(roots[m])
+            results.append(np.sort(np.array(roots).flatten()))
+
+        for m, roots in enumerate(zip(*results)):
+            outputs[m][0] = np.array(roots).reshape(a.shape)
 
 
 class ContactPointsOp(CircularContactPointsOp):
@@ -66,12 +68,14 @@ class ContactPointsOp(CircularContactPointsOp):
     def perform(self, node, inputs, outputs):
         a, e, w, i, r, R = inputs
         n_pl = a.size
-        print(n_pl)
+
+        results = []
         for n in range(n_pl):
             roots = find_roots(
                 a.flat[n], e.flat[n], w.flat[n], i.flat[n],
                 [R.flat[n] - r.flat[n], R.flat[n] + r.flat[n]],
                 tol=self.tol)
-            roots = np.sort(np.array(roots).flatten())
-            for m in range(4):
-                outputs[m][0] = np.float64(roots[m])
+            results.append(np.sort(np.array(roots).flatten()))
+
+        for m, roots in enumerate(zip(*results)):
+            outputs[m][0] = np.array(roots).reshape(a.shape)
