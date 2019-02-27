@@ -63,7 +63,7 @@ class AngleTransform(tr.Transform):
 
     def jacobian_det(self, y):
         sm = tt.sum(tt.square(y), axis=0)
-        return tt.log(sm) - 0.5*sm
+        return 10*tt.log(sm) - 0.5*sm
 
 
 angle = AngleTransform()
