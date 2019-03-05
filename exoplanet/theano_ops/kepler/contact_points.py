@@ -71,8 +71,8 @@ class ContactPointsOp(CircularContactPointsOp):
 
         results = []
         for n in range(n_pl):
-            solver = CircularRootFinder(a.flat[n], e.flat[n], w.flat[n],
-                                        i.flat[n], tol=self.tol)
+            solver = GeneralRootFinder(a.flat[n], e.flat[n], w.flat[n],
+                                       i.flat[n], tol=self.tol)
             roots = np.concatenate([solver.get_contact_points(L)
                                     for L in [R.flat[n] - r.flat[n],
                                               R.flat[n] + r.flat[n]]])
