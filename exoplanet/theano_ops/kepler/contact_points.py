@@ -11,7 +11,7 @@ import theano
 from theano import gof
 import theano.tensor as tt
 
-from .find_roots import find_roots
+from .find_roots import CircularRootFinder, GeneralRootFinder
 
 
 class CircularContactPointsOp(tt.Op):
@@ -52,10 +52,10 @@ class CircularContactPointsOp(tt.Op):
 
         results = []
         for n in range(n_pl):
-            roots = find_roots(
-                a.flat[n], 0.0, 0.0, i.flat[n],
-                [R.flat[n] - r.flat[n], R.flat[n] + r.flat[n]],
-                tol=self.tol)
+            solver = CircularRootFinder(a.flat[n], i.flat[n], tol=self.tol)
+            roots = np.concatenate([solver.get_contact_points(L)
+                                    for L in [R.flat[n] - r.flat[n],
+                                              R.flat[n] + r.flat[n]]])
             results.append(np.sort(np.array(roots).flatten()))
 
         for m, roots in enumerate(zip(*results)):
@@ -71,10 +71,11 @@ class ContactPointsOp(CircularContactPointsOp):
 
         results = []
         for n in range(n_pl):
-            roots = find_roots(
-                a.flat[n], e.flat[n], w.flat[n], i.flat[n],
-                [R.flat[n] - r.flat[n], R.flat[n] + r.flat[n]],
-                tol=self.tol)
+            solver = CircularRootFinder(a.flat[n], e.flat[n], w.flat[n],
+                                        i.flat[n], tol=self.tol)
+            roots = np.concatenate([solver.get_contact_points(L)
+                                    for L in [R.flat[n] - r.flat[n],
+                                              R.flat[n] + r.flat[n]]])
             results.append(np.sort(np.array(roots).flatten()))
 
         for m, roots in enumerate(zip(*results)):

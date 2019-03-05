@@ -58,7 +58,7 @@ class TestCircularContactPoints(utt.InferShapeTester):
                                 self.op_class)
 
     def test_basic(self):
-        a = np.float64(100.0)
+        a = np.float64(10.0)
         e = np.float64(0.0)
         w = np.float64(0.0)
         i = np.float64(0.5*np.pi)
