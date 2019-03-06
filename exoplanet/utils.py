@@ -122,6 +122,10 @@ def optimize(start=None, vars=None, model=None, return_info=False,
         g = bij.map(d)
         return res[0], g
 
+    if verbose:
+        print("optimizing logp for variables: {0}"
+              .format([v.name for v in vars]))
+
     # Optimize using scipy.optimize
     x0 = bij.map(start)
     initial = objective(x0)[0]
@@ -137,9 +141,8 @@ def optimize(start=None, vars=None, model=None, return_info=False,
              for var, value in zip(vars, model.fastfn(vars)(bij.rmap(x)))}
 
     if verbose:
-        print("success: {0}".format(info.success))
-        print("initial logp: {0}".format(-initial))
-        print("final logp: {0}".format(-info.fun))
+        print("message: {0}".format(info.message))
+        print("logp: {0} -> {1}".format(-initial, -info.fun))
 
     if return_info:
         return point, info

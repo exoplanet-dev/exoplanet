@@ -45,9 +45,19 @@ class AngleTransform(tr.Transform):
     is given by the arctan of the ratio of the two coordinates. This will have
     a uniform distribution between -pi and pi.
 
+    Args:
+        regularized: The amplitude of the regularization term. If ``None``,
+            no regularization is applied. This has no effect on the
+            distribution over the transformed parameter, but it can make
+            sampling more efficient in some cases.
+
     """
 
     name = "angle"
+
+    def __init__(self, *args, **kwargs):
+        self.regularized = kwargs.pop("regularized", 10.0)
+        super(AngleTransform, self).__init__(*args, **kwargs)
 
     def backward(self, y):
         return tt.arctan2(y[0], y[1])
@@ -63,7 +73,9 @@ class AngleTransform(tr.Transform):
 
     def jacobian_det(self, y):
         sm = tt.sum(tt.square(y), axis=0)
-        return 10*tt.log(sm) - 0.5*sm
+        if self.regularized is not None:
+            return self.regularized*tt.log(sm) - 0.5*sm
+        return -0.5*sm
 
 
 angle = AngleTransform()

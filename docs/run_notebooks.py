@@ -3,6 +3,7 @@
 
 from __future__ import division, print_function
 
+import os
 import re
 import sys
 import glob
@@ -13,7 +14,7 @@ from nbconvert.preprocessors import ExecutePreprocessor, CellExecutionError
 if len(sys.argv) >= 2:
     pattern = sys.argv[1]
 else:
-    pattern = "_static/notebooks/*.ipynb"
+    pattern = "notebooks/*.ipynb"
 
 
 errors = []
@@ -26,14 +27,14 @@ for filename in glob.glob(pattern):
 
     print("running: {0}".format(filename))
     try:
-        ep.preprocess(notebook, {"metadata": {"path": "_static/notebooks/"}})
+        ep.preprocess(notebook, {"metadata": {"path": "notebooks/"}})
     except CellExecutionError as e:
         msg = "error while running: {0}\n\n".format(filename)
         msg += e.traceback
         print(msg)
         errors.append(msg)
     finally:
-        with open(filename, mode="wt") as f:
+        with open(os.path.join("_static", filename), mode="wt") as f:
             nbformat.write(notebook, f)
 
 txt = "\n\n".join(errors)
