@@ -1,3 +1,11 @@
+0.1.5 (2019-03-07)
+++++++++++++++++++
+
+- Improves contact point solver using companion matrix to solve quadratic
+- Improves reliability of ``Angle`` distribution when the value of the angle
+  is well constrained
+
+
 0.1.4 (2019-02-10)
 ++++++++++++++++++
 
