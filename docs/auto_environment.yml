@@ -13,18 +13,21 @@ dependencies:
   - binutils_impl_linux-64=2.31.1=h6176602_1
   - binutils_linux-64=2.31.1=h6176602_6
   - blas=1.0=mkl
-  - ca-certificates=2018.12.5=0
+  - ca-certificates=2019.1.23=0
   - certifi=2018.11.29=py37_0
   - cffi=1.11.5=py37he75722e_1
   - chardet=3.0.4=py37_1
+  - cmarkgfm=0.4.2=py37h7b6447c_0
   - cryptography=2.4.2=py37h1ba5d50_0
   - cycler=0.10.0=py37_0
   - dbus=1.13.6=h746ee38_0
   - decorator=4.3.0=py37_0
+  - docutils=0.14=py37_0
   - entrypoints=0.3=py37_0
   - expat=2.2.6=he6710b0_0
   - fontconfig=2.13.0=h9420a91_0
   - freetype=2.9.1=h8a8886c_1
+  - future=0.17.1=py37_0
   - gcc_impl_linux-64=7.3.0=habb00fd_1
   - gcc_linux-64=7.3.0=h553295d_6
   - glib=2.56.2=hd408876_0
@@ -92,6 +95,7 @@ dependencies:
   - pexpect=4.6.0=py37_0
   - pickleshare=0.7.5=py37_0
   - pip=18.1=py37_0
+  - pkginfo=1.5.0.1=py37_0
   - pluggy=0.8.1=py37_0
   - prometheus_client=0.5.0=py37_0
   - prompt_toolkit=2.0.7=py37_0
@@ -119,7 +123,9 @@ dependencies:
   - qt=5.9.7=h5867ecd_1
   - qtconsole=4.4.3=py37_0
   - readline=7.0=h7b6447c_5
+  - readme_renderer=24.0=py37_0
   - requests=2.21.0=py37_0
+  - requests-toolbelt=0.8.0=py37_0
   - scipy=1.2.0=py37h7c811a0_0
   - secretstorage=3.1.0=py37_0
   - send2trash=1.5.0=py37_0
@@ -134,6 +140,7 @@ dependencies:
   - tornado=5.1.1=py37h7b6447c_0
   - tqdm=4.29.1=py_0
   - traitlets=4.3.2=py37_0
+  - twine=1.12.1=py37_0
   - urllib3=1.24.1=py37_0
   - wcwidth=0.1.7=py37_0
   - webencodings=0.5.1=py37_1
@@ -143,6 +150,7 @@ dependencies:
   - zeromq=4.2.5=hf484d3e_1
   - zlib=1.2.11=h7b6447c_3
   - pip:
+    - bleach==3.1.0
     - corner==2.0.1
     - mako==1.0.7
     - theano==1.0.4
