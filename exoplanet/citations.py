@@ -214,13 +214,16 @@ publisher={PeerJ Inc.}
 @article{exoplanet:luger18,
    author = {{Luger}, R. and {Agol}, E. and {Foreman-Mackey}, D. and {Fleming},
              D.~P. and {Lustig-Yaeger}, J. and {Deitrick}, R.},
-    title = "{STARRY: Analytic Occultation Light Curves}",
-  journal = {ArXiv e-prints},
-   eprint = {1810.06559},
-     year = 2018,
-    month = oct,
-   adsurl = {http://adsabs.harvard.edu/abs/2018arXiv181006559L},
+    title = "{starry: Analytic Occultation Light Curves}",
+  journal = {\aj},
+     year = 2019,
+    month = feb,
+   volume = 157,
+    pages = {64},
+      doi = {10.3847/1538-3881/aae8e5},
+   adsurl = {http://adsabs.harvard.edu/abs/2019AJ....157...64L},
   adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
 }
 """),
 
