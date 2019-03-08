@@ -58,11 +58,11 @@ CITATIONS = {
   author = {Dan Foreman-Mackey and
             Geert Barentsen and
             Tom Barclay},
-   title = {dfm/exoplanet: exoplanet v0.1.4},
-   month = feb,
+   title = {dfm/exoplanet: exoplanet v0.1.5},
+   month = mar,
     year = 2019,
-     doi = {10.5281/zenodo.2561395},
-     url = {https://doi.org/10.5281/zenodo.2561395}
+     doi = {10.5281/zenodo.2587222},
+     url = {https://doi.org/10.5281/zenodo.2587222}
 }
 """),
 
