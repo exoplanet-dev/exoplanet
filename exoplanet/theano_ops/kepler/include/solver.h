@@ -100,7 +100,7 @@ namespace exoplanet {
   }
 
   template <typename T>
-  inline T refine (T E, T M, T e, int order) {
+  inline T refine (T E, T M, T e) {
     T e1 = 1 - e;
     T snr, csr;
     sin_cos_reduc(E, &snr, &csr);
@@ -114,14 +114,14 @@ namespace exoplanet {
     T h[4];
 
     T delta;
-    for (int i = 1; i <= order; ++i) {
+    for (int i = 1; i <= 4; ++i) {
       delta = F[i];
       for (int j = 1; j <= i-1; ++j) {
         delta = delta * h[j-1] + F[i-j];
       }
       h[i-1] = -F[0] / delta;
     }
-    return E + h[order - 1];
+    return E + h[4 - 1];
   }
 
   template <typename T>
@@ -140,7 +140,7 @@ namespace exoplanet {
     T E0 = get_starter<T>(M, e);
 
     // Refine the estimate
-    T E = refine<T>(E0, M, e, 4);
+    T E = refine<T>(E0, M, e);
 
     if (high) {
       E = two_pi - E;

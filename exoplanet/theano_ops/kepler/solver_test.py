@@ -37,7 +37,23 @@ class TestKeplerSolver(utt.InferShapeTester):
         assert np.all(np.isfinite(E0))
         utt.assert_allclose(E, E0)
         assert np.all(np.isfinite(f0))
-        utt.assert_allclose(f, f0)
+        utt.assert_allclose(np.abs(f - f0) % (2*np.pi), np.zeros_like(f),
+                            atol=1e-7)
+
+    def test_pi(self):
+        e = np.linspace(0, 1.0, 100)
+        E = np.pi + np.zeros_like(e)
+        M, f = self._get_M_and_f(e, E)
+
+        M_t = tt.dvector()
+        e_t = tt.dvector()
+        func = theano.function([M_t, e_t], self.op(M_t, e_t))
+        E0, f0 = func(M, e)
+
+        assert np.all(np.isfinite(E0))
+        utt.assert_allclose(E, E0)
+        assert np.all(np.isfinite(f0))
+        utt.assert_allclose(np.abs(f - f0) % (2*np.pi), np.zeros_like(f))
 
     def test_solver(self):
         e = np.linspace(0, 1, 500)[:-1]
@@ -52,7 +68,7 @@ class TestKeplerSolver(utt.InferShapeTester):
         E0, f0 = func(M, e)
 
         utt.assert_allclose(E, E0)
-        utt.assert_allclose(f, f0)
+        utt.assert_allclose(np.abs(f - f0) % (2*np.pi), np.zeros_like(f))
 
     def test_infer_shape(self):
         np.random.seed(42)
