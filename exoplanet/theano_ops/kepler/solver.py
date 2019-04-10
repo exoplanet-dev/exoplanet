@@ -15,16 +15,14 @@ from ..build_utils import get_cache_version
 
 class KeplerOp(gof.COp):
     params_type = gof.ParamsType(
-        maxiter=theano.scalar.int64,
         tol=theano.scalar.float64,
     )
-    __props__ = ("tol", "maxiter")
+    __props__ = ("tol", )
     func_file = "./solver.cc"
     func_name = "APPLY_SPECIFIC(solver)"
 
-    def __init__(self, tol=1e-12, maxiter=1000, **kwargs):
+    def __init__(self, tol=1e-12, **kwargs):
         self.tol = float(tol)
-        self.maxiter = int(maxiter)
         super(KeplerOp, self).__init__(self.func_file, self.func_name)
 
     def c_code_cache_version(self):

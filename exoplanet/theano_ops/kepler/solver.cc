@@ -9,7 +9,6 @@ int APPLY_SPECIFIC(solver)(
 {
   typedef DTYPE_OUTPUT_0 T;
 
-  long maxiter = params->maxiter;
   double tol = params->tol;
 
   npy_intp N, Ne;
@@ -60,10 +59,7 @@ int APPLY_SPECIFIC(solver)(
         tanE2 = esinE / denom;  // tan(0.5*E)
         f_out[n] = 2 * atan(sqrt((1+e)/(1-e))*tanE2);
       } else {
-        if (fabs(esinE) > tol)
-          f_out[n] = M_PI * sign(esinE);
-        else
-          f_out[n] = 0;
+        f_out[n] = M_PI;
       }
 
     }
