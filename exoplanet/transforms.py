@@ -12,6 +12,29 @@ from pymc3.distributions import draw_values
 import theano.tensor as tt
 
 
+class AbsoluteValueTransform(tr.Transform):
+    """"""
+    name = "absolutevalue"
+
+    def backward(self, y):
+        u = 2 * tt.nnet.sigmoid(y) - 1
+        return tt.abs_(u)
+
+    def forward(self, x):
+        q = 0.5 * (x + 1)
+        return tt.log(q) - tt.log(1 - q)
+
+    def forward_val(self, x, point=None):
+        q = 0.5 * (x + 1)
+        return np.log(q) - np.log(1 - q)
+
+    def jacobian_det(self, y):
+        return -2 * tt.nnet.softplus(-y) - y
+
+
+absolute_value = AbsoluteValueTransform()
+
+
 class UnitVectorTransform(tr.Transform):
     """A unit vector transformation for PyMC3
 
@@ -56,7 +79,7 @@ class AngleTransform(tr.Transform):
     name = "angle"
 
     def __init__(self, *args, **kwargs):
-        self.regularized = kwargs.pop("regularized", 10.0)
+        self.regularized = kwargs.pop("regularized", None)
         super(AngleTransform, self).__init__(*args, **kwargs)
 
     def backward(self, y):
