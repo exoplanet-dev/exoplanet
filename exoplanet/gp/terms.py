@@ -320,6 +320,10 @@ class SHOTerm(Term):
         self.eps = tt.as_tensor_variable(kwargs.pop("eps", 1e-5))
         super(SHOTerm, self).__init__(*args, **kwargs)
 
+    @property
+    def J(self):
+        return 2
+
     def get_coefficients(self):
         def overdampled():
             Q = self.Q
@@ -439,3 +443,7 @@ class RotationTerm(TermSum):
             SHOTerm(S0=S1, w0=w1, Q=Q1),
             SHOTerm(S0=S2, w0=w2, Q=Q2))
         self.coefficients = self.get_coefficients()
+
+    @property
+    def J(self):
+        return 4
