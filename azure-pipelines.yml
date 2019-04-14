@@ -21,15 +21,19 @@ strategy:
 
 steps:
 
-- bash: |
+- script: |
+    git submodule update --init
+  displayName: 'Get the submodules'
+
+- script: |
     echo "##vso[task.prependpath]$CONDA/bin"
     sudo chown -R $USER /usr/share/miniconda
   displayName: 'Add conda to PATH'
 
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '$(python.version)'
-  displayName: 'Use Python $(python.version)'
+#- task: UsePythonVersion@0
+#  inputs:
+#    versionSpec: '$(python.version)'
+#  displayName: 'Use Python $(python.version)'
 
 - script: |
     conda create --yes --quiet --name test python=$(python.version)
