@@ -40,7 +40,7 @@ steps:
     . $CONDA/etc/profile.d/conda.sh
     conda activate test
     conda install -c conda-forge --yes --quiet --name test numpy scipy starry celerite
-    python -m pip install --upgrade pip
+    #python -m pip install --upgrade pip
     pip install -r requirements-dev.txt
   displayName: 'Install dependencies'
 
