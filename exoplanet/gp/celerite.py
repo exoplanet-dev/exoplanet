@@ -24,7 +24,12 @@ class GP(object):
         add_citations_to_model(self.__citations__, model=model)
 
         self.kernel = kernel
+        if J < 0:
+            J = self.kernel.J
+            if J > 32:
+                J = -1
         self.J = J
+
         self.x = tt.as_tensor_variable(x)
         self.diag = tt.as_tensor_variable(diag)
         self.a, self.U, self.V, self.P = self.kernel.get_celerite_matrices(
