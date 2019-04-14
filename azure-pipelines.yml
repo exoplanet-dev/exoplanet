@@ -27,10 +27,10 @@ steps:
 
 - script: |
     python -m pip install --upgrade pip
-    pip install -r requirements.txt
+    pip install -r requirements-dev.txt
   displayName: 'Install dependencies'
 
 - script: |
-    pip install pytest pytest-azurepipelines
-    pytest
-  displayName: 'pytest'
+    pip install pytest-azurepipelines
+    py.test -v -s exoplanet
+  displayName: 'Testing'
