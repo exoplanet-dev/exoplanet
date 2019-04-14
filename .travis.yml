@@ -1,6 +1,14 @@
 sudo: false
 language: c
 
+addons:
+    apt:
+        sources:
+            - ubuntu-toolchain-r-test
+        packages:
+            - gcc-4.8
+            - g++-4.8
+
 env:
     global:
         - THEANO_FLAGS=floatX=float64,compute_test_value=off
