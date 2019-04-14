@@ -14,6 +14,7 @@ from itertools import chain
 import theano
 import theano.tensor as tt
 from theano.ifelse import ifelse
+from theano.gof import MissingInputError
 
 
 class Term(object):
@@ -37,6 +38,18 @@ class Term(object):
             setattr(self, name, tt.cast(value, self.dtype))
 
         self.coefficients = self.get_coefficients()
+
+    @property
+    def J(self):
+        func = theano.function(
+            [], [self.coefficients[0], self.coefficients[2]])
+        try:
+            a_real, a_comp = func()
+        except MissingInputError:
+            return -1
+        a_real = np.atleast_1d(a_real)
+        a_comp = np.atleast_1d(a_comp)
+        return len(a_real) + 2 * len(a_comp)
 
     def __add__(self, b):
         dtype = theano.scalar.upcast(self.dtype, b.dtype)
