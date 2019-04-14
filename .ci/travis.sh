@@ -20,7 +20,11 @@ if ! command -v conda > /dev/null; then
     pip uninstall -y celerite
     git clone https://github.com/dfm/celerite.git
     cd celerite
-    python setup.py install
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        python setup.py install
+    else
+        CXX=g++-4.8 CC=gcc-4.8 python setup.py build_ext $BUILD_ARGS install
+    fi
     cd ..
 
     pip uninstall -y batman-package
