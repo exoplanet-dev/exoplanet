@@ -27,8 +27,13 @@ steps:
 
 - script: |
     python -m pip install --upgrade pip
+    pip install -r requirements.txt
     pip install -r requirements-dev.txt
   displayName: 'Install dependencies'
+
+- script: |
+    theano-cache purge
+  displayName: 'Purging Theano cache'
 
 - script: |
     pip install pytest-azurepipelines
