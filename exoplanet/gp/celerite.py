@@ -17,6 +17,35 @@ diag_dot = DiagDotOp()
 
 
 class GP(object):
+    """The interface for computing Gaussian Process models with celerite
+
+    This class implements the method described in `Foreman-Mackey et al. (2017)
+    <https://arxiv.org/abs/1703.09710>`_ and `Foreman-Mackey (2018)
+    <https://arxiv.org/abs/1801.10156>`_ for scalable evaluation of Gaussian
+    Process (GP) models in 1D.
+
+    .. note:: The input coordinates ``x`` must be sorted in ascending order,
+        but this is not checked in the code. If the values are not sorted, the
+        behavior of the algorithm is undefined.
+
+    Args:
+        kernel: A :class:`exoplanet.gp.terms.Term` object the specifies the
+            GP kernel.
+        x: The input coordinates. This should be a 1D array and the elements
+            must be sorted. Otherwise the results are undefined.
+        diag: The extra diagonal to add to the covariance matrix. This should
+            have the same length as ``x`` and correspond to the excess
+            *variance* for each data point. **Note:** this is different from
+            the usage in the ``celerite`` package where the standard deviation
+            (instead of variance) is provided.
+        J (Optional): The width of the system. This is the ``J`` parameter
+            from `Foreman-Mackey (2018) <https://arxiv.org/abs/1801.10156>`_
+            (not the original paper) so a real term contributes ``J += 1`` and
+            a complex term contributes ``J += 2``. If you know this value in
+            advance, you can provide it. Otherwise, the code will try to work
+            it out.
+
+    """
 
     __citations__ = ("celerite", )
 
