@@ -22,7 +22,6 @@ steps:
   displayName: 'Get the submodules'
 
 - script: |
-    echo "##vso[task.prependpath]$CONDA/bin"
     sudo chown -R $USER $CONDA
     . $CONDA/etc/profile.d/conda.sh
   displayName: 'Add conda to PATH'
