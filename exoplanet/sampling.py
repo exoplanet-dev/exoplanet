@@ -18,6 +18,8 @@ class PyMC3Sampler(object):
     This schedule is based on the method used by as described in Section 34.2
     of the `Stan Manual <http://mc-stan.org/users/documentation/>`_.
 
+    All extra keyword arguments are passed to the ``pymc3.sample`` function.
+
     Args:
         start (int): The number of steps to run as an initial burn-in to find
             the typical set.
@@ -31,7 +33,8 @@ class PyMC3Sampler(object):
 
     # Ref: src/stan/mcmc/windowed_adaptation.hpp in stan repo
 
-    def __init__(self, start=75, finish=50, window=25, dense=True):
+    def __init__(self, start=75, finish=50, window=25, dense=True,
+                 **kwargs):
         self.dense = dense
 
         self.start = int(start)
@@ -40,6 +43,7 @@ class PyMC3Sampler(object):
         self.count = 0
         self._current_step = None
         self._current_trace = None
+        self.kwargs = kwargs
 
     def get_step_for_trace(self, trace=None, model=None,
                            regular_window=0, regular_variance=1e-3,
@@ -92,11 +96,19 @@ class PyMC3Sampler(object):
 
         return pm.NUTS(potential=potential, **kwargs)
 
+    def _get_sample_kwargs(self, kwargs):
+        new_kwargs = dict(kwargs)
+        for k, v in self.kwargs.items():
+            if k not in new_kwargs:
+                new_kwargs[k] = v
+        return new_kwargs
+
     def _extend(self, steps, start=None, step=None, **kwargs):
 
         kwargs["compute_convergence_checks"] = False
         kwargs["discard_tuned_samples"] = False
         kwargs["draws"] = 2
+        kwargs = self._get_sample_kwargs(kwargs)
 
         # Hide some of the PyMC3 logging
         logger = logging.getLogger("pymc3")
@@ -203,7 +215,6 @@ class PyMC3Sampler(object):
         step_kwargs["adapt_step_size"] = False
         step_kwargs["potential"] = step.potential
         self._current_step = pm.NUTS(**step_kwargs)
-
         return self._current_trace
 
     def sample(self, trace=None, step=None, start=None, step_kwargs=None,
@@ -219,6 +230,7 @@ class PyMC3Sampler(object):
         if trace is not None:
             start = None
         kwargs["tune"] = kwargs.get("tune", 0)
+        kwargs = self._get_sample_kwargs(kwargs)
         self._current_trace = pm.sample(start=start, step=step, trace=trace,
                                         **kwargs)
         return self._current_trace
