@@ -19,7 +19,7 @@ steps:
 
 - script: |
     git submodule update --init
-  displayName: 'Get the submodules'
+  displayName: 'Submodules'
 
 - script: |
     sudo chown -R $USER $CONDA
@@ -32,10 +32,12 @@ steps:
 #  displayName: 'Use Python $(python.version)'
 
 - script: |
+    . $CONDA/etc/profile.d/conda.sh
     conda create --yes --quiet --name test python=$(python.version)
   displayName: 'Create Anaconda environment'
 
 - script: |
+    . $CONDA/etc/profile.d/conda.sh
     conda activate test
     conda install -c conda-forge --yes --quiet --name test numpy scipy starry celerite
     python -m pip install --upgrade pip
@@ -43,11 +45,13 @@ steps:
   displayName: 'Install dependencies'
 
 - script: |
+    . $CONDA/etc/profile.d/conda.sh
     conda activate test
     theano-cache purge
   displayName: 'Purging Theano cache'
 
 - script: |
+    . $CONDA/etc/profile.d/conda.sh
     conda activate test
     pip install pytest-azurepipelines
     py.test -v -s exoplanet
