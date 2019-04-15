@@ -1,6 +1,3 @@
-variables:
-- group: exoplanet-variables
-
 strategy:
   matrix:
     LinuxPython36:
@@ -9,9 +6,6 @@ strategy:
     LinuxPython37:
       imageName: 'Ubuntu-16.04'
       python.version: '3.7'
-    MacPython36:
-      imageName: 'macos-10.13'
-      python.version: '3.6'
     MacPython37:
       imageName: 'macos-10.13'
       python.version: '3.7'
@@ -50,9 +44,3 @@ steps:
     python debug.py
     py.test -v -s exoplanet
   displayName: 'Testing'
-
-- script: |
-    . $CONDA/etc/profile.d/conda.sh
-    conda activate test
-    coveralls
-  displayName: 'Coveralls'
