@@ -19,12 +19,8 @@ steps:
 - script: |
     sudo chown -R $USER $CONDA
     . $CONDA/etc/profile.d/conda.sh
-  displayName: 'Add conda to PATH'
-
-- script: |
-    . $CONDA/etc/profile.d/conda.sh
     conda create --yes --quiet --name test python=$(python.version)
-  displayName: 'Create Anaconda environment'
+  displayName: 'Setup conda'
 
 - script: |
     . $CONDA/etc/profile.d/conda.sh
@@ -42,7 +38,7 @@ steps:
 - script: |
     . $CONDA/etc/profile.d/conda.sh
     conda activate test
-    python exoplanet/gp/celerite_test.py
+    python debug.py
   displayName: 'Testing'
 
 #- script: |
