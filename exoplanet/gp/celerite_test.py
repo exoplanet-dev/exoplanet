@@ -117,7 +117,3 @@ def test_gp(celerite_kernel, seed=1234):
     print(12)
 
     assert np.allclose(loglike, celerite_loglike)
-
-
-if __name__ == "__main__":
-    test_gp("cterms.RealTerm(log_a=0.1, log_c=0.5)")
