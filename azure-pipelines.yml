@@ -42,6 +42,12 @@ steps:
 - script: |
     . $CONDA/etc/profile.d/conda.sh
     conda activate test
-    pip install pytest-azurepipelines
-    py.test -v -s exoplanet
+    python exoplanet/gp/celerite_test.py
   displayName: 'Testing'
+
+#- script: |
+#    . $CONDA/etc/profile.d/conda.sh
+#    conda activate test
+#    pip install pytest-azurepipelines
+#    py.test -v -s exoplanet
+#  displayName: 'Testing'
