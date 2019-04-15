@@ -14,14 +14,8 @@ if ! command -v conda > /dev/null; then
     conda update -q conda
     conda create -q --yes -n test python=$PYTHON_VERSION
     conda activate test
-    conda install -q -c conda-forge pip numpy=$NUMPY_VERSION  scipy astropy setuptools Theano pymc3 pytest starry
-    pip install parameterized nose coveralls pytest-cov>=2.6.1 pytest-env pybind11
-
-    pip uninstall -y celerite
-    git clone https://github.com/dfm/celerite.git
-    cd celerite
-    python setup.py install
-    cd ..
+    conda install -q -c conda-forge pip numpy=$NUMPY_VERSION  scipy astropy setuptools Theano pymc3 pytest
+    pip install parameterized nose coveralls pytest-cov>=2.6.1 pytest-env pybind11 celerite starry
 
     pip uninstall -y batman-package
     git clone https://github.com/lkreidberg/batman.git

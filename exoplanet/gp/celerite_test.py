@@ -69,52 +69,39 @@ def _get_theano_kernel(celerite_kernel):
     raise NotImplementedError()
 
 
-# @pytest.mark.parametrize(
-#     "celerite_kernel",
-#     [
-#         "cterms.RealTerm(log_a=0.1, log_c=0.5)",
-#         "cterms.RealTerm(log_a=0.1, log_c=0.5) + "
-#         "cterms.RealTerm(log_a=-0.1, log_c=0.7)",
-#         "cterms.ComplexTerm(log_a=0.1, log_c=0.5, log_d=0.1)",
-#         "cterms.ComplexTerm(log_a=0.1, log_b=-0.2, log_c=0.5, log_d=0.1)",
-#         "cterms.SHOTerm(log_S0=0.1, log_Q=-1, log_omega0=0.5)",
-#         "cterms.SHOTerm(log_S0=0.1, log_Q=1.0, log_omega0=0.5)",
-#         "cterms.SHOTerm(log_S0=0.1, log_Q=1.0, log_omega0=0.5) + "
-#         "cterms.RealTerm(log_a=0.1, log_c=0.4)",
-#         "cterms.SHOTerm(log_S0=0.1, log_Q=1.0, log_omega0=0.5) * "
-#         "cterms.RealTerm(log_a=0.1, log_c=0.4)",
-#         "cterms.Matern32Term(log_sigma=0.1, log_rho=0.4)",
-#     ]
-# )
-def test_gp(celerite_kernel="cterms.RealTerm(log_a=0.1, log_c=0.5)",
-            seed=1234):
-    print(1)
+@pytest.mark.parametrize(
+    "celerite_kernel",
+    [
+        "cterms.RealTerm(log_a=0.1, log_c=0.5)",
+        "cterms.RealTerm(log_a=0.1, log_c=0.5) + "
+        "cterms.RealTerm(log_a=-0.1, log_c=0.7)",
+        "cterms.ComplexTerm(log_a=0.1, log_c=0.5, log_d=0.1)",
+        "cterms.ComplexTerm(log_a=0.1, log_b=-0.2, log_c=0.5, log_d=0.1)",
+        "cterms.SHOTerm(log_S0=0.1, log_Q=-1, log_omega0=0.5)",
+        "cterms.SHOTerm(log_S0=0.1, log_Q=1.0, log_omega0=0.5)",
+        "cterms.SHOTerm(log_S0=0.1, log_Q=1.0, log_omega0=0.5) + "
+        "cterms.RealTerm(log_a=0.1, log_c=0.4)",
+        "cterms.SHOTerm(log_S0=0.1, log_Q=1.0, log_omega0=0.5) * "
+        "cterms.RealTerm(log_a=0.1, log_c=0.4)",
+        "cterms.Matern32Term(log_sigma=0.1, log_rho=0.4)",
+    ]
+)
+def test_gp(celerite_kernel, seed=1234):
     import celerite
-    print(2)
     import celerite.terms as cterms  # NOQA
-    print(3)
     celerite_kernel = eval(celerite_kernel)
-    print(4)
     np.random.seed(seed)
     x = np.sort(np.random.rand(100))
     yerr = np.random.uniform(0.1, 0.5, len(x))
     y = np.sin(x)
     diag = yerr**2
 
-    print(5)
     celerite_gp = celerite.GP(celerite_kernel)
-    print(6)
     celerite_gp.compute(x, yerr)
-    print(7)
     celerite_loglike = celerite_gp.log_likelihood(y)
-    print(8)
 
-    print(9)
     kernel = _get_theano_kernel(celerite_kernel)
-    print(10)
     gp = GP(kernel, x, diag)
-    print(11)
     loglike = gp.log_likelihood(y).eval()
-    print(12)
 
     assert np.allclose(loglike, celerite_loglike)
