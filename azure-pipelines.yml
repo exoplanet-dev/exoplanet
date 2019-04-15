@@ -1,10 +1,5 @@
-# Python package
-# Create and test a Python package on multiple Python versions.
-# Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/python
-
-trigger:
-- master
+#trigger:
+#- master
 
 pool:
   vmImage: 'Ubuntu-16.04'
@@ -21,14 +16,20 @@ steps:
     git submodule update --init
   displayName: 'Submodules'
 
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '$(python.version)'
-  displayName: 'Use Python $(python.version)'
+- script: |
+    sudo chown -R $USER $CONDA
+    . $CONDA/etc/profile.d/conda.sh
+  displayName: 'Add conda to PATH'
 
 - script: |
-    python -m pip install --upgrade pip
-    pip install -r requirements.txt
+    . $CONDA/etc/profile.d/conda.sh
+    conda create --yes --quiet --name test python=$(python.version)
+  displayName: 'Create Anaconda environment'
+
+- script: |
+    . $CONDA/etc/profile.d/conda.sh
+    conda activate test
+    conda install -c conda-forge --yes --quiet --name test numpy scipy starry celerite
     pip install -r requirements-dev.txt
   displayName: 'Install dependencies'
 
@@ -39,37 +40,8 @@ steps:
   displayName: 'Purging Theano cache'
 
 - script: |
+    . $CONDA/etc/profile.d/conda.sh
+    conda activate test
     pip install pytest-azurepipelines
     py.test -v -s exoplanet
   displayName: 'Testing'
-
-#- script: |
-#    sudo chown -R $USER $CONDA
-#    . $CONDA/etc/profile.d/conda.sh
-#  displayName: 'Add conda to PATH'
-
-#- script: |
-#    . $CONDA/etc/profile.d/conda.sh
-#    conda create --yes --quiet --name test python=$(python.version)
-#  displayName: 'Create Anaconda environment'
-
-#- script: |
-#    . $CONDA/etc/profile.d/conda.sh
-#    conda activate test
-#    conda install -c conda-forge --yes --quiet --name test numpy scipy starry celerite
-#    pip install -r requirements-dev.txt
-#  displayName: 'Install dependencies'
-
-#- script: |
-#    . $CONDA/etc/profile.d/conda.sh
-#    conda activate test
-#    theano-cache purge
-#  displayName: 'Purging Theano cache'
-
-#- script: |
-#    . $CONDA/etc/profile.d/conda.sh
-#    conda activate test
-#    python -c 'import theano, celerite; print(theano.__version__, celerite.__version__)'
-#    pip install pytest-azurepipelines
-#    py.test -v -s exoplanet
-#  displayName: 'Testing'
