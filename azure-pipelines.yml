@@ -1,14 +1,23 @@
 #trigger:
 #- master
 
-pool:
-  vmImage: 'Ubuntu-16.04'
 strategy:
   matrix:
-    Python36:
+    LinuxPython36:
+      imageName: 'Ubuntu-16.04'
       python.version: '3.6'
-    Python37:
+    LinuxPython37:
+      imageName: 'Ubuntu-16.04'
       python.version: '3.7'
+    MacPython36:
+      imageName: 'macos-10.13'
+      python.version: '3.6'
+    MacPython37:
+      imageName: 'macos-10.13'
+      python.version: '3.7'
+
+pool:
+  vmImage: $(imageName)
 
 steps:
 
