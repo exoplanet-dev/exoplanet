@@ -34,7 +34,7 @@ steps:
 - script: |
     . $CONDA/etc/profile.d/conda.sh
     conda activate test
-    pip install -r requirements.txt
+    pip install numpy pybind11
     pip install -r requirements-dev.txt
   displayName: 'Install dependencies'
 
