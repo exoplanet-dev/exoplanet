@@ -39,6 +39,7 @@ steps:
     . $CONDA/etc/profile.d/conda.sh
     conda activate test
     python debug.py
+    py.test -v -s exoplanet
   displayName: 'Testing'
 
 #- script: |
