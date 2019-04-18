@@ -7,6 +7,47 @@ __all__ = ["GeneralRootFinder", "CircularRootFinder"]
 import numpy as np
 
 
+def balance_companion_matrix(companion_matrix):
+    diag = np.array(np.diag(companion_matrix))
+    companion_matrix[np.diag_indices_from(companion_matrix)] = 0.0
+    degree = len(diag)
+
+    # gamma <= 1 controls how much a change in the scaling has to
+    # lower the 1-norm of the companion matrix to be accepted.
+    #
+    # gamma = 1 seems to lead to cycles (numerical issues?), so
+    # we set it slightly lower.
+    gamma = 0.9
+
+    scaling_has_changed = True
+    while scaling_has_changed:
+        scaling_has_changed = False
+        
+        for i in range(degree):
+            row_norm = np.sum(np.abs(companion_matrix[i]))
+            col_norm = np.sum(np.abs(companion_matrix[:, i]))
+            
+            # Decompose row_norm/col_norm into mantissa * 2^exponent,
+            # where 0.5 <= mantissa < 1. Discard mantissa (return value
+            # of frexp), as only the exponent is needed.
+            _, exponent = np.frexp(row_norm / col_norm)
+            exponent = exponent // 2
+            
+            if exponent != 0:
+                scaled_col_norm = np.ldexp(col_norm, exponent)
+                scaled_row_norm = np.ldexp(row_norm, -exponent)
+                if scaled_col_norm + scaled_row_norm < gamma * (col_norm + row_norm):
+                    # Accept the new scaling. (Multiplication by powers of 2 should not
+                    # introduce rounding errors (ignoring non-normalized numbers and
+                    # over- or underflow))
+                    scaling_has_changed = True
+                    companion_matrix[i] *= np.ldexp(1.0, -exponent)
+                    companion_matrix[:, i] *= np.ldexp(1.0, exponent)
+
+    companion_matrix[np.diag_indices_from(companion_matrix)] = diag
+    return companion_matrix
+
+
 class GeneralRootFinder(object):
 
     def __init__(self, semimajor, ecc, omega, incl, tol=1e-6):
@@ -65,7 +106,7 @@ class GeneralRootFinder(object):
         comp[1, -1] = -a1 / a4
         comp[2, -1] = -a2 / a4
         comp[3, -1] = -a3 / a4
-        roots = np.linalg.eigvals(comp)
+        roots = np.linalg.eigvals(balance_companion_matrix(comp))
 
         return roots
 
