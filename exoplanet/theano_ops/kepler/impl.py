@@ -97,20 +97,42 @@ def get_roots_general(a, e, cosw, sinw, cosi, sini, L, tol=1e-8):
     T = cosi / sini
     T *= T
 
-    quartic = get_quartic(A, B, C, D, E, F, T, L)
+    if np.allclose(e, 0.0):
+        x2 = (C*L*L + F*T) / (C + T)
+        if x2 < 0:
+            return np.array([-np.pi, np.pi]) + f0
+        roots = np.array([np.sqrt(x2), -np.sqrt(x2)])
 
-    roots = solve_companion_matrix(quartic)
-    roots = roots[np.argsort(np.real(roots))]
+    elif np.allclose(sinw, 0.0):
+        b0 = F*T + C*L*L
+        b1 = D*T
+        b2 = A*T - C
+        x1 = -0.5 * b1 / b2
+        arg = b1*b1 - 4*b0*b2
+        if arg < 0:
+            return np.array([-np.pi, np.pi]) + f0
+        x2 = 0.5 * np.sqrt(arg) / b2
+        roots = np.sort([x1 + x2, x1 - x2])
 
-    # Deal with multiplicity
-    roots[0] = roots[:2][np.argmin(np.abs(np.imag(roots[:2])))]
-    roots[1] = roots[2:][::-1][np.argmin(np.abs(np.imag(roots[2:])[::-1]))]
-    roots = roots[:2]
+    else:
+        quartic = get_quartic(A, B, C, D, E, F, T, L)
 
-    # Only select real roots
-    roots = np.clip(np.real(roots[np.abs(np.imag(roots)) < tol]), -L, L)
-    if len(roots) < 2:
-        return np.array([-np.pi, np.pi]) + f0
+        roots = solve_companion_matrix(quartic)
+
+        # Only select real roots
+        roots = np.clip(np.real(roots[np.abs(np.imag(roots)) < tol]), -L, L)
+        if len(roots) < 2:
+            return np.array([-np.pi, np.pi]) + f0
+
+        # Deal with multiplicity
+        roots = np.sort(roots)
+        if len(roots) == 4:
+            if sinw > -1e-12:
+                roots = roots[::2]
+            else:
+                roots = roots[1::2]
+        elif len(roots) == 3:
+            return np.array([-np.pi, np.pi]) + f0
 
     angles = []
     for x in roots:
