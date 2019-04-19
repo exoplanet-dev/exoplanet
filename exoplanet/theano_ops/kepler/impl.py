@@ -100,7 +100,7 @@ def get_roots_general(a, e, cosw, sinw, cosi, sini, L, tol=1e-8):
     if np.allclose(e, 0.0):
         x2 = (C*L*L + F*T) / (C + T)
         if x2 < 0:
-            return np.array([-np.pi, np.pi]) + f0
+            return np.array([-np.pi, np.pi]) + f0, False
         roots = np.array([np.sqrt(x2), -np.sqrt(x2)])
 
     elif np.allclose(sinw, 0.0):
@@ -110,7 +110,7 @@ def get_roots_general(a, e, cosw, sinw, cosi, sini, L, tol=1e-8):
         x1 = -0.5 * b1 / b2
         arg = b1*b1 - 4*b0*b2
         if arg < 0:
-            return np.array([-np.pi, np.pi]) + f0
+            return np.array([-np.pi, np.pi]) + f0, False
         x2 = 0.5 * np.sqrt(arg) / b2
         roots = np.sort([x1 + x2, x1 - x2])
 
@@ -119,20 +119,29 @@ def get_roots_general(a, e, cosw, sinw, cosi, sini, L, tol=1e-8):
 
         roots = solve_companion_matrix(quartic)
 
-        # Only select real roots
-        roots = np.clip(np.real(roots[np.abs(np.imag(roots)) < tol]), -L, L)
-        if len(roots) < 2:
-            return np.array([-np.pi, np.pi]) + f0
-
         # Deal with multiplicity
-        roots = np.sort(roots)
-        if len(roots) == 4:
-            if sinw > -1e-12:
-                roots = roots[np.array([0, 3])]
-            else:
-                roots = roots[np.array([1, 2])]
-        elif len(roots) == 3:
-            return np.array([-np.pi, np.pi]) + f0
+        roots = roots[np.argsort(np.real(roots))]
+
+        def _multi(r):
+            ip = np.abs(np.imag(r))
+            if np.all(ip > tol):
+                return None
+            if np.any(ip > tol):
+                return np.real(r[np.argmin(ip)])
+            return np.real(r[1])
+
+        if sinw >= 0:
+            roots = [
+                _multi(roots[:2][::-1]),
+                _multi(roots[2:])
+            ]
+        else:
+            roots = [
+                _multi(roots[:2]),
+                _multi(roots[2:][::-1])
+            ]
+        if roots[0] is None or roots[1] is None:
+            return np.array([-np.pi, np.pi]) + f0, False
 
     angles = []
     for x in roots:
@@ -148,7 +157,6 @@ def get_roots_general(a, e, cosw, sinw, cosi, sini, L, tol=1e-8):
             z = z1 + sgn * z2
             if z > 0:
                 continue
-
             x0 = x*cosw + z*sinw/sini
             y0 = -x*sinw + z*cosw/sini
             angle = np.arctan2(y0, x0) - np.pi
@@ -164,6 +172,6 @@ def get_roots_general(a, e, cosw, sinw, cosi, sini, L, tol=1e-8):
         if np.all(angles < 0):
             angles = np.array([angles[1], angles[0] + 2*np.pi])
     else:
-        angles = np.array([-np.pi, np.pi])
+        return np.array([-np.pi, np.pi]) + f0, False
 
-    return angles + f0
+    return angles + f0, True
