@@ -2,6 +2,7 @@
 
 from __future__ import division, print_function
 
+import pytest
 import numpy as np
 
 from .impl import get_roots_general
@@ -22,10 +23,14 @@ def compute(L, a, b, e, w):
 
     incl_factor = (1 + e * sinw) / (1 - e**2)
     cosi = incl_factor * b * L / a
+    if np.abs(cosi) >= 1:
+        return
     i = np.arccos(cosi)
     sini = np.sin(i)
 
-    fs = get_roots_general(a, e, cosw, sinw, cosi, sini, L)
+    fs, flag = get_roots_general(a, e, cosw, sinw, cosi, sini, L)
+    if not flag:
+        return
 
     assert len(fs) == 2
     assert np.all(np.isfinite(fs))
@@ -33,12 +38,12 @@ def compute(L, a, b, e, w):
         assert np.allclose(target, get_b2(f, a, e, cosw, sinw, cosi, sini))
 
 
-def test_contact_point_impl(L=1.1, a=100.0):
+@pytest.mark.parametrize("a", [5.0, 12.1234, 100.0, 1000.0, 20000.0])
+def test_contact_point_impl(a, L=1.1):
     es = np.linspace(0, 1, 50)[:-1]
     ws = np.linspace(-np.pi, np.pi, 71)
     bs = np.linspace(0, 1 - 1e-5, 5)
     for bi, b in enumerate(bs):
         for ei, e in enumerate(es):
             for wi, w in enumerate(ws):
-                print(bi, ei, wi)
                 compute(L, a, b, e, w)
