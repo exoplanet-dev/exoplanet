@@ -199,6 +199,94 @@ $f$ with respect to $e$ and $M$.
 
 \subsection{Scalable Gaussian Processes for time series}
 
+\appendix
+
+\section{Contact points}
+
+In the plane of the orbit, $S_0$, the coordinates of the orbit satisfy the
+equation
+\begin{eqnarray}\eqlabel{constraint0}
+{({x_0} - a\,e)}^2 + \frac{{y_0}^2}{1-e^2} &=& a^2 \quad.
+\end{eqnarray}
+To rotate into the observing plane, we perform the following transformation
+\begin{eqnarray}\eqlabel{rotation}
+\bvec{x}_2 &=& R_i\,R_\omega\,\bvec{x}_0 \\
+\left(\begin{array}{c}x_2\\y_2\\z_2\end{array}\right) &=&
+\left(\begin{array}{ccc}
+1 & 0 & 0\\
+0 & \cos i & \sin i \\
+0 & -\sin i & \cos i \\
+\end{array}\right) \,
+\left(\begin{array}{ccc}
+\cos\omega & \sin\omega & 0\\
+-\sin\omega & \cos\omega & 0 \\
+0 & 0 & 1 \\
+\end{array}\right) \,
+\left(\begin{array}{c}x_0\\y_0\\0\end{array}\right) \quad.
+\end{eqnarray}
+In this space, the planet will transit whenever
+\begin{eqnarray}
+z_2 < 0 &\mathrm{and}& {x_2}^2 + {y_2}^2 < L^2
+\end{eqnarray}
+where $L = R_\star + R_P$.
+The contact point therefore occurs when
+\begin{eqnarray} \eqlabel{quad1}
+\hat{x_2}^2 + \hat{y_2}^2 = L^2
+\end{eqnarray}
+where the hat indicates that 
+
+Using the inverse of \eq{rotation} to re-write \eq{constraint0} in terms of
+$x_2$ and $y_2$, we find the following quadratic equation 
+\begin{eqnarray} \eqlabel{quad2}
+A\,{x_2}^2 + B\,{x_2\,y_2} + C\,{y_2}^2 + D\,x_2 + E\,y_2 + F &=& 0
+\end{eqnarray}
+with
+\begin{eqnarray}
+A &=& \left(e^{2}\,\cos^{2}{\omega} - 1\right)\,\cos^{2}{i} \\
+B &=& 2\,e^{2}\,\cos{i}\,\sin{\omega}\,\cos{\omega}\\
+C &=& e^{2}\,\sin^{2}{\omega} - 1\\
+D &=& 2\,a\,e\,\left(1-e^{2}\right)\,\cos^{2}{i}\,\cos{\omega}\\
+E &=& 2\,a\,e\,\left(1-e^{2}\right)\,\sin{\omega} \cos{i}\\
+F &=& a^{2}\,\left(e^{2} - 1\right)^{2}\,\cos^{2}{i}
+\end{eqnarray}
+
+The pair of quadratic equations defined by \eq{quad1} and \eq{quad2} can be
+combined to give a quartic equation for $x_2$
+\begin{eqnarray}
+a_0 + a_1\,{x_2} + a_2\,{x_2}^2 + a_3\,{x_2}^3 + a_4\,{x_2}^4 = 0
+\end{eqnarray}
+where
+\begin{eqnarray}
+a_0 &=& \left(C L^{2} - E L + F\right) \left(C L^{2} + E L + F\right) \\
+a_1 &=& - 2 \left(B E L^{2} - C D L^{2} - D F\right)\\
+a_2 &=& 2 A C L^{2} + 2 A F - B^{2} L^{2} - 2 C^{2} L^{2} - 2 C F + D^{2} + E^{2}\\
+a_3 &=& 2 \left(A D + B E - C D\right)\\
+a_4 &=& A^{2} - 2 A C + B^{2} + C^{2}
+\end{eqnarray}
+which can be solved symbolically (CITE Kipping) or numerically. 
+
+\paragraph{Edge-on orbits}
+For an edge-on orbit, $\cos{i} = 0$ and the contact points occur at
+\begin{eqnarray}\eqlabel{edgeon1}
+x_2 &=& \pm L \\
+y_2 &=& 0 \quad,
+\end{eqnarray}
+but care must be taken when evaluating $z_2$.
+To do this, we substitute \eq{edgeon1} into \eq{constraint0} to get the
+following quadratic equation for $z_2$
+\begin{eqnarray}
+b_0 + b_1\,{z_2} + b_2\,{z_2}^2 &=& 0
+\end{eqnarray}
+where
+\begin{eqnarray}
+b_{0,\pm} &=& L^2\,(e^2\,\cos^2\omega - 1) \mp 2\,a\,e\,L\,\cos\omega\,(e^2-1) +
+a^2\,{(e^2 -1)}^2 \\
+b_{1,\pm} &=& -2\,a\,e\,\sin\omega\,(e^2-1) \pm 2\,e^2\,L\,\sin\omega\,\cos\omega\\
+b_{2,\pm} &=& e^{2} \sin^{2}{\left (\omega \right )} - 1 \quad.
+\end{eqnarray}
+There are 4 solutions to this system of which we are only interested in the
+ones where $z_2 < 0$ (the others are the contact points for the occultation).
+
 \bibliography{exoplanet}
 
 
