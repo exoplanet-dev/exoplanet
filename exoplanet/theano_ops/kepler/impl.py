@@ -128,9 +128,9 @@ def get_roots_general(a, e, cosw, sinw, cosi, sini, L, tol=1e-8):
         roots = np.sort(roots)
         if len(roots) == 4:
             if sinw > -1e-12:
-                roots = roots[::2]
+                roots = roots[np.array([0, 3])]
             else:
-                roots = roots[1::2]
+                roots = roots[np.array([1, 2])]
         elif len(roots) == 3:
             return np.array([-np.pi, np.pi]) + f0
 
