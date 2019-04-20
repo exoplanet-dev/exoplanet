@@ -39,9 +39,10 @@ def compute(L, a, b, e, w):
 
 
 @pytest.mark.parametrize("a", [5.0, 12.1234, 100.0, 1000.0, 20000.0])
-def test_contact_point_impl(a, L=1.1):
-    es = np.linspace(0, 1, 50)[:-1]
-    ws = np.linspace(-np.pi, np.pi, 71)
+@pytest.mark.parametrize("L", [0.7, 0.9, 1.0, 1.1, 1.5])
+def test_contact_point_impl(a, L):
+    es = np.linspace(0, 1, 25)[:-1]
+    ws = np.linspace(-np.pi, np.pi, 51)
     bs = np.linspace(0, 1 - 1e-5, 5)
     for bi, b in enumerate(bs):
         for ei, e in enumerate(es):
