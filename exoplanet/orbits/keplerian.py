@@ -7,6 +7,7 @@ __all__ = ["KeplerianOrbit", "get_true_anomaly"]
 import numpy as np
 
 import theano.tensor as tt
+from theano.ifelse import ifelse
 
 from astropy import constants
 from astropy import units as u
@@ -406,7 +407,7 @@ class KeplerianOrbit(object):
         hp = 0.5 * self.period
         t_start = (M_contact[0] - self.M0) / self.n
         t_start = tt.mod(t_start + hp, self.period) - hp
-        t_end = (M_contact[3] - self.M0) / self.n
+        t_end = (M_contact[1] - self.M0) / self.n
         t_end = tt.mod(t_end + hp, self.period) - hp
         dt = tt.mod(self._warp_times(t) - self.t0 + hp, self.period) - hp
         if texp is not None:
@@ -414,8 +415,11 @@ class KeplerianOrbit(object):
             t_end += 0.5*texp
 
         mask = tt.any(tt.and_(dt >= t_start, dt <= t_end), axis=-1)
+        result = ifelse(tt.all(tt.neq(M_contact[2], 0)),
+                        tt.arange(t.size)[mask],
+                        tt.arange(t.size))
 
-        return tt.arange(t.size)[mask]
+        return result
 
 
 def get_true_anomaly(M, e, **kwargs):

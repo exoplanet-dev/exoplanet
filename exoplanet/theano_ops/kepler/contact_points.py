@@ -19,7 +19,7 @@ class CircularContactPointsOp(tt.Op):
     __props__ = ("tol", )
     num_inputs = 4
 
-    def __init__(self, tol=1e-6, **kwargs):
+    def __init__(self, tol=1e-10, **kwargs):
         self.tol = float(tol)
         super(CircularContactPointsOp, self).__init__(**kwargs)
 
@@ -40,26 +40,28 @@ class CircularContactPointsOp(tt.Op):
         out_args = [
             tt.TensorType(dtype=dtype,
                           broadcastable=[False] * ndim)()
-            for i in range(4)]
+            for i in range(2)] + [tt.iscalar().type()]
         return gof.Apply(self, in_args, out_args)
 
     def infer_shape(self, node, shapes):
-        return shapes[0], shapes[0], shapes[0], shapes[0]
+        return shapes[0], shapes[0], shapes[0]
 
     def perform(self, node, inputs, outputs):
         a, i, r, R = inputs
         n_pl = a.size
 
         results = []
+        flags = []
         for n in range(n_pl):
             solver = CircularRootFinder(a.flat[n], i.flat[n], tol=self.tol)
-            roots = np.concatenate([solver.get_contact_points(L)
-                                    for L in [R.flat[n] - r.flat[n],
-                                              R.flat[n] + r.flat[n]]])
+            roots, flag = solver.get_contact_points(R.flat[n] + r.flat[n])
             results.append(np.sort(np.array(roots).flatten()))
+            flags.append(flag)
 
         for m, roots in enumerate(zip(*results)):
             outputs[m][0] = np.array(roots).reshape(a.shape)
+
+        outputs[2][0] = np.array(flags, dtype=np.int32).reshape(a.shape)
 
 
 class ContactPointsOp(CircularContactPointsOp):
@@ -70,13 +72,15 @@ class ContactPointsOp(CircularContactPointsOp):
         n_pl = a.size
 
         results = []
+        flags = []
         for n in range(n_pl):
             solver = GeneralRootFinder(a.flat[n], e.flat[n], w.flat[n],
                                        i.flat[n], tol=self.tol)
-            roots = np.concatenate([solver.get_contact_points(L)
-                                    for L in [R.flat[n] - r.flat[n],
-                                              R.flat[n] + r.flat[n]]])
+            roots, flag = solver.get_contact_points(R.flat[n] + r.flat[n])
             results.append(np.sort(np.array(roots).flatten()))
+            flags.append(flag)
 
         for m, roots in enumerate(zip(*results)):
             outputs[m][0] = np.array(roots).reshape(a.shape)
+
+        outputs[2][0] = np.array(flags, dtype=np.int32)
