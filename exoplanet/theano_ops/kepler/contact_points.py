@@ -19,7 +19,7 @@ class CircularContactPointsOp(tt.Op):
     __props__ = ("tol", )
     num_inputs = 4
 
-    def __init__(self, tol=1e-10, **kwargs):
+    def __init__(self, tol=1e-8, **kwargs):
         self.tol = float(tol)
         super(CircularContactPointsOp, self).__init__(**kwargs)
 
@@ -40,7 +40,9 @@ class CircularContactPointsOp(tt.Op):
         out_args = [
             tt.TensorType(dtype=dtype,
                           broadcastable=[False] * ndim)()
-            for i in range(2)] + [tt.iscalar().type()]
+            for i in range(2)] + [
+            tt.TensorType(dtype="int32",
+                          broadcastable=[False] * ndim)()]
         return gof.Apply(self, in_args, out_args)
 
     def infer_shape(self, node, shapes):
@@ -83,4 +85,4 @@ class ContactPointsOp(CircularContactPointsOp):
         for m, roots in enumerate(zip(*results)):
             outputs[m][0] = np.array(roots).reshape(a.shape)
 
-        outputs[2][0] = np.array(flags, dtype=np.int32)
+        outputs[2][0] = np.array(flags, dtype=np.int32).reshape(a.shape)
