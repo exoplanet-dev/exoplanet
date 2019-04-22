@@ -34,7 +34,7 @@ class GeneralRootFinder(object):
         E = 2 * np.arctan(self.Efactor * np.tan(0.5*f))
         M = E - self.ecc * np.sin(E)
 
-        return M
+        return M, flag
 
 
 class CircularRootFinder(GeneralRootFinder):
