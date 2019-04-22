@@ -29,7 +29,7 @@ def compute(L, a, b, e, w):
     sini = np.sin(i)
 
     fs, flag = get_roots_general(a, e, cosw, sinw, cosi, sini, L)
-    if not flag:
+    if flag:
         return
 
     assert len(fs) == 2

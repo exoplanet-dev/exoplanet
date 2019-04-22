@@ -91,7 +91,7 @@ def get_roots_general(a, e, cosw, sinw, cosi, sini, L, tol=1e-8):
     a = 1.0
 
     f0 = 2 * np.arctan2(cosw, 1 + sinw)
-    default_return = f0 + np.array([-np.pi, np.pi]), False
+    default_return = f0 + np.array([-np.pi, np.pi])
 
     quad = get_quadratic(a, e, cosw, sinw, cosi, sini)
     A, B, C, D, E, F = quad
@@ -101,7 +101,7 @@ def get_roots_general(a, e, cosw, sinw, cosi, sini, L, tol=1e-8):
     if np.allclose(e, 0.0):
         x2 = (C*L*L + F*T) / (C + T)
         if x2 < 0:
-            return default_return
+            return default_return, 1
         roots = np.array([np.sqrt(x2), -np.sqrt(x2)])
 
     elif np.allclose(sinw, 0.0):
@@ -111,7 +111,7 @@ def get_roots_general(a, e, cosw, sinw, cosi, sini, L, tol=1e-8):
         x1 = -0.5 * b1 / b2
         arg = b1*b1 - 4*b0*b2
         if arg < 0:
-            return default_return
+            return default_return, 2
         x2 = 0.5 * np.sqrt(arg) / b2
         roots = np.sort([x1 + x2, x1 - x2])
 
@@ -126,7 +126,7 @@ def get_roots_general(a, e, cosw, sinw, cosi, sini, L, tol=1e-8):
 
     # Fail now if the roots don't span zero
     if np.all(roots <= 0) or np.all(roots > 0):
-        return default_return
+        return default_return, 3
 
     # Loop over the roots and compute the z coordinates
     angles = np.empty_like(roots)
@@ -156,13 +156,13 @@ def get_roots_general(a, e, cosw, sinw, cosi, sini, L, tol=1e-8):
 
     m = np.isfinite(angles)
     if not np.any(m):
-        return default_return
+        return default_return, 4
     angles = angles[m]
     roots = roots[m]
 
     # Fail now if the roots don't span zero
     if np.all(roots <= 0) or np.all(roots > 0):
-        return default_return
+        return default_return, 5
 
     # Deal with multiplicity
     if len(angles) > 2:
@@ -184,11 +184,11 @@ def get_roots_general(a, e, cosw, sinw, cosi, sini, L, tol=1e-8):
     angles -= f0
     angles = np.sort(angles)
     if len(angles) != 2:
-        return default_return
+        return default_return, 6
 
     if np.all(angles > 0):
         angles = np.array([angles[1] - 2*np.pi, angles[0]])
     if np.all(angles < 0):
         angles = np.array([angles[1], angles[0] + 2*np.pi])
 
-    return angles + f0, True
+    return angles + f0, 0
