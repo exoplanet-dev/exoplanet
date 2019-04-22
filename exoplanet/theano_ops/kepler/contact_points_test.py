@@ -35,10 +35,11 @@ class TestContactPoints(utt.InferShapeTester):
         r = np.float64(0.1)
         R = np.float64(1.1)
 
-        M_expect = np.array([0.88452506, 0.8863776, 0.90490204, 0.90675455])
+        M_expect = np.array([0.88452506, 0.90675455])
         M_calc = theano.function([], self.op(a, e, w, i, r, R))()
 
-        utt.assert_allclose(M_calc, M_expect)
+        assert np.all(M_calc[2] == 0)
+        utt.assert_allclose(M_calc[:2], M_expect)
 
 
 class TestCircularContactPoints(utt.InferShapeTester):
