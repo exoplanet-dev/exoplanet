@@ -40,7 +40,7 @@ class ContactPointsOp(gof.COp):
 
     def make_node(self, *args):
         if len(args) != self.num_inputs:
-            raise ValueError("expected {0} inputs".format(self.num_input))
+            raise ValueError("expected {0} inputs".format(self.num_inputs))
         dtype = theano.config.floatX
         in_args = []
         for a in args:
