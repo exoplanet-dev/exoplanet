@@ -2,8 +2,6 @@
 
 from __future__ import division, print_function
 
-__all__ = ["get_roots_general"]
-
 import numpy as np
 
 
@@ -86,62 +84,63 @@ def get_quartic(A, B, C, D, E, F, T, L):
     )
 
 
-def get_roots_general(a, e, cosw, sinw, cosi, sini, L, tol=1e-8):
-    L = L / a
-    a = 1.0
+def get_roots_general(a, e, omega, i, L, tol=1e-8):
+    cosw = np.cos(omega)
+    sinw = np.sin(omega)
+    cosi = np.cos(i)
+    sini = np.sin(i)
 
     f0 = 2 * np.arctan2(cosw, 1 + sinw)
-    default_return = f0 + np.array([-np.pi, np.pi])
 
     quad = get_quadratic(a, e, cosw, sinw, cosi, sini)
     A, B, C, D, E, F = quad
-    from scipy.optimize import bisect
+    T = cosi / sini
+    T *= T
+    quartic = get_quartic(A, B, C, D, E, F, T, L)
 
-    def func(x, return_all=False):
+    roots = solve_companion_matrix(quartic)
+    roots = roots[np.argsort(np.real(roots))]
+
+    # Deal with multiplicity
+    roots[0] = roots[:2][np.argmin(np.abs(np.imag(roots[:2])))]
+    roots[1] = roots[2:][::-1][np.argmin(np.abs(np.imag(roots[2:])[::-1]))]
+    roots = roots[:2]
+
+    # Only select real roots
+    roots = np.clip(np.real(roots[np.abs(np.imag(roots)) < tol]), -L, L)
+    if len(roots) < 2:
+        return np.empty(0)
+
+    angles = []
+    for x in roots:
         b0 = A*x*x + D*x + F
         b1 = B*x + E
         b2 = C
         z1 = -0.5 * b1 / b2
         arg = b1*b1 - 4*b0*b2
         if arg < 0:
-            raise ValueError()
+            continue
         z2 = 0.5 * np.sqrt(arg) / b2
-        z = z1 + z2
-        if z > 0:
-            z = z1 - z2
+        for sgn in [-1, 1]:
+            z = z1 + sgn * z2
             if z > 0:
-                raise ValueError()
-        y = z * cosi / sini
-        dist = y**2 + x**2 - L**2
-        if return_all:
-            return dist, x, y, z
-        return dist
+                continue
 
-    angles = np.empty(2)
-    for ri, rng in enumerate([(-L, 0), (0, L)]):
-        try:
-            if np.sign(func(rng[0])) == np.sign(func(rng[1])):
-                return default_return, 1
-            r = bisect(func, rng[0], rng[1])
-        except ValueError:
-            return default_return, 2
-        _, x, y, z = func(r, return_all=True)
-        x0 = x*cosw + z*sinw/sini
-        y0 = -x*sinw + z*cosw/sini
-        angle = np.arctan2(y0, x0) - np.pi
-        while angle < -np.pi:
-            angle += 2*np.pi
-        angles[ri] = angle
+            x0 = x*cosw + z*sinw/sini
+            y0 = -x*sinw + z*cosw/sini
+            angle = np.arctan2(y0, x0) - np.pi
+            if angle < -np.pi:
+                angle += 2*np.pi
+            angles.append(angle - f0)
 
     # Wrap the roots properly to span the transit
-    angles -= f0
     angles = np.sort(angles)
-    if len(angles) != 2:
-        return default_return, 6
+    if len(angles) == 2:
+        if np.all(angles > 0):
+            angles = np.array([angles[1] - 2*np.pi, angles[0]])
+        if np.all(angles < 0):
+            angles = np.array([angles[1], angles[0] + 2*np.pi])
+    else:
+        angles = np.array([-np.pi, np.pi])
 
-    if np.all(angles > 0):
-        angles = np.array([angles[1] - 2*np.pi, angles[0]])
-    if np.all(angles < 0):
-        angles = np.array([angles[1], angles[0] + 2*np.pi])
-
-    return angles + f0, 0
+    return angles + f0
