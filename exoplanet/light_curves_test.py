@@ -73,6 +73,17 @@ def test_in_transit():
     utt.assert_allclose(*vals)
 
 
+def test_contact_bug():
+    orbit = KeplerianOrbit(period=3.456, ecc=0.6, omega=-1.5)
+    t = np.linspace(-0.1, 0.1, 1000)
+    u = [0.3, 0.2]
+    y1 = StarryLightCurve(u).get_light_curve(
+        orbit=orbit, r=0.1, t=t, texp=0.02).eval()
+    y2 = StarryLightCurve(u).get_light_curve(
+        orbit=orbit, r=0.1, t=t, texp=0.02, use_in_transit=False).eval()
+    assert np.allclose(y1, y2)
+
+
 def test_small_star():
     from batman.transitmodel import TransitModel, TransitParams
     u_star = [0.2, 0.1]
