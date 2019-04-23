@@ -395,7 +395,7 @@ class KeplerianOrbit(object):
 
         if self.ecc is None:
             M_contact = self.contact_points_op(
-                self.a, z, o, self.cos_incl + z, self.sin_incl + z, R + r)
+                self.a, z, o, z, self.cos_incl + z, self.sin_incl + z, R + r)
         else:
             M_contact = self.contact_points_op(
                 self.a, self.ecc, self.cos_omega, self.sin_omega,
