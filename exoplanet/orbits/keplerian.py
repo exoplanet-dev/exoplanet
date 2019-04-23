@@ -415,7 +415,8 @@ class KeplerianOrbit(object):
             t_end += 0.5*texp
 
         mask = tt.any(tt.and_(dt >= t_start, dt <= t_end), axis=-1)
-        result = ifelse(tt.all(tt.eq(M_contact[2], 0)),
+        result = ifelse(tt.and_(tt.all(tt.eq(M_contact[2], 0)),
+                                tt.gt(t_end, t_start)),
                         tt.arange(t.size)[mask],
                         tt.arange(t.size))
 
