@@ -137,6 +137,36 @@ def test_in_transit():
     assert np.all(out)
 
 
+def test_in_transit_circ():
+    t = np.linspace(-20, 20, 1000)
+    m_planet = np.array([0.3, 0.5])
+    m_star = 1.45
+    r_star = 1.5
+    orbit = KeplerianOrbit(
+        m_star=m_star,
+        r_star=r_star,
+        t0=np.array([0.5, 17.4]),
+        period=np.array([10.0, 5.3]),
+        ecc=np.array([0.0, 0.0]),
+        omega=np.array([0.0, 0.0]),
+        m_planet=m_planet,
+    )
+    orbit_circ = KeplerianOrbit(
+        m_star=m_star,
+        r_star=r_star,
+        t0=np.array([0.5, 17.4]),
+        period=np.array([10.0, 5.3]),
+        m_planet=m_planet,
+    )
+
+    r_pl = np.array([0.1, 0.03])
+    inds = theano.function([], orbit.in_transit(t, r=r_pl))()
+    inds_circ = theano.function([], orbit_circ.in_transit(t, r=r_pl))()
+    print(inds)
+    print(inds_circ)
+    assert np.all(inds == inds_circ)
+
+
 def test_small_star():
     from batman import _rsky
     m_star = 0.151

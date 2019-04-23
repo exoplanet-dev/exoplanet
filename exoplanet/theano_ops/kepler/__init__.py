@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-__all__ = ["KeplerOp", "CircularContactPointsOp", "ContactPointsOp"]
+__all__ = ["KeplerOp"]
 
 from .solver import KeplerOp
-from .contact_points import CircularContactPointsOp, ContactPointsOp

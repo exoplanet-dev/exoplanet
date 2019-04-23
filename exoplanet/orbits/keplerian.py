@@ -388,32 +388,42 @@ class KeplerianOrbit(object):
             The indices of the timestamps that are in transit.
 
         """
+
         z = tt.zeros_like(self.a)
-        o = tt.ones_like(self.a)
         r = tt.as_tensor_variable(r) + z
         R = self.r_star + z
 
+        # Wrap the times into time since transit
+        hp = 0.5 * self.period
+        dt = tt.mod(self._warp_times(t) - self.t0 + hp, self.period) - hp
+
         if self.ecc is None:
-            M_contact = self.contact_points_op(
-                self.a, z, o, z, self.cos_incl + z, self.sin_incl + z, R + r)
+            # Equation 14 from Winn (2010)
+            k = r / self.r_star
+            arg = tt.square(1 + k) - tt.square(self.b)
+            hdur = hp * tt.arcsin(self.r_star / self.a *
+                                  tt.sqrt(arg) / self.sin_incl) / np.pi
+            t_start = -hdur
+            t_end = hdur
+            flag = z
+
         else:
             M_contact = self.contact_points_op(
                 self.a, self.ecc, self.cos_omega, self.sin_omega,
                 self.cos_incl + z, self.sin_incl + z, R + r)
+            flag = M_contact[2]
 
-        # Wrap the times into time since transit
-        hp = 0.5 * self.period
-        t_start = (M_contact[0] - self.M0) / self.n
-        t_start = tt.mod(t_start + hp, self.period) - hp
-        t_end = (M_contact[1] - self.M0) / self.n
-        t_end = tt.mod(t_end + hp, self.period) - hp
-        dt = tt.mod(self._warp_times(t) - self.t0 + hp, self.period) - hp
+            t_start = (M_contact[0] - self.M0) / self.n
+            t_start = tt.mod(t_start + hp, self.period) - hp
+            t_end = (M_contact[1] - self.M0) / self.n
+            t_end = tt.mod(t_end + hp, self.period) - hp
+
         if texp is not None:
             t_start -= 0.5*texp
             t_end += 0.5*texp
 
         mask = tt.any(tt.and_(dt >= t_start, dt <= t_end), axis=-1)
-        result = ifelse(tt.and_(tt.all(tt.eq(M_contact[2], 0)),
+        result = ifelse(tt.and_(tt.all(tt.eq(flag, 0)),
                                 tt.all(tt.gt(t_end, t_start))),
                         tt.arange(t.size)[mask],
                         tt.arange(t.size))
