@@ -22,6 +22,8 @@ autodoc_mock_imports = [
     "theano",
 ]
 
+import exoplanet
+
 # Convert the tutorials
 for fn in chain(glob.glob("_static/notebooks/*.ipynb"),
                 glob.glob("_static/notebooks/gallery/*.ipynb")):

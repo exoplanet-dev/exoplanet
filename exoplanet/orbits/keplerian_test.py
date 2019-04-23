@@ -162,8 +162,6 @@ def test_in_transit_circ():
     r_pl = np.array([0.1, 0.03])
     inds = theano.function([], orbit.in_transit(t, r=r_pl))()
     inds_circ = theano.function([], orbit_circ.in_transit(t, r=r_pl))()
-    print(inds)
-    print(inds_circ)
     assert np.all(inds == inds_circ)
 
 
