@@ -9,7 +9,7 @@ from ..exoplanet_version import __version__
 
 
 def get_compile_args(compiler):
-    opts = ["-std=c++11", "-O2", "-DNDEBUG"]
+    opts = ["-std=c++11", "-O2", "-DNDEBUG", "-fPIC"]
     if sys.platform == "darwin":
         opts += ["-stdlib=libc++", "-mmacosx-version-min=10.7"]
     return opts + compiler.compile_args()
