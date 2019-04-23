@@ -13,8 +13,8 @@ from astropy import constants
 from astropy import units as u
 
 from ..citations import add_citations_to_model
-from ..theano_ops.kepler import (
-    KeplerOp, CircularContactPointsOp, ContactPointsOp)
+from ..theano_ops.kepler import KeplerOp
+from ..theano_ops.contact_points import ContactPointsOp
 
 
 class KeplerianOrbit(object):
@@ -101,14 +101,11 @@ class KeplerianOrbit(object):
             contact_points_kwargs = dict()
 
         # Eccentricity
+        self.contact_points_op = ContactPointsOp(**contact_points_kwargs)
         if ecc is None:
             self.ecc = None
             self.M0 = 0.5 * np.pi + tt.zeros_like(self.n)
             self.tref = self.t0 - self.M0 / self.n
-
-            self.contact_points_op = \
-                CircularContactPointsOp(**contact_points_kwargs)
-
             incl_factor = 1
         else:
             self.ecc = tt.as_tensor_variable(ecc)
@@ -124,7 +121,6 @@ class KeplerianOrbit(object):
                                 tt.sqrt(1+self.ecc)*opsw)
             self.M0 = E0 - self.ecc * tt.sin(E0)
             self.tref = self.t0 - self.M0 / self.n
-            self.contact_points_op = ContactPointsOp(**contact_points_kwargs)
 
             ome2 = 1 - self.ecc**2
             self.K0 /= tt.sqrt(ome2)
@@ -393,15 +389,17 @@ class KeplerianOrbit(object):
 
         """
         z = tt.zeros_like(self.a)
+        o = tt.ones_like(self.a)
         r = tt.as_tensor_variable(r) + z
         R = self.r_star + z
 
         if self.ecc is None:
             M_contact = self.contact_points_op(
-                self.a, self.incl + z, r, R)
+                self.a, z, o, self.cos_incl + z, self.sin_incl + z, R + r)
         else:
             M_contact = self.contact_points_op(
-                self.a, self.ecc, self.omega, self.incl + z, r, R)
+                self.a, self.ecc, self.cos_omega, self.sin_omega,
+                self.cos_incl + z, self.sin_incl + z, R + r)
 
         # Wrap the times into time since transit
         hp = 0.5 * self.period

@@ -16,13 +16,13 @@ int main () {
   T cosi = cos(incl);
   T sini = sin(incl);
 
-  auto results = contact_points::find_roots(
-      a, e, cosw, sinw, cosi, sini, L);
+  auto solver = contact_points::ContactPointSolver<T>(
+      a, e, cosw, sinw, cosi, sini);
+  auto roots = solver.find_roots(L);
 
-  //std::cout << flag << "\n";
-  //for (int i = 0; i < 4; ++i) {
-  //  std::cout << real_roots[i] << " " << imag_roots[i] << "\n";
-  //}
+  std::cout << std::get<0>(roots) << "\n";
+  std::cout << std::get<1>(roots) << "\n";
+  std::cout << std::get<2>(roots) << "\n";
 
   return 0;
 }

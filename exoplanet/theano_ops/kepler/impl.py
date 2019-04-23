@@ -129,12 +129,10 @@ def get_roots_general(a, e, cosw, sinw, cosi, sini, L, tol=1e-8):
         x0 = x*cosw + z*sinw/sini
         y0 = -x*sinw + z*cosw/sini
         angle = np.arctan2(y0, x0) - np.pi
-        while angle < -np.pi:
-            angle += 2*np.pi
         angles[ri] = angle
 
-    if len(angles) != 2:
-        return default_return, 6
+    # if len(angles) != 2:
+    #     return default_return, 6
 
     # Wrap the roots properly to span the transit
     # angles -= f0
