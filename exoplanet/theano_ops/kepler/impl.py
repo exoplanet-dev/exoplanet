@@ -125,7 +125,7 @@ def get_roots_general(a, e, cosw, sinw, cosi, sini, L, tol=1e-8):
             r = bisect(func, rng[0], rng[1])
         except ValueError:
             return default_return, 2
-        _, x, y, z = func(r, return_all=True)
+        dist, x, y, z = func(r, return_all=True)
         x0 = x*cosw + z*sinw/sini
         y0 = -x*sinw + z*cosw/sini
         angle = np.arctan2(y0, x0) - np.pi
@@ -133,15 +133,16 @@ def get_roots_general(a, e, cosw, sinw, cosi, sini, L, tol=1e-8):
             angle += 2*np.pi
         angles[ri] = angle
 
-    # Wrap the roots properly to span the transit
-    angles -= f0
-    angles = np.sort(angles)
     if len(angles) != 2:
         return default_return, 6
 
-    if np.all(angles > 0):
-        angles = np.array([angles[1] - 2*np.pi, angles[0]])
-    if np.all(angles < 0):
-        angles = np.array([angles[1], angles[0] + 2*np.pi])
+    # Wrap the roots properly to span the transit
+    # angles -= f0
+    # angles = np.sort(angles)
 
-    return angles + f0, 0
+    # if np.all(angles > 0):
+    #     angles = np.array([angles[1] - 2*np.pi, angles[0]])
+    # if np.all(angles < 0):
+    #     angles = np.array([angles[1], angles[0] + 2*np.pi])
+
+    return angles, 0
