@@ -5,6 +5,7 @@ from __future__ import division, print_function
 __all__ = ["get_roots_general"]
 
 import numpy as np
+from scipy.optimize import bisect
 
 
 def balance_companion_matrix(companion_matrix):
@@ -95,7 +96,6 @@ def get_roots_general(a, e, cosw, sinw, cosi, sini, L, tol=1e-8):
 
     quad = get_quadratic(a, e, cosw, sinw, cosi, sini)
     A, B, C, D, E, F = quad
-    from scipy.optimize import bisect
 
     def func(x, return_all=False):
         b0 = A*x*x + D*x + F
