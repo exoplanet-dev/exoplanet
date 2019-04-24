@@ -1,3 +1,12 @@
+0.1.6 (2019-04-24)
+++++++++++++++++++
+
+- Fixes some edge case failures for Kepler solver
+- Improves reliability of contact point solver and fails (more) gracefully
+  when this doesn't work; this reduces the number of divergences when fitting
+  a transit model
+
+
 0.1.5 (2019-03-07)
 ++++++++++++++++++
 
