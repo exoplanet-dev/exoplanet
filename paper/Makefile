@@ -12,7 +12,7 @@ exoplanet.pdf: exoplanet.tex exoplanet.bib $(FIGURES) xostyle.tex
 	# Generate links to current git commit
 	python gen_links.py
 	if [ "${TECTONIC}" = "true" ]; then\
-		tectonic exoplanet.tex --print --keep-logs;\
+		tectonic -C exoplanet.tex --print --keep-logs;\
 	else\
 		${LATEX} exoplanet;\
 		( ${CHECK_RERUN} && ${LATEX} exoplanet ) || echo "Done.";\
