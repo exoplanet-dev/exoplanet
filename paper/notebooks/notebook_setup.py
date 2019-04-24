@@ -6,11 +6,12 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 rcParams["savefig.dpi"] = 100
 rcParams["figure.dpi"] = 100
-rcParams["font.size"] = 16
+rcParams["font.size"] = 20
+rcParams["font.family"] = "sans-serif"
 rcParams["font.sans-serif"] = ["Computer Modern Sans"]
 rcParams["text.usetex"] = True
 rcParams["text.latex.preamble"] = r"\usepackage{cmbright}"
-# rcParams["font.family"] = "sans-serif"
+rcParams["figure.autolayout"] = True
 
 # Hide deprecation warnings from Theano
 import warnings
