@@ -28,3 +28,7 @@ git push -q -f https://dfm:`cat .github_api_key`@github.com/dfm/exoplanet.git au
 
 cd ..
 git checkout master
+
+mail -s "autoexoplanet finished" "foreman.mackey@gmail.com" <<EOF
+run_notebooks finished running
+EOF
