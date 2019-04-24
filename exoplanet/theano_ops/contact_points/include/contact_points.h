@@ -32,41 +32,34 @@ namespace contact_points {
         Efactor = sqrt((1 - e) / (1 + e));
       }
 
-      void build_quadratic () {
-        auto const e2 = e*e;
-        auto const e2mo = e2 - 1;
-        quad[0] = e2*cosw*cosw - 1;
-        quad[1] = 2*e2*sinw*cosw/sini;
-        quad[2] = (e2mo - e2*cosw*cosw)/(sini*sini);
-        quad[3] = -2*e*e2mo*cosw;
-        quad[4] = -2*e*e2mo*sinw/sini;
-        quad[5] = e2mo*e2mo;
-      }
-
       std::tuple<int, Scalar, Scalar> find_roots (Scalar L, Scalar tol=1e-8) const {
         L /= a;
         auto L2 = L * L;
 
-        // Check the signs
-        auto const f_left = objective(L2, -L);
-        auto const f_mid = objective(L2, 0);
-        auto const f_right = objective(L2, L);
-        if (!std::get<0>(f_left) || !std::get<0>(f_mid) || !std::get<0>(f_right) ||
-            sgn(std::get<1>(f_left)) == sgn(std::get<1>(f_mid)) ||
-            sgn(std::get<1>(f_mid)) == sgn(std::get<1>(f_right))) {
-          return std::make_tuple<int, Scalar, Scalar>(1, 0, 0);
-        }
+        Scalar x_left = -L;
+        Scalar x_right = L;
+        if (std::abs(cosi) > tol) {
+          // Check the signs
+          auto const f_left = objective(L2, -L);
+          auto const f_mid = objective(L2, 0);
+          auto const f_right = objective(L2, L);
+          if (!std::get<0>(f_left) || !std::get<0>(f_mid) || !std::get<0>(f_right) ||
+              sgn(std::get<1>(f_left)) == sgn(std::get<1>(f_mid)) ||
+              sgn(std::get<1>(f_mid)) == sgn(std::get<1>(f_right))) {
+            return std::make_tuple<int, Scalar, Scalar>(1, 0, 0);
+          }
 
-        // Left root
-        auto const root_left = bisect(L2, -L, 0, tol);
-        auto const root_right = bisect(L2, 0, L, tol);
-        if (!std::get<0>(root_left) || !std::get<0>(root_right)) {
-          return std::make_tuple<int, Scalar, Scalar>(2, 0, 0);
-        }
+          // Find the roots
+          auto const root_left = bisect(L2, -L, 0, tol);
+          auto const root_right = bisect(L2, 0, L, tol);
+          if (!std::get<0>(root_left) || !std::get<0>(root_right)) {
+            return std::make_tuple<int, Scalar, Scalar>(2, 0, 0);
+          }
 
-        // Compute the angles
-        auto const x_left = std::get<1>(root_left);
-        auto const x_right = std::get<1>(root_right);
+          // Compute the angles
+          x_left = std::get<1>(root_left);
+          x_right = std::get<1>(root_right);
+        }
 
         auto const M_left = convert_to_mean_anomaly(x_left);
         auto const M_right = convert_to_mean_anomaly(x_right);
@@ -78,6 +71,17 @@ namespace contact_points {
       }
 
     private:
+
+      void build_quadratic () {
+        auto const e2 = e*e;
+        auto const e2mo = e2 - 1;
+        quad[0] = e2*cosw*cosw - 1;
+        quad[1] = 2*e2*sinw*cosw/sini;
+        quad[2] = (e2mo - e2*cosw*cosw)/(sini*sini);
+        quad[3] = -2*e*e2mo*cosw;
+        quad[4] = -2*e*e2mo*sinw/sini;
+        quad[5] = e2mo*e2mo;
+      }
 
       std::tuple<bool, Scalar> convert_to_mean_anomaly (Scalar x) const {
         auto const coords = get_coords(x);
