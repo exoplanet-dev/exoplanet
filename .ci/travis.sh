@@ -17,20 +17,19 @@ if ! command -v conda > /dev/null; then
     conda activate test
     conda install -q -c conda-forge pip numpy=$NUMPY_VERSION  scipy astropy setuptools Theano pymc3 pytest
     pip install parameterized nose coveralls pytest-cov>=2.6.1 pytest-env pybind11
-    pip install celerite starry
-
-    pip uninstall -y batman-package
-    git clone https://github.com/lkreidberg/batman.git
-    cd batman
-    git apply $TRAVIS_BUILD_DIR/.ci/batman-patch.diff
-    python setup.py install
-    cd ..
 
     if [[ $TEST_LANG -eq paper ]]
     then
         conda install -q tectonic jupyter
+    else
+        pip install celerite starry
+        pip uninstall -y batman-package
+        git clone https://github.com/lkreidberg/batman.git
+        cd batman
+        git apply $TRAVIS_BUILD_DIR/.ci/batman-patch.diff
+        python setup.py install
+        cd ..
     fi
-
 fi
 
 # Display some info
