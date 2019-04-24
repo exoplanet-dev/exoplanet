@@ -1,7 +1,7 @@
 \pdfoutput=1
 
 %\usepackage{lmodern}
-\usepackage{microtype}
+%\usepackage{microtype}
 \usepackage{url}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -9,6 +9,19 @@
 \usepackage{multirow}
 \usepackage{graphicx}
 \bibliographystyle{aasjournal}
+
+\usepackage{mathtools}
+\usepackage{calc}
+\usepackage{etoolbox}
+\usepackage{xspace}
+\usepackage[T1]{fontenc} % https://tex.stackexchange.com/a/166791
+\usepackage{textcomp}
+\usepackage{ifxetex}
+\ifxetex
+\usepackage{fontspec}
+\defaultfontfeatures{Extension = .otf}
+\fi
+\usepackage{fontawesome}
 
 % Matrix fix:
 % http://tex.stackexchange.com/questions/317824/letter-c-appearing-inside-pmatrix-environment-with-aastex
@@ -26,8 +39,9 @@
 
 % Projects:
 \newcommand{\project}[1]{\textsf{#1}}
-\newcommand{\kepler}{\project{Kepler}}
-\newcommand{\ktwo}{\project{K2}}
+\newcommand{\exoplanet}{\project{exoplanet}}
+\newcommand{\radvel}{\project{RadVel}}
+\newcommand{\batman}{\project{batman}}
 
 % references to text content
 \newcommand{\documentname}{\textsl{Note}}
@@ -54,3 +68,32 @@
 
 % typography obsessions
 \setlength{\parindent}{3.0ex}
+
+% from: https://github.com/rodluger/corTeX
+% Add code, proof, and animation hyperlinks
+\definecolor{linkcolor}{rgb}{0.1216,0.4667,0.7059}
+\newcommand{\codeicon}{{\color{linkcolor}\faFileCodeO}}
+\newcommand{\prooficon}{{\color{linkcolor}\faPencilSquareO}}
+\input{gitlinks}
+
+% Define a proof environment for open source equation proofs
+\newtagform{eqtag}[]{(}{)}
+\newcommand{\currentlabel}{None}
+\newenvironment{proof}[1]{%
+\ifstrempty{#1}{%
+\renewtagform{eqtag}[]{\raisebox{-0.1em}{{\color{red}\faPencilSquareO}}\,(}{)}%
+}{%
+\renewtagform{eqtag}[]{\prooflink{#1}\,(}{)}%
+}%
+\usetagform{eqtag}%
+\renewcommand{\currentlabel}{#1}
+\align%
+}{%
+\endalign%
+\renewtagform{eqtag}[]{(}{)}%
+\usetagform{eqtag}%
+\message{<<<\currentlabel: \theequation>>>}%
+}
+
+% Define the `oscaption` command for open source figure captions
+\newcommand{\oscaption}[2]{\caption{#2 \codelink{#1}}}
