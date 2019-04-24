@@ -14,6 +14,13 @@ def setup(app):
     app.add_stylesheet("css/exoplanet.css")
 
 
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.mathjax",
+]
+
 autodoc_mock_imports = [
     "numpy",
     "scipy",
@@ -21,8 +28,6 @@ autodoc_mock_imports = [
     "pymc3",
     "theano",
 ]
-
-import exoplanet
 
 # Convert the tutorials
 for fn in chain(glob.glob("_static/notebooks/*.ipynb"),
@@ -36,12 +41,6 @@ for fn in chain(glob.glob("_static/notebooks/*.ipynb"),
     subprocess.check_call(
         "python fix_internal_links.py " + outfn, shell=True)
 
-extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.intersphinx",
-    "sphinx.ext.napoleon",
-    "sphinx.ext.mathjax",
-]
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
     'numpy': ('https://docs.scipy.org/doc/numpy/', None),
