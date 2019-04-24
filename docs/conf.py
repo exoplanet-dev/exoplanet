@@ -9,6 +9,8 @@ from itertools import chain
 
 import sphinx_nameko_theme
 
+sys.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 def setup(app):
     app.add_stylesheet("css/exoplanet.css")
