@@ -1,5 +1,7 @@
 sudo: false
 language: c
+blocklist:
+    - *-pdf
 
 env:
     global:
@@ -7,6 +9,9 @@ env:
 
 matrix:
     include:
+        - os: linux
+          env: TEST_LANG='paper' PYTHON_VERSION=3.7 NUMPY_VERSION=latest
+
         - os: linux
           env: PYTHON_VERSION=3.6 NUMPY_VERSION=1.15
 
@@ -16,20 +21,30 @@ matrix:
         - os: osx
           env: PYTHON_VERSION=3.7 NUMPY_VERSION=1.16
 
-install:
-    - source .ci/travis.sh
-    - conda env export
-    - python -c 'import theano; print(theano.__version__)'
-    - python -c 'import celerite; print(celerite.__version__)'
-    - theano-cache purge
-    - python setup.py develop
+cache:
+    directories:
+        - $HOME/miniconda
 
-#cache:
-#    directories:
-#        - $HOME/miniconda
 
-script:
-    - py.test -v -s exoplanet
+install: |
+    source .ci/travis.sh
+    conda env export
+    python -c 'import theano; print(theano.__version__)'
+    python -c 'import celerite; print(celerite.__version__)'
+    theano-cache purge
+    python setup.py develop
 
-after_success:
-    - coveralls
+script: |
+    if [[ $TEST_LANG -eq paper ]]
+    then
+      source .ci/build-paper.sh
+    else
+    then
+      py.test -v -s exoplanet
+    fi
+
+after_success: |
+    if [[ $TEST_LANG -ne paper ]]
+    then
+      coveralls
+    fi

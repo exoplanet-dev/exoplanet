@@ -1,5 +1,6 @@
 # Miniconda (cached)
 if ! command -v conda > /dev/null; then
+
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
         wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
     else
@@ -25,8 +26,25 @@ if ! command -v conda > /dev/null; then
     python setup.py install
     cd ..
 
+    if [[ $TEST_LANG -eq paper ]]
+    then
+        conda install tectonic
+    fi
 
 fi
 
 # Display some info
 conda info -a
+
+if [[ $TEST_LANG -eq paper ]]
+then
+    # DEBUG [November 2 2018]
+    # Attempt to resolve issues with SSL certificate expiring for purl.org:
+    # https://tectonic.newton.cx/t/how-to-use-tectonic-if-you-can-t-access-purl-org/44
+    # https://github.com/tectonic-typesetting/tectonic/issues/131
+    mkdir -p $HOME/.config/Tectonic
+    cat > $HOME/.config/Tectonic/config.toml << EOL
+[[default_bundles]]
+url = "https://tectonic.newton.cx/bundles/tlextras-2018.1r0/bundle.tar"
+EOL
+fi
