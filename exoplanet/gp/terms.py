@@ -41,9 +41,9 @@ class Term(object):
 
     @property
     def J(self):
-        func = theano.function(
-            [], [self.coefficients[0], self.coefficients[2]])
         try:
+            func = theano.function(
+                [], [self.coefficients[0], self.coefficients[2]])
             a_real, a_comp = func()
         except MissingInputError:
             return -1
@@ -143,6 +143,10 @@ class TermSum(Term):
     def __init__(self, *terms, **kwargs):
         self.terms = terms
         super(TermSum, self).__init__(**kwargs)
+
+    @property
+    def J(self):
+        return sum(term.J for term in self.terms)
 
     def get_coefficients(self):
         coeffs = []
