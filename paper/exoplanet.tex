@@ -193,6 +193,21 @@ within Theano.
 This means that we must also provide a method for evaluating the derivative of
 $f$ with respect to $e$ and $M$.
 
+\begin{figure}[htbp]
+\begin{centering}
+\includegraphics[width=0.8\linewidth]{figures/kepler_solver.pdf}
+\oscaption{kepler_solver}{\label{fig:kepler_solver}
+The performance of the Kepler solver used by \exoplanet\ compared to
+the solvers from the \radvel\ \citep{Fulton:2017, Fulton:2018} and \batman\
+\citep{Kreidberg:2015} libraries.
+\emph{top}: The average wall time required to solve Kepler's equation once for
+the eccentric anomaly $E$ conditioned on eccentricity $e$ and mean anomaly $M$.
+Smaller numbers correspond to faster solutions.
+\emph{bottom}: The 90-th percentile of the absolute error of the computed
+eccentric anomaly for 5000 true values of $E$ in the range $0 \le E < 2\,\pi$.
+Smaller numbers correspond to more accurate solutions.}
+\end{centering}
+\end{figure}
 
 
 \subsection{Limb-darkened light curves}
@@ -233,10 +248,10 @@ The contact point therefore occurs when
 \begin{eqnarray} \eqlabel{quad1}
 \hat{x_2}^2 + \hat{y_2}^2 = L^2
 \end{eqnarray}
-where the hat indicates that 
+where the hat indicates that
 
 Using the inverse of \eq{rotation} to re-write \eq{constraint0} in terms of
-$x_2$ and $y_2$, we find the following quadratic equation 
+$x_2$ and $y_2$, we find the following quadratic equation
 \begin{eqnarray} \eqlabel{quad2}
 A\,{x_2}^2 + B\,{x_2\,y_2} + C\,{y_2}^2 + D\,x_2 + E\,y_2 + F &=& 0
 \end{eqnarray}
@@ -263,7 +278,7 @@ a_2 &=& 2 A C L^{2} + 2 A F - B^{2} L^{2} - 2 C^{2} L^{2} - 2 C F + D^{2} + E^{2
 a_3 &=& 2 \left(A D + B E - C D\right)\\
 a_4 &=& A^{2} - 2 A C + B^{2} + C^{2}
 \end{eqnarray}
-which can be solved symbolically (CITE Kipping) or numerically. 
+which can be solved symbolically (CITE Kipping) or numerically.
 
 \paragraph{Edge-on orbits}
 For an edge-on orbit, $\cos{i} = 0$ and the contact points occur at

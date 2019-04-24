@@ -3,3 +3,4 @@ exoplanet.pdf
 *.bbl
 *.blg
 *.log
+figures/*.pdf
