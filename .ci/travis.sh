@@ -28,7 +28,7 @@ if ! command -v conda > /dev/null; then
 
     if [[ $TEST_LANG -eq paper ]]
     then
-        conda install -q tectonic
+        conda install -q tectonic jupyter
     fi
 
 fi
