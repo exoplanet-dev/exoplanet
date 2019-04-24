@@ -36,16 +36,15 @@ install: |
     python setup.py develop
 
 script: |
-    if [[ $TEST_LANG -eq paper ]]
+    if [[ $TEST_LANG == 'paper' ]]
     then
       source .ci/build-paper.sh
     else
-    then
       py.test -v -s exoplanet
     fi
 
 after_success: |
-    if [[ $TEST_LANG -ne paper ]]
+    if [[ $TEST_LANG -ne 'paper' ]]
     then
       coveralls
     fi
