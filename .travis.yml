@@ -23,6 +23,12 @@ install:
     - travis_retry pip install --upgrade -r requirements-dev.txt
     - travis_retry python setup.py develop
 
+script:
+    - py.test -v -s exoplanet
+
+after_success:
+    - coveralls
+
 #matrix:
 #    include:
 #        - os: linux
