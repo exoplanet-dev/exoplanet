@@ -9,7 +9,7 @@ import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
-from .solver import ContactPointsOp
+from .contact import ContactPointsOp
 from ..kepler import KeplerOp
 
 

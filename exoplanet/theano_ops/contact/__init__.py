@@ -2,4 +2,4 @@
 
 __all__ = ["ContactPointsOp"]
 
-from .solver import ContactPointsOp
+from .contact import ContactPointsOp

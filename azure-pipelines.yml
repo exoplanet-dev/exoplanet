@@ -9,7 +9,7 @@ steps:
 
 - script: |
     git submodule update --init
-  displayName: 'Submodules'
+  displayName: 'Fetch submodules'
 
 - script: |
     sudo chown -R $USER $CONDA
@@ -32,10 +32,18 @@ steps:
 - script: |
     . $CONDA/etc/profile.d/conda.sh
     conda activate exoplanet
+    cd paper/notebooks
+    python run_notebooks.py
+    cd ../..
+  displayName: 'Generate the figures'
+
+- script: |
+    . $CONDA/etc/profile.d/conda.sh
+    conda activate exoplanet
     cd paper
     make
     cd ..
-  displayName: 'Building paper'
+  displayName: 'Build the paper'
 
 - script: |
     git checkout --orphan $(Build.SourceBranchName)-pdf
@@ -45,4 +53,4 @@ steps:
     git add -f paper/notebooks/notebook_errors.log
     git -c user.name='azure' -c user.email='azure' commit -m "building the paper"
     git push -q -f https://$(GITHUB_USER):$(GITHUB_API_KEY)@github.com/dfm/exoplanet $(Build.SourceBranchName)-pdf >/dev/null 2>&1
-  displayName: 'Uploading the paper'
+  displayName: 'Upload the paper'

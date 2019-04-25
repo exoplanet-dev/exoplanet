@@ -19,8 +19,8 @@ class ContactPointsOp(gof.COp):
         tol=theano.scalar.float64,
     )
     __props__ = ("tol", )
-    func_file = "./solver.cc"
-    func_name = "APPLY_SPECIFIC(solver)"
+    func_file = "./contact.cc"
+    func_name = "APPLY_SPECIFIC(contact)"
 
     def __init__(self, tol=1e-10, **kwargs):
         self.tol = float(tol)
