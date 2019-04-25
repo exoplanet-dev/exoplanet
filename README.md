@@ -12,23 +12,23 @@ exoplanet
 <img src="https://img.shields.io/badge/read-the_paper-blue.svg?style=flat"></a>
 <br>
 <a href="https://travis-ci.org/dfm/exoplanet">
-<img src="https://img.shields.io/travis/dfm/exoplanet/master.svg?style=flat&label=tests">
-</a>
+<img src="https://img.shields.io/travis/dfm/exoplanet/master.svg?style=flat&label=tests"></a>
 <a href="https://dev.azure.com/foremanmackey/exoplanet/_build?definitionId=1">
 <img src="https://img.shields.io/azure-devops/build/foremanmackey/704922a0-a57f-4d16-bbea-e37f58c88ba5/1/master.svg?label=paper"></a>
 <a href="https://exoplanet.dfm.io">
 <img src="https://img.shields.io/readthedocs/exoplanet.svg?style=flat"></a>
+<br>
+<a href="https://rodluger.github.io/starry">
+<img src="https://img.shields.io/badge/powered_by-starry-EB5368.svg?style=flat"></a>
+<a href="https://celerite.readthedocs.io">
+<img src="https://img.shields.io/badge/powered_by-celerite-EB5368.svg?style=flat"></a>
+<a href="https://docs.pymc.io">
+<img src="https://img.shields.io/badge/powered_by-PyMC3-EB5368.svg?style=flat"></a>
+<a href="http://www.astropy.org">
+<img src="https://img.shields.io/badge/powered_by-AstroPy-EB5368.svg?style=flat"></a>
+<a href="https://github.com/rodluger/corTeX">
+<img src="https://img.shields.io/badge/powered_by-corTeX-EB5368.svg?style=flat"></a>
 </p>
-
-[![image](https://img.shields.io/badge/powered_by-starry-EB5368.svg?style=flat)](https://rodluger.github.io/starry)
-
-[![image](https://img.shields.io/badge/powered_by-celerite-EB5368.svg?style=flat)](https://celerite.readthedocs.io)
-
-[![image](https://img.shields.io/badge/powered_by-PyMC3-EB5368.svg?style=flat)](https://docs.pymc.io)
-
-[![image](https://img.shields.io/badge/powered_by-AstroPy-EB5368.svg?style=flat)](http://www.astropy.org)
-
-[![image](https://img.shields.io/badge/powered_by-corTeX-EB5368.svg?style=flat)](https://github.com/rodluger/corTeX)
 
 *exoplanet* is a toolkit for probabilistic modeling of transit and/or
 radial velocity observations of
