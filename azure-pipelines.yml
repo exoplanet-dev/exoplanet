@@ -32,6 +32,12 @@ steps:
 - script: |
     . $CONDA/etc/profile.d/conda.sh
     conda activate exoplanet
+    python paper/figures/get_fonts.py
+  displayName: 'List fonts'
+
+- script: |
+    . $CONDA/etc/profile.d/conda.sh
+    conda activate exoplanet
     cd paper/figures
     python run_notebooks.py
     cd ../..
