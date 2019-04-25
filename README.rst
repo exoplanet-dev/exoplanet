@@ -7,6 +7,8 @@ exoplanet
    :target: https://github.com/dfm/exoplanet/blob/master/LICENSE
 .. image:: https://zenodo.org/badge/138077978.svg
    :target: https://zenodo.org/badge/latestdoi/138077978
+.. image:: https://img.shields.io/badge/read-the_paper-blue.svg?style=flat
+   :target: https://docs.google.com/viewer?url=https://github.com/dfm/exoplanet/raw/master-pdf/paper/exoplanet.pdf
 
 .. image:: https://img.shields.io/travis/dfm/exoplanet/master.svg?style=flat&label=tests
    :target: https://travis-ci.org/dfm/exoplanet
@@ -23,6 +25,8 @@ exoplanet
    :target: https://docs.pymc.io
 .. image:: https://img.shields.io/badge/powered_by-AstroPy-EB5368.svg?style=flat
    :target: http://www.astropy.org
+.. image:: https://img.shields.io/badge/powered_by-corTeX-EB5368.svg?style=flat
+   :target: https://github.com/rodluger/corTeX
 
 *exoplanet* is a toolkit for probabilistic modeling of transit and/or radial
 velocity observations of `exoplanets <https://en.wikipedia.org/wiki/Exoplanet>`_
