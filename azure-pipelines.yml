@@ -32,7 +32,7 @@ steps:
 - script: |
     . $CONDA/etc/profile.d/conda.sh
     conda activate exoplanet
-    cd paper/notebooks
+    cd paper/figures
     python run_notebooks.py
     cd ../..
   displayName: 'Generate the figures'
