@@ -197,21 +197,21 @@ within Theano.
 This means that we must also provide a method for evaluating the derivative of
 $f$ with respect to $e$ and $M$.
 
-%\begin{figure}[htbp]
-%\begin{centering}
-%\includegraphics[width=0.8\linewidth]{figures/kepler_solver.pdf}
-%\oscaption{kepler_solver}{\label{fig:kepler_solver}
-%The performance of the Kepler solver used by \exoplanet\ compared to
-%the solvers from the \radvel\ \citep{Fulton:2017, Fulton:2018} and \batman\
-%\citep{Kreidberg:2015} libraries.
-%\emph{top}: The average wall time required to solve Kepler's equation once for
-%the eccentric anomaly $E$ conditioned on eccentricity $e$ and mean anomaly $M$.
-%Smaller numbers correspond to faster solutions.
-%\emph{bottom}: The 90-th percentile of the absolute error of the computed
-%eccentric anomaly for 5000 true values of $E$ in the range $0 \le E < 2\,\pi$.
-%Smaller numbers correspond to more accurate solutions.}
-%\end{centering}
-%\end{figure}
+\begin{figure}[htbp]
+\begin{centering}
+\includegraphics[width=0.8\linewidth]{figures/kepler_solver.pdf}
+\oscaption{kepler_solver}{\label{fig:kepler_solver}
+The performance of the Kepler solver used by \exoplanet\ compared to
+the solvers from the \radvel\ \citep{Fulton:2017, Fulton:2018} and \batman\
+\citep{Kreidberg:2015} libraries.
+\emph{top}: The average wall time required to solve Kepler's equation once for
+the eccentric anomaly $E$ conditioned on eccentricity $e$ and mean anomaly $M$.
+Smaller numbers correspond to faster solutions.
+\emph{bottom}: The 90-th percentile of the absolute error of the computed
+eccentric anomaly for 5000 true values of $E$ in the range $0 \le E < 2\,\pi$.
+Smaller numbers correspond to more accurate solutions.}
+\end{centering}
+\end{figure}
 
 
 \subsection{Limb-darkened light curves}
@@ -306,13 +306,13 @@ b_{2,\pm} &=& e^{2} \sin^{2}{\left (\omega \right )} - 1 \quad.
 There are 4 solutions to this system of which we are only interested in the
 ones where $z_2 < 0$ (the others are the contact points for the occultation).
 
-%\begin{figure}[htbp]
-%\begin{centering}
-%\includegraphics[width=0.8\linewidth]{figures/contact_points.pdf}
-%\oscaption{contact_points}{\label{fig:contact_points}
-%This is a figure.}
-%\end{centering}
-%\end{figure}
+\begin{figure}[htbp]
+\begin{centering}
+\includegraphics[width=0.8\linewidth]{figures/contact_points.pdf}
+\oscaption{contact_points}{\label{fig:contact_points}
+This is a figure.}
+\end{centering}
+\end{figure}
 
 \newpage
 \bibliography{exoplanet}
