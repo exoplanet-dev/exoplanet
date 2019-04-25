@@ -1,17 +1,5 @@
-strategy:
-  matrix:
-    LinuxPython36:
-      imageName: 'Ubuntu-16.04'
-      python.version: '3.6'
-    LinuxPython37:
-      imageName: 'Ubuntu-16.04'
-      python.version: '3.7'
-    MacPython37:
-      imageName: 'macos-10.13'
-      python.version: '3.7'
-
 pool:
-  vmImage: $(imageName)
+  vmImage: Ubuntu-16.04
 
 steps:
 
@@ -22,7 +10,7 @@ steps:
 - script: |
     sudo chown -R $USER $CONDA
     . $CONDA/etc/profile.d/conda.sh
-    conda create --yes --quiet --name test python=$(python.version)
+    conda create --yes --quiet --name test python=3.7
   displayName: 'Setup conda'
 
 - script: |
@@ -30,6 +18,7 @@ steps:
     conda activate test
     pip install numpy pybind11
     pip install -r requirements-dev.txt
+    conda install -q tectonic
   displayName: 'Install dependencies'
 
 - script: |
@@ -41,6 +30,6 @@ steps:
 - script: |
     . $CONDA/etc/profile.d/conda.sh
     conda activate test
-    python debug.py
-    py.test -v -s exoplanet
-  displayName: 'Testing'
+    cd paper
+    make
+  displayName: 'Building paper'
