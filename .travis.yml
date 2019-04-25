@@ -8,6 +8,9 @@ blocklist:
 env:
     global:
         - THEANO_FLAGS=floatX=float64,compute_test_value=off
+cache:
+  directories:
+  - "$HOME/.cache/pip"
 jobs:
   include:
     - python: '3.5'
