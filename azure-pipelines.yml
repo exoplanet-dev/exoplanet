@@ -24,8 +24,9 @@ steps:
     pip install -U setuptools
     pip install -U -r requirements.txt
     pip install -U -r paper/requirements.txt
-    conda install -y -c conda-forge tectonic
+    conda install -y -q -c conda-forge tectonic
     theano-cache purge
+    python setup.py install
   displayName: 'Install dependencies'
 
 - script: |
@@ -37,11 +38,11 @@ steps:
   displayName: 'Building paper'
 
 - script: |
-    git checkout --orphan $(BUILD_SOURCEBRANCH)-pdf
+    git checkout --orphan $(Build.SourceBranchName)-pdf
     git rm -rf .
     git add -f paper/exoplanet.pdf
     git add -f paper/notebooks/*.pdf
     git add -f paper/notebooks/notebook_errors.log
     git -c user.name='azure' -c user.email='azure' commit -m "building the paper"
-    git push -q -f https://$(GITHUB_USER):$(GITHUB_API_KEY)@github.com/$(BUILD_REPOSITORYNAME) $(BUILD_SOURCEBRANCH)-pdf >/dev/null 2>&1
+    git push -q -f https://$(GITHUB_USER):$(GITHUB_API_KEY)@github.com/dfm/exoplanet $(Build.SourceBranchName)-pdf >/dev/null 2>&1
   displayName: 'Uploading the paper'
