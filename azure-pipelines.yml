@@ -33,6 +33,7 @@ steps:
     conda activate test
     cd paper
     make
+    cd ..
   displayName: 'Building paper'
 
 - script: |
