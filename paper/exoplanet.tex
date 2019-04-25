@@ -7,8 +7,8 @@
 
 \title{%
 \project{exoplanet}:
-A toolkit for scalable inference for exoplanetary systems using transits \&
-radial velocities
+A toolkit for scalable inference for exoplanetary systems using transits,
+radial velocities, \& astrometry
 %An efficient and robust toolkit for gradient-based
 %probabilistic characterization of exoplanets using transits and radial
 %velocities
@@ -40,31 +40,35 @@ methods: data analysis ---
 methods: statistical
 }
 
-%\section{Outline}
+\section{Outline}
 
-%\begin{enumerate}
+\begin{enumerate}
 
-%\item Introduction to the characterization of exoplanets and gradient-based
-%methods
+{\item Introduction
+\begin{itemize}
+{\item the datasets available and forthcoming}
+{\item existing tools for exoplanet fitting}
+{\item motivation for gradients}
+\end{itemize}}
 
-%\item Automatic differentiation and inference frameworks
+\item Automatic differentiation and inference frameworks
 
-%\item Hamiltonian Monte Carlo and variants
+\item Hamiltonian Monte Carlo and variants
 
-%\item Custom gradients required for exoplanet datasets
-%\begin{itemize}
-%\item Radial velocities and Kepler's equation
-%\item Astrometry
-%\item Transits
-%\end{itemize}
+\item Custom gradients required for exoplanet datasets
+\begin{itemize}
+\item Radial velocities and Kepler's equation
+\item Astrometry
+\item Transits
+\end{itemize}
 
-%\item Implementation details and benchmarks
+\item Implementation details and benchmarks
 
-%\item Examples
+\item Examples
 
-%\item Discussion
+\item Discussion
 
-%\end{enumerate}
+\end{enumerate}
 
 \section{Introduction}
 
@@ -108,7 +112,7 @@ tedious and error-prone.
 Instead, it is generally preferable to use a method (called automatic
 differentiation) that can automatically compute the exact gradients of the
 model \emph{to machine precision} at compile time.
-I would like to emphasize the fact that I am not talking \emph{numerical}
+We would like to emphasize the fact that we are not talking \emph{numerical}
 derivatives like finite difference methods, and there is no approximation
 being made.
 
@@ -132,7 +136,7 @@ motivated models that involve numerical solutions to differential equations
 or special functions that are not natively supported by the popular automatic
 differentiation frameworks.
 
-In this paper, I demonstrate how to incorporate exoplanet-specific functions
+In this paper, we demonstrate how to incorporate exoplanet-specific functions
 into these frameworks and derive the functions needed to characterize
 exoplanets using gradient-based methods applied to radial velocity,
 astrometry, and transit datasets.
@@ -142,7 +146,7 @@ future paper.
 
 At present, there are many model-building libraries available in every
 programming language, and it is not clear which should be preferred.
-For this paper, I focus on implementations within TensorFlow
+For this paper, we focus on implementations within TensorFlow
 \citep{Abadi:2016} because it is accessible using Python, the most widely used
 programming language in astronomy (CITE?) and because the code is
 well-supported and stable.
