@@ -11,10 +11,6 @@ steps:
     git submodule update --init
   displayName: 'Fetch submodules'
 
-#- script: |
-#    sudo apt-get update && sudo apt-get install -qy --force-yes texlive-full
-#  displayName: 'Install LaTeX'
-
 - script: |
     sudo chown -R $USER $CONDA
     . $CONDA/etc/profile.d/conda.sh
@@ -33,13 +29,13 @@ steps:
     python setup.py install
   displayName: 'Install dependencies'
 
-#- script: |
-#    . $CONDA/etc/profile.d/conda.sh
-#    conda activate exoplanet
-#    cd paper/figures
-#    python run_notebooks.py
-#    cd ../..
-#  displayName: 'Generate the figures'
+- script: |
+    . $CONDA/etc/profile.d/conda.sh
+    conda activate exoplanet
+    cd paper/figures
+    python run_notebooks.py
+    cd ../..
+  displayName: 'Generate the figures'
 
 - script: |
     . $CONDA/etc/profile.d/conda.sh
@@ -53,8 +49,8 @@ steps:
     git checkout --orphan $(Build.SourceBranchName)-pdf
     git rm -rf .
     git add -f paper/exoplanet.pdf
-    git add -f paper/notebooks/*.pdf
-    git add -f paper/notebooks/notebook_errors.log
+    git add -f paper/figures/*.pdf
+    git add -f paper/figures/notebook_errors.log
     git -c user.name='azure' -c user.email='azure' commit -m "building the paper"
     git push -q -f https://$(GITHUB_USER):$(GITHUB_API_KEY)@github.com/dfm/exoplanet $(Build.SourceBranchName)-pdf >/dev/null 2>&1
   displayName: 'Upload the paper'

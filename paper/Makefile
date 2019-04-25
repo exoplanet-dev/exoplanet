@@ -8,7 +8,7 @@ TECTONIC    = $(shell command -v tectonic >/dev/null && echo true || echo false 
 
 default: exoplanet.pdf
 
-exoplanet.pdf: exoplanet.tex exoplanet.bib xostyle.tex # $(FIGURES)
+exoplanet.pdf: exoplanet.tex exoplanet.bib xostyle.tex $(FIGURES)
 	# Generate links to current git commit
 	python gen_links.py
 	if [ "${TECTONIC}" = "true" ]; then\
