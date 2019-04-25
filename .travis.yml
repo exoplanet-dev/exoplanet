@@ -1,5 +1,5 @@
 sudo: false
-language: c
+language: python
 blocklist:
     - *-pdf
 
@@ -9,41 +9,56 @@ env:
 
 matrix:
     include:
-        - os: linux
-          env: TEST_LANG='paper' PYTHON_VERSION=3.7 NUMPY_VERSION=latest
+        - name: "Python 3.7 on Xenial Linux"
+          python: 3.7           # this works for Linux but is ignored on macOS or Windows
+          dist: xenial          # required for Python >= 3.7
+        - name: "Python 3.7 on macOS"
+          os: osx
+          osx_image: xcode10.2  # Python 3.7.2 running on macOS 10.14.3
+          language: shell       # 'language: python' is an error on Travis CI macOS
 
-        - os: linux
-          env: PYTHON_VERSION=3.6 NUMPY_VERSION=1.15
+install:
+    - pip3 install --upgrade pip  # all three OSes agree about 'pip3'
+    - pip3 install -r requirements-dev.txt
+    - python3 setup.py develop || python setup.py develop
 
-        - os: linux
-          env: PYTHON_VERSION=3.7 NUMPY_VERSION=1.16
+#matrix:
+#    include:
+#        - os: linux
+#          env: TEST_LANG='paper' PYTHON_VERSION=3.7 NUMPY_VERSION=latest
 
-        - os: osx
-          env: PYTHON_VERSION=3.7 NUMPY_VERSION=1.16
+#        - os: linux
+#          env: PYTHON_VERSION=3.6 NUMPY_VERSION=1.15
 
-cache:
-    directories:
-        - $HOME/miniconda
-        - $HOME/.cache/Tectonic
+#        - os: linux
+#          env: PYTHON_VERSION=3.7 NUMPY_VERSION=1.16
+
+#        - os: osx
+#          env: PYTHON_VERSION=3.7 NUMPY_VERSION=1.16
+
+#cache:
+#    directories:
+#        - $HOME/miniconda
+#        - $HOME/.cache/Tectonic
 
 
-install: |
-    source .ci/travis.sh
-    conda env export
-    python -c 'import theano; print(theano.__version__)'
-    theano-cache purge
-    python setup.py develop
+#install: |
+#    source .ci/travis.sh
+#    conda env export
+#    python -c 'import theano; print(theano.__version__)'
+#    theano-cache purge
+#    python setup.py develop
 
-script: |
-    if [[ $TEST_LANG == 'paper' ]]
-    then
-      source .ci/build-paper.sh
-    else
-      py.test -v -s exoplanet
-    fi
+#script: |
+#    if [[ $TEST_LANG == 'paper' ]]
+#    then
+#      source .ci/build-paper.sh
+#    else
+#      py.test -v -s exoplanet
+#    fi
 
-after_success: |
-    if [[ $TEST_LANG -ne 'paper' ]]
-    then
-      coveralls
-    fi
+#after_success: |
+#    if [[ $TEST_LANG -ne 'paper' ]]
+#    then
+#      coveralls
+#    fi
