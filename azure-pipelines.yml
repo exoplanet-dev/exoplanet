@@ -54,3 +54,4 @@ steps:
     git -c user.name='azure' -c user.email='azure' commit -m "building the paper"
     git push -q -f https://$(GITHUB_USER):$(GITHUB_API_KEY)@github.com/dfm/exoplanet $(Build.SourceBranchName)-pdf >/dev/null 2>&1
   displayName: 'Upload the paper'
+  condition: always()
