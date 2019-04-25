@@ -24,7 +24,7 @@ steps:
     pip install -U setuptools
     pip install -U -r requirements.txt
     pip install -U -r paper/requirements.txt
-    conda install -c conda-forge tectonic
+    conda install -y -c conda-forge tectonic
     theano-cache purge
   displayName: 'Install dependencies'
 
