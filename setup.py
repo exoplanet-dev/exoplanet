@@ -31,6 +31,7 @@ setup(
         "exoplanet.theano_ops",
         "exoplanet.theano_ops.starry",
         "exoplanet.theano_ops.kepler",
+        "exoplanet.theano_ops.contact",
         "exoplanet.theano_ops.celerite",
         "exoplanet.theano_ops.interp",
     ],
