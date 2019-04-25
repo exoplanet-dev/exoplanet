@@ -1,26 +1,23 @@
 sudo: false
 language: python
+matrix:
+    fast_finish: true
 blocklist:
     - *-pdf
-
 env:
     global:
         - THEANO_FLAGS=floatX=float64,compute_test_value=off
-
-matrix:
-    include:
-        - name: "Python 3.7 on Xenial Linux"
-          python: 3.7           # this works for Linux but is ignored on macOS or Windows
-          dist: xenial          # required for Python >= 3.7
-        - name: "Python 3.7 on macOS"
-          os: osx
-          osx_image: xcode10.2  # Python 3.7.2 running on macOS 10.14.3
-          language: shell       # 'language: python' is an error on Travis CI macOS
+jobs:
+  include:
+    - python: '3.5'
+    - python: '3.6'
+    - python: '3.7'
+    - python: nightly
 
 install:
-    - pip3 install --upgrade pip  # all three OSes agree about 'pip3'
-    - pip3 install -r requirements-dev.txt
-    - python3 setup.py develop || python setup.py develop
+    - travis_retry pip install --upgrade pip
+    - travis_retry pip install --upgrade -r requirements-dev.txt
+    - travis_retry python setup.py develop
 
 #matrix:
 #    include:
