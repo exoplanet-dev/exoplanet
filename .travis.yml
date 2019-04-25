@@ -13,7 +13,6 @@ jobs:
     - python: '3.5'
     - python: '3.6'
     - python: '3.7'
-    - python: nightly
 
 install:
     - travis_retry pip install --upgrade pip
