@@ -1,12 +1,13 @@
 -r requirements.txt
 scipy
 astropy
-starry
 nose
 parameterized
 coveralls
 pytest-cov>=2.6.1
 pytest-env
 pybind11
-celerite
+celerite>=0.3.1
+starry
 batman-package
+radvel
