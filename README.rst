@@ -5,8 +5,10 @@ exoplanet
    :target: https://github.com/dfm/exoplanet
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg?style=flat
    :target: https://github.com/dfm/exoplanet/blob/master/LICENSE
-.. image:: https://img.shields.io/travis/dfm/exoplanet/master.svg?style=flat
+.. image:: https://img.shields.io/travis/dfm/exoplanet/master.svg?style=flat&label=tests
    :target: https://travis-ci.org/dfm/exoplanet
+.. image:: https://img.shields.io/azure-devops/build/foremanmackey/704922a0-a57f-4d16-bbea-e37f58c88ba5/1/master.svg?label=paper
+   :target: https://dev.azure.com/foremanmackey/exoplanet/_build?definitionId=1
 .. image:: https://img.shields.io/readthedocs/exoplanet.svg?style=flat
    :target: https://exoplanet.dfm.io
 .. image:: https://zenodo.org/badge/138077978.svg
