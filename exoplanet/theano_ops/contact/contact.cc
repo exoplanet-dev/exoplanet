@@ -1,6 +1,6 @@
 #section support_code_apply
 
-int APPLY_SPECIFIC(solver)(
+int APPLY_SPECIFIC(contact)(
     PyArrayObject*  input0,
     PyArrayObject*  input1,
     PyArrayObject*  input2,
