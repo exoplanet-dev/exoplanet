@@ -205,10 +205,97 @@ within Theano.
 This means that we must also provide a method for evaluating the derivative of
 $f$ with respect to $e$ and $M$.
 
+
+\subsection{Limb-darkened light curves}
+
+\subsection{Scalable Gaussian Processes for time series}
+
+\appendix
+
+\section{Solving Kepler's equation}
+
+A crucial component for all of the models in this paper is an accurate and
+high-performance solver for Kepler's equation
+\begin{eqnarray}\eqlabel{kepler-equation}
+M &=& E - e\,\sin E \quad.
+\end{eqnarray}
+We use the method presented by \citet{Nijenhuis:1991}.
+Unlike most of the methods used in astrophysics, this algorithm \emph{is not
+iterative}.
+This can lead to much better compiler optimization.
+Furthermore, this algorithm doesn't require the evaluation of trigonometric
+functions directly.
+As well as improving performance, this also increases the accuracy of the
+results because it avoids catastrophic cancellations when evaluating $E - \sin
+E$ and $1 - \cos E$ by evaluating these differences directly using a series
+expansion.
+
+The procedure is as follows:
+\begin{enumerate}
+
+\item Initial estimates are selected for the parameters by partitioning the
+parameter space into 4 regions and applying a set of heuristics specific to
+each part of parameter space.
+
+\item This estimate is refined using either a single iteration of Halley's
+second order root finding algorithm (with the sine function with its series
+expansion) or a variant of the cubic approximation from \citet{Mikkola:1987}.
+
+\item Finally, the result is updated by a single step of a high-order
+generalized Newton method where the order of the method controls the target
+accuracy of the method. In the \exoplanet\ implementation, we use a 4th order
+update.
+
+\end{enumerate}
+
+The details of the implementation are exactly ported from the implementation
+in \citet{Nijenhuis:1991} so we won't reproduce that here, but we did an
+experiment to compare the performance and accuracy of this method to some
+implementations of Kepler solvers commonly used for exoplanet fitting.
+Specifically we compare to the implementations from the \batman\ transit
+fitting framework \citep{Kreidberg:2015} and the \radvel\ radial velocity
+fitting library \citep{Fulton:2017, Fulton:2018}.
+In both cases, the solver is implemented in \project{C} and exposed to
+\python\ using the \python\ \project{C}-API directly or \cython\
+\citep{Behnel:2011} respectively.
+Similarly, the implementation in \exoplanet\ is written in \cpp\ with \python\
+bindings exposed by \theano\ \citep{Theano-Development-Team:2016}.
+
+To test the implementation, we generated 5000 true eccentric anomalies
+$E_\mathrm{true}$ uniformly distributed between $0$ and $2\,\pi$.
+Then, for a range of eccentricities $e$, we computed the mean anomaly $M$ using
+\eq{kepler-equation} and used each library to solve \eq{kepler-equation} for
+$E_\mathrm{calc}$.
+The top panel of \Figure{kepler_solver} shows the average computational cost per
+solve of \eq{kepler-equation} for each library as a function of eccentricity.
+The implementation of the \citet{Nijenhuis:1991} algorithm in \exoplanet\ is
+more than an order of magnitude more efficient than the other methods and this
+cost does not depend sensitively on the eccentricity of the orbit.
+It is worth noting that both \batman\ and \exoplanet\ feature ``fused''
+solvers that return both the eccentric anomaly and the true anomaly whereas
+\radvel\ only computes the eccentric anomaly so there is a small amount of
+computational overhead introduced into both \exoplanet\ and \batman\ when
+compared to \radvel.
+
+The bottom panel of \Figure{kepler_solver} shows the 90th percentile of the
+distribution of absolute errors when comparing $E_\mathrm{true}$ and
+$E_\mathrm{calc}$ for each method as a function of eccentricity.
+Across all values of eccentricity, \exoplanet\ computes the eccentric anomaly
+with an accuracy of better than 15 decimal places.
+In some cases, the \radvel\ solver is slightly better, but at some
+eccentricities, the error is more than an order of magnitude worse for
+\radvel\ than for \exoplanet.
+In all cases, the accuracy of the implementation from \batman\ is several
+orders of magnitude worse than the other implementations.
+This accuracy could be improved by decreasing the convergence tolerance in the
+iterative solver at the cost of longer run times, but the current value of
+$10^{-7}$ is currently hard coded\footnote{\url{%
+https://github.com/lkreidberg/batman/blob/70f2c0c609124bdf4f17041bf09d5426f3c93334/c\_src/\_rsky.c\#L45}}.
+
 \begin{figure}[htbp]
 \begin{centering}
 \includegraphics[width=0.8\linewidth]{figures/kepler_solver.pdf}
-\oscaption{kepler_solver}{\label{fig:kepler_solver}
+\oscaption{kepler_solver}{\figurelabel{kepler_solver}
 The performance of the Kepler solver used by \exoplanet\ compared to
 the solvers from the \radvel\ \citep{Fulton:2017, Fulton:2018} and \batman\
 \citep{Kreidberg:2015} libraries.
@@ -220,13 +307,6 @@ eccentric anomaly for 5000 true values of $E$ in the range $0 \le E < 2\,\pi$.
 Smaller numbers correspond to more accurate solutions.}
 \end{centering}
 \end{figure}
-
-
-\subsection{Limb-darkened light curves}
-
-\subsection{Scalable Gaussian Processes for time series}
-
-\appendix
 
 \section{Contact points}
 
