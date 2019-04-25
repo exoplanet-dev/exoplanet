@@ -14,7 +14,7 @@ from astropy import units as u
 
 from ..citations import add_citations_to_model
 from ..theano_ops.kepler import KeplerOp
-from ..theano_ops.contact_points import ContactPointsOp
+from ..theano_ops.contact import ContactPointsOp
 
 
 class KeplerianOrbit(object):
