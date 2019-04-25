@@ -4,7 +4,7 @@ channels:
   - defaults
 dependencies:
   - asn1crypto=0.24.0=py37_0
-  - astropy=3.1.1=py37h7b6447c_0
+  - astropy=3.1.2=py37h7b6447c_0
   - astroquery=0.3.9=py_1000
   - atomicwrites=1.2.1=py37_0
   - attrs=18.2.0=py37h28b3542_0
@@ -14,7 +14,7 @@ dependencies:
   - binutils_linux-64=2.31.1=h6176602_6
   - blas=1.0=mkl
   - ca-certificates=2019.1.23=0
-  - certifi=2018.11.29=py37_0
+  - certifi=2019.3.9=py37_0
   - cffi=1.11.5=py37he75722e_1
   - chardet=3.0.4=py37_1
   - cmarkgfm=0.4.2=py37h7b6447c_0
@@ -85,7 +85,7 @@ dependencies:
   - notebook=5.7.4=py37_0
   - numpy=1.15.4=py37h7e9f1db_0
   - numpy-base=1.15.4=py37hde5b4d6_0
-  - openssl=1.1.1a=h7b6447c_0
+  - openssl=1.1.1b=h7b6447c_1
   - pandas=0.24.0=py37he6710b0_0
   - pandoc=2.2.3.2=0
   - pandocfilters=1.4.2=py37_1
@@ -152,7 +152,9 @@ dependencies:
   - pip:
     - bleach==3.1.0
     - corner==2.0.1
+    - coverage==4.5.3
     - mako==1.0.7
+    - pytest-cov==2.6.1
     - theano==1.0.4
 prefix: /mnt/home/dforeman/miniconda3/envs/autoexoplanet
 
