@@ -8,7 +8,7 @@ TECTONIC    = $(shell command -v tectonic >/dev/null && echo true || echo false 
 
 default: exoplanet.pdf
 
-exoplanet.pdf: exoplanet.tex exoplanet.bib $(FIGURES) xostyle.tex
+exoplanet.pdf: exoplanet.tex exoplanet.bib xostyle.tex # $(FIGURES)
 	# Generate links to current git commit
 	python gen_links.py
 	if [ "${TECTONIC}" = "true" ]; then\
@@ -19,11 +19,6 @@ exoplanet.pdf: exoplanet.tex exoplanet.bib $(FIGURES) xostyle.tex
 		( ${CHECK_RERUN} && ${LATEX} exoplanet ) || echo "Done.";\
 		( ${CHECK_RERUN} && ${LATEX} exoplanet ) || echo "Done.";\
 	fi
-	# Update the proofs page in the docs
-	#sleep 1
-	#echo "<<EXOPLANET.TEX LOGFILE TAIL>>"
-	#tail starry.log
-	#python genproofs.py
 
 clean:
 	$(RM_TMP)
