@@ -10,14 +10,16 @@ steps:
 - script: |
     sudo chown -R $USER $CONDA
     . $CONDA/etc/profile.d/conda.sh
-    conda create --yes --quiet --name test python=3.7
+    conda create --yes --quiet --name test python=3.7 pip
   displayName: 'Setup conda'
 
 - script: |
     . $CONDA/etc/profile.d/conda.sh
     conda activate test
-    pip install numpy pybind11
-    pip install -r requirements-dev.txt
+    pip install -U pip
+    pip install -U setuptools
+    pip install -U -r requirements.txt
+    pip install -U -r paper/requirements.txt
     conda install -q tectonic
   displayName: 'Install dependencies'
 
