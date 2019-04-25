@@ -3,7 +3,6 @@
 
 from __future__ import division, print_function
 
-import os
 import re
 import sys
 import glob
@@ -40,3 +39,5 @@ txt = ansi_escape.sub("", txt)
 
 with open("notebook_errors.log", "wb") as f:
     f.write(txt.encode("utf-8"))
+
+sys.exit(len(errors))
