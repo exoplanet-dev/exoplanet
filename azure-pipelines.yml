@@ -14,23 +14,23 @@ steps:
 - script: |
     sudo chown -R $USER $CONDA
     . $CONDA/etc/profile.d/conda.sh
-    conda create --yes --quiet --name test python=3.7 pip
+    conda create --yes --quiet --name exoplanet python=3.7 pip
   displayName: 'Setup conda'
 
 - script: |
     . $CONDA/etc/profile.d/conda.sh
-    conda activate test
+    conda activate exoplanet
     pip install -U pip
     pip install -U setuptools
     pip install -U -r requirements.txt
     pip install -U -r paper/requirements.txt
-    conda install -q --yes -c conda-forge tectonic
+    conda install -c conda-forge tectonic
     theano-cache purge
   displayName: 'Install dependencies'
 
 - script: |
     . $CONDA/etc/profile.d/conda.sh
-    conda activate test
+    conda activate exoplanet
     cd paper
     make
     cd ..
