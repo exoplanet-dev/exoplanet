@@ -13,7 +13,7 @@ with open(os.path.join(dirname, "requirements.txt"), "r") as f:
     install_requires = f.read().splitlines()
 
 
-with open(os.path.join(dirname, "README.rst"), encoding="utf-8") as f:
+with open(os.path.join(dirname, "README.md"), encoding="utf-8") as f:
     readme = f.read()
 
 
@@ -37,8 +37,9 @@ setup(
     ],
     description="Fast & scalable MCMC for all your exoplanet needs",
     long_description=readme,
+    long_description_content_type="text/markdown",
     install_requires=install_requires,
-    package_data={"": ["README.rst", "LICENSE"]},
+    package_data={"": ["README.md", "LICENSE"]},
     include_package_data=True,
     classifiers=[
         "Development Status :: 4 - Beta",
