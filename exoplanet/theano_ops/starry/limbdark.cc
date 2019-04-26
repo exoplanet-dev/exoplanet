@@ -1,6 +1,6 @@
 #section support_code_struct
 
-starry::limbdark::GreensLimbDark<double>* APPLY_SPECIFIC(L);
+starry::limbdark::GreensLimbDark<DTYPE_OUTPUT_0>* APPLY_SPECIFIC(L);
 
 #section init_code_struct
 
