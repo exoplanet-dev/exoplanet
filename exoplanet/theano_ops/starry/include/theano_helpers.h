@@ -4,7 +4,6 @@
 #include <cmath>
 #include <Eigen/Core>
 #include "limbdark.h"
-#include <iostream>
 
 template <typename T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));
