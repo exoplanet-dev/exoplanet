@@ -1,4 +1,21 @@
-#section support_code_apply
+#section support_code_struct
+
+starry::limbdark::GreensLimbDark<double>* APPLY_SPECIFIC(L);
+
+#section init_code_struct
+
+{
+  APPLY_SPECIFIC(L) = NULL;
+}
+
+#section cleanup_code_struct
+
+if (APPLY_SPECIFIC(L) != NULL) {
+  delete APPLY_SPECIFIC(L);
+}
+
+//#section support_code_apply
+#section support_code_struct
 
 int APPLY_SPECIFIC(limbdark)(
     PyArrayObject* input0,    // Array of "cl"
@@ -50,7 +67,10 @@ int APPLY_SPECIFIC(limbdark)(
   dfdcl_mat.setZero();
 
   Eigen::Map<Eigen::Matrix<DTYPE_INPUT_0, Eigen::Dynamic, 1>> cvec(c, Nc);
-  starry::limbdark::GreensLimbDark<DTYPE_OUTPUT_0> L(Nc-1);
+  if (APPLY_SPECIFIC(L) == NULL || APPLY_SPECIFIC(L)->lmax != Nc - 1) {
+    if (APPLY_SPECIFIC(L) != NULL) delete APPLY_SPECIFIC(L);
+    APPLY_SPECIFIC(L) = new starry::limbdark::GreensLimbDark<double>(Nc-1);
+  }
 
   for (npy_intp i = 0; i < Nb; ++i) {
     f[i] = 0;
@@ -61,15 +81,16 @@ int APPLY_SPECIFIC(limbdark)(
       auto b_ = std::abs(b[i]);
       auto r_ = std::abs(r[i]);
       if (b_ < 1 + r_) {
-        L.compute(b_, r_, true);
+        APPLY_SPECIFIC(L)->compute(b_, r_, true);
+        auto S = APPLY_SPECIFIC(L)->S;
 
         // The value of the light curve
-        f[i] = L.S.dot(cvec) - 1;
+        f[i] = S.dot(cvec) - 1;
 
         // The gradients
-        dfdcl_mat.col(i) = L.S;
-        dfdb[i] = sgn(b[i]) * L.dSdb.dot(cvec);
-        dfdr[i] = sgn(r[i]) * L.dSdr.dot(cvec);
+        dfdcl_mat.col(i) = S;
+        dfdb[i] = sgn(b[i]) * APPLY_SPECIFIC(L)->dSdb.dot(cvec);
+        dfdr[i] = sgn(r[i]) * APPLY_SPECIFIC(L)->dSdr.dot(cvec);
       }
     }
   }

@@ -157,6 +157,7 @@ class StarryLightCurve(object):
                 and the source.
 
         """
+        b = tt.as_tensor_variable(b)
         if los is None:
             los = -tt.ones_like(b)
         return limbdark(self.c_norm, b, r, los)[0]
