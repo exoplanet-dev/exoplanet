@@ -14,7 +14,6 @@ if (APPLY_SPECIFIC(L) != NULL) {
   delete APPLY_SPECIFIC(L);
 }
 
-//#section support_code_apply
 #section support_code_struct
 
 int APPLY_SPECIFIC(limbdark)(
