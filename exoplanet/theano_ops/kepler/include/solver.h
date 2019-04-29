@@ -124,8 +124,33 @@ namespace exoplanet {
     return E + h[4 - 1];
   }
 
+  //template <typename T>
+  //inline T solve_kepler (T M, T e) {
+  //  const T two_pi = 2 * M_PI;
+
+  //  T M_ref = two_pi * floor(M / two_pi);
+  //  M -= M_ref;
+
+  //  bool high = M > M_PI;
+  //  if (high) {
+  //    M = two_pi - M;
+  //  }
+
+  //  // Initialize
+  //  T E0 = get_starter<T>(M, e);
+
+  //  // Refine the estimate
+  //  T E = refine<T>(E0, M, e);
+
+  //  if (high) {
+  //    E = two_pi - E;
+  //  }
+
+  //  return E + M_ref;
+  //}
+
   template <typename T>
-  inline T solve_kepler (T M, T e) {
+  inline T solve_kepler (T M, T ecc) {
     const T two_pi = 2 * M_PI;
 
     T M_ref = two_pi * floor(M / two_pi);
@@ -136,18 +161,36 @@ namespace exoplanet {
       M = two_pi - M;
     }
 
-    // Initialize
-    T E0 = get_starter<T>(M, e);
+    T M2 = M*M;
+    T M3 = M2*M;
 
-    // Refine the estimate
-    T E = refine<T>(E0, M, e);
+    T alpha = (3*M_PI + 1.6*(M_PI-std::abs(M))/(1+ecc) )/(M_PI - 6/M_PI);
+    T d = 3*(1 - ecc) + alpha*ecc;
+    T r = 3*alpha*d*(d-1+ecc)*M + M3;
+    T q = 2*alpha*d*(1-ecc) - M2;
+    T q2 = q*q;
+    T w = pow(std::abs(r) + sqrt(q2*q + r*r), 2.0/3);
+    T E = (2*r*w/(w*w + w*q + q2) + M) / d;
+
+    T sinE = sin(E);
+    T f_0 = E - ecc*sinE - M;
+    T f_1 = 1 - ecc*cos(E);
+    T f_2 = ecc*sinE;
+    T f_3 = 1-f_1;
+    T d_3 = -f_0/(f_1 - 0.5*f_0*f_2/f_1);
+    T d_4 = -f_0/(f_1 + 0.5*d_3*f_2 + (d_3*d_3)*f_3/6);
+    T d_42 = d_4*d_4;
+    E -= f_0/(f_1 + 0.5*d_4*f_2 + d_4*d_4*f_3/6 - d_42*d_4*f_2/24);
 
     if (high) {
       E = two_pi - E;
     }
 
+    if (E > M_PI) E -= two_pi;
+
     return E + M_ref;
   }
+
 
 }
 
