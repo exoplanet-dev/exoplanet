@@ -418,13 +418,17 @@ class KeplerianOrbit(object):
             t_end = (M_contact[1] - self.M0) / self.n
             t_end = tt.mod(t_end + hp, self.period) - hp
 
+            t_start = tt.switch(tt.gt(t_start, 0.0),
+                                t_start - self.period, t_start)
+            t_end = tt.switch(tt.lt(t_end, 0.0),
+                              t_end + self.period, t_end)
+
         if texp is not None:
             t_start -= 0.5*texp
             t_end += 0.5*texp
 
         mask = tt.any(tt.and_(dt >= t_start, dt <= t_end), axis=-1)
-        result = ifelse(tt.and_(tt.all(tt.eq(flag, 0)),
-                                tt.all(tt.gt(t_end, t_start))),
+        result = ifelse(tt.all(tt.eq(flag, 0)),
                         tt.arange(t.size)[mask],
                         tt.arange(t.size))
 
