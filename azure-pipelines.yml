@@ -32,20 +32,19 @@ steps:
 - script: |
     . $CONDA/etc/profile.d/conda.sh
     conda activate exoplanet
-    cd paper/figures
+    cd $(Build.SourcesDirectory)/paper/figures
     python run_notebooks.py
-    cd ../..
   displayName: 'Generate the figures'
 
 - script: |
     . $CONDA/etc/profile.d/conda.sh
     conda activate exoplanet
-    cd paper
+    cd $(Build.SourcesDirectory)/paper
     make
-    cd ..
   displayName: 'Build the paper'
 
 - script: |
+    cd $(Build.SourcesDirectory)
     git checkout --orphan $(Build.SourceBranchName)-pdf
     git rm -rf .
     git add -f paper/exoplanet.pdf
@@ -54,4 +53,3 @@ steps:
     git -c user.name='azure' -c user.email='azure' commit -m "building the paper"
     git push -q -f https://$(GITHUB_USER):$(GITHUB_API_KEY)@github.com/dfm/exoplanet $(Build.SourceBranchName)-pdf >/dev/null 2>&1
   displayName: 'Upload the paper'
-  condition: always()
