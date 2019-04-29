@@ -150,6 +150,25 @@ namespace exoplanet {
   //}
 
   template <typename T>
+  inline T pade_approx (T E, T sinE, T ecc) {
+    if (ecc < 0.5 || E > 1.0) return E - ecc*sinE;
+    T E2 = E*E;
+    T E4 = E2*E2;
+    T E6 = E4*E2;
+    T E8 = E6*E2;
+    T numerator = 1.0
+                  - 1.7454287843856404e-6 * E6
+                  + 4.1584640418181644e-4 * E4
+                  - 3.0956446448551138e-2 * E2;
+    T denominator = 6.0
+                    + 1.7804367119519884e-8 * E8
+                    + 5.9727613731070647e-6 * E6
+                    + 1.0652873476684142e-3 * E4
+                    + 1.1426132130869317e-1 * E2;
+    return (1.0 - ecc) * E + ecc * E2*E * numerator / denominator;
+  }
+
+  template <typename T>
   inline T solve_kepler (T M, T ecc) {
     const T two_pi = 2 * M_PI;
 
@@ -173,7 +192,9 @@ namespace exoplanet {
     T E = (2*r*w/(w*w + w*q + q2) + M) / d;
 
     T sinE = sin(E);
-    T f_0 = E - ecc*sinE - M;
+    T Mstar = pade_approx(E, sinE, ecc);
+
+    T f_0 = Mstar - M;
     T f_1 = 1 - ecc*cos(E);
     T f_2 = ecc*sinE;
     T f_3 = 1-f_1;
@@ -186,11 +207,8 @@ namespace exoplanet {
       E = two_pi - E;
     }
 
-    if (E > M_PI) E -= two_pi;
-
     return E + M_ref;
   }
-
 
 }
 
