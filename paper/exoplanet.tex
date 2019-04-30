@@ -261,7 +261,7 @@ In both cases, the solver is implemented in \project{C} and exposed to
 Similarly, the implementation in \exoplanet\ is written in \cpp\ with \python\
 bindings exposed by \theano\ \citep{Theano-Development-Team:2016}.
 
-To test the implementation, we generated 5000 true eccentric anomalies
+To test the implementation, we generated 100000 true eccentric anomalies
 $E_\mathrm{true}$ uniformly distributed between $0$ and $2\,\pi$.
 Then, for a range of eccentricities $e$, we computed the mean anomaly $M$ using
 \eq{kepler-equation} and used each library to solve \eq{kepler-equation} for
@@ -303,7 +303,7 @@ the solvers from the \radvel\ \citep{Fulton:2017, Fulton:2018} and \batman\
 the eccentric anomaly $E$ conditioned on eccentricity $e$ and mean anomaly $M$.
 Smaller numbers correspond to faster solutions.
 \emph{bottom}: The 90-th percentile of the absolute error of the computed
-eccentric anomaly for 5000 true values of $E$ in the range $0 \le E < 2\,\pi$.
+eccentric anomaly for 100000 true values of $E$ in the range $0 \le E < 2\,\pi$.
 Smaller numbers correspond to more accurate solutions.}
 \end{centering}
 \end{figure}
