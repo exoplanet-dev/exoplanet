@@ -124,8 +124,52 @@ namespace exoplanet {
     return E + h[4 - 1];
   }
 
+  //template <typename T>
+  //inline T solve_kepler (T M, T e) {
+  //  const T two_pi = 2 * M_PI;
+
+  //  T M_ref = two_pi * floor(M / two_pi);
+  //  M -= M_ref;
+
+  //  bool high = M > M_PI;
+  //  if (high) {
+  //    M = two_pi - M;
+  //  }
+
+  //  // Initialize
+  //  T E0 = get_starter<T>(M, e);
+
+  //  // Refine the estimate
+  //  T E = refine<T>(E0, M, e);
+
+  //  if (high) {
+  //    E = two_pi - E;
+  //  }
+
+  //  return E + M_ref;
+  //}
+
   template <typename T>
-  inline T solve_kepler (T M, T e) {
+  inline T pade_approx (T E, T sinE, T ecc) {
+    if (ecc < 0.5 || E > 1.0) return E - ecc*sinE;
+    T E2 = E*E;
+    T E4 = E2*E2;
+    T E6 = E4*E2;
+    T E8 = E6*E2;
+    T numerator = 1.0
+                  - 1.7454287843856404e-6 * E6
+                  + 4.1584640418181644e-4 * E4
+                  - 3.0956446448551138e-2 * E2;
+    T denominator = 6.0
+                    + 1.7804367119519884e-8 * E8
+                    + 5.9727613731070647e-6 * E6
+                    + 1.0652873476684142e-3 * E4
+                    + 1.1426132130869317e-1 * E2;
+    return (1.0 - ecc) * E + ecc * E2*E * numerator / denominator;
+  }
+
+  template <typename T>
+  inline T solve_kepler (T M, T ecc) {
     const T two_pi = 2 * M_PI;
 
     T M_ref = two_pi * floor(M / two_pi);
@@ -136,11 +180,37 @@ namespace exoplanet {
       M = two_pi - M;
     }
 
-    // Initialize
-    T E0 = get_starter<T>(M, e);
+    T ome = 1.0 - ecc;
 
-    // Refine the estimate
-    T E = refine<T>(E0, M, e);
+    // Get starter
+    T M2 = M*M;
+    T M3 = M2*M;
+    T alpha = (3*M_PI + 1.6*(M_PI-std::abs(M))/(1+ecc) )/(M_PI - 6/M_PI);
+    T d = 3*ome + alpha*ecc;
+    T r = 3*alpha*d*(d-ome)*M + M3;
+    T q = 2*alpha*d*ome - M2;
+    T q2 = q*q;
+    T w = pow(std::abs(r) + sqrt(q2*q + r*r), 2.0/3);
+    T E = (2*r*w/(w*w + w*q + q2) + M) / d;
+
+    // Approximate Mstar = E - e*sin(E) with numerically stability
+    //T sinE = sin(E);
+    //T Mstar = pade_approx(E, sinE, ecc);
+    T sE, cE;
+    sin_cos_reduc (E, &sE, &cE);
+
+    // Refine the starter
+    //T f_0 = Mstar - M;
+    //T f_1 = 1 - ecc*cos(E);
+    // T f_2 = ecc * sinE;
+    T f_0 = ecc * sE + E * ome - M;
+    T f_1 = ecc * cE + ome;
+    T f_2 = ecc * (E - sE);
+    T f_3 = 1-f_1;
+    T d_3 = -f_0/(f_1 - 0.5*f_0*f_2/f_1);
+    T d_4 = -f_0/(f_1 + 0.5*d_3*f_2 + (d_3*d_3)*f_3/6);
+    T d_42 = d_4*d_4;
+    E -= f_0/(f_1 + 0.5*d_4*f_2 + d_4*d_4*f_3/6 - d_42*d_4*f_2/24);
 
     if (high) {
       E = two_pi - E;
