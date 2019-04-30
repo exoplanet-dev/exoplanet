@@ -180,23 +180,32 @@ namespace exoplanet {
       M = two_pi - M;
     }
 
+    T ome = 1.0 - ecc;
+
+    // Get starter
     T M2 = M*M;
     T M3 = M2*M;
-
     T alpha = (3*M_PI + 1.6*(M_PI-std::abs(M))/(1+ecc) )/(M_PI - 6/M_PI);
-    T d = 3*(1 - ecc) + alpha*ecc;
-    T r = 3*alpha*d*(d-1+ecc)*M + M3;
-    T q = 2*alpha*d*(1-ecc) - M2;
+    T d = 3*ome + alpha*ecc;
+    T r = 3*alpha*d*(d-ome)*M + M3;
+    T q = 2*alpha*d*ome - M2;
     T q2 = q*q;
     T w = pow(std::abs(r) + sqrt(q2*q + r*r), 2.0/3);
     T E = (2*r*w/(w*w + w*q + q2) + M) / d;
 
-    T sinE = sin(E);
-    T Mstar = pade_approx(E, sinE, ecc);
+    // Approximate Mstar = E - e*sin(E) with numerically stability
+    //T sinE = sin(E);
+    //T Mstar = pade_approx(E, sinE, ecc);
+    T sE, cE;
+    sin_cos_reduc (E, &sE, &cE);
 
-    T f_0 = Mstar - M;
-    T f_1 = 1 - ecc*cos(E);
-    T f_2 = ecc*sinE;
+    // Refine the starter
+    //T f_0 = Mstar - M;
+    //T f_1 = 1 - ecc*cos(E);
+    // T f_2 = ecc * sinE;
+    T f_0 = ecc * sE + E * ome - M;
+    T f_1 = ecc * cE + ome;
+    T f_2 = ecc * (E - sE);
     T f_3 = 1-f_1;
     T d_3 = -f_0/(f_1 - 0.5*f_0*f_2/f_1);
     T d_4 = -f_0/(f_1 + 0.5*d_3*f_2 + (d_3*d_3)*f_3/6);
