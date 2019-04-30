@@ -1,0 +1,36 @@
+{%- extends "basic/layout.html" %}
+
+{% if not title %}
+{% set title = project %}
+{% endif %}
+
+{%- block extrahead %}
+    {{ super() }}
+
+    <link rel="shortcut icon" href="{{ pathto('_static/favicon.png', 1) }}">
+    <link rel="stylesheet" href="{{ pathto('_static/code.css', 1) }}?v=1" type="text/css" />
+
+{% endblock %}
+
+{%- block relbar1 %}{% endblock %}
+{%- block relbar2 %}{% endblock %}
+
+{%- block document %}
+
+<div class="main-logo">
+    <h1><a href="{{ pathto(master_doc) }}">{{ project }}</a></h1>
+    <h2>{{ theme_tagline }}</h2>
+</div>
+
+{{ super() }}
+
+{% endblock %}
+
+{%- block footer %}
+
+    <div class="footer">
+        Copyright {{ copyright }}. Released under
+            <a href="https://raw.github.com/dfm/exoplanet/master/LICENSE">MIT License</a>.
+    </div>
+
+{%- endblock %}
