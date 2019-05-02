@@ -4,6 +4,7 @@ from __future__ import division, print_function
 
 __all__ = ["RegularGridInterpolator"]
 
+import theano
 import theano.tensor as tt
 from .theano_ops.interp import RegularGridOp
 
@@ -39,8 +40,8 @@ class RegularGridInterpolator(object):
         self.ndim = len(points)
         self.nout = int(nout)
 
-        self.points = [tt.as_tensor_variable(p) for p in points]
-        self.values = tt.as_tensor_variable(values)
+        self.points = [theano.shared(p) for p in points]
+        self.values = theano.shared(values)
         if self.values.ndim == self.ndim:
             self.values = tt.shape_padright(self.values)
 
