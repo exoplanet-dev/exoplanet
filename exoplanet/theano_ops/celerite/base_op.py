@@ -6,9 +6,7 @@ __all__ = ["CeleriteBaseOp"]
 
 import pkg_resources
 
-import theano
 from theano import gof
-import theano.tensor as tt
 
 from ..build_utils import get_compile_args, get_cache_version
 
@@ -60,24 +58,3 @@ class CeleriteBaseOp(gof.COp):
             else:
                 args.append("-DCELERITE_JNRHS_ORDER=Eigen::RowMajor")
         return args
-
-    def _get_node_args(self, *args):
-        if len(args) != self.num_input:
-            raise ValueError("expected {0} inputs".format(self.num_input))
-        dtype = theano.config.floatX
-        in_args = []
-        for a in args:
-            try:
-                a = tt.as_tensor_variable(a)
-            except tt.AsTensorError:
-                pass
-            else:
-                dtype = theano.scalar.upcast(dtype, a.dtype)
-            in_args.append(a)
-        out_args = [
-            tt.TensorType(dtype=dtype, broadcastable=[False] * ndim)()
-            for ndim in self.output_ndim]
-        return in_args, out_args
-
-    def make_node(self, *args):
-        return gof.Apply(self, *self._get_node_args(*args))

@@ -24,8 +24,11 @@ class FactorOp(CeleriteBaseOp):
         super(FactorOp, self).__init__(J=J)
 
     def make_node(self, *args):
-        in_args, out_args = self._get_node_args(*args)
-        out_args.append(tt.iscalar().type())
+        in_args = [tt.as_tensor_variable(a) for a in args]
+        out_args = [
+            in_args[0].type(), in_args[2].type(),
+            tt.matrix(dtype=theano.config.floatX).type(),
+            tt.iscalar().type()]
         return gof.Apply(self, in_args, out_args)
 
     def grad(self, inputs, gradients):
