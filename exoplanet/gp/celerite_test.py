@@ -16,11 +16,17 @@ def test_broadcast_dim():
     logS0 = tt.scalar()
     logw0 = tt.scalar()
     logQ = tt.scalar()
+    logS0.tag.test_value = -5.0
+    logw0.tag.test_value = -2.0
+    logQ.tag.test_value = 1.0
     kernel = terms.SHOTerm(S0=tt.exp(logS0), w0=tt.exp(logw0), Q=tt.exp(logQ))
 
     x = tt.vector()
     y = tt.vector()
     diag = tt.vector()
+    x.tag.test_value = np.zeros(2)
+    y.tag.test_value = np.zeros(2)
+    diag.tag.test_value = np.ones(2)
     gp = GP(kernel, x, diag, J=2)
     loglike = gp.log_likelihood(y)
 
@@ -33,6 +39,18 @@ def test_broadcast_dim():
     y = np.sin(x)
     diag = np.random.rand(N)
     grad(-5.0, -2.0, 1.0, x, y, diag)
+
+
+def test_drop_non_broadcastable():
+    np.random.seed(123)
+    mean = tt.dscalar()
+    mean.tag.test_value = 0.1
+    gp = GP(terms.RealTerm(a=1.0, c=1.0), np.linspace(0, 10, 50), np.ones(50))
+    arg = (np.random.rand(50) - mean)
+    res = gp.apply_inverse(arg[:, None])
+    theano.grad(tt.sum(res), [arg])
+    theano.grad(tt.sum(arg), [mean])
+    theano.grad(tt.sum(res), [mean])
 
 
 def _get_theano_kernel(celerite_kernel):

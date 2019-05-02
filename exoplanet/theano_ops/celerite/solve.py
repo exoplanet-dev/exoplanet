@@ -5,6 +5,8 @@ from __future__ import division, print_function
 __all__ = ["SolveOp"]
 
 import theano
+from theano import gof
+import theano.tensor as tt
 
 from .base_op import CeleriteBaseOp
 from .solve_rev import SolveRevOp
@@ -20,6 +22,13 @@ class SolveOp(CeleriteBaseOp):
     def __init__(self, J=-1, n_rhs=-1):
         self.grad_op = SolveRevOp(J=J, n_rhs=n_rhs)
         super(SolveOp, self).__init__(J=J, n_rhs=n_rhs)
+
+    def make_node(self, *args):
+        in_args = [tt.as_tensor_variable(a) for a in args]
+        out_args = [in_args[-1].type(),
+                    tt.matrix(dtype=theano.config.floatX).type(),
+                    tt.matrix(dtype=theano.config.floatX).type()]
+        return gof.Apply(self, in_args, out_args)
 
     def grad(self, inputs, gradients):
         U, P, d, W, Y = inputs
