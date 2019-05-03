@@ -2,6 +2,10 @@
 @import url(http://fonts.googleapis.com/css?family=Lato:100,300,700,300italic);
 @import url(http://fonts.googleapis.com/css?family=Source+Code+Pro:300,400,600);
 
+* {
+    box-sizing: border-box;
+}
+
 body {
     font-family: Lato, "Helvetica Neue", Helvetica, sans-serif;
     font-weight: 300;
@@ -191,51 +195,30 @@ input.searchfield:focus {
 div.admonition {
     background-color: #f6f7f9;
     border: 1px solid #cdcdd1;
-    padding: 0px 12px 12px 12px;
+    padding: 12px;
+    margin: 12px 0;
     font-size: 0.9em;
 }
 
 p.admonition-title {
-    display: block;
-    background-color: #cdcdd1;
-    margin: -12px -12px 12px -12px;
-    padding: 6px 12px;
+    font-weight: bold;
 }
 
-div.admonition p.admonition-title + p {
+p.admonition-title:after {
+    content: ": ";
+}
+
+div.admonition p {
     display: inline;
+    margin: 0;
 }
 
-div.attention, div.caution, div.seealso {
-    background-color: #fef9e9;
-    border: 1px solid #fbe091;
-}
+/* Responsive */
 
-div.attention p.admonition-title,
-div.caution p.admonition-title,
-div.seealso p.admonition-title {
-    background-color: #fbe091;
-}
-
-div.danger, div.error, div.warning {
-    border: 1px solid #FEA1A2;
-    background-color: #FEE4E4;
-}
-
-div.danger p.admonition-title,
-div.error p.admonition-title,
-div.warning p.admonition-title {
-    background-color: #FEA1A2;
-}
-
-div.note, div.important, div.hint, div.tip {
-    border: 1px solid #daebea;
-    background-color: #F7FAFA;
-}
-
-div.note p.admonition-title,
-div.important p.admonition-title,
-div.hint p.admonition-title,
-div.tip p.admonition-title {
-    background-color: #daebea;
+@media only screen and (max-width: 720px) {
+    .document, .footer, .related {
+        width: 100%;
+        margin: 0;
+        padding: 0 15px;
+    }
 }
