@@ -3,6 +3,7 @@
 
 from __future__ import division, print_function
 
+import os
 import re
 import sys
 import glob
@@ -32,6 +33,10 @@ for filename in glob.glob(pattern):
         msg += e.traceback
         print(msg)
         errors.append(msg)
+    finally:
+        with open(os.path.splitext(filename)[0] + "_exec.ipynb",
+                  mode="wt") as f:
+            nbformat.write(notebook, f)
 
 txt = "\n\n".join(errors)
 ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
