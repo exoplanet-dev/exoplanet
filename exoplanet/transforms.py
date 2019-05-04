@@ -79,7 +79,7 @@ class AngleTransform(tr.Transform):
     name = "angle"
 
     def __init__(self, *args, **kwargs):
-        self.regularized = kwargs.pop("regularized", 10.0)
+        self.regularized = kwargs.pop("regularized", None)
         super(AngleTransform, self).__init__(*args, **kwargs)
 
     def backward(self, y):
