@@ -15,8 +15,6 @@ class DiagDotOp(CeleriteBaseOp):
 
     func_file = "./diag_dot.cc"
     func_name = "APPLY_SPECIFIC(diag_dot)"
-    num_input = 2
-    output_ndim = (1, )
 
     def make_node(self, *args):
         in_args = [tt.as_tensor_variable(a) for a in args]
