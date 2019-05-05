@@ -13,8 +13,6 @@ class SolveRevOp(CeleriteBaseOp):
 
     func_file = "./solve_rev.cc"
     func_name = "APPLY_SPECIFIC(solve_rev)"
-    num_input = 8
-    output_ndim = (2, 2, 1, 2, 2)
 
     def make_node(self, *args):
         in_args = [tt.as_tensor_variable(a) for a in args]

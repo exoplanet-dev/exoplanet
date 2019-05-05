@@ -16,8 +16,6 @@ class FactorOp(CeleriteBaseOp):
 
     func_file = "./factor.cc"
     func_name = "APPLY_SPECIFIC(factor)"
-    num_input = 4
-    output_ndim = (1, 2, 2)
 
     def __init__(self, J=-1):
         self.grad_op = FactorRevOp(J=J)

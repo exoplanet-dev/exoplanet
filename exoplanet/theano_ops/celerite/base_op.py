@@ -14,8 +14,6 @@ from ..build_utils import get_compile_args, get_cache_version
 class CeleriteBaseOp(gof.COp):
 
     __props__ = ("J", "n_rhs")
-    num_input = 0
-    output_ndim = ()
     func_file = None
     func_name = None
 
