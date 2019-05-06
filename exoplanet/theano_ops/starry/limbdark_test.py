@@ -28,7 +28,7 @@ class TestLimbDark(utt.InferShapeTester):
         c_val = np.array([-0.85, 2.5, -0.425, 0.1])
         b_val = np.linspace(-1.5, 1.5, 100)
         r_val = 0.1 + np.zeros_like(b_val)
-        los_val = -np.ones_like(b_val)
+        los_val = np.ones_like(b_val)
 
         return f, [c, b, r, los], [c_val, b_val, r_val, los_val]
 
