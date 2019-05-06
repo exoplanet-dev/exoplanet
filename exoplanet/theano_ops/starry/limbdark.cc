@@ -76,7 +76,7 @@ int APPLY_SPECIFIC(limbdark)(
     dfdb[i] = 0;
     dfdr[i] = 0;
 
-    if (los[i] < 0) {
+    if (los[i] > 0) {
       auto b_ = std::abs(b[i]);
       auto r_ = std::abs(r[i]);
       if (b_ < 1 + r_) {
