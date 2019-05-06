@@ -1,4 +1,4 @@
-in\documentclass[modern]{aastex62}
+\documentclass[modern]{aastex62}
 
 \input{xostyle}
 \input{xosymbols}
@@ -19,9 +19,7 @@ radial velocities, \& astrometry
 
 \begin{abstract}
 
-As larger and more precise datasets continue to be collected for the discovery
-and characterization of exoplanets, we must also develop computationally
-efficient and rigorous methods for making inferences based on these data.
+As larger and more precise datasets continue to be collected for the discovery and characterization of exoplanets, we must also develop computationally efficient and rigorous methods for making inferences based on these data.
 The efficiency and robustness of numerical methods for probabilistic inference
 can be improved by using derivatives of the model with respect to the
 parameters.
@@ -152,14 +150,22 @@ Similar derivations would certainly be tractable for microlensing, direct
 imaging, and other exoplanet characterization methods, but these are left to a
 future paper.
 
-At present, there are many model-building libraries available in every
-programming language, and it is not clear which should be preferred.
-For this paper, we focus on implementations within TensorFlow
-\citep{Abadi:2016} because it is accessible using Python, the most widely used
-programming language in astronomy (CITE?) and because the code is
-well-supported and stable.
-This being said, the basic ideas behind each library are similar and the core
-implementation in C++ can be minimally modified to support other frameworks.
+\paragraph{Choice of modeling framework}
+
+At present, there are many model-building libraries available in every programming language, and it is not clear which should be preferred.
+Since it is a popular language for code development in astrophysics, we focus on libraries with interfaces implemented in the \python\ programming language.
+The two most popular libraries for model building in \python\ are the well-supported and actively-developed packages \tensorflow\ \citep{Abadi:2016} and \pytorch\ \citep{Paszke:2017}.
+Each of these libraries come with extensions that enable probabilistic modeling and gradient-based inference: \project{tensorflow-probability} \citep{Dillon:2017} and \project{Pyro} \citep{Bingham:2018}.
+Both of these libraries (\tensorflow\ and \pytorch) and their inference engines are built for high performance machine learning and, while many of those features are also useful for our purposes, some of the inference goals in astrophysics are somewhat different.
+For example, the primary posterior inference method implemented by these packages is variational inference \dfmtodo{(CITE)}.
+\dfmtodo{We discuss the application of variational inference later in this paper}, but the primary inference method used in astrophysics is Markov chain Monte Carlo (MCMC) and the implementations of gradient-based MCMC (HMC, NUTS etc) within these packages is not as fully featured as the state-of-the-art MCMC inference packages like \pymc\ \citep{Salvatier:2016} and \stan\ \citep{Carpenter:2015, Carpenter:2017}.
+So, for the purposes of this paper, we restrict our focus to \pymc\ and its modeling engine \theano\ \citep{Theano-Development-Team:2016}.
+
+\theano\ is a model building framework for \python\ that, like \tensorflow, provides an interface for defining a computational graph that can be used to efficiently compute a model and its derivatives.
+It was originally developed for deep learning, but it was adopted by the \pymc\ project and extended to support probabilistic modeling and gradient-based inference methods like Hamiltonian Monte Carlo, no U-turn sampling, and variational inference.
+In our experiments, the combination of \theano\ and \pymc\ provided the best balance of modern inference features, ease of use, and computational efficiency of all the existing \python-first modeling frameworks.
+The \stan\ project provides a more mature and feature-rich set of inference methods, but it is more difficult to build and debug the complicated physical models that are required by exoplanet applications using the \stan\ modeling language.
+Furthermore, as discussed below, we must provide custom astronomy-specific operations as part of this library and, while it is possible to extend the \stan\ math library, we found it to be much easier to develop, test, and release the necessary features using \pymc\ and \theano.
 
 \section{The custom operations provided by exoplanet}
 
