@@ -38,15 +38,20 @@ class KeplerianOrbit(object):
        the sun. If only ``rho_star`` is defined, the radius of the central is
        assumed to be ``1 * R_sun``. Otherwise, at most two of ``m_star``,
        ``r_star``, and ``rho_star`` can be defined.
+    5. Either ``t0`` (reference transit) or ``t_periastron`` must be given,
+       but not both.
+
 
     Args:
         period: The orbital periods of the bodies in days.
         a: The semimajor axes of the orbits in ``R_sun``.
         t0: The time of a reference transit for each orbits in days.
+        t_periastron: The epoch of a reference periastron passage in days.
         incl: The inclinations of the orbits in radians.
         b: The impact parameters of the orbits.
         ecc: The eccentricities of the orbits. Must be ``0 <= ecc < 1``.
         omega: The arguments of periastron for the orbits in radians.
+        Omega: The position angles of the ascending nodes in radians.
         m_planet: The masses of the planets in units of ``m_planet_units``.
         m_star: The mass of the star in ``M_sun``.
         r_star: The radius of the star in ``R_sun``.
@@ -63,9 +68,10 @@ class KeplerianOrbit(object):
 
     def __init__(self,
                  period=None, a=None, t0=0.0,
-                 incl=None, b=None, duration=None,
-                 ecc=None, omega=None, m_planet=0.0,
-                 m_star=None, r_star=None, rho_star=None,
+                 t_periastron=None, incl=None, b=None,
+                 duration=None, ecc=None, omega=None,
+                 Omega=None, m_planet=0.0, m_star=None,
+                 r_star=None, rho_star=None,
                  m_planet_units=None, rho_star_units=None,
                  model=None,
                  contact_points_kwargs=None,
@@ -116,11 +122,20 @@ class KeplerianOrbit(object):
             self.cos_omega = tt.cos(self.omega)
             self.sin_omega = tt.sin(self.omega)
 
+            if Omega is None:
+                Omega = 0.0
+            self.Omega = tt.as_tensor_variable(Omega)
+            self.cos_Omega = tt.cos(self.Omega)
+            self.sin_Omega = tt.sin(self.Omega)
+
             opsw = 1 + self.sin_omega
             E0 = 2 * tt.arctan2(tt.sqrt(1-self.ecc)*self.cos_omega,
                                 tt.sqrt(1+self.ecc)*opsw)
             self.M0 = E0 - self.ecc * tt.sin(E0)
-            self.tref = self.t0 - self.M0 / self.n
+            if t_periastron is not None:
+                self.tref = t_periastron
+            else:
+                self.tref = self.t0 - self.M0 / self.n
 
             ome2 = 1 - self.ecc**2
             self.K0 /= tt.sqrt(ome2)
