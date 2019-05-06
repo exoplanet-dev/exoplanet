@@ -77,9 +77,6 @@ exclude_patterns = ["_build"]
 pygments_style = "sphinx"
 
 # Readthedocs.
-# on_rtd = os.environ.get("READTHEDOCS", None) == "True"
-# html_theme_path = [sphinx_nameko_theme.get_html_theme_path()]
-# html_theme = "nameko"
 html_theme_path = ["_themes"]
 html_theme = "daft"
 html_theme_options = {
