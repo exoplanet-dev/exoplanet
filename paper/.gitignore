@@ -4,3 +4,6 @@ exoplanet.pdf
 *.blg
 *.log
 figures/*.pdf
+*.fls
+*.synctex.gz
+*.fdb_latexmk
