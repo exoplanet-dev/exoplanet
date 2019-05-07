@@ -46,7 +46,7 @@ steps:
 - script: |
     cd $(Build.SourcesDirectory)
     git checkout --orphan $(Build.SourceBranchName)-pdf
-    git rm -rf .
+    git rm -rf --cached .
     git add -f paper/exoplanet.pdf
     git add -f paper/figures/*.pdf
     git add -f paper/figures/*_exec.ipynb

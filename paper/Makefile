@@ -3,7 +3,6 @@ LATEX       = pdflatex -interaction=nonstopmode -halt-on-error
 SUFF        = pdf
 RM_TMP      = $(foreach d, ${TEX_FILES}, rm -rf $(foreach suff, ${TMP_SUFFS}, ${d}.${suff}))
 CHECK_RERUN = grep Rerun exoplanet.log
-FIGURES     = $(patsubst %.ipynb,%.pdf,$(wildcard figures/*.ipynb))
 TECTONIC    = $(shell command -v tectonic >/dev/null && echo true || echo false )
 
 default: exoplanet.pdf
@@ -23,9 +22,4 @@ exoplanet.pdf: exoplanet.tex exoplanet.bib xostyle.tex
 clean:
 	$(RM_TMP)
 
-figures: ${FIGURES}
-
-figures/%.pdf: figures/%.ipynb figures/notebook_setup.py
-	cd $(<D);python run_notebooks.py $(<F)
-
-.PHONY: figures clean
+.PHONY: clean
