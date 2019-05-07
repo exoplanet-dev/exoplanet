@@ -26,14 +26,13 @@ def test_sky_coords():
     r_batman = np.empty((len(t), len(t0)))
 
     for i in range(len(t0)):
-        r_batman[:, i] = _rsky._rsky(t, t0[i], period[i], a[i], incl[i], e[i],
-                                     omega[i], 1, 1)
+        r_batman[:, i] = _rsky._rsky(t, t0[i], period[i], a[i],
+                                     incl[i], e[i], omega[i], 1, 1)
     m = r_batman < 100.0
     assert m.sum() > 0
 
     orbit = KeplerianOrbit(
-        period=period, a=a, t0=t0, ecc=e, omega=omega, incl=incl, tol=1e-8,
-        maxiter=5000)
+        period=period, a=a, t0=t0, ecc=e, omega=omega, incl=incl)
     func = theano.function([], orbit.get_relative_position(t))
     x, y, z = func()
     r = np.sqrt(x**2 + y**2)
@@ -42,10 +41,10 @@ def test_sky_coords():
     utt.assert_allclose(r_batman[m], r[m], atol=2e-5)
 
     # In-transit should correspond to negative z in our parameterization
-    assert np.all(z[m] < 0)
+    assert np.all(z[m] > 0)
 
     # Therefore, when batman doesn't see a transit we shouldn't be transiting
-    no_transit = z[~m] > 0
+    no_transit = z[~m] < 0
     no_transit |= r[~m] > 2
     assert np.all(no_transit)
 
@@ -129,11 +128,11 @@ def test_in_transit():
 
     m = np.isin(np.arange(len(t)), inds)
     in_ = r2[inds] <= ((r_star + r_pl)**2)[None, :]
-    in_ &= coords[2][inds] < 0
+    in_ &= coords[2][inds] > 0
     assert np.all(np.any(in_, axis=1))
 
     out = r2[~m] > ((r_star + r_pl)**2)[None, :]
-    out |= coords[2][~m] >= 0
+    out |= coords[2][~m] <= 0
     assert np.all(out)
 
 
@@ -211,4 +210,4 @@ def test_impact():
     coords = orbit.get_relative_position(t0)
     utt.assert_allclose((tt.sqrt(coords[0]**2 + coords[1]**2) / r_star).eval(),
                         b)
-    assert coords[2].eval() < 0
+    assert coords[2].eval() > 0

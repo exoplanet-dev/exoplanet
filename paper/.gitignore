@@ -3,7 +3,7 @@ exoplanet.pdf
 *.bbl
 *.blg
 *.log
-figures/*.pdf
 *.fls
 *.synctex.gz
 *.fdb_latexmk
+figures/*_exec.ipynb

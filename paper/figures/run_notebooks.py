@@ -20,6 +20,9 @@ else:
 errors = []
 
 for filename in glob.glob(pattern):
+    if filename.endswith("_exec.ipynb"):
+        continue
+
     with open(filename) as f:
         notebook = nbformat.read(f, as_version=4)
 
