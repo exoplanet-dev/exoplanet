@@ -32,7 +32,7 @@ class TestContactPoints(utt.InferShapeTester):
     def test_basic(self):
         a = np.float64(100.0)
         e = np.float64(0.3)
-        w = 0.1
+        w = 0.1 + np.pi
         cosw = np.float64(np.cos(w))
         sinw = np.float64(np.sin(w))
         i = 0.5*np.pi - 1e-2
@@ -40,7 +40,7 @@ class TestContactPoints(utt.InferShapeTester):
         sini = np.float64(np.sin(i))
         L = np.float64(1.1 + 0.1)
 
-        M_expect = np.array([0.88809465, 0.90313756])
+        M_expect = np.array([0.90313756, 0.88809465])
         M_calc = theano.function(
             [], self.op(a, e, cosw, sinw, cosi, sini, L))()
 
