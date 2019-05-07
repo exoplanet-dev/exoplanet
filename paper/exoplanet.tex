@@ -17,6 +17,10 @@ radial velocities, \& astrometry
 \author[0000-0002-9328-5652]{Daniel Foreman-Mackey}
 \affil{Center for Computational Astrophysics, Flatiron Institute, New York, NY}
 
+\author[0000-0002-1483-8811]{Ian Czekala}
+\altaffiliation{NASA Hubble Fellowship Program Sagan Fellow}
+\affiliation{Department of Astronomy, 501 Campbell Hall, University of California, Berkeley, CA 94720-3411, USA}
+
 \begin{abstract}
 
 As larger and more precise datasets continue to be collected for the discovery and characterization of exoplanets, we must also develop computationally efficient and rigorous methods for making inferences based on these data.
@@ -166,6 +170,84 @@ It was originally developed for deep learning, but it was adopted by the \pymc\ 
 In our experiments, the combination of \theano\ and \pymc\ provided the best balance of modern inference features, ease of use, and computational efficiency of all the existing \python-first modeling frameworks.
 The \stan\ project provides a more mature and feature-rich set of inference methods, but it is more difficult to build and debug the complicated physical models that are required by exoplanet applications using the \stan\ modeling language.
 Furthermore, as discussed below, we must provide custom astronomy-specific operations as part of this library and, while it is possible to extend the \stan\ math library, we found it to be much easier to develop, test, and release the necessary features using \pymc\ and \theano.
+
+
+\section{Orbital conventions}
+We choose to follow a set of orbital conventions that respects as many of the established conventions while also hewing to sensible choices of right-hand rule.
+
+The orbit is specified in the perifocal plane $x,y,z$, technically in the $x,y$ plane, where $z=0$. Then, the choice is to decide how to rotate this coordinate frame into the observed frame, which is specified by $X,Y,Z$.
+
+Where does the $+Z$ axis point? Towards observer. X is north, Y is east.
+
+What is the definition of the ascending node? Where the secondary is receeding from the observer.
+
+To do this, we consider the rotation matrices
+\begin{equation}
+  \boldsymbol{P}_x(\phi) = \left [
+  \begin{array}{ccc}
+    1 & 0 & 0 \\
+    0 & \cos \phi & - \sin \phi \\
+    0 & \sin \phi & \cos \phi \\
+    \end{array}\right]
+\end{equation}
+\begin{equation}
+  \boldsymbol{P}_z (\phi) = \left [
+  \begin{array}{ccc}
+    \cos \phi & - \sin \phi & 0\\
+    \sin \phi & \cos \phi & 0 \\
+    0 & 0 & 1 \\
+    \end{array}\right].
+\end{equation}
+These rotation matrices result in a \emph{clockwise} rotation of the axes, as defined using the right hand rule. This means when we look down the $z$-axis, for a positive angle $\phi$, it would be as if the $x$ and $y$ axes rotated clockwise.
+In order to find out what defines counter-clockwise when considering the other rotations, we look to the right hand rule and cross products of the axes unit vectors. Since, $\hat{\bm x} \times \hat{\bm y} = \hat{\bm z}$, we know that when looking down the $z$ axis the direction of the $x$-axis towards the $y$-axis defines counter clockwise.
+Similarly, we have $\hat{{\bm y}} \times \hat{{\bm z}} = \hat{{\bm x}}$, and $\hat{{\bm z}} \times \hat{{\bm x}} = \hat{{\bm y}}$.
+
+One can see how we need to rotate by referencing Figure~\ref{fig:orbit3D}. The three rotations are (i) a rotation about the $z$-axis through an angle $\omega$ so that the $x$-axis coincides with the line of nodes at the ascending node (ii) a rotation about the $x$-axis through an angle ($-i$) so that the two planes are coincident and finally (iii) a rotation about the $z$-axis through an angle $\Omega$. As one might notice, we break from some conventions \citep[e.g.,][]{Murray:2010} in using a negative rotation for inclination, which is due to the change in how we label the ascending node. Applying these rotation matrices yields
+\begin{equation}
+  \left [ \begin{array}{c}
+  X \\
+  Y \\
+  Z \\
+\end{array}
+  \right ] =
+  \boldsymbol{P}_z (\Omega) \boldsymbol{P}_x(-i) \boldsymbol{P}_z(\omega)
+  \left [
+  \begin{array}{c}
+  x \\
+  y \\
+  z \\
+  \end{array}
+  \right]
+\end{equation}
+
+\begin{equation}
+  \begin{array}{lc}
+    X =& r [ \cos \Omega (\cos \omega \cos f - \sin \omega \sin f)  - \sin \Omega  \cos i (\sin \omega \cos f + \cos \omega \sin f) ] \\
+    Y =& r [ \sin \Omega (\cos \omega \cos f - \sin \omega \sin f) + \cos \Omega \cos i(\sin \omega \cos f + \cos \omega \sin f) ] \\
+    Z =& - r \sin i (\sin \omega \cos f + \cos \omega \sin f).\\
+\end{array}
+\label{eqn:Z}
+\end{equation}
+
+
+Using the sum angle identities to simplify the calculations, we find
+\begin{equation}
+  \begin{array}{lc}
+    X =& r (\cos \Omega \cos(\omega + f) - \sin(\Omega) \sin(\omega + f) \cos(i)) \\
+    Y =& r (\sin \Omega \cos(\omega + f) + \cos(\Omega) \sin(\omega + f) \cos(i)) \\
+    Z =& - r \sin(\omega + f) \sin(i).\\
+\end{array}
+\label{eqn:Z}
+\end{equation}
+
+
+\begin{figure}[htbp]
+\begin{centering}
+\includegraphics{figures/orbit3D.pdf}
+\oscaption{orbit3D}{\figurelabel{orbit3D}
+The conventions used.}
+\end{centering}
+\end{figure}
 
 \section{The custom operations provided by exoplanet}
 
