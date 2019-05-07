@@ -244,7 +244,7 @@ class KeplerianOrbit(object):
         else:
             a = self.cos_omega * x - self.sin_omega * y
             b = self.sin_omega * x + self.cos_omega * y
-        return (a, self.cos_incl * b, self.sin_incl * b)
+        return (a, self.cos_incl * b, -self.sin_incl * b)
 
     def _warp_times(self, t):
         return tt.shape_padright(t)
@@ -358,6 +358,11 @@ class KeplerianOrbit(object):
     def get_radial_velocity(self, t, K=None, output_units=None):
         """Get the radial velocity of the star
 
+        .. note:: The convention in exoplanet is that positive `z` points
+            *towards* the observer. However, for consistency with radial
+            velocity literature this method returns values where positive
+            radial velocity corresponds to a redshift as expected.
+
         Args:
             t: The times where the radial velocity should be evaluated.
             K (Optional): The semi-amplitudes of the orbits. If provided, the
@@ -389,7 +394,7 @@ class KeplerianOrbit(object):
             output_units = u.m / u.s
         conv = (1 * u.R_sun / u.day).to(output_units).value
         v = self.get_star_velocity(t)
-        return conv * v[2]
+        return -conv * v[2]
 
     def in_transit(self, t, r=0.0, texp=None):
         """Get a list of timestamps that are in transit
