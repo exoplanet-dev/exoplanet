@@ -25,7 +25,7 @@ namespace contact_points {
         , cosw(cosw_)
         , sinw(sinw_)
         , cosi(cosi_)
-        , sini(sini_)
+        , sini(-sini_)
         , quad(6)
       {
         build_quadratic();
