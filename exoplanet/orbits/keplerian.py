@@ -229,7 +229,7 @@ class KeplerianOrbit(object):
         else:
             a = self.cos_omega * x - self.sin_omega * y
             b = self.sin_omega * x + self.cos_omega * y
-        return (a, self.cos_incl * b, -self.sin_incl * b)
+        return (a, self.cos_incl * b, self.sin_incl * b)
 
     def _warp_times(self, t):
         return tt.shape_padright(t)
