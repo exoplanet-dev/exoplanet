@@ -25,7 +25,7 @@ namespace contact_points {
         , cosw(cosw_)
         , sinw(sinw_)
         , cosi(cosi_)
-        , sini(sini_)
+        , sini(-sini_)
         , quad(6)
       {
         build_quadratic();
@@ -103,9 +103,9 @@ namespace contact_points {
         }
         auto const z2 = 0.5 * sqrt(arg) / b2;
         Scalar z = z1 + z2;
-        if (z > 0) {
+        if (z < 0) {
           z = z1 - z2;
-          if (z > 0) {
+          if (z < 0) {
             return std::make_tuple<bool, Scalar, Scalar>(false, 0, 0);
           }
         }

@@ -40,7 +40,7 @@ class TestLimbDark(utt.InferShapeTester):
 
     def test_los(self):
         f, _, in_args = self.get_args()
-        in_args[-1] = np.ones_like(in_args[-1])
+        in_args[-1] = -np.ones_like(in_args[-1])
         out = f(*in_args)
         utt.assert_allclose(0.0, out)
 
