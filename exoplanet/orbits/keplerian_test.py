@@ -60,6 +60,7 @@ def test_center_of_mass():
         period=np.array([100.0, 37.3]),
         ecc=np.array([0.1, 0.8]),
         omega=np.array([0.5, 1.3]),
+        Omega=np.array([0.0, 1.0]),
         incl=np.array([0.25*np.pi, 0.3*np.pi]),
         m_planet=m_planet,
     )
@@ -85,6 +86,7 @@ def test_velocity():
         period=100.0,
         ecc=0.1,
         omega=0.5,
+        Omega=1.0,
         incl=0.25*np.pi,
         m_planet=m_planet,
     )
@@ -118,6 +120,7 @@ def test_in_transit():
         period=np.array([10.0, 5.3]),
         ecc=np.array([0.1, 0.8]),
         omega=np.array([0.5, 1.3]),
+        Omega=np.array([0.0, 1.0]),
         m_planet=m_planet,
     )
 
