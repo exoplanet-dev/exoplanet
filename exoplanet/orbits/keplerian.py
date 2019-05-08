@@ -123,17 +123,18 @@ class KeplerianOrbit(object):
             self.sin_omega = tt.sin(self.omega)
 
             if Omega is None:
-                Omega = 0.0
-            self.Omega = tt.as_tensor_variable(Omega)
-            self.cos_Omega = tt.cos(self.Omega)
-            self.sin_Omega = tt.sin(self.Omega)
+                self.Omega = None
+            else:
+                self.Omega = tt.as_tensor_variable(Omega)
+                self.cos_Omega = tt.cos(self.Omega)
+                self.sin_Omega = tt.sin(self.Omega)
 
             opsw = 1 + self.sin_omega
             E0 = 2 * tt.arctan2(tt.sqrt(1-self.ecc)*self.cos_omega,
                                 tt.sqrt(1+self.ecc)*opsw)
             self.M0 = E0 - self.ecc * tt.sin(E0)
             if t_periastron is not None:
-                self.tref = t_periastron
+                self.tref = tt.as_tensor_variable(t_periastron)
             else:
                 self.tref = self.t0 - self.M0 / self.n
 
@@ -238,13 +239,38 @@ class KeplerianOrbit(object):
         return a, period, rho_star * self.gcc_to_sun, r_star, m_star
 
     def _rotate_vector(self, x, y):
+        '''
+        Apply the rotation matrices to go from x0,y0,z0 to observer frame X,Y,Z
+
+        In order,
+        1. rotate about the z axis by an amount omega -> x1, y1, z1
+        2. rotate about the x1 axis by an amount -incl -> x2, y2, z2
+        3. rotate about the z2 axis by an amount Omega -> x3, y3, z3
+
+        Returns: (X, Y, Z)
+        '''
+
+        # 1) rotate about z0 axis by omega
         if self.ecc is None:
-            a = x
-            b = y
+            x1 = x
+            y1 = y
         else:
-            a = self.cos_omega * x - self.sin_omega * y
-            b = self.sin_omega * x + self.cos_omega * y
-        return (a, self.cos_incl * b, -self.sin_incl * b)
+            x1 = self.cos_omega * x - self.sin_omega * y
+            y1 = self.sin_omega * x + self.cos_omega * y
+
+        # 2) rotate about x1 axis by -incl
+        x2 = x1
+        y2 = self.cos_incl * y1
+        # z3 = z2, subsequent rotation by Omega doesn't affect it
+        Z = -self.cos_incl * y1
+
+        # 3) rotate about z2 axis by Omega
+        if self.Omega is None:
+            return (x2, y2, Z)
+        else:
+            X = self.cos_Omega * x2 - self.sin_Omega * y2
+            Y = self.sin_Omega * x2 + self.cos_Omega * y2
+            return (X, Y, Z)
 
     def _warp_times(self, t):
         return tt.shape_padright(t)
@@ -299,7 +325,7 @@ class KeplerianOrbit(object):
                      for x in self._get_position(self.a_star, t))
 
     def get_relative_position(self, t):
-        """The planets' positions relative to the star
+        """The planets' positions relative to the star in the X,Y,Z frame.
 
         .. note:: This treats each planet independently and does not take the
             other planets into account when computing the position of the
@@ -315,6 +341,28 @@ class KeplerianOrbit(object):
         """
         return tuple(tt.squeeze(x)
                      for x in self._get_position(-self.a, t))
+
+    def get_relative_angles(self, t):
+        """The planets' relative position to the star in the sky plane, in
+        separation, position angle coordinates.
+
+        Args:
+            t: The times where the position should be evaluated.
+
+        Returns:
+            The separation (arcseconds) and position angle (radians,
+            measured east of north) of the planet relative to the star.
+
+        """
+
+        X, Y, Z = self._get_position(-self.a, t)
+
+        # calculate rho and theta
+        rho = tt.sqrt(X**2 + Y**2) # arcsec
+        theta = tt.arctan2(Y,X) # radians between [-pi, pi]
+
+        return (rho, theta)
+
 
     def _get_velocity(self, m, t):
         f = self._get_true_anomaly(t)
