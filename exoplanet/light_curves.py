@@ -118,7 +118,10 @@ class StarryLightCurve(object):
             if texp.ndim == 0:
                 dt = texp * dt
             else:
-                dt = tt.shape_padright(texp) * dt
+                if use_in_transit:
+                    dt = tt.shape_padright(texp[inds]) * dt
+                else:
+                    dt = tt.shape_padright(texp) * dt
             tgrid = tt.shape_padright(t) + dt
 
             # Madness to get the shapes to work out...

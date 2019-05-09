@@ -73,6 +73,38 @@ def test_in_transit():
     utt.assert_allclose(*vals)
 
 
+def test_variable_texp():
+    t = np.linspace(-20, 20, 1000)
+    m_planet = np.array([0.3, 0.5])
+    m_star = 1.45
+    orbit = KeplerianOrbit(
+        m_star=m_star,
+        r_star=1.5,
+        t0=np.array([0.5, 17.4]),
+        period=np.array([10.0, 5.3]),
+        ecc=np.array([0.1, 0.8]),
+        omega=np.array([0.5, 1.3]),
+        m_planet=m_planet,
+    )
+    u = np.array([0.2, 0.3, 0.1, 0.5])
+    r = np.array([0.1, 0.01])
+    texp0 = 0.1
+
+    lc = StarryLightCurve(u)
+    model1 = lc.get_light_curve(r=r, orbit=orbit, t=t, texp=texp0,
+                                use_in_transit=False)
+    model2 = lc.get_light_curve(r=r, orbit=orbit, t=t, use_in_transit=False,
+                                texp=texp0 + np.zeros_like(t))
+    vals = theano.function([], [model1, model2])()
+    utt.assert_allclose(*vals)
+
+    model1 = lc.get_light_curve(r=r, orbit=orbit, t=t, texp=texp0)
+    model2 = lc.get_light_curve(r=r, orbit=orbit, t=t,
+                                texp=texp0 + np.zeros_like(t))
+    vals = theano.function([], [model1, model2])()
+    utt.assert_allclose(*vals)
+
+
 def test_contact_bug():
     orbit = KeplerianOrbit(period=3.456, ecc=0.6, omega=-1.5)
     t = np.linspace(-0.1, 0.1, 1000)
