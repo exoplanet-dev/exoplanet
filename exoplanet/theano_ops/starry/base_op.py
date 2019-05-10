@@ -24,7 +24,7 @@ class StarryBaseOp(gof.COp):
         return get_cache_version()
 
     def c_headers(self, compiler):
-        return ["theano_helpers.h"]
+        return ["theano_helpers.h", "integrate.h", "functors.h"]
 
     def c_header_dirs(self, compiler):
         return [
