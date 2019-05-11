@@ -85,7 +85,6 @@ namespace vice {
           auto S = L_->S;
           auto grad = L_->dSdb.dot(cvec_) * b.derivatives() + L_->dSdr.dot(cvec_) * r_.derivatives();
           T val = T(S.dot(cvec_) - 1, grad);
-
           val.derivatives().tail(grad.rows() - 4) += S.transpose();
 
           return val;

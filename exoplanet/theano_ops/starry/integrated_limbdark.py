@@ -34,10 +34,10 @@ class IntegratedLimbDarkOp(StarryBaseOp):
         self.include_contacts = bool(include_contacts)
         super(IntegratedLimbDarkOp, self).__init__()
 
-    def make_node(self, c, b, r, los, dbdt, d2bdt2, dt):
+    def make_node(self, c, b, r, los, bt, btt, dt):
         in_args = []
         dtype = theano.config.floatX
-        for a in [c, b, r, los, dbdt, d2bdt2, dt]:
+        for a in [c, b, r, los, bt, btt, dt]:
             try:
                 a = tt.as_tensor_variable(a)
             except tt.AsTensorError:
@@ -63,8 +63,8 @@ class IntegratedLimbDarkOp(StarryBaseOp):
             shapes[1], shapes[2], shapes[4], shapes[5])
 
     def grad(self, inputs, gradients):
-        c, b, r, los, dbdt, d2bdt2, dt = inputs
-        f, dfdcl, dfdb, dfdr, dfdbdot, dfdbdotdot = self(*inputs)
+        c, b, r, los, bt, btt, dt = inputs
+        f, dfdcl, dfdb, dfdr, dfdbt, dfdbtt = self(*inputs)
         bf = gradients[0]
         for i, g in enumerate(gradients[1:]):
             if not isinstance(g.type, theano.gradient.DisconnectedType):
@@ -74,10 +74,10 @@ class IntegratedLimbDarkOp(StarryBaseOp):
                     tt.reshape(dfdcl, (c.size, bf.size)), axis=-1)
         bb = bf * dfdb
         br = bf * dfdr
-        bbdot = bf * dfdbdot
-        bbdotdot = bf * dfdbdotdot
+        bbt = bf * dfdbt
+        bbtt = bf * dfdbtt
         return (
-            bc, bb, br, tt.zeros_like(los), bbdot, bbdotdot, tt.zeros_like(dt))
+            bc, bb, br, tt.zeros_like(los), bbt, bbtt, tt.zeros_like(dt))
 
     def R_op(self, inputs, eval_points):
         if eval_points[0] is None:
