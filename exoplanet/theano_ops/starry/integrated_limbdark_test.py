@@ -19,21 +19,21 @@ class TestIntegratedLimbDark(utt.InferShapeTester):
         self.op = IntegratedLimbDarkOp()
 
     def get_args(self):
-        np.random.seed(12345)
+        np.random.seed(1234)
 
-        c = tt.vector()
-        b = tt.vector()
-        r = tt.vector()
-        los = tt.vector()
-        db = tt.vector()
-        d2b = tt.vector()
-        dt = tt.vector()
+        c = tt.dvector()
+        b = tt.dvector()
+        r = tt.dvector()
+        los = tt.dvector()
+        db = tt.dvector()
+        d2b = tt.dvector()
+        dt = tt.dvector()
         f = theano.function([c, b, r, los, db, d2b, dt],
                             self.op(c, b, r, los, db, d2b, dt)[0])
 
-        c_val = np.array([-0.85, 2.5, -0.425, 0.1])
+        c_val = np.array([0.14691226,  0.25709645, -0.01836403])
         b_val = np.linspace(-1.5, 1.5, 100)
-        r_val = 0.1 + np.zeros_like(b_val)
+        r_val = np.random.uniform(0.01, 0.2, len(b_val))
         los_val = np.ones_like(b_val)
         db_val = np.random.uniform(-10, 10, len(b_val))
         d2b_val = np.random.uniform(-10, 10, len(b_val))
@@ -64,6 +64,6 @@ class TestIntegratedLimbDark(utt.InferShapeTester):
                                 self.op_class)
 
     def test_grad(self):
-        _, _, in_args = self.get_args()
-        func = lambda *args: self.op(*args)[0]  # NOQA
-        utt.verify_grad(func, in_args)
+        _, args, in_args = self.get_args()
+        func = lambda *args: self.op(*(list(args) + in_args[2:]))[0]  # NOQA
+        utt.verify_grad(func, in_args[:2])

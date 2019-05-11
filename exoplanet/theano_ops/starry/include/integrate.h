@@ -8,91 +8,7 @@
 namespace vice {
   namespace integrate {
 
-    using std::abs;
-
-  struct riemann {
-
-    template <typename Scalar, typename Functor>
-    inline Scalar operator() (Functor& func, Scalar lower, Scalar upper, unsigned points) {
-      Scalar nothing = 0;
-      return this->operator()(func, lower, upper, nothing, nothing, points);
-    }
-
-    template <typename Scalar, typename Functor>
-    inline Scalar operator() (Functor& func, Scalar lower, Scalar upper, Scalar ym, Scalar yp, unsigned points) {
-      points = std::max<unsigned>(1, points);
-
-      Scalar dx = (upper - lower) / points;
-      Scalar x = lower + 0.5 * dx;
-      Scalar f = Scalar(0);
-      for (unsigned i = 0; i < points; ++i) {
-        f += func(x);
-        x += dx;
-      }
-
-      return dx * f;
-    }
-
-  };
-
-  struct trapezoid_adapt {
-
-    template <typename Scalar, typename Functor>
-    inline Scalar inner (Functor& func, Scalar x1, Scalar x2, Scalar y1, Scalar y2, Scalar tol, unsigned max_depth, unsigned depth) {
-      Scalar x0 = 0.5 * (x1 + x2);
-      Scalar val = func(x0);
-      Scalar dx = (x2 - x1);
-      Scalar pred = 0.5 * dx * (y1 + y2);
-      Scalar integral = 0.25 * dx * (y1 + 2*val + y2);
-
-      if (depth < max_depth && std::abs(pred - integral) > tol) {
-        integral = inner<Scalar, Functor>(func, x1, x0, y1, val, tol, max_depth, depth+1);
-        integral += inner<Scalar, Functor>(func, x0, x2, val, y2, tol, max_depth, depth+1);
-      }
-
-      return integral;
-    }
-
-    template <typename Scalar, typename Functor>
-    inline Scalar operator() (Functor& func, Scalar lower, Scalar upper, Scalar tol, unsigned max_depth=50) {
-      Scalar ym = func(lower);
-      Scalar yp = func(upper);
-      return this->operator()(func, lower, upper, ym, yp, tol, max_depth);
-    }
-
-    template <typename Scalar, typename Functor>
-    inline Scalar operator() (Functor& func, Scalar lower, Scalar upper, Scalar ym, Scalar yp, Scalar tol, unsigned max_depth=50) {
-      return inner<Scalar, Functor> (func, lower, upper, ym, yp, tol, max_depth, 0);
-    }
-
-  };
-
-  struct trapezoid_fixed {
-
-    template <typename Scalar, typename Functor>
-    inline Scalar operator() (Functor& func, Scalar lower, Scalar upper, unsigned points) {
-      Scalar ym = func(lower);
-      Scalar yp = func(upper);
-      return this->operator()(func, lower, upper, ym, yp, points);
-    }
-
-    template <typename Scalar, typename Functor>
-    inline Scalar operator() (Functor& func, Scalar lower, Scalar upper, Scalar ym, Scalar yp, unsigned points) {
-      points = std::max<unsigned>(2, points);
-
-      Scalar dx = (upper - lower) / (points - 1);
-      Scalar x = lower + dx;
-      Scalar f = 0.5 * ym;
-      for (unsigned i = 1; i < points - 1; ++i) {
-        f += func(x);
-        x += dx;
-      }
-      f += 0.5 * yp;
-
-      return dx * f;
-    }
-
-  };
+  using std::abs;
 
   struct simpson_adapt {
 
@@ -137,32 +53,6 @@ namespace vice {
       }
 
       return inner<XScalar, YScalar, Functor> (func, x0, dx, ym, y0, yp, tol, max_depth, min_depth, 0);
-    }
-  };
-
-  struct simpson_fixed {
-
-    template <typename Scalar, typename Functor>
-    inline Scalar operator() (Functor& func, Scalar lower, Scalar upper, unsigned points) {
-      Scalar ym = func(lower);
-      Scalar yp = func(upper);
-      return this->operator()(func, lower, upper, ym, yp, points);
-    }
-
-    template <typename Scalar, typename Functor>
-    inline Scalar operator() (Functor& func, Scalar lower, Scalar upper, Scalar ym, Scalar yp, unsigned points) {
-      points = std::max<unsigned>(3, points + (points + 1) % 2);  // points must be odd
-
-      Scalar dx = (upper - lower) / (points - 1);
-      Scalar x = lower + dx;
-      Scalar f = ym;
-      for (unsigned i = 1; i < points - 1; ++i) {
-        f += (2 + 2 * (i % 2)) * func(x);
-        x += dx;
-      }
-      f += yp;
-
-      return dx * f / 3;
     }
 
   };
