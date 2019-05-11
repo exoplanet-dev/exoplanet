@@ -71,20 +71,20 @@ int APPLY_SPECIFIC(integrated_limbdark)(
     return 1;
   }
 
-  DTYPE_INPUT_0* c      = (DTYPE_INPUT_0*) PyArray_DATA(input0);
-  DTYPE_INPUT_1* b      = (DTYPE_INPUT_1*) PyArray_DATA(input1);
-  DTYPE_INPUT_2* r      = (DTYPE_INPUT_2*) PyArray_DATA(input2);
-  DTYPE_INPUT_3* los    = (DTYPE_INPUT_3*) PyArray_DATA(input3);
-  DTYPE_INPUT_4* dbdt   = (DTYPE_INPUT_4*) PyArray_DATA(input4);
-  DTYPE_INPUT_5* d2bdt2 = (DTYPE_INPUT_5*) PyArray_DATA(input5);
-  DTYPE_INPUT_6* dt     = (DTYPE_INPUT_6*) PyArray_DATA(input6);
+  DTYPE_INPUT_0* c   = (DTYPE_INPUT_0*) PyArray_DATA(input0);
+  DTYPE_INPUT_1* b   = (DTYPE_INPUT_1*) PyArray_DATA(input1);
+  DTYPE_INPUT_2* r   = (DTYPE_INPUT_2*) PyArray_DATA(input2);
+  DTYPE_INPUT_3* los = (DTYPE_INPUT_3*) PyArray_DATA(input3);
+  DTYPE_INPUT_4* bt  = (DTYPE_INPUT_4*) PyArray_DATA(input4);
+  DTYPE_INPUT_5* btt = (DTYPE_INPUT_5*) PyArray_DATA(input5);
+  DTYPE_INPUT_6* dt  = (DTYPE_INPUT_6*) PyArray_DATA(input6);
 
-  DTYPE_OUTPUT_0* f          = (DTYPE_OUTPUT_0*)PyArray_DATA(*output0);
-  DTYPE_OUTPUT_1* dfdcl      = (DTYPE_OUTPUT_1*)PyArray_DATA(*output1);
-  DTYPE_OUTPUT_2* dfdb       = (DTYPE_OUTPUT_2*)PyArray_DATA(*output2);
-  DTYPE_OUTPUT_3* dfdr       = (DTYPE_OUTPUT_3*)PyArray_DATA(*output3);
-  DTYPE_OUTPUT_4* dfdbdot    = (DTYPE_OUTPUT_4*)PyArray_DATA(*output4);
-  DTYPE_OUTPUT_5* dfdbdotdot = (DTYPE_OUTPUT_5*)PyArray_DATA(*output5);
+  DTYPE_OUTPUT_0* f      = (DTYPE_OUTPUT_0*)PyArray_DATA(*output0);
+  DTYPE_OUTPUT_1* dfdcl  = (DTYPE_OUTPUT_1*)PyArray_DATA(*output1);
+  DTYPE_OUTPUT_2* dfdb   = (DTYPE_OUTPUT_2*)PyArray_DATA(*output2);
+  DTYPE_OUTPUT_3* dfdr   = (DTYPE_OUTPUT_3*)PyArray_DATA(*output3);
+  DTYPE_OUTPUT_4* dfdbt  = (DTYPE_OUTPUT_4*)PyArray_DATA(*output4);
+  DTYPE_OUTPUT_5* dfdbtt = (DTYPE_OUTPUT_5*)PyArray_DATA(*output5);
 
   Eigen::Map<Eigen::Matrix<DTYPE_OUTPUT_1, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> dfdcl_mat(dfdcl, Nc, Nb);
   dfdcl_mat.setZero();
@@ -109,17 +109,17 @@ int APPLY_SPECIFIC(integrated_limbdark)(
 
 
   for (npy_intp i = 0; i < Nb; ++i) {
-    f[i] = 0;
-    dfdb[i] = 0;
-    dfdr[i] = 0;
-    dfdbdot[i] = 0;
-    dfdbdotdot[i] = 0;
+    f[i]      = 0;
+    dfdb[i]   = 0;
+    dfdr[i]   = 0;
+    dfdbt[i]  = 0;
+    dfdbtt[i] = 0;
 
     if (los[i] > 0) {
       auto r_      = Diff(r[i], n_grad, 0);
       auto b_      = Diff(b[i], n_grad, 1);
-      auto dbdt_   = Diff(dbdt[i], n_grad, 2);
-      auto d2bdt2_ = Diff(d2bdt2[i], n_grad, 3);
+      auto dbdt_   = Diff(bt[i], n_grad, 2);
+      auto d2bdt2_ = Diff(btt[i], n_grad, 3);
 
       int nlim = func.setup(r_, b_, dbdt_, d2bdt2_, dt[i], limits, include_contacts);
       auto ym = func(limits[0]);
@@ -129,10 +129,10 @@ int APPLY_SPECIFIC(integrated_limbdark)(
           f[i] += val.value();
 
           auto grad = val.derivatives();
-          dfdr[i]       += grad(0);
-          dfdb[i]       += grad(1);
-          dfdbdot[i]    += grad(2);
-          dfdbdotdot[i] += grad(3);
+          dfdr[i]   += grad(0);
+          dfdb[i]   += grad(1);
+          dfdbt[i]  += grad(2);
+          dfdbtt[i] += grad(3);
           dfdcl_mat.col(i) += grad.tail(grad.rows() - 4).transpose();
 
           ym = yp;
