@@ -346,6 +346,10 @@ class KeplerianOrbit(object):
         """The planets' relative position to the star in the sky plane, in
         separation, position angle coordinates.
 
+        .. note:: This treats each planet independently and does not take the
+            other planets into account when computing the position of the
+            star. This is fine as long as the planet masses are small.
+
         Args:
             t: The times where the position should be evaluated.
 
@@ -358,8 +362,8 @@ class KeplerianOrbit(object):
         X, Y, Z = self._get_position(-self.a, t)
 
         # calculate rho and theta
-        rho = tt.sqrt(X**2 + Y**2) # arcsec
-        theta = tt.arctan2(Y,X) # radians between [-pi, pi]
+        rho = tt.squeeze(tt.sqrt(X**2 + Y**2)) # arcsec
+        theta = tt.squeeze(tt.arctan2(Y,X)) # radians between [-pi, pi]
 
         return (rho, theta)
 
