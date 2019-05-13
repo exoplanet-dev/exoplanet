@@ -369,6 +369,9 @@ class KeplerianOrbit(object):
 
 
     def _get_velocity(self, m, t):
+        """
+        Get the velocity vector of a body in v_x, v_y, v_z
+        """
         f = self._get_true_anomaly(t)
         K = self.K0 * m
         if self.ecc is None:
