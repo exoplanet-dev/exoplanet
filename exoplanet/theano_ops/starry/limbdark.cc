@@ -44,10 +44,10 @@ int APPLY_SPECIFIC(limbdark)(
   shape[0] = Nc;
   for (npy_intp i = 0; i < ndim; ++i) shape[i+1] = dims[i];
 
-  success += allocate_output(ndim, dims, TYPENUM_OUTPUT_0, output0);
-  success += allocate_output(ndim+1, &(shape[0]), TYPENUM_OUTPUT_1, output1);
-  success += allocate_output(ndim, dims, TYPENUM_OUTPUT_2, output2);
-  success += allocate_output(ndim, dims, TYPENUM_OUTPUT_3, output3);
+  auto f = allocate_output<DTYPE_OUTPUT_0>(ndim, dims, TYPENUM_OUTPUT_0, output0, &success);
+  auto dfdcl = allocate_output<DTYPE_OUTPUT_1>(ndim+1, &(shape[0]), TYPENUM_OUTPUT_1, output1, &success);
+  auto dfdb = allocate_output<DTYPE_OUTPUT_2>(ndim, dims, TYPENUM_OUTPUT_2, output2, &success);
+  auto dfdr = allocate_output<DTYPE_OUTPUT_3>(ndim, dims, TYPENUM_OUTPUT_3, output3, &success);
   if (success) {
     return 1;
   }
@@ -56,11 +56,6 @@ int APPLY_SPECIFIC(limbdark)(
   DTYPE_INPUT_1* b   = (DTYPE_INPUT_1*) PyArray_DATA(input1);
   DTYPE_INPUT_2* r   = (DTYPE_INPUT_2*) PyArray_DATA(input2);
   DTYPE_INPUT_3* los = (DTYPE_INPUT_3*) PyArray_DATA(input3);
-
-  DTYPE_OUTPUT_0* f     = (DTYPE_OUTPUT_0*)PyArray_DATA(*output0);
-  DTYPE_OUTPUT_1* dfdcl = (DTYPE_OUTPUT_1*)PyArray_DATA(*output1);
-  DTYPE_OUTPUT_2* dfdb  = (DTYPE_OUTPUT_2*)PyArray_DATA(*output2);
-  DTYPE_OUTPUT_3* dfdr  = (DTYPE_OUTPUT_3*)PyArray_DATA(*output3);
 
   Eigen::Map<Eigen::Matrix<DTYPE_OUTPUT_1, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> dfdcl_mat(dfdcl, Nc, Nb);
   dfdcl_mat.setZero();
