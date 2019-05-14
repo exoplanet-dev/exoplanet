@@ -10,13 +10,13 @@ int APPLY_SPECIFIC(get_cl)(
   int success = get_size(input0, &N);
   if (success) return 1;
 
-  success += allocate_output(PyArray_NDIM(input0), PyArray_DIMS(input0), TYPENUM_OUTPUT_0, output0);
+  auto c = allocate_output<DTYPE_OUTPUT_0>(PyArray_NDIM(input0), PyArray_DIMS(input0), TYPENUM_OUTPUT_0, output0, &success);
   if (success) {
     return 1;
   }
 
   DTYPE_INPUT_0*  u = (DTYPE_INPUT_0*)PyArray_DATA(input0);
-  DTYPE_OUTPUT_0* c = (DTYPE_OUTPUT_0*)PyArray_DATA(*output0);
+  // DTYPE_OUTPUT_0* c = (DTYPE_OUTPUT_0*)PyArray_DATA(*output0);
 
   Eigen::Matrix<T, Eigen::Dynamic, 1> a(N);
   a.setZero();
