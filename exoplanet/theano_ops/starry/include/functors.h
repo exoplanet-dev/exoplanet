@@ -93,7 +93,7 @@ namespace vice {
         T operator() (Scalar t) {
           if (z_ + zt_ * t <= 0) return 0.0 * r_;
           T b = get_b(t);
-          if (b >= 1 + r_) return 0.0 * b;
+          if (b >= 1 + r_ - 1e-8) return 0.0 * b;
           num_eval_++;
 
           L_->compute(b.value(), r_.value(), true);
