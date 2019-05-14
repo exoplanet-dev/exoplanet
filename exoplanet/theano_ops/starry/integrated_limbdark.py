@@ -34,37 +34,36 @@ class IntegratedLimbDarkOp(StarryBaseOp):
         self.include_contacts = bool(include_contacts)
         super(IntegratedLimbDarkOp, self).__init__()
 
-    def make_node(self, c, b, r, los, bt, btt, dt):
-        in_args = []
+    def make_node(self, *args):
+        if len(args) != 11:
+            raise ValueError("wrong number of inputs")
         dtype = theano.config.floatX
-        for a in [c, b, r, los, bt, btt, dt]:
-            try:
-                a = tt.as_tensor_variable(a)
-            except tt.AsTensorError:
-                pass
-            else:
-                dtype = theano.scalar.upcast(dtype, a.dtype)
-            in_args.append(a)
-
+        in_args = [tt.as_tensor_variable(a) for a in args]
         out_args = [
             in_args[1].type(),
-            tt.TensorType(dtype=dtype,
+            tt.TensorType(dtype=theano.config.floatX,
                           broadcastable=[False] * (in_args[1].ndim + 1))(),
             in_args[1].type(),
             in_args[2].type(),
+            in_args[3].type(),
             in_args[4].type(),
             in_args[5].type(),
+            in_args[6].type(),
+            in_args[7].type(),
+            tt.lscalar().type(),
         ]
         return gof.Apply(self, in_args, out_args)
 
     def infer_shape(self, node, shapes):
         return (
             shapes[1], list(shapes[0]) + list(shapes[1]),
-            shapes[1], shapes[2], shapes[4], shapes[5])
+            shapes[1], shapes[2], shapes[3], shapes[4], shapes[5],
+            shapes[6], shapes[7], ())
 
     def grad(self, inputs, gradients):
-        c, b, r, los, bt, btt, dt = inputs
-        f, dfdcl, dfdb, dfdr, dfdbt, dfdbtt = self(*inputs)
+        c, r, x, xt, xtt, y, yt, ytt, z, dt = inputs
+        f, dfdcl, dfdr, dfdx, dfdxt, dfdxtt, dfdy, dfdyt, dfdytt \
+            = self(*inputs)
         bf = gradients[0]
         for i, g in enumerate(gradients[1:]):
             if not isinstance(g.type, theano.gradient.DisconnectedType):
@@ -72,12 +71,16 @@ class IntegratedLimbDarkOp(StarryBaseOp):
                                  .format(i+1))
         bc = tt.sum(tt.reshape(bf, (1, bf.size)) *
                     tt.reshape(dfdcl, (c.size, bf.size)), axis=-1)
-        bb = bf * dfdb
         br = bf * dfdr
-        bbt = bf * dfdbt
-        bbtt = bf * dfdbtt
+        bx = bf * dfdx
+        bxt = bf * dfdxt
+        bxtt = bf * dfdxtt
+        by = bf * dfdy
+        byt = bf * dfdyt
+        bytt = bf * dfdytt
         return (
-            bc, bb, br, tt.zeros_like(los), bbt, bbtt, tt.zeros_like(dt))
+            bc, br, bx, bxt, bxtt, by, byt, bytt,
+            tt.zeros_like(z), tt.zeros_like(dt))
 
     def R_op(self, inputs, eval_points):
         if eval_points[0] is None:
