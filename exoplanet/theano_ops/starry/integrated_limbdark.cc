@@ -114,7 +114,7 @@ int APPLY_SPECIFIC(integrated_limbdark)(
     dfdyt[i]  = 0;
     dfdytt[i] = 0;
 
-    if (z[i] > 0 || (z[i] + 0.5*zt[i] * dt[i]) > 0 || (z[i] - 0.5*zt[i] * dt[i]) > 0) {
+    if (z[i] > 0) {
       auto r_      = Diff(r[i], n_grad, 0);
       auto x_      = Diff(x[i], n_grad, 1);
       auto xt_     = Diff(xt[i], n_grad, 2);
