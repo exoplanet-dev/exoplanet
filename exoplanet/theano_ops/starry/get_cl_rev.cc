@@ -6,17 +6,13 @@ int APPLY_SPECIFIC(get_cl_rev)(
 {
   typedef DTYPE_OUTPUT_0 T;
 
-  npy_intp N;
-  int success = get_size(input0, &N);
+  int success = 0;
+  npy_intp N = -1;
+  auto bc_in = get_input<DTYPE_INPUT_0>(&N, input0, &success);
   if (success) return 1;
 
-  success += allocate_output(PyArray_NDIM(input0), PyArray_DIMS(input0), TYPENUM_OUTPUT_0, output0);
-  if (success) {
-    return 1;
-  }
-
-  DTYPE_INPUT_0*  bc_in = (DTYPE_INPUT_0*)PyArray_DATA(input0);
-  DTYPE_OUTPUT_0* bu = (DTYPE_OUTPUT_0*)PyArray_DATA(*output0);
+  auto bu = allocate_output<DTYPE_OUTPUT_0>(PyArray_NDIM(input0), PyArray_DIMS(input0), TYPENUM_OUTPUT_0, output0, &success);
+  if (success) return 1;
 
   Eigen::Matrix<T, Eigen::Dynamic, 1> bc(N);
   Eigen::Matrix<T, Eigen::Dynamic, 1> ba(N);
