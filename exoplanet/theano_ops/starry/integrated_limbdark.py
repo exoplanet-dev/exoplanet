@@ -61,8 +61,8 @@ class IntegratedLimbDarkOp(StarryBaseOp):
             shapes[6], shapes[7], ())
 
     def grad(self, inputs, gradients):
-        c, r, x, xt, xtt, y, yt, ytt, z, dt = inputs
-        f, dfdcl, dfdr, dfdx, dfdxt, dfdxtt, dfdy, dfdyt, dfdytt \
+        c, r, x, xt, xtt, y, yt, ytt, z, zt, dt = inputs
+        f, dfdcl, dfdr, dfdx, dfdxt, dfdxtt, dfdy, dfdyt, dfdytt, neval \
             = self(*inputs)
         bf = gradients[0]
         for i, g in enumerate(gradients[1:]):
@@ -80,7 +80,7 @@ class IntegratedLimbDarkOp(StarryBaseOp):
         bytt = bf * dfdytt
         return (
             bc, br, bx, bxt, bxtt, by, byt, bytt,
-            tt.zeros_like(z), tt.zeros_like(dt))
+            tt.zeros_like(z), tt.zeros_like(zt), tt.zeros_like(dt))
 
     def R_op(self, inputs, eval_points):
         if eval_points[0] is None:
