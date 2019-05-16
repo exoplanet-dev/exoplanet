@@ -1,10 +1,14 @@
 {% if READTHEDOCS and current_version %}
 {%- set this_version = current_version %}
-{%- set this_branch = readthedocs.v1.vcs.version %}
 {% else %}
 {%- set this_version = 'latest' %}
+{% endif %}
+{% if github_version is defined %}
+{%- set this_branch = github_version %}
+{% else %}
 {%- set this_branch = 'master' %}
 {% endif %}
+
 
 <p>
   <a href="https://github.com/dfm/exoplanet">
