@@ -1,8 +1,6 @@
 exoplanet
 =========
 
-.. include:: badges.rst
-
 *exoplanet* is a toolkit for probabilistic modeling of transit and/or radial
 velocity observations of `exoplanets <https://en.wikipedia.org/wiki/Exoplanet>`_
 and other astronomical time series using `PyMC3 <https://docs.pymc.io>`_.
