@@ -111,8 +111,6 @@ def test_velocity():
     for i in range(3):
         g = theano.grad(tt.sum(pos[i]), t_tensor)
         vel_expect[i] = theano.function([t_tensor], g)(t)
-    print(vel.shape)
-    print(vel_expect.shape)
     utt.assert_allclose(vel, vel_expect)
 
 
