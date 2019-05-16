@@ -233,6 +233,48 @@ class TermDiff(Term):
         return final_coeffs
 
 
+class IntegratedTerm(Term):
+
+    def __init__(self, term, delta, **kwargs):
+        self.term = term
+        self.delta = tt.as_tensor_variable(delta)
+        super(IntegratedTerm, self).__init__(**kwargs)
+
+    @property
+    def J(self):
+        return self.term.J
+
+    def get_coefficients(self):
+        ar, cr, a, b, c, d = self.term.coefficients
+
+        # Real componenets
+        crd = cr * self.delta
+        coeffs = [
+            ar * (tt.exp(crd) + tt.exp(-crd) - 2) / (crd)**2,
+            cr
+        ]
+
+        # Imaginary coefficients
+        cd = c * self.delta
+        dd = d * self.delta
+        c2 = c**2
+        d2 = d**2
+        factor = 1. / (self.delta * (c2 + d2))**2
+        epcos = (tt.exp(cd) + tt.exp(-cd)) * tt.cos(dd) - 2
+        emsin = (tt.exp(cd) - tt.exp(-cd)) * tt.sin(dd)
+
+        C1 = a*(c2 - d2) + 2*b*c*d
+        C2 = b*(c2 - d2) - 2*a*c*d
+
+        coeffs += [
+            factor*(C1 * epcos - C2 * emsin),
+            factor*(C2 * epcos + C1 * emsin),
+            c, d
+        ]
+
+        return coeffs
+
+
 class RealTerm(Term):
     r"""The simplest celerite term
 
