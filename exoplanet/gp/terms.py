@@ -260,15 +260,15 @@ class IntegratedTerm(Term):
         c2 = c**2
         d2 = d**2
         factor = 1. / (self.delta * (c2 + d2))**2
-        epcos = (tt.exp(cd) + tt.exp(-cd)) * tt.cos(dd) - 2
-        emsin = (tt.exp(cd) - tt.exp(-cd)) * tt.sin(dd)
+        cos_term = tt.cosh(cd) * tt.cos(dd) - 1
+        sin_term = tt.sinh(cd) * tt.sin(dd)
 
-        C1 = a*(c2 - d2) + 2*b*c*d
-        C2 = b*(c2 - d2) - 2*a*c*d
+        C1 = 2*(a*(c2 - d2) + 2*b*c*d)
+        C2 = 2*(b*(c2 - d2) - 2*a*c*d)
 
         coeffs += [
-            factor*(C1 * epcos - C2 * emsin),
-            factor*(C2 * epcos + C1 * emsin),
+            factor*(C1 * cos_term - C2 * sin_term),
+            factor*(C2 * cos_term + C1 * sin_term),
             c, d
         ]
 
