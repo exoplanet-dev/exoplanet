@@ -175,22 +175,35 @@ class KeplerianOrbit(object):
             period = tt.as_tensor_variable(period)
 
         # Compute the implied density if a and period are given
+        implied_rho_star = False
         if a is not None and period is not None:
             if rho_star is not None or m_star is not None:
                 raise ValueError("if both a and period are given, you can't "
                                  "also define rho_star or m_star")
+
+            # Default to a stellar radius of 1 if not provided
             if r_star is None:
-                r_star = 1.0
-            rho_star = 3*np.pi*(a / r_star)**3 / (self.G_grav*period**2)
-            rho_star -= 3*self.m_planet/(4*np.pi*r_star**3)
+                r_star = tt.as_tensor_variable(1.0)
+            else:
+                r_star = tt.as_tensor_variable(r_star)
+
+            # Compute the implied mass via Kepler's 3rd law
+            m_tot = 4*np.pi*np.pi*a**3/(self.G_grav*period**2)
+
+            # Compute the implied density
+            m_star = m_tot - self.m_planet
+            vol_star = 4 * np.pi * r_star**3 / 3.
+            rho_star = self.gcc_to_sun * m_star / vol_star
             rho_star_units = None
+            implied_rho_star = True
 
         # Make sure that the right combination of stellar parameters are given
         if r_star is None and m_star is None:
             r_star = 1.0
             if rho_star is None:
                 m_star = 1.0
-        if sum(arg is None for arg in (rho_star, r_star, m_star)) != 1:
+        if (not implied_rho_star) and sum(arg is None for arg in
+                                          (rho_star, r_star, m_star)) != 1:
             raise ValueError("values must be provided for exactly two of "
                              "rho_star, m_star, and r_star")
 
@@ -210,8 +223,8 @@ class KeplerianOrbit(object):
             rho_star = 3*m_star/(4*np.pi*r_star**3)
         elif r_star is None:
             r_star = (3*m_star/(4*np.pi*rho_star))**(1/3)
-        else:
-            m_star = 4*np.pi*r_star**3*rho_star/3
+        elif m_star is None:
+            m_star = 4*np.pi*r_star**3*rho_star/3.
 
         # Work out the planet parameters
         if a is None:
