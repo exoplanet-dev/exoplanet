@@ -116,7 +116,7 @@ class Term(object):
         return K
 
     def psd(self, omega):
-        ar, cr, ac, bc, cc, dc = self.get_coefficients()
+        ar, cr, ac, bc, cc, dc = self.coefficients
         omega = tt.reshape(omega, tt.concatenate([omega.shape, [1]]),
                            ndim=omega.ndim+1)
         w2 = omega**2
@@ -127,7 +127,7 @@ class Term(object):
         return np.sqrt(2.0 / np.pi) * power
 
     def value(self, tau):
-        ar, cr, ac, bc, cc, dc = self.get_coefficients()
+        ar, cr, ac, bc, cc, dc = self.coefficients
         tau = tt.abs_(tau)
         tau = tt.reshape(tau, tt.concatenate([tau.shape, [1]]),
                          ndim=tau.ndim+1)
@@ -273,6 +273,67 @@ class IntegratedTerm(Term):
         ]
 
         return coeffs
+
+    def psd(self, omega):
+        psd0 = self.term.psd(omega)
+        arg = 0.5 * self.delta * omega
+        sinc = tt.switch(tt.neq(arg, 0), tt.sin(arg) / arg, tt.ones_like(arg))
+        return psd0 * sinc**2
+
+    def value(self, tau0):
+        dt = self.delta
+        ar, cr, a, b, c, d = self.term.coefficients
+
+        # Format the lags correctly
+        tau0 = tt.abs_(tau0)
+        tau = tt.reshape(tau0, tt.concatenate([tau0.shape, [1]]),
+                         ndim=tau0.ndim+1)
+
+        # Precompute some factors
+        dpt = dt + tau
+        dmt = dt - tau
+
+        # Real parts:
+        # tau > Delta
+        crd = cr * dt
+        norm = 1.0 / (crd)**2
+        factor = (tt.exp(crd) + tt.exp(-crd) - 2) * norm,
+        K_large = tt.sum(ar * tt.exp(-cr*tau) * factor, axis=-1)
+
+        # tau < Delta
+        K_small = tt.sum(
+            (2*cr*(dmt) + tt.exp(-cr*dmt) + tt.exp(-cr*dpt)
+             - 2*tt.exp(-cr*tau)) * norm, axis=-1)
+
+        # Complex part
+        cd = c * dt
+        dd = d * dt
+        c2 = c**2
+        d2 = d**2
+        c2pd2 = c2 + d2
+        C1 = a*(c2 - d2) + 2*b*c*d
+        C2 = b*(c2 - d2) - 2*a*c*d
+        norm = 1.0 / (dt * c2pd2)**2
+        k0 = tt.exp(-c*tau)
+        cdt = tt.cos(d*tau)
+        sdt = tt.sin(d*tau)
+
+        # For tau > Delta
+        cos_term = 2*(tt.cosh(cd) * tt.cos(dd) - 1)
+        sin_term = 2*(tt.sinh(cd) * tt.sin(dd))
+        factor = k0 * norm
+        K_large += tt.sum((C1*cos_term - C2*sin_term)*factor*cdt, axis=-1)
+        K_large += tt.sum((C2*cos_term + C1*sin_term)*factor*sdt, axis=-1)
+
+        # Real part
+        edmt = tt.exp(-c*dmt)
+        edpt = tt.exp(-c*dpt)
+        cos_term = edmt*tt.cos(d*dmt) + edpt*tt.cos(d*dpt) - 2*k0*cdt
+        sin_term = edmt*tt.sin(d*dmt) + edpt*tt.sin(d*dpt) - 2*k0*sdt
+        K_small += tt.sum(2*(a*c + b*d)*c2pd2*dmt * norm, axis=-1)
+        K_small += tt.sum((C1 * cos_term + C2 * sin_term) * norm, axis=-1)
+
+        return tt.switch(tt.le(tau0, dt), K_small, K_large)
 
 
 class RealTerm(Term):
