@@ -260,3 +260,32 @@ def test_impact():
     utt.assert_allclose((tt.sqrt(coords[0]**2 + coords[1]**2) / r_star).eval(),
                         b)
     assert coords[2].eval() > 0
+
+
+def test_consistent_coords():
+    import astropy.units as u
+    import astropy.constants as c
+
+    au_to_R_sun = (c.au / c.R_sun).value
+    a_ang = 0.324  # arcsec
+    parallax = 24.05  # milliarcsec
+    dpc = 1e3 / parallax
+    a = a_ang * dpc  # au
+    P = 28.8 * 365.25  # days
+
+    # kappa = a1 / (a1 + a2)
+    kappa = 0.45
+
+    # calculate Mtot from a, P
+    Mtot = (4*np.pi**2*(a*u.au)**3/(c.G*(P*u.day)**2)).to(u.M_sun).value
+
+    M2 = kappa * Mtot
+    M1 = Mtot - M2
+
+    orbit = KeplerianOrbit(a=a * au_to_R_sun, period=P,
+                           m_planet=M2)
+
+    assert np.allclose(M1, orbit.m_star.eval())
+    assert np.allclose(M2, orbit.m_planet.eval())
+    assert np.allclose(Mtot, orbit.m_total.eval())
+
