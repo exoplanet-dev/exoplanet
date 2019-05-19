@@ -43,7 +43,7 @@ int APPLY_SPECIFIC(integrated_limbdark)(
 {
   typedef DTYPE_INPUT_0 Scalar;
 
-  double tol = params->tol;
+  double tol = params->tol * params->tol;
   int min_depth = params->min_depth;
   int max_depth = params->max_depth;
   bool include_contacts = params->include_contacts;
