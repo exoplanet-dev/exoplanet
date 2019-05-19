@@ -25,7 +25,7 @@ class IntegratedLimbDarkOp(StarryBaseOp):
     func_file = "./integrated_limbdark.cc"
     func_name = "APPLY_SPECIFIC(integrated_limbdark)"
 
-    def __init__(self, tol=1e-12, min_depth=0, max_depth=50, Nc=-1,
+    def __init__(self, tol=1e-6, min_depth=0, max_depth=50, Nc=-1,
                  include_contacts=False, **kwargs):
         self.tol = float(tol)
         self.min_depth = max(0, int(min_depth))
