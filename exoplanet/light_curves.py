@@ -253,7 +253,7 @@ class LimbDarkLightCurve(object):
         # Apply the time integrated op
         op = IntegratedLimbDarkOp(**kwargs)
         res = op(self.c_norm, rgrid/orbit.r_star,
-                  x, dx, d2x, y, dy, d2y, z, dz, texp)
+                 x, dx, d2x, y, dy, d2y, z, dz, texp)
         if return_num_eval:
             return res[0], res[-1]
         return res[0]
