@@ -24,6 +24,12 @@
     <h2>{{ theme_tagline }}</h2>
 </div>
 
+{% if pagename == 'index' %}
+{% include 'badges.html' %}
+{% else %}
+<h1>{{ title }}</h1>
+{% endif %}
+
 {#
 {%- if display_toc %}
   <!-- <h3><a href="{{ pathto(master_doc) }}">{{ _('Table of Contents') }}</a></h3> -->

@@ -11,6 +11,7 @@ import theano.tensor as tt
 from .citations import add_citations_to_model
 from .theano_ops.starry.get_cl import GetClOp
 from .theano_ops.starry.limbdark import LimbDarkOp
+from .theano_ops.starry.integrated_limbdark import IntegratedLimbDarkOp
 
 get_cl = GetClOp()
 limbdark = LimbDarkOp()
@@ -118,7 +119,10 @@ class StarryLightCurve(object):
             if texp.ndim == 0:
                 dt = texp * dt
             else:
-                dt = tt.shape_padright(texp) * dt
+                if use_in_transit:
+                    dt = tt.shape_padright(texp[inds]) * dt
+                else:
+                    dt = tt.shape_padright(texp) * dt
             tgrid = tt.shape_padright(t) + dt
 
             # Madness to get the shapes to work out...
@@ -161,3 +165,95 @@ class StarryLightCurve(object):
         if los is None:
             los = tt.ones_like(b)
         return limbdark(self.c_norm, b, r, los)[0]
+
+
+class LimbDarkLightCurve(object):
+
+    """A limb darkened light curve computed using starry
+
+    Args:
+        u (vector): A vector of limb darkening coefficients.
+
+    """
+
+    __citations__ = ("starry", )
+
+    def __init__(self, u, model=None):
+        add_citations_to_model(self.__citations__, model=model)
+        self.u = tt.as_tensor_variable(u)
+        u_ext = tt.concatenate([-1 + tt.zeros(1, dtype=self.u.dtype), self.u])
+        self.c = get_cl(u_ext)
+        self.c_norm = self.c / (np.pi * (self.c[0] + 2 * self.c[1] / 3))
+
+    def get_light_curve(self, orbit=None, r=None, t=None, texp=None,
+                        return_num_eval=False, **kwargs):
+        """Get the light curve for an orbit at a set of times
+
+        Args:
+            orbit: An object with a ``get_relative_position`` method that
+                takes a tensor of times and returns a list of Cartesian
+                coordinates of a set of bodies relative to the central source.
+                This method should return three tensors (one for each
+                coordinate dimension) and each tensor should have the shape
+                ``append(t.shape, r.shape)`` or ``append(t.shape, oversample,
+                r.shape)`` when ``texp`` is given. The first two coordinate
+                dimensions are treated as being in the plane of the sky and the
+                third coordinate is the line of sight with positive values
+                pointing *away* from the observer. For an example, take a look
+                at :class:`orbits.KeplerianOrbit`.
+            r (tensor): The radius of the transiting body in the same units as
+                ``r_star``. This should have a shape that is consistent with
+                the coordinates returned by ``orbit``. In general, this means
+                that it should probably be a scalar or a vector with one entry
+                for each body in ``orbit``.
+            t (tensor): The times where the light curve should be evaluated.
+            texp (Optional[tensor]): The exposure time of each observation.
+                This can be a scalar or a tensor with the same shape as ``t``.
+                If ``texp`` is provided, ``t`` is assumed to indicate the
+                timestamp at the *middle* of an exposure of length ``texp``.
+
+        """
+        if orbit is None:
+            raise ValueError("missing required argument 'orbit'")
+        if r is None:
+            raise ValueError("missing required argument 'r'")
+        if t is None:
+            raise ValueError("missing required argument 't'")
+
+        r = tt.as_tensor_variable(r)
+        r = tt.reshape(r, (r.size,))
+        t = tt.as_tensor_variable(t)
+
+        rgrid = tt.shape_padleft(r, t.ndim) \
+            + tt.shape_padright(tt.zeros_like(t), r.ndim)
+
+        if texp is None:
+            coords = orbit.get_relative_position(t)
+            b = tt.sqrt(coords[0]**2 + coords[1]**2)
+            b = tt.reshape(b, rgrid.shape)
+            los = tt.reshape(coords[2], rgrid.shape)
+            return limbdark(self.c_norm, b/orbit.r_star, rgrid/orbit.r_star,
+                            los)[0]
+
+        texp = tt.as_tensor_variable(texp) + tt.zeros_like(rgrid)
+        x, y, z = orbit.get_relative_position(t)
+        dx, dy, dz = orbit.get_relative_velocity(t)
+        d2x, d2y, d2z = orbit.get_relative_acceleration(t)
+
+        # Normalize by the stellar radius
+        x = tt.reshape(x/orbit.r_star, rgrid.shape)
+        y = tt.reshape(y/orbit.r_star, rgrid.shape)
+        z = tt.reshape(z/orbit.r_star, rgrid.shape)
+        dx = tt.reshape(dx/orbit.r_star, rgrid.shape)
+        dy = tt.reshape(dy/orbit.r_star, rgrid.shape)
+        dz = tt.reshape(dz/orbit.r_star, rgrid.shape)
+        d2x = tt.reshape(d2x/orbit.r_star, rgrid.shape)
+        d2y = tt.reshape(d2y/orbit.r_star, rgrid.shape)
+
+        # Apply the time integrated op
+        op = IntegratedLimbDarkOp(**kwargs)
+        res = op(self.c_norm, rgrid/orbit.r_star,
+                 x, dx, d2x, y, dy, d2y, z, dz, texp)
+        if return_num_eval:
+            return res[0], res[-1]
+        return res[0]

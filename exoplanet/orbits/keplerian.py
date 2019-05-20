@@ -6,6 +6,7 @@ __all__ = ["KeplerianOrbit", "get_true_anomaly"]
 
 import numpy as np
 
+import theano
 import theano.tensor as tt
 from theano.ifelse import ifelse
 
@@ -190,22 +191,35 @@ class KeplerianOrbit(object):
             period = tt.as_tensor_variable(period)
 
         # Compute the implied density if a and period are given
+        implied_rho_star = False
         if a is not None and period is not None:
             if rho_star is not None or m_star is not None:
                 raise ValueError("if both a and period are given, you can't "
                                  "also define rho_star or m_star")
+
+            # Default to a stellar radius of 1 if not provided
             if r_star is None:
-                r_star = 1.0
-            rho_star = 3*np.pi*(a / r_star)**3 / (self.G_grav*period**2)
-            rho_star -= 3*self.m_planet/(4*np.pi*r_star**3)
+                r_star = tt.as_tensor_variable(1.0)
+            else:
+                r_star = tt.as_tensor_variable(r_star)
+
+            # Compute the implied mass via Kepler's 3rd law
+            m_tot = 4*np.pi*np.pi*a**3/(self.G_grav*period**2)
+
+            # Compute the implied density
+            m_star = m_tot - self.m_planet
+            vol_star = 4 * np.pi * r_star**3 / 3.
+            rho_star = self.gcc_to_sun * m_star / vol_star
             rho_star_units = None
+            implied_rho_star = True
 
         # Make sure that the right combination of stellar parameters are given
         if r_star is None and m_star is None:
             r_star = 1.0
             if rho_star is None:
                 m_star = 1.0
-        if sum(arg is None for arg in (rho_star, r_star, m_star)) != 1:
+        if (not implied_rho_star) and sum(arg is None for arg in
+                                          (rho_star, r_star, m_star)) != 1:
             raise ValueError("values must be provided for exactly two of "
                              "rho_star, m_star, and r_star")
 
@@ -225,8 +239,8 @@ class KeplerianOrbit(object):
             rho_star = 3*m_star/(4*np.pi*r_star**3)
         elif r_star is None:
             r_star = (3*m_star/(4*np.pi*rho_star))**(1/3)
-        else:
-            m_star = 4*np.pi*r_star**3*rho_star/3
+        elif m_star is None:
+            m_star = 4*np.pi*r_star**3*rho_star/3.
 
         # Work out the planet parameters
         if a is None:
@@ -410,6 +424,24 @@ class KeplerianOrbit(object):
         return tuple(tt.squeeze(x)
                      for x in self._get_velocity(self.m_planet, t))
 
+    def get_relative_velocity(self, t):
+        """The planets' velocity relative to the star
+
+        .. note:: This treats each planet independently and does not take the
+            other planets into account when computing the position of the
+            star. This is fine as long as the planet masses are small.
+
+        Args:
+            t: The times where the velocity should be evaluated.
+
+        Returns:
+            The components of the velocity vector at ``t`` in units of
+            ``R_sun/day``.
+
+        """
+        return tuple(tt.squeeze(x)
+                     for x in self._get_velocity(-self.m_total, t))
+
     def get_radial_velocity(self, t, K=None, output_units=None):
         """Get the radial velocity of the star
 
@@ -451,6 +483,85 @@ class KeplerianOrbit(object):
         v = self.get_star_velocity(t)
         return -conv * v[2]
 
+    def _get_acceleration(self, a, m, t):
+        f = self._get_true_anomaly(t)
+        K = self.K0 * m
+        cosf = tt.cos(f)
+        if self.ecc is None:
+            factor = -K**2 / a
+        else:
+            factor = K**2 * (self.ecc*cosf + 1)**2 / (a*(self.ecc**2 - 1))
+        return self._rotate_vector(factor * cosf, factor * tt.sin(f))
+
+    def get_planet_acceleration(self, t):
+        return tuple(tt.squeeze(x)
+                     for x in self._get_acceleration(self.a_planet,
+                                                     -self.m_star, t))
+
+    def get_star_acceleration(self, t):
+        return tuple(tt.squeeze(x)
+                     for x in self._get_acceleration(self.a_star,
+                                                     self.m_planet, t))
+
+    def get_relative_acceleration(self, t):
+        return tuple(tt.squeeze(x)
+                     for x in self._get_acceleration(-self.a,
+                                                     -self.m_total, t))
+
+    def get_stencil(self, t, r=None, texp=None):
+        if r is None or texp is None:
+            return tt.shape_padright(t)
+
+        z = tt.zeros_like(self.a)
+        r = tt.as_tensor_variable(r)
+        R = self.r_star + z
+        hp = 0.5 * self.period
+
+        if self.ecc is None:
+            # Equation 14 from Winn (2010)
+            k = r / self.r_star
+            arg1 = tt.square(1 + k) - tt.square(self.b)
+            arg2 = tt.square(1 - k) - tt.square(self.b)
+            factor = R / (self.a * self.sin_incl)
+            hdur1 = hp * tt.arcsin(factor * tt.sqrt(arg1)) / np.pi
+            hdur2 = hp * tt.arcsin(factor * tt.sqrt(arg2)) / np.pi
+            ts = [-hdur1, -hdur2, hdur2, hdur1]
+            flag = z
+
+        else:
+            M_contact1 = self.contact_points_op(
+                self.a, self.ecc, self.cos_omega, self.sin_omega,
+                self.cos_incl + z, self.sin_incl + z, R + r)
+            M_contact2 = self.contact_points_op(
+                self.a, self.ecc, self.cos_omega, self.sin_omega,
+                self.cos_incl + z, self.sin_incl + z, R - r)
+
+            flag = M_contact1[2] + M_contact2[2]
+
+            ts = [
+                tt.mod((M_contact1[0]-self.M0)/self.n+hp, self.period)-hp,
+                tt.mod((M_contact2[0]-self.M0)/self.n+hp, self.period)-hp,
+                tt.mod((M_contact2[1]-self.M0)/self.n+hp, self.period)-hp,
+                tt.mod((M_contact1[1]-self.M0)/self.n+hp, self.period)-hp
+            ]
+
+        start = self.period * tt.floor((tt.min(t) - self.t0) / self.period)
+        end = self.period * (tt.ceil((tt.max(t) - self.t0) / self.period) + 1)
+        start += self.t0
+        end += self.t0
+        tout = []
+        for i in range(4):
+            if z.ndim < 1:
+                tout.append(ts[i] + tt.arange(start, end, self.period))
+            else:
+                tout.append(theano.scan(
+                    fn=lambda t0, s0, e0, p0: t0 + tt.arange(s0, e0, p0),
+                    sequences=[ts[i], start, end, self.period],
+                )[0].flatten())
+
+        ts = tt.sort(tt.concatenate(tout))
+        return ts, flag
+
     def in_transit(self, t, r=0.0, texp=None):
         """Get a list of timestamps that are in transit
 
@@ -474,10 +585,10 @@ class KeplerianOrbit(object):
 
         if self.ecc is None:
             # Equation 14 from Winn (2010)
-            k = r / self.r_star
+            k = r / R
             arg = tt.square(1 + k) - tt.square(self.b)
-            hdur = hp * tt.arcsin(self.r_star / self.a *
-                                  tt.sqrt(arg) / self.sin_incl) / np.pi
+            factor = R / (self.a * self.sin_incl)
+            hdur = hp * tt.arcsin(factor * tt.sqrt(arg)) / np.pi
             t_start = -hdur
             t_end = hdur
             flag = z
