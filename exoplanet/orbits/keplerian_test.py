@@ -107,6 +107,55 @@ def test_velocity():
         planet_vel_expect[i] = theano.function([t_tensor], g)(t)
     utt.assert_allclose(planet_vel, planet_vel_expect)
 
+    pos = orbit.get_relative_position(t_tensor)
+    vel = np.array(theano.function([], orbit.get_relative_velocity(t))())
+    vel_expect = np.empty_like(vel)
+    for i in range(3):
+        g = theano.grad(tt.sum(pos[i]), t_tensor)
+        vel_expect[i] = theano.function([t_tensor], g)(t)
+    utt.assert_allclose(vel, vel_expect)
+
+
+def test_acceleration():
+    t_tensor = tt.dvector()
+    t = np.linspace(0, 100, 1000)
+    m_planet = 0.1
+    m_star = 1.3
+    orbit = KeplerianOrbit(
+        m_star=m_star,
+        r_star=1.0,
+        t0=0.5,
+        period=100.0,
+        ecc=0.1,
+        omega=0.5,
+        incl=0.25*np.pi,
+        m_planet=m_planet,
+    )
+
+    star_vel = orbit.get_star_velocity(t_tensor)
+    star_acc = theano.function([], orbit.get_star_acceleration(t))()
+    star_acc_expect = np.empty_like(star_acc)
+    for i in range(3):
+        g = theano.grad(tt.sum(star_vel[i]), t_tensor)
+        star_acc_expect[i] = theano.function([t_tensor], g)(t)
+    utt.assert_allclose(star_acc, star_acc_expect)
+
+    planet_vel = orbit.get_planet_velocity(t_tensor)
+    planet_acc = theano.function([], orbit.get_planet_acceleration(t))()
+    planet_acc_expect = np.empty_like(planet_acc)
+    for i in range(3):
+        g = theano.grad(tt.sum(planet_vel[i]), t_tensor)
+        planet_acc_expect[i] = theano.function([t_tensor], g)(t)
+    utt.assert_allclose(planet_acc, planet_acc_expect)
+
+    vel = orbit.get_relative_velocity(t_tensor)
+    acc = theano.function([], orbit.get_relative_acceleration(t))()
+    acc_expect = np.empty_like(acc)
+    for i in range(3):
+        g = theano.grad(tt.sum(vel[i]), t_tensor)
+        acc_expect[i] = theano.function([t_tensor], g)(t)
+    utt.assert_allclose(acc, acc_expect)
+
 
 def test_in_transit():
     t = np.linspace(-20, 20, 1000)
@@ -214,3 +263,32 @@ def test_impact():
     utt.assert_allclose((tt.sqrt(coords[0]**2 + coords[1]**2) / r_star).eval(),
                         b)
     assert coords[2].eval() > 0
+
+
+def test_consistent_coords():
+    import astropy.units as u
+    import astropy.constants as c
+
+    au_to_R_sun = (c.au / c.R_sun).value
+    a_ang = 0.324  # arcsec
+    parallax = 24.05  # milliarcsec
+    dpc = 1e3 / parallax
+    a = a_ang * dpc  # au
+    P = 28.8 * 365.25  # days
+
+    # kappa = a1 / (a1 + a2)
+    kappa = 0.45
+
+    # calculate Mtot from a, P
+    Mtot = (4*np.pi**2*(a*u.au)**3/(c.G*(P*u.day)**2)).to(u.M_sun).value
+
+    M2 = kappa * Mtot
+    M1 = Mtot - M2
+
+    orbit = KeplerianOrbit(a=a * au_to_R_sun, period=P,
+                           m_planet=M2)
+
+    assert np.allclose(M1, orbit.m_star.eval())
+    assert np.allclose(M2, orbit.m_planet.eval())
+    assert np.allclose(Mtot, orbit.m_total.eval())
+
