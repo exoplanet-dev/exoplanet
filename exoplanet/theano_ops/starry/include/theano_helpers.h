@@ -19,7 +19,8 @@ int get_size(PyArrayObject* input, npy_intp* size) {
   return 0;
 }
 
-int allocate_output(int ndim, npy_intp* shape, int typenum, PyArrayObject** output) {
+template <typename DTYPE_OUTPUT_NUM>
+DTYPE_OUTPUT_NUM* allocate_output(int ndim, npy_intp* shape, int typenum, PyArrayObject** output, int* success) {
   bool flag = true;
   if (*output != NULL && PyArray_NDIM(*output) == ndim) {
     for (int n = 0; n < ndim; ++n) {
@@ -35,14 +36,30 @@ int allocate_output(int ndim, npy_intp* shape, int typenum, PyArrayObject** outp
   if (!flag || !PyArray_CHKFLAGS(*output, NPY_ARRAY_C_CONTIGUOUS)) {
     Py_XDECREF(*output);
     *output = (PyArrayObject*)PyArray_EMPTY(ndim, shape, typenum, 0);
-
     if (!*output) {
+      *success = 1;
       PyErr_Format(PyExc_ValueError, "Could not allocate output storage");
-      return 1;
+      return NULL;
     }
   }
 
-  return 0;
+  *success = 0;
+  return (DTYPE_OUTPUT_NUM*)PyArray_DATA(*output);
+}
+
+template <typename DTYPE_INPUT_NUM>
+DTYPE_INPUT_NUM* get_input (npy_intp* Nr, PyArrayObject* input, int* flag) {
+  npy_intp N;
+  *flag = get_size(input, &N);
+  if (*flag) return NULL;
+  if (*Nr > 0 && N != *Nr) {
+    *flag = 1;
+    PyErr_Format(PyExc_ValueError, "dimension mismatch");
+    return NULL;
+  }
+  *flag = 0;
+  *Nr = N;
+  return (DTYPE_INPUT_NUM*) PyArray_DATA(input);
 }
 
 #endif  // _STARRY_THEANO_OPS_THEANO_HELPERS_H_

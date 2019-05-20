@@ -30,15 +30,6 @@ autodoc_mock_imports = [
     "theano",
 ]
 
-# Get the badges from the README
-readme_txt = open("../README.md").read()
-badges = "\n".join(re.findall(r"^<p>(.+)</p>", readme_txt, re.M | re.S))
-with open("badges.rst", "w") as f:
-    f.write(".. raw:: html\n\n    <p>")
-    for line in badges.splitlines():
-        f.write("    " + line + "\n")
-    f.write("    </p>\n")
-
 # Convert the tutorials
 for fn in chain(glob.glob("_static/notebooks/*.ipynb"),
                 glob.glob("_static/notebooks/gallery/*.ipynb")):

@@ -15,11 +15,15 @@ radial velocities, \& astrometry
 }
 
 \author[0000-0002-9328-5652]{Daniel Foreman-Mackey}
-\affil{Center for Computational Astrophysics, Flatiron Institute, New York, NY}
+\affil{Center for Computational Astrophysics, Flatiron Institute, 162 5th Ave, New York, NY 10010}
 
 \author[0000-0002-1483-8811]{Ian Czekala}
 \altaffiliation{NASA Hubble Fellowship Program Sagan Fellow}
-\affiliation{Department of Astronomy, 501 Campbell Hall, University of California, Berkeley, CA 94720-3411, USA}
+\affiliation{Department of Astronomy, 501 Campbell Hall, University of California, Berkeley, CA 94720}
+
+\author[0000-0002-0802-9145]{Eric Agol}\altaffiliation{Guggenheim Fellow}
+\affil{Department~of~Astronomy, University~of~Washington, Seattle, WA 98195}
+\affil{Virtual~Planetary~Laboratory, University~of~Washington, Seattle, WA 98195}
 
 \begin{abstract}
 
@@ -312,7 +316,6 @@ This operation is useful for many exoplanet applications where the datasets are 
 For example, the time series for a typical short cadence target from the \tess\ mission has a light curve with about 20,000 data points.
 Evaluating a GP model on these data using high-performance general linear algebra libraries would take \dfmtodo{how long?}.
 
-
 \appendix
 
 \section{Solving Kepler's equation}
@@ -504,6 +507,51 @@ ones where $z_2 < 0$ (the others are the contact points for the occultation).
 This is a figure.}
 \end{centering}
 \end{figure}
+
+\section{Exposure time integration for celerite models}
+
+\paragraph{Real term}
+
+For a real term:
+\begin{equation}
+k(\tau) = a\,\exp\left(-c\,(t_i - t_j)\right)
+\end{equation}
+the integrated kernel is
+\begin{proof}{celerite-integral}
+k_\Delta(\tau) = \frac{2}{\left(c\,\Delta\right)^2}\,\left[
+    \cosh(c\,\Delta) - 1
+\right]\,k(\tau)
+\end{proof}
+where $\Delta$ is the integration time.
+
+\paragraph{Complex term}
+
+The result is somewhat more complicated for a complex term:
+\begin{equation}
+k(\tau) = (a + i\,b)\,\exp\left(-(c+i\,d)\,(t_i - t_j)\right)
+\end{equation}
+In this case, the integrated kernel is
+\begin{equation}
+k_\Delta(\tau) = (A + i\,B)\,k(\tau)
+\end{equation}
+where
+\begin{proof}{celerite-integral}
+  A = \frac{C_1\,\left[\cosh(c\,\Delta)\,\cos(d\,\Delta) - 1\right]
+  - C_2\,\sinh(c\,\Delta)\,\sin(d\,\Delta)
+}{\Delta^2\,(c^2 + d^2)^2}
+\end{proof}
+and
+\begin{proof}{celerite-integral}
+  B = \frac{C_2\,\left[\cosh(c\,\Delta)\,\cos(d\,\Delta) - 1\right]
+  + C_1\,\sinh(c\,\Delta)\,\sin(d\,\Delta)
+}{\Delta^2\,(c^2 + d^2)^2}
+\end{proof}
+where
+\begin{eqnarray}
+C_1 = 2\,(a\,c^2 - a\,d^2 + 2\,b\,c\,d)
+\quad\mathrm{and}\quad
+C_2 = 2\,(b\,c^2 - b\,d^2 - 2\,a\,c\,d)
+\end{eqnarray}
 
 \newpage
 \bibliography{exoplanet}
