@@ -81,6 +81,7 @@ class KeplerianOrbit(object):
 
         self.gcc_to_sun = (
             (constants.M_sun / constants.R_sun**3).to(u.g / u.cm**3).value)
+        self.au_to_R_sun = (constants.au / constants.R_sun).value
         self.G_grav = constants.G.to(u.R_sun**3 / u.M_sun / u.day**2).value
 
         self.kepler_op = KeplerOp(**kwargs)
@@ -276,7 +277,7 @@ class KeplerianOrbit(object):
         x2 = x1
         y2 = self.cos_incl * y1
         # z3 = z2, subsequent rotation by Omega doesn't affect it
-        Z = -self.cos_incl * y1
+        Z = -self.sin_incl * y1
 
         # 3) rotate about z2 axis by Omega
         if self.Omega is None:
@@ -296,16 +297,34 @@ class KeplerianOrbit(object):
         _, f = self.kepler_op(M, self.ecc + tt.zeros_like(M))
         return f
 
-    def _get_position(self, a, t):
+    def _get_position(self, a, t, parallax=None):
+        """
+        Get the position of a body.
+
+        Args:
+            a: the semi-major axis of the orbit.
+            t: the time (or tensor of times) to calculate the position.
+            parallax: (arcseconds) if provided, return the position in
+            units of arcseconds.
+
+        Returns:
+            (X,Y,Z) position of the body in the observer frame. Default is in units
+            of R_sun, but if parallax is provided, then in units of arcseconds.
+        """
         f = self._get_true_anomaly(t)
         cosf = tt.cos(f)
         if self.ecc is None:
             r = a
         else:
             r = a * (1.0 - self.ecc**2) / (1 + self.ecc * cosf)
+
+        if parallax is not None:
+            # convert r into arcseconds
+            r = r * parallax / self.au_to_R_sun
+
         return self._rotate_vector(r * cosf, r * tt.sin(f))
 
-    def get_planet_position(self, t):
+    def get_planet_position(self, t, parallax=None):
         """The planets' positions in the barycentric frame
 
         Args:
@@ -317,9 +336,9 @@ class KeplerianOrbit(object):
 
         """
         return tuple(tt.squeeze(x)
-                     for x in self._get_position(self.a_planet, t))
+                     for x in self._get_position(self.a_planet, t, parallax))
 
-    def get_star_position(self, t):
+    def get_star_position(self, t, parallax=None):
         """The star's position in the barycentric frame
 
         .. note:: If there are multiple planets in the system, this will
@@ -336,9 +355,9 @@ class KeplerianOrbit(object):
 
         """
         return tuple(tt.squeeze(x)
-                     for x in self._get_position(self.a_star, t))
+                     for x in self._get_position(self.a_star, t, parallax))
 
-    def get_relative_position(self, t):
+    def get_relative_position(self, t, parallax=None):
         """The planets' positions relative to the star in the X,Y,Z frame.
 
         .. note:: This treats each planet independently and does not take the
@@ -354,9 +373,9 @@ class KeplerianOrbit(object):
 
         """
         return tuple(tt.squeeze(x)
-                     for x in self._get_position(-self.a, t))
+                     for x in self._get_position(-self.a, t, parallax))
 
-    def get_relative_angles(self, t):
+    def get_relative_angles(self, t, parallax=None):
         """The planets' relative position to the star in the sky plane, in
         separation, position angle coordinates.
 
@@ -373,7 +392,7 @@ class KeplerianOrbit(object):
 
         """
 
-        X, Y, Z = self._get_position(-self.a, t)
+        X, Y, Z = self._get_position(-self.a, t, parallax)
 
         # calculate rho and theta
         rho = tt.squeeze(tt.sqrt(X**2 + Y**2)) # arcsec
