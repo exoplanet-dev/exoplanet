@@ -135,6 +135,7 @@ class KeplerianOrbit(object):
             E0 = 2 * tt.arctan2(tt.sqrt(1-self.ecc)*self.cos_omega,
                                 tt.sqrt(1+self.ecc)*opsw)
             self.M0 = E0 - self.ecc * tt.sin(E0)
+
             if t_periastron is not None:
                 self.tref = tt.as_tensor_variable(t_periastron)
             else:
@@ -289,10 +290,10 @@ class KeplerianOrbit(object):
         # 3) rotate about z2 axis by Omega
         if self.Omega is None:
             return (x2, y2, Z)
-        else:
-            X = self.cos_Omega * x2 - self.sin_Omega * y2
-            Y = self.sin_Omega * x2 + self.cos_Omega * y2
-            return (X, Y, Z)
+
+        X = self.cos_Omega * x2 - self.sin_Omega * y2
+        Y = self.sin_Omega * x2 + self.cos_Omega * y2
+        return X, Y, Z
 
     def _warp_times(self, t):
         return tt.shape_padright(t)
