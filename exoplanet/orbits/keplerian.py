@@ -108,6 +108,13 @@ class KeplerianOrbit(object):
         if contact_points_kwargs is None:
             contact_points_kwargs = dict()
 
+        if Omega is None:
+            self.Omega = None
+        else:
+            self.Omega = tt.as_tensor_variable(Omega)
+            self.cos_Omega = tt.cos(self.Omega)
+            self.sin_Omega = tt.sin(self.Omega)
+
         # Eccentricity
         self.contact_points_op = ContactPointsOp(**contact_points_kwargs)
         if ecc is None:
@@ -123,13 +130,6 @@ class KeplerianOrbit(object):
 
             self.cos_omega = tt.cos(self.omega)
             self.sin_omega = tt.sin(self.omega)
-
-            if Omega is None:
-                self.Omega = None
-            else:
-                self.Omega = tt.as_tensor_variable(Omega)
-                self.cos_Omega = tt.cos(self.Omega)
-                self.sin_Omega = tt.sin(self.Omega)
 
             opsw = 1 + self.sin_omega
             E0 = 2 * tt.arctan2(tt.sqrt(1-self.ecc)*self.cos_omega,
