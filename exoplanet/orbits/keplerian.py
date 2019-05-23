@@ -39,15 +39,20 @@ class KeplerianOrbit(object):
        the sun. If only ``rho_star`` is defined, the radius of the central is
        assumed to be ``1 * R_sun``. Otherwise, at most two of ``m_star``,
        ``r_star``, and ``rho_star`` can be defined.
+    5. Either ``t0`` (reference transit) or ``t_periastron`` must be given,
+       but not both.
+
 
     Args:
         period: The orbital periods of the bodies in days.
         a: The semimajor axes of the orbits in ``R_sun``.
         t0: The time of a reference transit for each orbits in days.
+        t_periastron: The epoch of a reference periastron passage in days.
         incl: The inclinations of the orbits in radians.
         b: The impact parameters of the orbits.
         ecc: The eccentricities of the orbits. Must be ``0 <= ecc < 1``.
         omega: The arguments of periastron for the orbits in radians.
+        Omega: The position angles of the ascending nodes in radians.
         m_planet: The masses of the planets in units of ``m_planet_units``.
         m_star: The mass of the star in ``M_sun``.
         r_star: The radius of the star in ``R_sun``.
@@ -64,9 +69,10 @@ class KeplerianOrbit(object):
 
     def __init__(self,
                  period=None, a=None, t0=0.0,
-                 incl=None, b=None, duration=None,
-                 ecc=None, omega=None, m_planet=0.0,
-                 m_star=None, r_star=None, rho_star=None,
+                 t_periastron=None, incl=None, b=None,
+                 duration=None, ecc=None, omega=None,
+                 Omega=None, m_planet=0.0, m_star=None,
+                 r_star=None, rho_star=None,
                  m_planet_units=None, rho_star_units=None,
                  model=None,
                  contact_points_kwargs=None,
@@ -75,6 +81,7 @@ class KeplerianOrbit(object):
 
         self.gcc_to_sun = (
             (constants.M_sun / constants.R_sun**3).to(u.g / u.cm**3).value)
+        self.au_to_R_sun = (constants.au / constants.R_sun).value
         self.G_grav = constants.G.to(u.R_sun**3 / u.M_sun / u.day**2).value
 
         self.kepler_op = KeplerOp(**kwargs)
@@ -101,6 +108,13 @@ class KeplerianOrbit(object):
         if contact_points_kwargs is None:
             contact_points_kwargs = dict()
 
+        if Omega is None:
+            self.Omega = None
+        else:
+            self.Omega = tt.as_tensor_variable(Omega)
+            self.cos_Omega = tt.cos(self.Omega)
+            self.sin_Omega = tt.sin(self.Omega)
+
         # Eccentricity
         self.contact_points_op = ContactPointsOp(**contact_points_kwargs)
         if ecc is None:
@@ -121,7 +135,11 @@ class KeplerianOrbit(object):
             E0 = 2 * tt.arctan2(tt.sqrt(1-self.ecc)*self.cos_omega,
                                 tt.sqrt(1+self.ecc)*opsw)
             self.M0 = E0 - self.ecc * tt.sin(E0)
-            self.tref = self.t0 - self.M0 / self.n
+
+            if t_periastron is not None:
+                self.tref = tt.as_tensor_variable(t_periastron)
+            else:
+                self.tref = self.t0 - self.M0 / self.n
 
             ome2 = 1 - self.ecc**2
             self.K0 /= tt.sqrt(ome2)
@@ -237,13 +255,45 @@ class KeplerianOrbit(object):
         return a, period, rho_star * self.gcc_to_sun, r_star, m_star
 
     def _rotate_vector(self, x, y):
+        """Apply the rotation matrices to go from obrit to observer frame
+
+        In order,
+        1. rotate about the z axis by an amount omega -> x1, y1, z1
+        2. rotate about the x1 axis by an amount -incl -> x2, y2, z2
+        3. rotate about the z2 axis by an amount Omega -> x3, y3, z3
+
+        Args:
+            x: A tensor representing the x coodinate in the plane of the
+                orbit.
+            y: A tensor representing the y coodinate in the plane of the
+                orbit.
+
+        Returns:
+            Three tensors representing ``(X, Y, Z)`` in the observer frame.
+
+        """
+
+        # 1) rotate about z0 axis by omega
         if self.ecc is None:
-            a = x
-            b = y
+            x1 = x
+            y1 = y
         else:
-            a = self.cos_omega * x - self.sin_omega * y
-            b = self.sin_omega * x + self.cos_omega * y
-        return (a, self.cos_incl * b, -self.sin_incl * b)
+            x1 = self.cos_omega * x - self.sin_omega * y
+            y1 = self.sin_omega * x + self.cos_omega * y
+
+        # 2) rotate about x1 axis by -incl
+        x2 = x1
+        y2 = self.cos_incl * y1
+        # z3 = z2, subsequent rotation by Omega doesn't affect it
+        Z = -self.sin_incl * y1
+
+        # 3) rotate about z2 axis by Omega
+        if self.Omega is None:
+            return (x2, y2, Z)
+
+        X = self.cos_Omega * x2 - self.sin_Omega * y2
+        Y = self.sin_Omega * x2 + self.cos_Omega * y2
+        return X, Y, Z
 
     def _warp_times(self, t):
         return tt.shape_padright(t)
@@ -255,16 +305,34 @@ class KeplerianOrbit(object):
         _, f = self.kepler_op(M, self.ecc + tt.zeros_like(M))
         return f
 
-    def _get_position(self, a, t):
+    def _get_position(self, a, t, parallax=None):
+        """Get the position of a body.
+
+        Args:
+            a: the semi-major axis of the orbit.
+            t: the time (or tensor of times) to calculate the position.
+            parallax: (arcseconds) if provided, return the position in
+            units of arcseconds.
+
+        Returns:
+            The position of the body in the observer frame. Default is in units
+            of R_sun, but if parallax is provided, then in units of arcseconds.
+
+        """
         f = self._get_true_anomaly(t)
         cosf = tt.cos(f)
         if self.ecc is None:
             r = a
         else:
             r = a * (1.0 - self.ecc**2) / (1 + self.ecc * cosf)
+
+        if parallax is not None:
+            # convert r into arcseconds
+            r = r * parallax / self.au_to_R_sun
+
         return self._rotate_vector(r * cosf, r * tt.sin(f))
 
-    def get_planet_position(self, t):
+    def get_planet_position(self, t, parallax=None):
         """The planets' positions in the barycentric frame
 
         Args:
@@ -276,9 +344,9 @@ class KeplerianOrbit(object):
 
         """
         return tuple(tt.squeeze(x)
-                     for x in self._get_position(self.a_planet, t))
+                     for x in self._get_position(self.a_planet, t, parallax))
 
-    def get_star_position(self, t):
+    def get_star_position(self, t, parallax=None):
         """The star's position in the barycentric frame
 
         .. note:: If there are multiple planets in the system, this will
@@ -295,10 +363,10 @@ class KeplerianOrbit(object):
 
         """
         return tuple(tt.squeeze(x)
-                     for x in self._get_position(self.a_star, t))
+                     for x in self._get_position(self.a_star, t, parallax))
 
-    def get_relative_position(self, t):
-        """The planets' positions relative to the star
+    def get_relative_position(self, t, parallax=None):
+        """The planets' positions relative to the star in the X,Y,Z frame.
 
         .. note:: This treats each planet independently and does not take the
             other planets into account when computing the position of the
@@ -313,9 +381,36 @@ class KeplerianOrbit(object):
 
         """
         return tuple(tt.squeeze(x)
-                     for x in self._get_position(-self.a, t))
+                     for x in self._get_position(-self.a, t, parallax))
+
+    def get_relative_angles(self, t, parallax=None):
+        """The planets' relative position to the star in the sky plane, in
+        separation, position angle coordinates.
+
+        .. note:: This treats each planet independently and does not take the
+            other planets into account when computing the position of the
+            star. This is fine as long as the planet masses are small.
+
+        Args:
+            t: The times where the position should be evaluated.
+
+        Returns:
+            The separation (arcseconds) and position angle (radians,
+            measured east of north) of the planet relative to the star.
+
+        """
+
+        X, Y, Z = self._get_position(-self.a, t, parallax)
+
+        # calculate rho and theta
+        rho = tt.squeeze(tt.sqrt(X**2 + Y**2)) # arcsec
+        theta = tt.squeeze(tt.arctan2(Y,X)) # radians between [-pi, pi]
+
+        return (rho, theta)
+
 
     def _get_velocity(self, m, t):
+        """Get the velocity vector of a body in the observer frame"""
         f = self._get_true_anomaly(t)
         K = self.K0 * m
         if self.ecc is None:
