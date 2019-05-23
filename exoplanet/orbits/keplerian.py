@@ -254,16 +254,23 @@ class KeplerianOrbit(object):
         return a, period, rho_star * self.gcc_to_sun, r_star, m_star
 
     def _rotate_vector(self, x, y):
-        '''
-        Apply the rotation matrices to go from x0,y0,z0 to observer frame X,Y,Z
+        """Apply the rotation matrices to go from obrit to observer frame
 
         In order,
         1. rotate about the z axis by an amount omega -> x1, y1, z1
         2. rotate about the x1 axis by an amount -incl -> x2, y2, z2
         3. rotate about the z2 axis by an amount Omega -> x3, y3, z3
 
-        Returns: (X, Y, Z)
-        '''
+        Args:
+            x: A tensor representing the x coodinate in the plane of the
+                orbit.
+            y: A tensor representing the y coodinate in the plane of the
+                orbit.
+
+        Returns:
+            Three tensors representing ``(X, Y, Z)`` in the observer frame.
+
+        """
 
         # 1) rotate about z0 axis by omega
         if self.ecc is None:
@@ -298,8 +305,7 @@ class KeplerianOrbit(object):
         return f
 
     def _get_position(self, a, t, parallax=None):
-        """
-        Get the position of a body.
+        """Get the position of a body.
 
         Args:
             a: the semi-major axis of the orbit.
@@ -308,8 +314,9 @@ class KeplerianOrbit(object):
             units of arcseconds.
 
         Returns:
-            (X,Y,Z) position of the body in the observer frame. Default is in units
+            The position of the body in the observer frame. Default is in units
             of R_sun, but if parallax is provided, then in units of arcseconds.
+
         """
         f = self._get_true_anomaly(t)
         cosf = tt.cos(f)
@@ -402,9 +409,7 @@ class KeplerianOrbit(object):
 
 
     def _get_velocity(self, m, t):
-        """
-        Get the velocity vector of a body in v_x, v_y, v_z
-        """
+        """Get the velocity vector of a body in the observer frame"""
         f = self._get_true_anomaly(t)
         K = self.K0 * m
         if self.ecc is None:
