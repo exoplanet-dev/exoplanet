@@ -68,8 +68,8 @@ class KeplerianOrbit(object):
     __citations__ = ("astropy", )
 
     def __init__(self,
-                 period=None, a=None, t0=0.0,
-                 t_periastron=None, incl=None, b=None,
+                 period=None, a=None, t0=None, t_periastron=None,
+                 incl=None, b=None,
                  duration=None, ecc=None, omega=None,
                  Omega=None, m_planet=0.0, m_star=None,
                  r_star=None, rho_star=None,
@@ -88,7 +88,6 @@ class KeplerianOrbit(object):
 
         # Parameters
         self.period = tt.as_tensor_variable(period)
-        self.t0 = tt.as_tensor_variable(t0)
         self.m_planet = tt.as_tensor_variable(m_planet)
         if m_planet_units is not None:
             self.m_planet *= (1 * m_planet_units).to(u.M_sun).value
@@ -120,7 +119,6 @@ class KeplerianOrbit(object):
         if ecc is None:
             self.ecc = None
             self.M0 = 0.5 * np.pi + tt.zeros_like(self.n)
-            self.tref = self.t0 - self.M0 / self.n
             incl_factor = 1
         else:
             self.ecc = tt.as_tensor_variable(ecc)
@@ -135,11 +133,6 @@ class KeplerianOrbit(object):
             E0 = 2 * tt.arctan2(tt.sqrt(1-self.ecc)*self.cos_omega,
                                 tt.sqrt(1+self.ecc)*opsw)
             self.M0 = E0 - self.ecc * tt.sin(E0)
-
-            if t_periastron is not None:
-                self.tref = tt.as_tensor_variable(t_periastron)
-            else:
-                self.tref = self.t0 - self.M0 / self.n
 
             ome2 = 1 - self.ecc**2
             self.K0 /= tt.sqrt(ome2)
@@ -178,6 +171,20 @@ class KeplerianOrbit(object):
             self.incl = 0.5 * np.pi + zla
             self.cos_incl = zla
             self.b = zla
+
+        if t0 is not None and t_periastron is not None:
+            raise ValueError("you can't define both t0 and t_periastron")
+        if t0 is None and t_periastron is None:
+            t0 = 0.0
+
+        if t0 is None:
+            self.t_periastron = tt.as_tensor_variable(t_periastron)
+            self.t0 = self.t_periastron + self.M0 / self.n
+        else:
+            self.t0 = tt.as_tensor_variable(t0)
+            self.t_periastron = self.t0 - self.M0 / self.n
+
+        self.tref = self.t_periastron
 
         self.sin_incl = tt.sin(self.incl)
 
