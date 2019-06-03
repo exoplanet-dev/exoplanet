@@ -158,7 +158,38 @@ Similar derivations would certainly be tractable for microlensing, direct
 imaging, and other exoplanet characterization methods, but these are left to a
 future paper.
 
-\paragraph{Choice of modeling framework}
+\subsection{An introduction to automatic differentiation}
+
+% https://alexey.radul.name/ideas/2013/introduction-to-automatic-differentiation/
+
+First of all, it's important to note that automatic differentiation is not numerical or symbolic differentiation.
+It is a method for evaluating the derivatives of a function \emph{exactly} for some set of inputs, without symbolically differentiating the function.
+
+Example:
+\begin{eqnarray}
+f(x) = u(x)\,v(x)
+\end{eqnarray}
+\begin{eqnarray}
+  \frac{\dd f(x)}{\dd x} = \frac{\dd u(x)}{\dd x}\,v(x) + u(x)\,\frac{\dd v(x)}{\dd x}
+\end{eqnarray}
+Instead, define $x \to x + \epsilon\,\delta x$ where $\epsilon^2 = 0$.
+Therefore,
+\begin{eqnarray}
+  u(x + \epsilon\,\delta x) = u(x) + \frac{\dd u(x)}{\dd x}\,\epsilon\,\delta x
+\end{eqnarray}
+This equality is exact because of our definition that $\epsilon^2 = 0$.
+Therefore,
+\begin{eqnarray}
+f(x) + \epsilon\,\delta f &=& u(x + \epsilon\,\delta x)\,v(x + \epsilon\,\delta x) \\
+&=& \left[u(x) + \frac{\dd u(x)}{\dd x}\,\epsilon\,\delta x\right]\,
+    \left[v(x) + \frac{\dd v(x)}{\dd x}\,\epsilon\,\delta x\right] \\
+&=& u(x)\,v(x) + \epsilon\,\left[\frac{\dd u(x)}{\dd x}\,v(x) + u(x)\,\frac{\dd v(x)}{\dd x}\right]\,\delta x
+\end{eqnarray}
+
+The basic idea is that, at its roots, a computer program is the composition of simpler operations.
+If the derivatives of the simplest operations are known, the automatic differentiation library can automatically apply the chain rule to each step of the calculation to accumulate the derivative of the full program.
+
+\subsection{Choice of modeling framework}
 
 At present, there are many model-building libraries available in every programming language, and it is not clear which should be preferred.
 Since it is a popular language for code development in astrophysics, we focus on libraries with interfaces implemented in the \python\ programming language.
