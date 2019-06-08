@@ -210,6 +210,8 @@ class PyMC3Sampler(object):
             step_kwargs = dict()
         else:
             step_kwargs = dict(step_kwargs)
+            step_kwargs.pop("regular_window", None)
+            step_kwargs.pop("regular_variance", None)
         step_kwargs["model"] = model
         step_kwargs["step_scale"] = np.mean(expected) * model.ndim ** 0.25
         step_kwargs["adapt_step_size"] = False
