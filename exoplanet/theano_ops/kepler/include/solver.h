@@ -49,6 +49,9 @@ namespace exoplanet {
     }
   }
 
+  const double FACTOR1 = 3*M_PI / (M_PI - 6/M_PI);
+  const double FACTOR2 = 1.6 / (M_PI - 6/M_PI);
+
   template <typename T>
   inline T solve_kepler (T M, T ecc) {
     const T two_pi = 2 * M_PI;
@@ -66,7 +69,7 @@ namespace exoplanet {
     // Get starter
     T M2 = M*M;
     T M3 = M2*M;
-    T alpha = (3*M_PI + 1.6*(M_PI-std::abs(M))/(1+ecc) )/(M_PI - 6/M_PI);
+    T alpha = FACTOR1 + FACTOR2*(M_PI-std::abs(M))/(1+ecc);
     T d = 3*ome + alpha*ecc;
     T r = 3*alpha*d*(d-ome)*M + M3;
     T q = 2*alpha*d*ome - M2;

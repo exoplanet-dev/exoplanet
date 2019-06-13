@@ -1,4 +1,4 @@
-radvel
-batman-package
 jupyter
 emcee>=3.0rc2
+cppimport
+pybind11

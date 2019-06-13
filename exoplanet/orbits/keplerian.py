@@ -87,7 +87,7 @@ class KeplerianOrbit(object):
         self.kepler_op = KeplerOp(**kwargs)
 
         # Parameters
-        self.period = tt.as_tensor_variable(period)
+        # self.period = tt.as_tensor_variable(period)
         self.m_planet = tt.as_tensor_variable(m_planet)
         if m_planet_units is not None:
             self.m_planet *= (1 * m_planet_units).to(u.M_sun).value
