@@ -6,6 +6,8 @@
 \begin{document}\raggedbottom\sloppy\sloppypar\frenchspacing
 
 \title{%
+{\bf NOTE: this is a very rough draft of this manuscript --- read at your own risk!}
+\\
 \project{exoplanet}:
 A toolkit for scalable inference for exoplanetary systems using transits,
 radial velocities, \& astrometry
@@ -207,6 +209,14 @@ The \stan\ project provides a more mature and feature-rich set of inference meth
 Furthermore, as discussed below, we must provide custom astronomy-specific operations as part of this library and, while it is possible to extend the \stan\ math library, we found it to be much easier to develop, test, and release the necessary features using \pymc\ and \theano.
 
 
+\section{Inference methods}
+
+Gradient-based methods can be applied to both optimization and inference tasks.
+For example, the task of finding the maximum likelihood or maximum a posteriori parameters can be significantly accelerated using the gradient of the objective with respect to the model parameters.
+While computing the gradient will be somewhat more expensive than computing only the value of the function, it is generally significantly more efficient than using finite difference methods.
+Furthermore, since the gradients computed using automatic differentation is exact, unlike finite difference which will suffer from numerical issues unless the step size is carefully tuned, the lack of numerical noise generally reduces the number of steps the optimizer must take before reaching the optimum.
+
+
 \section{Orbital conventions}
 We choose to follow a set of orbital conventions that respects as many of the established conventions while also hewing to sensible choices of right-hand rule.
 
@@ -329,7 +339,38 @@ This means that we must also provide a method for evaluating the derivative of
 $f$ with respect to $e$ and $M$.
 
 
-\subsection{Limb-darkened light curves}
+\subsection{Transit light curves}
+
+Another custom operation included as part of \exoplanet\ is for calculating model light curves for the transits (and occultations) including limb-darkening and exposure time integration.
+This core functionality is provided by the code \starry\ \citep{Luger:2019} \dfmtodo{cite limbdark}.
+Briefly, \starry\ represents the star using a spherical harmonic representation of its surface brightness and then uses this representation to analytically integrate the surface of the star to compute the model light curve and the derivatives with respect to the physical parameters.
+This algorithm is a generalization of the popular quadratic limb darkening model \citep{Mandel:2002} to a much more flexible class of stellar surface maps \dfmtodo{cite other limb darkening models}.
+For our purposes, \starry's key feature is the fact that it not only computes the model light curve (as has been done previously \dfmtodo{cite}), but also the derivatives of this model with respect to the parameters of the system (the orbital parameters and the spherical harmonic coefficients).
+In the case of pure limb darkening, these derivatives are calculated analytically following \dfmtodo{cite limbdark} while, in the more general case, the derivatives are accumulated using automatic differentiation in the \cpp\ code (using Eigen \dfmtodo{cite Eigen}).
+\dfmtodo{Make a plot of the gradient light curves.}
+This means that \starry\ can be included within the backpropagation framework needed by \exoplanet.
+
+From an interface perspective, \starry\ is included as a set of custom \theano\ operations that compute the matrices in the \starry\ equation as a function of the sky coordinates of the bodies in the system and the spherical harmonic coefficients.
+The linear algebra is performed directly in \theano.
+This means that the gradients are efficiently backpropagated using the linear algebra routines provided by \theano.
+
+\paragraph{Exposure time integration}
+In many cases, the finite exposure time integration of transit light curves must be included in the model light curve in order to get correct constraints on the physical properties of the system.
+\exoplanet\ includes several routines for integrating the model.
+First, it includes an oversampling routine as recommended by \dfmtodo{cite kipping}, including generalizations to higher order integration schemes.
+This has the benefit that it is simple to use and can generally be applied to any model light curve.
+However, this method also introduces significant memory overhead because each data point requires many (at least tens) of model evaluations and these must be stored in memory for the purposes of backpropagation.
+
+Because of this shortcoming, \exoplanet\ also implements an adaptive exposure time integration routine directly in \cpp\ that can be used for Keplerian orbits.
+In this case, the time integral is performed using an adaptive Simpson's rule \dfmtodo{cite} directly in the backend, reducing the computational cost and memory overhead.
+This routine works by recursively subdividing the exposure interval until a parabolic approximation to the flux in the subexposure matches the computed flux to a specified tolerance.
+The derivative of this integral is accumulated using during the forward pass.
+
+\paragraph{Performance}
+As demonstrated in the papers describing this algorithm \citep{Luger:2019} \dfmtodo{cite limbdark}, the performance of the algorithms implemented in \starry\ is competitive with the other standard light curve implementations \dfmtodo{cite}.
+Figure \dfmtodo{whatever} demonstrates this in the context of \exoplanet.
+\dfmtodo{Make a runtime figure and explain it.}
+
 
 \subsection{Scalable Gaussian Processes for time series}
 
@@ -583,6 +624,11 @@ C_1 = 2\,(a\,c^2 - a\,d^2 + 2\,b\,c\,d)
 \quad\mathrm{and}\quad
 C_2 = 2\,(b\,c^2 - b\,d^2 - 2\,a\,c\,d)
 \end{eqnarray}
+
+\newpage
+\acknowledgements
+
+This research was partially conducted during the Exostar19 program at the Kavli Institute for Theoretical Physics at UC Santa Barbara, which was supported in part by the National Science Foundation under Grant No. NSF PHY-1748958.
 
 \newpage
 \bibliography{exoplanet}

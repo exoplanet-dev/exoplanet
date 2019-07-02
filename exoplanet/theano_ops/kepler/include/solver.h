@@ -49,15 +49,37 @@ namespace exoplanet {
     }
   }
 
+  // Implementation from numpy
+  template <typename T>
+  inline T npy_mod (T a, T b) {
+    T mod = fmod(a, b);
+
+    if (!b) {
+      // If b == 0, return result of fmod. For IEEE is nan
+      return mod;
+    }
+
+    // adjust fmod result to conform to Python convention of remainder
+    if (mod) {
+      if ((b < 0) != (mod < 0)) {
+        mod += b;
+      }
+    } else {
+      // if mod is zero ensure correct sign
+      mod = copysign(0, b);
+    }
+
+    return mod;
+  }
+
   const double FACTOR1 = 3*M_PI / (M_PI - 6/M_PI);
   const double FACTOR2 = 1.6 / (M_PI - 6/M_PI);
+  const double two_pi = 2 * M_PI;
 
   template <typename T>
   inline T solve_kepler (T M, T ecc) {
-    const T two_pi = 2 * M_PI;
 
-    T M_ref = two_pi * floor(M / two_pi);
-    M -= M_ref;
+    M = npy_mod(M, T(two_pi));
 
     bool high = M > M_PI;
     if (high) {
@@ -68,11 +90,11 @@ namespace exoplanet {
 
     // Get starter
     T M2 = M*M;
-    T M3 = M2*M;
-    T alpha = FACTOR1 + FACTOR2*(M_PI-std::abs(M))/(1+ecc);
+    T alpha = FACTOR1 + FACTOR2*(M_PI-M)/(1+ecc);
     T d = 3*ome + alpha*ecc;
-    T r = 3*alpha*d*(d-ome)*M + M3;
-    T q = 2*alpha*d*ome - M2;
+    T alphad = alpha*d;
+    T r = (3*alphad*(d-ome) + M2) * M;
+    T q = 2*alphad*ome - M2;
     T q2 = q*q;
     T w = pow(std::abs(r) + sqrt(q2*q + r*r), 2.0/3);
     T E = (2*r*w/(w*w + w*q + q2) + M) / d;
@@ -95,7 +117,7 @@ namespace exoplanet {
       E = two_pi - E;
     }
 
-    return E + M_ref;
+    return E;  // + M_ref;
   }
 
 }

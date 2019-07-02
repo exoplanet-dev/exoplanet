@@ -9,7 +9,7 @@ exoplanet
 <a href="https://zenodo.org/badge/latestdoi/138077978">
 <img src="https://zenodo.org/badge/138077978.svg"></a>
 <a href="https://docs.google.com/viewer?url=https://github.com/dfm/exoplanet/raw/master-pdf/paper/exoplanet.pdf">
-<img src="https://img.shields.io/badge/read-the_paper-blue.svg?style=flat"></a>
+<img src="https://img.shields.io/badge/read-the_paper_draft-blue.svg?style=flat"></a>
 <br>
 <a href="https://travis-ci.org/dfm/exoplanet">
 <img src="https://img.shields.io/travis/dfm/exoplanet/master.svg?style=flat&label=tests"></a>
