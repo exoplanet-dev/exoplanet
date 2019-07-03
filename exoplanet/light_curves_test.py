@@ -8,7 +8,7 @@ import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
-import starry
+import starry_beta as starry # LUGER. TODO: GET RID OF THIS
 
 from .orbits import KeplerianOrbit
 from .light_curves import StarryLightCurve

@@ -24,16 +24,13 @@ class StarryBaseOp(gof.COp):
         return get_cache_version()
 
     def c_headers(self, compiler):
-        return ["theano_helpers.h", "integrate.h", "functors.h"]
+        return ["theano_helpers.h", "integrate.h", "functors.h",
+                "ellip.h", "limbdark.h", "utils.h"]
 
     def c_header_dirs(self, compiler):
         return [
             pkg_resources.resource_filename(__name__, "include"),
-            pkg_resources.resource_filename(__name__, "starry/starry"),
-            pkg_resources.resource_filename(__name__,
-                                            "starry/lib/eigen_3.3.3"),
-            pkg_resources.resource_filename(__name__,
-                                            "starry/lib/boost_1_66_0"),
+            pkg_resources.resource_filename(__name__, "include/eigen_3.3.3")
         ]
 
     def c_compile_args(self, compiler):
