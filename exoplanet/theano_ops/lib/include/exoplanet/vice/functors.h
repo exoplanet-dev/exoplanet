@@ -1,5 +1,5 @@
-#ifndef _VICE_FUNCTORS_H_
-#define _VICE_FUNCTORS_H_
+#ifndef _EXOPLANET_VICE_FUNCTORS_H_
+#define _EXOPLANET_VICE_FUNCTORS_H_
 
 #include <cmath>
 #include <vector>
@@ -8,8 +8,9 @@
 #include <Eigen/Core>
 #include <unsupported/Eigen/AutoDiff>
 
-#include <limbdark.h>
+#include "exoplanet/starry/limbdark.h"
 
+namespace exoplanet {
 namespace vice {
   namespace functors {
 
@@ -112,5 +113,6 @@ namespace vice {
 
   }  // namespace functors
 }    // namespace vice
+}    // namespace exoplanet
 
-#endif  // _VICE_FUNCTORS_H_
+#endif  // _EXOPLANET_VICE_FUNCTORS_H_

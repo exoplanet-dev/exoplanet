@@ -4,11 +4,9 @@ from __future__ import division, print_function
 
 __all__ = ["StarryBaseOp"]
 
-import pkg_resources
-
 from theano import gof
 
-from ..build_utils import get_compile_args, get_cache_version
+from ..build_utils import get_compile_args, get_cache_version, get_header_dirs
 
 
 class StarryBaseOp(gof.COp):
@@ -24,14 +22,16 @@ class StarryBaseOp(gof.COp):
         return get_cache_version()
 
     def c_headers(self, compiler):
-        return ["theano_helpers.h", "integrate.h", "functors.h",
-                "ellip.h", "limbdark.h", "utils.h"]
+        xo = lambda f: "exoplanet/" + f  # NOQA
+        vc = lambda f: "exoplanet/vice/" + f  # NOQA
+        st = lambda f: "exoplanet/starry/" + f  # NOQA
+        return [
+            xo("theano_helpers.h"),
+            vc("integrate.h"), vc("functors.h"),
+            st("ellip.h"), st("limbdark.h"), st("utils.h")]
 
     def c_header_dirs(self, compiler):
-        return [
-            pkg_resources.resource_filename(__name__, "include"),
-            pkg_resources.resource_filename(__name__, "include/eigen_3.3.3")
-        ]
+        return get_header_dirs(eigen=True)
 
     def c_compile_args(self, compiler):
         return get_compile_args(compiler)

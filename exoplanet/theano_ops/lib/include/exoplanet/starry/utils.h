@@ -4,8 +4,8 @@
 
 */
 
-#ifndef _STARRY_UTILS_H_
-#define _STARRY_UTILS_H_
+#ifndef _EXOPLANET_STARRY_UTILS_H_
+#define _EXOPLANET_STARRY_UTILS_H_
 
 // Includes
 #include <stdlib.h>
@@ -61,8 +61,8 @@
 #   define M_SQRTPI 1.77245385090551602729816748334
 #endif
 
-
-namespace starry { 
+namespace exoplanet {
+namespace starry {
 namespace utils {
 
 
@@ -92,7 +92,7 @@ using OneByOne = Eigen::Matrix<T, 1, 1>;
 template <typename T>
 using Matrix = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 template <typename T>
-using RowMatrix = Eigen::Matrix<T, Eigen::Dynamic, 
+using RowMatrix = Eigen::Matrix<T, Eigen::Dynamic,
                                 Eigen::Dynamic, Eigen::RowMajor>;
 template <typename T, int N>
 using ADScalar = Eigen::AutoDiffScalar<Eigen::Matrix<T, N, 1>>;
@@ -104,35 +104,35 @@ using ADScalar = Eigen::AutoDiffScalar<Eigen::Matrix<T, N, 1>>;
 
 
 // Tag forwarding hack
-template <class T> 
+template <class T>
 struct tag {};
 
 //! Pi for current type
-template <class T> 
-inline T pi() { 
-    return static_cast<T>(M_PI); 
+template <class T>
+inline T pi() {
+    return static_cast<T>(M_PI);
 }
 
 //! Square root of pi for current type
-template <class T> 
-inline T root_pi() { 
-    return static_cast<T>(M_SQRTPI); 
+template <class T>
+inline T root_pi() {
+    return static_cast<T>(M_SQRTPI);
 }
 
 //! Machine precision for current type
-template <class T> 
-inline T mach_eps(tag<T>) { 
-    return std::numeric_limits<T>::epsilon(); 
+template <class T>
+inline T mach_eps(tag<T>) {
+    return std::numeric_limits<T>::epsilon();
 }
-template <class T> 
+template <class T>
 inline Eigen::AutoDiffScalar<T> mach_eps(
     tag<Eigen::AutoDiffScalar<T>>
 ) {
     return std::numeric_limits<typename T::Scalar>::epsilon();
 }
-template <class T> 
-inline T mach_eps() { 
-    return mach_eps(tag<T>()); 
+template <class T>
+inline T mach_eps() {
+    return mach_eps(tag<T>());
 }
 
 
@@ -143,7 +143,7 @@ inline T mach_eps() {
 
 //! Check if a number is even (or doubly, triply, quadruply... even)
 inline bool is_even (
-    int n, 
+    int n,
     int ntimes=1
 ) {
     for (int i = 0; i < ntimes; i++) {
@@ -156,4 +156,6 @@ inline bool is_even (
 
 } // namespace utils
 } // namespace starry
+} // namespace exoplanet
+
 #endif

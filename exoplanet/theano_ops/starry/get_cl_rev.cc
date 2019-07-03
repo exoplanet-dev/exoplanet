@@ -4,6 +4,7 @@ int APPLY_SPECIFIC(get_cl_rev)(
     PyArrayObject*  input0,  // Array of "u" limb darkening coeffs
     PyArrayObject** output0)
 {
+  using namespace exoplanet;
   typedef DTYPE_OUTPUT_0 T;
 
   int success = 0;

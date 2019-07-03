@@ -1,6 +1,6 @@
 #section support_code_struct
 
-starry::limbdark::GreensLimbDark<DTYPE_OUTPUT_0>* APPLY_SPECIFIC(L);
+exoplanet::starry::limbdark::GreensLimbDark<DTYPE_OUTPUT_0>* APPLY_SPECIFIC(L);
 
 #section init_code_struct
 
@@ -41,6 +41,7 @@ int APPLY_SPECIFIC(integrated_limbdark)(
     PARAMS_TYPE* params
   )
 {
+  using namespace exoplanet;
   typedef DTYPE_INPUT_0 Scalar;
 
   double tol = params->tol * params->tol;

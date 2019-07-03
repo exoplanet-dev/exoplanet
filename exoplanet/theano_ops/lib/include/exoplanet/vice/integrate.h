@@ -1,10 +1,11 @@
-#ifndef _VICE_INTEGRATE_H_
-#define _VICE_INTEGRATE_H_
+#ifndef _EXOPLANET_VICE_INTEGRATE_H_
+#define _EXOPLANET_VICE_INTEGRATE_H_
 
 #include <cmath>
 #include <tuple>
 #include <algorithm>
 
+namespace exoplanet {
 namespace vice {
   namespace integrate {
 
@@ -59,5 +60,6 @@ namespace vice {
 
   }  // namespace integrate
 }    // namespace vice
+}    // namespace exoplanet
 
-#endif  // _VICE_INTEGRATE_H_
+#endif  // _EXOPLANET_VICE_INTEGRATE_H_

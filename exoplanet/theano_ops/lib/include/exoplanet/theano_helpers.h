@@ -1,12 +1,14 @@
-#ifndef _STARRY_THEANO_OPS_THEANO_HELPERS_H_
-#define _STARRY_THEANO_OPS_THEANO_HELPERS_H_
+#ifndef _EXOPLANET_THEANO_HELPERS_H_
+#define _EXOPLANET_THEANO_HELPERS_H_
 
 #include <cmath>
 #include <Eigen/Core>
-#include "limbdark.h"
+#include "exoplanet/starry/limbdark.h"
+
+namespace exoplanet {
 
 template <typename T> int sgn(T val) {
-    return (T(0) < val) - (val < T(0));
+  return (T(0) < val) - (val < T(0));
 }
 
 int get_size(PyArrayObject* input, npy_intp* size) {
@@ -62,4 +64,6 @@ DTYPE_INPUT_NUM* get_input (npy_intp* Nr, PyArrayObject* input, int* flag) {
   return (DTYPE_INPUT_NUM*) PyArray_DATA(input);
 }
 
-#endif  // _STARRY_THEANO_OPS_THEANO_HELPERS_H_
+} // namespace exoplanet
+
+#endif  // _EXOPLANET_THEANO_HELPERS_H_
