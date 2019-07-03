@@ -29,35 +29,34 @@ int APPLY_SPECIFIC(limbdark)(
 {
   using namespace exoplanet;
 
-  npy_intp Nc, Nb, Nr, Nlos;
-  int success = get_size(input0, &Nc);
-  success += get_size(input1, &Nb);
-  success += get_size(input2, &Nr);
-  success += get_size(input3, &Nlos);
+  int success = 0;
+  int ndim_c = -1;
+  npy_intp* shape_c;
+  auto c = get_input<DTYPE_INPUT_0>(&ndim_c, &shape_c, input0, &success);
+
+  int ndim = -1;
+  npy_intp* shape;
+  auto b   = get_input<DTYPE_INPUT_1>(&ndim, &shape, input1, &success);
+  auto r   = get_input<DTYPE_INPUT_2>(&ndim, &shape, input2, &success);
+  auto los = get_input<DTYPE_INPUT_3>(&ndim, &shape, input3, &success);
   if (success) return 1;
-  if (Nb != Nr || Nb != Nlos) {
-    PyErr_Format(PyExc_ValueError, "dimension mismatch %d %d %d", Nb, Nr, Nlos);
-    return 1;
+
+  std::vector<npy_intp> new_shape(ndim + ndim_c);
+  int Nc = 1, Nb = 1;
+  for (int i = 0; i < ndim_c; ++i) {
+    new_shape[i] = shape_c[i];
+    Nc *= shape_c[i];
+  }
+  for (int i = 0; i < ndim; ++i) {
+    new_shape[ndim_c+i] = shape[i];
+    Nb *= shape[i];
   }
 
-  npy_intp ndim = PyArray_NDIM(input1);
-  npy_intp* dims = PyArray_DIMS(input1);
-  std::vector<npy_intp> shape(ndim + 1);
-  shape[0] = Nc;
-  for (npy_intp i = 0; i < ndim; ++i) shape[i+1] = dims[i];
-
-  auto f = allocate_output<DTYPE_OUTPUT_0>(ndim, dims, TYPENUM_OUTPUT_0, output0, &success);
-  auto dfdcl = allocate_output<DTYPE_OUTPUT_1>(ndim+1, &(shape[0]), TYPENUM_OUTPUT_1, output1, &success);
-  auto dfdb = allocate_output<DTYPE_OUTPUT_2>(ndim, dims, TYPENUM_OUTPUT_2, output2, &success);
-  auto dfdr = allocate_output<DTYPE_OUTPUT_3>(ndim, dims, TYPENUM_OUTPUT_3, output3, &success);
-  if (success) {
-    return 1;
-  }
-
-  DTYPE_INPUT_0* c   = (DTYPE_INPUT_0*) PyArray_DATA(input0);
-  DTYPE_INPUT_1* b   = (DTYPE_INPUT_1*) PyArray_DATA(input1);
-  DTYPE_INPUT_2* r   = (DTYPE_INPUT_2*) PyArray_DATA(input2);
-  DTYPE_INPUT_3* los = (DTYPE_INPUT_3*) PyArray_DATA(input3);
+  auto f     = allocate_output<DTYPE_OUTPUT_0>(ndim, shape, TYPENUM_OUTPUT_0, output0, &success);
+  auto dfdcl = allocate_output<DTYPE_OUTPUT_1>(ndim+ndim_c, &(new_shape[0]), TYPENUM_OUTPUT_1, output1, &success);
+  auto dfdb  = allocate_output<DTYPE_OUTPUT_2>(ndim, shape, TYPENUM_OUTPUT_2, output2, &success);
+  auto dfdr  = allocate_output<DTYPE_OUTPUT_3>(ndim, shape, TYPENUM_OUTPUT_3, output3, &success);
+  if (success) return 1;
 
   Eigen::Map<Eigen::Matrix<DTYPE_OUTPUT_1, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> dfdcl_mat(dfdcl, Nc, Nb);
   dfdcl_mat.setZero();

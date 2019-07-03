@@ -4,11 +4,9 @@ from __future__ import division, print_function
 
 __all__ = ["CeleriteBaseOp"]
 
-import pkg_resources
-
 from theano import gof
 
-from ..build_utils import get_compile_args, get_cache_version
+from ..build_utils import get_compile_args, get_cache_version, get_header_dirs
 
 
 class CeleriteBaseOp(gof.COp):
@@ -26,14 +24,10 @@ class CeleriteBaseOp(gof.COp):
         return get_cache_version()
 
     def c_headers(self, compiler):
-        return ["theano_helpers.h"]
+        return ["exoplanet/theano_helpers.h", "exoplanet/celerite.h"]
 
     def c_header_dirs(self, compiler):
-        return [
-            pkg_resources.resource_filename(__name__, "include"),
-            pkg_resources.resource_filename("exoplanet.theano_ops.starry",
-                                            "starry/lib/eigen_3.3.3")
-        ]
+        return get_header_dirs(eigen=True)
 
     def c_compile_args(self, compiler):
         args = get_compile_args(compiler)

@@ -50,19 +50,105 @@ DTYPE_OUTPUT_NUM* allocate_output(int ndim, npy_intp* shape, int typenum, PyArra
 }
 
 template <typename DTYPE_INPUT_NUM>
-DTYPE_INPUT_NUM* get_input (npy_intp* Nr, PyArrayObject* input, int* flag) {
-  npy_intp N;
-  *flag = get_size(input, &N);
-  if (*flag) return NULL;
-  if (*Nr > 0 && N != *Nr) {
-    *flag = 1;
+DTYPE_INPUT_NUM* get_input (int* ndim, npy_intp** shape, PyArrayObject* input, int* flag) {
+  *flag = 1;
+
+  if (input == NULL || !PyArray_CHKFLAGS(input, NPY_ARRAY_C_CONTIGUOUS)) {
+    PyErr_Format(PyExc_ValueError, "input must be C contiguous");
+    return NULL;
+  }
+
+  // Check the dimensions
+  if (*ndim >= 0 && PyArray_NDIM(input) != *ndim) {
     PyErr_Format(PyExc_ValueError, "dimension mismatch");
     return NULL;
   }
+
+  // Check the shape
+  auto dims = PyArray_DIMS(input);
+  if (*ndim >= 0) {
+    for (int n = 0; n < *ndim; ++n) {
+      if (*shape[n] >= 0 && dims[n] != *shape[n]) {
+        PyErr_Format(PyExc_ValueError, "dimension mismatch");
+        return NULL;
+      } else {
+        *shape[n] = dims[n];
+      }
+    }
+  } else {
+    *ndim = PyArray_NDIM(input);
+    *shape = dims;
+  }
+
   *flag = 0;
-  *Nr = N;
   return (DTYPE_INPUT_NUM*) PyArray_DATA(input);
 }
+
+template <typename DTYPE_INPUT_NUM>
+DTYPE_INPUT_NUM* get_input (npy_intp* size, PyArrayObject* input, int* flag) {
+  *flag = 1;
+
+  if (input == NULL || !PyArray_CHKFLAGS(input, NPY_ARRAY_C_CONTIGUOUS)) {
+    PyErr_Format(PyExc_ValueError, "input must be C contiguous");
+    return NULL;
+  }
+
+  // Check the dimensions
+  if (*size >= 0 && PyArray_SIZE(input) != *size) {
+    PyErr_Format(PyExc_ValueError, "dimension mismatch");
+    return NULL;
+  }
+
+  *size = PyArray_SIZE(input);
+  *flag = 0;
+  return (DTYPE_INPUT_NUM*) PyArray_DATA(input);
+}
+
+template <typename DTYPE_INPUT_NUM>
+DTYPE_INPUT_NUM* get_input (int ndim, npy_intp* shape, PyArrayObject* input, int* flag) {
+  *flag = 1;
+
+  if (input == NULL || !PyArray_CHKFLAGS(input, NPY_ARRAY_C_CONTIGUOUS)) {
+    PyErr_Format(PyExc_ValueError, "input must be C contiguous");
+    return NULL;
+  }
+
+  // Check the dimensions
+  if (PyArray_NDIM(input) != ndim) {
+    PyErr_Format(PyExc_ValueError, "dimension mismatch");
+    return NULL;
+  }
+
+  // Check the shape
+  auto dims = PyArray_DIMS(input);
+  for (int n = 0; n < ndim; ++n) {
+    if (shape[n] >= 0 && dims[n] != shape[n]) {
+      PyErr_Format(PyExc_ValueError, "dimension mismatch");
+      return NULL;
+    }
+  }
+
+  *flag = 0;
+  return (DTYPE_INPUT_NUM*) PyArray_DATA(input);
+}
+
+template <typename DTYPE_INPUT_NUM>
+DTYPE_INPUT_NUM* get_matrix_input (npy_intp* N1, npy_intp* N2, PyArrayObject* input, int* flag) {
+  int ndim = -1;
+  npy_intp* shape;
+  auto input_obj = get_input<DTYPE_INPUT_NUM>(&ndim, &shape, input, flag);
+  if (*flag) return NULL;
+  if (ndim != 2) {
+    *flag = 1;
+    PyErr_Format(PyExc_ValueError, "argument must be a matrix");
+    return NULL;
+  }
+  *flag = 0;
+  *N1 = shape[0];
+  *N2 = shape[1];
+  return input_obj;
+}
+
 
 } // namespace exoplanet
 

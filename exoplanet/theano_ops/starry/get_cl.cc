@@ -7,17 +7,13 @@ int APPLY_SPECIFIC(get_cl)(
   using namespace exoplanet;
   typedef DTYPE_OUTPUT_0 T;
 
-  npy_intp N;
-  int success = get_size(input0, &N);
+  npy_intp N = -1;
+  int success = 0;
+  auto u = get_input<DTYPE_INPUT_0>(&N, input0, &success);
   if (success) return 1;
 
   auto c = allocate_output<DTYPE_OUTPUT_0>(PyArray_NDIM(input0), PyArray_DIMS(input0), TYPENUM_OUTPUT_0, output0, &success);
-  if (success) {
-    return 1;
-  }
-
-  DTYPE_INPUT_0*  u = (DTYPE_INPUT_0*)PyArray_DATA(input0);
-  // DTYPE_OUTPUT_0* c = (DTYPE_OUTPUT_0*)PyArray_DATA(*output0);
+  if (success) return 1;
 
   Eigen::Matrix<T, Eigen::Dynamic, 1> a(N);
   a.setZero();

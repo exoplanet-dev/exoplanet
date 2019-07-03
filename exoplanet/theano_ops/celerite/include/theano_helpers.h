@@ -1,5 +1,8 @@
+#ifndef _EXOPLANET_CELERITE_THEANO_H_
+#define _EXOPLANET_CELERITE_THEANO_H_
+
 #include <Eigen/Core>
-#include "celerite.h"
+#include "exoplanet/celerite.h"
 
 #ifndef CELERITE_J
 #define CELERITE_J       Eigen::Dynamic
