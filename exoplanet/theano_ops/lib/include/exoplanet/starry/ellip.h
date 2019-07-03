@@ -1,7 +1,7 @@
 /**
 \file ellip.h
 \brief Elliptic integral computation.
-    
+
 Elliptic integrals computed following
 
     Bulirsch 1965, Numerische Mathematik, 7, 78
@@ -9,17 +9,18 @@ Elliptic integrals computed following
 
 adapted from the implementation by E. Agol in
 <a href="https://github.com/rodluger/limbdark/">limbdark</a>.
-Based in part on Daniel Foreman-Mackey's 
+Based in part on Daniel Foreman-Mackey's
 <a href="https://github.com/dfm/AstroFlow/">AstroFlow</a>.
 
 */
 
-#ifndef _STARRY_ELLIP_H_
-#define _STARRY_ELLIP_H_
+#ifndef _EXOPLANET_STARRY_ELLIP_H_
+#define _EXOPLANET_STARRY_ELLIP_H_
 
 #include <cmath>
-#include "utils.h"
+#include "exoplanet/starry/utils.h"
 
+namespace exoplanet {
 namespace starry {
 namespace ellip {
 
@@ -33,10 +34,10 @@ namespace ellip {
     */
     template <typename T>
     T CEL (
-        T ksq, 
-        T kc, 
-        T p, 
-        T a, 
+        T ksq,
+        T kc,
+        T p,
+        T a,
         T b
     ) {
         // In some rare cases, k^2 is so close to zero that it can actually
@@ -110,9 +111,9 @@ namespace ellip {
     */
     template <typename T>
     T CEL (
-        T ksq, 
-        T p, 
-        T a, 
+        T ksq,
+        T p,
+        T a,
         T b
     ) {
         T kc;
@@ -134,17 +135,17 @@ namespace ellip {
     */
     template <typename T>
     inline void CEL (
-        T k2, 
-        T kc, 
-        T p, 
-        T a1, 
-        T a2, 
-        T a3, 
-        T b1, 
-        T b2, 
-        T b3, 
-        T& Piofk, 
-        T& Eofk, 
+        T k2,
+        T kc,
+        T p,
+        T a1,
+        T a2,
+        T a3,
+        T b1,
+        T b2,
+        T b3,
+        T& Piofk,
+        T& Eofk,
         T& Em1mKdm
     ) {
         // Bounds checks
@@ -163,19 +164,19 @@ namespace ellip {
         T p1, pinv, pinv1, q, g, g1, ginv, f, f1, f2, f3;
 
         // Initialize values:
-        T ee = kc; 
+        T ee = kc;
         T m = 1.0;
         if (p > 0.0) {
-            p = sqrt(p); 
-            pinv = 1.0 / p; 
+            p = sqrt(p);
+            pinv = 1.0 / p;
             b1 *= pinv;
         } else {
-            q = k2; 
-            g = 1.0 - p; 
+            q = k2;
+            g = 1.0 - p;
             f = g - k2;
-            q *= (b1 - a1 * p); 
-            ginv = 1.0 / g; 
-            p = sqrt(f * ginv); 
+            q *= (b1 - a1 * p);
+            ginv = 1.0 / g;
+            p = sqrt(f * ginv);
             a1 = (a1 - b1) * ginv;
             pinv = 1.0 / p;
             b1 = -q * ginv * ginv * pinv + a1 * p;
@@ -183,34 +184,34 @@ namespace ellip {
         // Compute recursion:
         f1 = a1;
         // First compute the first integral with p:
-        a1 += b1 * pinv; 
-        g = ee * pinv; 
-        b1 += f1 * g; 
-        b1 += b1; 
-        p += g; 
+        a1 += b1 * pinv;
+        g = ee * pinv;
+        b1 += f1 * g;
+        b1 += b1;
+        p += g;
         g = m;
         // Next, compute the remainder with p = 1:
-        p1 = 1.0; 
+        p1 = 1.0;
         g1 = ee;
-        f2 = a2; 
+        f2 = a2;
         f3 = a3;
-        a2 += b2; 
-        b2 += f2 * g1; 
+        a2 += b2;
+        b2 += f2 * g1;
         b2 += b2;
-        a3 += b3; 
-        b3 += f3 * g1; 
+        a3 += b3;
+        b3 += f3 * g1;
         b3 += b3;
         p1 += g1;
         g1 = m;
         m += kc;
-        size_t iter = 0; 
-        while (((abs(g - kc) > g * ca) || (abs(g1 - kc) > g1 * ca)) && 
+        size_t iter = 0;
+        while (((abs(g - kc) > g * ca) || (abs(g1 - kc) > g1 * ca)) &&
               (iter < STARRY_ELLIP_MAX_ITER)) {
             kc = sqrt(ee);
             kc += kc;
             ee = kc * m;
-            f1 = a1; 
-            f2 = a2; 
+            f1 = a1;
+            f2 = a2;
             f3 = a3;
             pinv = 1.0 / p;
             pinv1 = 1.0 / p1;
@@ -241,5 +242,6 @@ namespace ellip {
 
 } // namespace ellip
 } // namespace starry
+} // namespace exoplanet
 
 #endif

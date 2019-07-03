@@ -1,6 +1,6 @@
 #section support_code_struct
 
-starry::limbdark::GreensLimbDark<DTYPE_OUTPUT_0>* APPLY_SPECIFIC(L);
+exoplanet::starry::limbdark::GreensLimbDark<DTYPE_OUTPUT_0>* APPLY_SPECIFIC(L);
 
 #section init_code_struct
 
@@ -27,6 +27,8 @@ int APPLY_SPECIFIC(limbdark)(
     PyArrayObject** output3   // dfdr
   )
 {
+  using namespace exoplanet;
+
   npy_intp Nc, Nb, Nr, Nlos;
   int success = get_size(input0, &Nc);
   success += get_size(input1, &Nb);
