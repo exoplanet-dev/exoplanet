@@ -1,5 +1,6 @@
 paper/* linguist-documentation
 docs/* linguist-documentation
+exoplanet/theano_ops/vendor/* linguist-vendored
 *.h linguist-language=C++
 docs/notebooks/*.ipynb filter=nbstripout
 paper/figures/*.ipynb filter=nbstripout
