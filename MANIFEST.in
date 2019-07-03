@@ -2,6 +2,8 @@ include README.rst
 include LICENSE
 include requirements.txt
 
+include exoplanet/theano_ops/lib/include/exoplanet/*.h
+
 include exoplanet/theano_ops/kepler/*.cc
 include exoplanet/theano_ops/kepler/include/*.h
 
@@ -14,8 +16,7 @@ include exoplanet/theano_ops/celerite/include/*.h
 include exoplanet/theano_ops/interp/*.cc
 include exoplanet/theano_ops/interp/include/*.h
 
-include exoplanet/theano_ops/starry/starry/starry/*.h
+include exoplanet/theano_ops/lib/include/exoplanet/starry/*.h
+include exoplanet/theano_ops/lib/include/exoplanet/vice/*.h
 include exoplanet/theano_ops/starry/*.cc
-include exoplanet/theano_ops/starry/include/*.h
-graft exoplanet/theano_ops/starry/starry/lib/eigen_3.3.3
-graft exoplanet/theano_ops/starry/starry/lib/boost_1_66_0
+graft exoplanet/theano_ops/lib/vendor/eigen_3.3.3

@@ -1,5 +1,22 @@
+#ifndef _EXOPLANET_CELERITE_H_
+#define _EXOPLANET_CELERITE_H_
+
 #include <Eigen/Core>
 
+#ifndef CELERITE_J
+#define CELERITE_J       Eigen::Dynamic
+#define CELERITE_J2      Eigen::Dynamic
+#define CELERITE_J_ORDER Eigen::RowMajor
+#endif
+
+#ifndef CELERITE_NRHS
+#define CELERITE_NRHS        Eigen::Dynamic
+#define CELERITE_JNRHS       Eigen::Dynamic
+#define CELERITE_NRHS_ORDER  Eigen::RowMajor
+#define CELERITE_JNRHS_ORDER Eigen::RowMajor
+#endif
+
+namespace exoplanet {
 namespace celerite {
 
 template <typename T> int sgn(T val) {
@@ -254,5 +271,7 @@ void solve_grad (
   }
 }
 
-}
+}  // namespace celerite
+}  // namespace exoplanet
 
+#endif
