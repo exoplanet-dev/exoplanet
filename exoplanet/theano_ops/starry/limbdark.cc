@@ -75,16 +75,16 @@ int APPLY_SPECIFIC(limbdark)(
       auto b_ = std::abs(b[i]);
       auto r_ = std::abs(r[i]);
       if (b_ < 1 + r_) {
-        APPLY_SPECIFIC(L)->compute(b_, r_, true);
-        auto S = APPLY_SPECIFIC(L)->S;
+        APPLY_SPECIFIC(L)->template compute<true>(b_, r_);
+        auto sT = APPLY_SPECIFIC(L)->sT;
 
         // The value of the light curve
-        f[i] = S.dot(cvec) - 1;
+        f[i] = sT.dot(cvec) - 1;
 
         // The gradients
-        dfdcl_mat.col(i) = S;
-        dfdb[i] = sgn(b[i]) * APPLY_SPECIFIC(L)->dSdb.dot(cvec);
-        dfdr[i] = sgn(r[i]) * APPLY_SPECIFIC(L)->dSdr.dot(cvec);
+        dfdcl_mat.col(i) = sT;
+        dfdb[i] = sgn(b[i]) * APPLY_SPECIFIC(L)->dsTdb.dot(cvec);
+        dfdr[i] = sgn(r[i]) * APPLY_SPECIFIC(L)->dsTdr.dot(cvec);
       }
     }
   }
