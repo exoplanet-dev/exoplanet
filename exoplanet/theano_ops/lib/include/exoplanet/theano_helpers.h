@@ -68,11 +68,9 @@ DTYPE_INPUT_NUM* get_input (int* ndim, npy_intp** shape, PyArrayObject* input, i
   auto dims = PyArray_DIMS(input);
   if (*ndim >= 0) {
     for (int n = 0; n < *ndim; ++n) {
-      if (*shape[n] >= 0 && dims[n] != *shape[n]) {
+      if ((*shape)[n] >= 0 && dims[n] != (*shape)[n]) {
         PyErr_Format(PyExc_ValueError, "dimension mismatch");
         return NULL;
-      } else {
-        *shape[n] = dims[n];
       }
     }
   } else {
