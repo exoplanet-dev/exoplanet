@@ -33,6 +33,10 @@ int APPLY_SPECIFIC(limbdark)(
   int ndim_c = -1;
   npy_intp* shape_c;
   auto c = get_input<DTYPE_INPUT_0>(&ndim_c, &shape_c, input0, &success);
+  if (ndim_c != 1) {
+    PyErr_Format(PyExc_ValueError, "c must be 1D");
+    return 1;
+  }
 
   int ndim = -1;
   npy_intp* shape;
