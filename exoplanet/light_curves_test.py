@@ -9,6 +9,7 @@ import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
 import starry
+from packaging import version
 
 from .orbits import KeplerianOrbit
 from .light_curves import StarryLightCurve
@@ -26,10 +27,15 @@ def test_light_curve():
     b_val = np.linspace(-1.5, 1.5, 100)
     r_val = 0.1 + np.zeros_like(b_val)
 
-    m = starry.Map(lmax=len(u_val))
-    m[:] = u_val
-    expect = m.flux(xo=b_val, ro=r_val) - 1
-
+    if version.parse(starry.__version__) < version.parse("0.9.9"):
+        m = starry.Map(lmax=len(u_val))
+        m[:] = u_val
+        expect = m.flux(xo=b_val, ro=r_val) - 1
+    else:
+        m = starry.Map(udeg=len(u_val), lazy=False)
+        m[1:] = u_val
+        expect = m.flux(xo=b_val, ro=r_val[0]) - 1
+    
     evaluated = func(u_val, b_val, r_val)
 
     utt.assert_allclose(expect, evaluated)
