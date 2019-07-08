@@ -537,6 +537,28 @@ namespace limbdark {
             }
         }
 
+        // Special case: complete occultation
+        if (unlikely(b < r - 1)) {
+            sT.setZero();
+            if (GRADIENT) {
+                dsTdb.setZero();
+                dsTdr.setZero();
+            }
+            return;
+        }
+
+        // Special case: no occultation
+        if (unlikely(r == 0) || (b > r + 1)) {
+            sT.setZero();
+            sT(0) = pi<T>();
+            sT(1) = 2.0 * pi<T>() / 3.0;
+            if (GRADIENT) {
+                dsTdb.setZero();
+                dsTdr.setZero();
+            }
+            return;
+        }
+
         b2 = b * b;
         r2 = r * r;
         invr = T(1.0) / r;
@@ -633,8 +655,6 @@ namespace limbdark {
             }
             return;
         }
-
-        // TODO: Special cases for r == 0 and for no/complete occultation
 
         // Compute the quadratic term
         T r2pb2 = (r2 + b2);

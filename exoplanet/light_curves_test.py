@@ -166,3 +166,39 @@ def test_small_star():
     model = TransitModel(params, t)
     flux = model.light_curve(params)
     utt.assert_allclose(vals[0][:, 0], flux - 1)
+
+
+def test_singular_points():
+    u = tt.vector()
+    b = tt.vector()
+    r = tt.vector()
+    lc = StarryLightCurve(u)
+    f = lc._compute_light_curve(b, r)
+    func = theano.function([u, b, r], f)
+    u_val = np.array([0.2, 0.3, 0.1, 0.5])
+
+    def compare(b_val, r_val, b_eps, r_eps):
+        """
+        Compare the flux at a singular point
+        to the flux at neighboring points.
+
+        """
+        b_val = [b_val - b_eps, b_val + b_eps, b_val]
+        r_val = [r_val - r_eps, r_val + r_eps, r_val]
+        flux = func(u_val, b_val, r_val)
+        assert np.allclose(np.mean(flux[:2]), flux[2]) 
+
+    # Test the b = 1 - r singular point
+    compare(0.1, 0.9, 1e-8, 0.0)
+
+    # Test the b = r = 0.5 singular point
+    compare(0.5, 0.5, 1e-8, 0.0)
+
+    # Test the b = 0 singular point
+    compare(0.0, 0.1, 1e-8, 0.0)
+
+    # Test the b = 0, r = 1 singular point
+    compare(0.0, 1.0, 0.0, 1e-8)
+
+    # Test the b = 1 + r singular point
+    compare(1.1, 0.1, 1e-8, 0.0)
