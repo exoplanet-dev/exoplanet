@@ -1,5 +1,5 @@
-#ifndef _EXOPLANET_KEPLER_SOLVER_H_
-#define _EXOPLANET_KEPLER_SOLVER_H_
+#ifndef _EXOPLANET_KEPLER_H_
+#define _EXOPLANET_KEPLER_H_
 
 // A solver for Kepler's equation based on:
 //
@@ -14,6 +14,7 @@
 #include <cmath>
 
 namespace exoplanet {
+namespace kepler {
 
   // Calculates x - sin(x) and 1 - cos(x) to 20 significant digits for x in [0, pi)
   template <typename T>
@@ -120,6 +121,7 @@ namespace exoplanet {
     return E;  // + M_ref;
   }
 
-}
+}  // namespace kepler
+}  // namespace exoplanet
 
 #endif

@@ -217,8 +217,39 @@ Furthermore, as discussed below, we must provide custom astronomy-specific opera
 Gradient-based methods can be applied to both optimization and inference tasks.
 For example, the task of finding the maximum likelihood or maximum a posteriori parameters can be significantly accelerated using the gradient of the objective with respect to the model parameters.
 While computing the gradient will be somewhat more expensive than computing only the value of the function, it is generally significantly more efficient than using finite difference methods.
-Furthermore, since the gradients computed using automatic differentation is exact, unlike finite difference which will suffer from numerical issues unless the step size is carefully tuned, the lack of numerical noise generally reduces the number of steps the optimizer must take before reaching the optimum.
+Furthermore, since the gradients computed using automatic differentiation is exact, unlike finite difference which will suffer from numerical issues unless the step size is carefully tuned, the lack of numerical noise generally reduces the number of steps the optimizer must take before reaching the optimum.
 
+\subsection{Optimization}
+
+One standard inference procedure is maximum likelihood or maximum a posteriori inference by optimization.
+In this case, the objective (either the likelihood or posterior function) is maximized (numerically) with respect to the input parameters.
+Operations like this are commonly performed within the astronomical literature (CITE) and gradient-free methods are commonly used for this purpose (LM, NM).
+These methods can work reasonably well in low dimensions when the objective is well behaved, but this performance generally degrades rapidly with the number of parameters.
+In other scientific fields, gradient-based optimization is the industry standard (CITE), and these methods have been demonstrated to scale to large parameter spaces.
+In astronomy, it is now common to use the \project{BFGS} optimization routine (CITE) combined with finite difference estimates of the derivatives.
+These methods can be applied to larger problems, but the computational cost of evaluating the model scales with the number of dimensions and the results are generally sensitive to the choice of step size in the finite difference.
+Furthermore, the numerical noise introduced by the finite difference calculations reduces the performance of the optimization routine and increases the number of model evaluations needed to reach the optimum.
+
+In this paper, we describe the computations needed to compute the required gradients using backpropagation and these derivatives can be used to substantially improve the performance of optimization applied to exoplanet datasets.
+
+\dfmtodo{Make an example.}
+
+For example, we computed the number of function evaluations and total run time needed to find an estimate of the maximum likelihood parameters for a simulated radial velocity data set and compared the precision of this estimate to the \dfmtodo{true} maximum.
+In this case, finite difference required \dfmtodo{how many?} as many more function evaluations.
+
+Similarly, we compare the performance of finite difference and exoplanet for optimizing the parameters for a transiting exoplanet.
+In this case... \dfmtodo{finish this}.
+
+\subsection{Sampling}
+
+A popular method for evaluating posterior integrals is to us Markov chain Monte Carlo (MCMC).
+These methods can be substantial accelerated using gradients of the log probability with respect to the input parameters using Langevin or Hamiltonian methods.
+
+\dfmtodo{Talk about Langevin methods? CITE things}
+
+
+
+\subsection{Variational inference}
 
 \section{Orbital conventions}
 We choose to follow a set of orbital conventions that respects as many of the established conventions while also hewing to sensible choices of right-hand rule.
@@ -227,7 +258,7 @@ The orbit is specified in the perifocal plane $x,y,z$, technically in the $x,y$ 
 
 Where does the $+Z$ axis point? Towards observer. X is north, Y is east.
 
-What is the definition of the ascending node? Where the secondary is receeding from the observer.
+What is the definition of the ascending node? Where the secondary is receding from the observer.
 
 To do this, we consider the rotation matrices
 \begin{equation}
@@ -390,6 +421,10 @@ As discussed by \citet{Foreman-Mackey:2017}, this covariance function can be int
 This operation is useful for many exoplanet applications where the datasets are large enough that traditional GP modeling is intractable.
 For example, the time series for a typical short cadence target from the \tess\ mission has a light curve with about 20,000 data points.
 Evaluating a GP model on these data using high-performance general linear algebra libraries would take \dfmtodo{how long?}.
+
+\section{Examples}
+
+
 
 \appendix
 
