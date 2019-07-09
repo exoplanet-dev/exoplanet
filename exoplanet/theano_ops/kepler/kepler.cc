@@ -1,35 +1,28 @@
 #section support_code_apply
 
-int APPLY_SPECIFIC(solver)(
+int APPLY_SPECIFIC(kepler)(
     PyArrayObject*  input0,
     PyArrayObject*  input1,
     PyArrayObject** output0,
-    PyArrayObject** output1,
-    PARAMS_TYPE* params)
+    PyArrayObject** output1)
 {
+  using namespace exoplanet;
+
   typedef DTYPE_OUTPUT_0 T;
 
-  double tol = params->tol;
-
-  npy_intp N, Ne;
-  int success = get_size(input0, &N);
-  success += get_size(input1, &Ne);
+  int success = 0;
+  int ndim = -1;
+  npy_intp* shape;
+  auto M_in = get_input<DTYPE_INPUT_0>(&ndim, &shape, input0, &success);
+  auto e_in = get_input<DTYPE_INPUT_0>(&ndim, &shape, input1, &success);
   if (success) return 1;
-  if (N != Ne) {
-    PyErr_Format(PyExc_ValueError, "dimension mismatch");
-    return 1;
-  }
 
-  success += allocate_output(PyArray_NDIM(input0), PyArray_DIMS(input0), TYPENUM_OUTPUT_0, output0);
-  success += allocate_output(PyArray_NDIM(input0), PyArray_DIMS(input0), TYPENUM_OUTPUT_1, output1);
-  if (success) {
-    return 1;
-  }
+  auto E_out = allocate_output<DTYPE_OUTPUT_0>(ndim, shape, TYPENUM_OUTPUT_0, output0, &success);
+  auto f_out = allocate_output<DTYPE_OUTPUT_1>(ndim, shape, TYPENUM_OUTPUT_1, output1, &success);
+  if (success) return 1;
 
-  DTYPE_INPUT_0*  M_in  = (DTYPE_INPUT_0*)PyArray_DATA(input0);
-  DTYPE_INPUT_1*  e_in  = (DTYPE_INPUT_1*)PyArray_DATA(input1);
-  DTYPE_OUTPUT_0* E_out = (DTYPE_OUTPUT_0*)PyArray_DATA(*output0);
-  DTYPE_OUTPUT_1* f_out = (DTYPE_OUTPUT_1*)PyArray_DATA(*output1);
+  npy_intp N = 1;
+  for (int n = 0; n < ndim; ++n) N *= shape[n];
 
   T M, e, E, delta, func, esinE, tanE2, denom;
   for (npy_intp n = 0; n < N; ++n) {
@@ -43,6 +36,7 @@ int APPLY_SPECIFIC(solver)(
       return 1;
     }
 
+    const T tol = 1e-10;
     if (e <= tol) {
 
       // Special case for zero eccentricity
@@ -51,7 +45,7 @@ int APPLY_SPECIFIC(solver)(
 
     } else {
 
-      E = exoplanet::solve_kepler(M, e);
+      E = kepler::solve_kepler(M, e);
       E_out[n] = E;
       denom = e * (1 + cos(E));
       esinE = e * sin(E);

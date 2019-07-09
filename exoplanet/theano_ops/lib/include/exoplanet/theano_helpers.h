@@ -2,13 +2,16 @@
 #define _EXOPLANET_THEANO_HELPERS_H_
 
 #include <cmath>
-#include <Eigen/Core>
-#include "exoplanet/starry/limbdark.h"
 
 namespace exoplanet {
 
 template <typename T> int sgn(T val) {
   return (T(0) < val) - (val < T(0));
+}
+
+template <typename T>
+inline T wrap_into (T x, T period) {
+  return x - period * floor(x / period);
 }
 
 int get_size(PyArrayObject* input, npy_intp* size) {

@@ -8,7 +8,7 @@ import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
-from .solver import KeplerOp
+from .kepler import KeplerOp
 
 
 class TestKeplerSolver(utt.InferShapeTester):
