@@ -2,4 +2,4 @@
 
 __all__ = ["KeplerOp"]
 
-from .solver import KeplerOp
+from .kepler import KeplerOp

@@ -4,35 +4,35 @@ from __future__ import division, print_function
 
 __all__ = ["KeplerOp"]
 
-import pkg_resources
-
 import theano
 from theano import gof
 import theano.tensor as tt
 
-from ..build_utils import get_cache_version
+from ..build_utils import get_cache_version, get_compile_args, get_header_dirs
 
 
 class KeplerOp(gof.COp):
-    params_type = gof.ParamsType(
-        tol=theano.scalar.float64,
-    )
-    __props__ = ("tol", )
-    func_file = "./solver.cc"
-    func_name = "APPLY_SPECIFIC(solver)"
+    __props__ = ()
+    func_file = "./kepler.cc"
+    func_name = "APPLY_SPECIFIC(kepler)"
 
-    def __init__(self, tol=1e-12, **kwargs):
-        self.tol = float(tol)
+    def __init__(self, **kwargs):
         super(KeplerOp, self).__init__(self.func_file, self.func_name)
 
     def c_code_cache_version(self):
         return get_cache_version()
 
     def c_headers(self, compiler):
-        return ["theano_helpers.h", "solver.h"]
+        return [
+            "exoplanet/theano_helpers.h",
+            "exoplanet/kepler.h"
+        ]
 
     def c_header_dirs(self, compiler):
-        return [pkg_resources.resource_filename(__name__, "include")]
+        return get_header_dirs(eigen=False)
+
+    def c_compile_args(self, compiler):
+        return get_compile_args(compiler)
 
     def make_node(self, mean_anom, eccen):
         in_args = [tt.as_tensor_variable(mean_anom),
