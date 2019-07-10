@@ -32,14 +32,15 @@ class TestKeplerSolver(utt.InferShapeTester):
         M_t = tt.dvector()
         e_t = tt.dvector()
         func = theano.function([M_t, e_t], self.op(M_t, e_t))
-        E0, f0 = func(M, e)
+        E0, sinf0, cosf0 = func(M, e)
 
         assert np.all(np.isfinite(E0))
         utt.assert_allclose(np.sin(E), np.sin(E0))
         utt.assert_allclose(np.cos(E), np.cos(E0))
-        assert np.all(np.isfinite(f0))
-        utt.assert_allclose(np.sin(f), np.sin(f0))
-        utt.assert_allclose(np.cos(f), np.cos(f0))
+        assert np.all(np.isfinite(sinf0))
+        assert np.all(np.isfinite(cosf0))
+        utt.assert_allclose(np.sin(f), sinf0)
+        utt.assert_allclose(np.cos(f), cosf0)
 
     def test_pi(self):
         e = np.linspace(0, 1.0, 100)
@@ -49,14 +50,15 @@ class TestKeplerSolver(utt.InferShapeTester):
         M_t = tt.dvector()
         e_t = tt.dvector()
         func = theano.function([M_t, e_t], self.op(M_t, e_t))
-        E0, f0 = func(M, e)
+        E0, sinf0, cosf0 = func(M, e)
 
         assert np.all(np.isfinite(E0))
         utt.assert_allclose(np.sin(E), np.sin(E0))
         utt.assert_allclose(np.cos(E), np.cos(E0))
-        assert np.all(np.isfinite(f0))
-        utt.assert_allclose(np.sin(f), np.sin(f0))
-        utt.assert_allclose(np.cos(f), np.cos(f0))
+        assert np.all(np.isfinite(sinf0))
+        assert np.all(np.isfinite(cosf0))
+        utt.assert_allclose(np.sin(f), sinf0)
+        utt.assert_allclose(np.cos(f), cosf0)
 
     def test_solver(self):
         e = np.linspace(0, 1, 500)[:-1]
@@ -68,14 +70,15 @@ class TestKeplerSolver(utt.InferShapeTester):
         M_t = tt.matrix()
         e_t = tt.matrix()
         func = theano.function([M_t, e_t], self.op(M_t, e_t))
-        E0, f0 = func(M, e)
+        E0, sinf0, cosf0 = func(M, e)
 
         assert np.all(np.isfinite(E0))
         utt.assert_allclose(np.sin(E), np.sin(E0))
         utt.assert_allclose(np.cos(E), np.cos(E0))
-        assert np.all(np.isfinite(f0))
-        utt.assert_allclose(np.sin(f), np.sin(f0))
-        utt.assert_allclose(np.cos(f), np.cos(f0))
+        assert np.all(np.isfinite(sinf0))
+        assert np.all(np.isfinite(cosf0))
+        utt.assert_allclose(np.sin(f), sinf0)
+        utt.assert_allclose(np.cos(f), cosf0)
 
     def test_infer_shape(self):
         np.random.seed(42)

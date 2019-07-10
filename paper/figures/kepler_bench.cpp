@@ -71,8 +71,8 @@ inline double kepler_radvel(double M, double e)
 // Ref: https://github.com/lkreidberg/batman/blob/master/c_src/_rsky.c
 inline double kepler_batman(double M, double e)	//calculates the eccentric anomaly (see Seager Exoplanets book:  Murray & Correia eqn. 5 -- see section 3)
 {
-	double E = M, eps = 1.0e-7;
-	double fe, fs;
+  double E = M, eps = 1.0e-7;
+  double fe, fs;
   const int max_iter = 30;
   int i = 0;
 
@@ -90,20 +90,29 @@ inline double kepler_batman(double M, double e)	//calculates the eccentric anoma
 
 
 struct Exoplanet {
-  inline double operator() (double M, double ecc) {
-    return exoplanet::kepler::solve_kepler<double>(M, ecc);
+  inline double operator() (double M, double ecc, double* sE, double* cE) {
+    double E = exoplanet::kepler::solve_kepler<double>(M, ecc);
+    *sE = sin(E);
+    *cE = cos(E);
+    return E;
   }
 };
 
 struct Radvel {
-  inline double operator() (double M, double ecc) {
-    return kepler_radvel(M, ecc);
+  inline double operator() (double M, double ecc, double* sE, double* cE) {
+    double E = kepler_radvel(M, ecc);
+    *sE = sin(E);
+    *cE = cos(E);
+    return E;
   }
 };
 
 struct Batman {
-  inline double operator() (double M, double ecc) {
-    return kepler_batman(M, ecc);
+  inline double operator() (double M, double ecc, double* sE, double* cE) {
+    double E = kepler_batman(M, ecc);
+    *sE = sin(E);
+    *cE = cos(E);
+    return E;
   }
 };
 
@@ -118,9 +127,10 @@ std::tuple<double, double, double, double> do_benchmark (double ecc, const int N
   std::vector<double> error(N);
   double start = get_timestamp();
   Operator func;
+  double sE, cE;
   for (int n = 0; n < N; ++n) {
-    double E_solve = func(M[n], ecc);
-    error[n] = std::abs(sin(E[n]) - sin(E_solve));
+    double E_solve = func(M[n], ecc, &sE, &cE);
+    error[n] = std::abs(sin(E[n]) - sE);
   }
   double end = get_timestamp();
   double max_err = 0.0;
