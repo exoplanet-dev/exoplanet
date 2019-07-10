@@ -1,7 +1,7 @@
 /*
 <%
 setup_pybind11(cfg)
-cfg['include_dirs'] = ['../../exoplanet/theano_ops/kepler/include']
+cfg['include_dirs'] = ['../../exoplanet/theano_ops/lib/include/exoplanet']
 %>
 */
 #include <pybind11/pybind11.h>
@@ -12,7 +12,7 @@ cfg['include_dirs'] = ['../../exoplanet/theano_ops/kepler/include']
 #include <algorithm>
 #include <sys/time.h>
 
-#include "solver.h"
+#include "kepler.h"
 
 namespace py = pybind11;
 
@@ -91,7 +91,7 @@ inline double kepler_batman(double M, double e)	//calculates the eccentric anoma
 
 struct Exoplanet {
   inline double operator() (double M, double ecc) {
-    return exoplanet::solve_kepler<double>(M, ecc);
+    return exoplanet::kepler::solve_kepler<double>(M, ecc);
   }
 };
 
@@ -120,7 +120,7 @@ std::tuple<double, double, double, double> do_benchmark (double ecc, const int N
   Operator func;
   for (int n = 0; n < N; ++n) {
     double E_solve = func(M[n], ecc);
-    error[n] = std::abs(E[n] - E_solve);
+    error[n] = std::abs(sin(E[n]) - sin(E_solve));
   }
   double end = get_timestamp();
   double max_err = 0.0;
