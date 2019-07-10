@@ -62,15 +62,13 @@ class Solver:
         M1, M2, flag = self.op(a, e, cosw, sinw, cosi, sini, L)
 
         kepler_op = KeplerOp()
-        E1, f1 = kepler_op(M1, e)
-        E2, f2 = kepler_op(M2, e)
+        E1, sinf1, cosf1 = kepler_op(M1, e)
+        E2, sinf2, cosf2 = kepler_op(M2, e)
 
         self.func = theano.function([a, e, cosw, sinw, cosi, sini, L],
-                                    [f1, f2, flag])
+                                    [sinf1, cosf1, sinf2, cosf2, flag])
 
-    def get_b2(self, f, a, e, cosw, sinw, cosi, sini):
-        cosf = np.cos(f)
-        sinf = np.sin(f)
+    def get_b2(self, sinf, cosf, a, e, cosw, sinw, cosi, sini):
         e2 = e**2
         factor = (a * (e2 - 1) / (e*cosf + 1))**2
         return factor*(cosi**2*(cosw*sinf + sinw*cosf)**2 +
@@ -88,15 +86,17 @@ class Solver:
         i = np.arccos(cosi)
         sini = np.sin(i)
 
-        f1, f2, flag = self.func(a, e, cosw, sinw, cosi, sini, L)
+        sinf1, cosf1, sinf2, cosf2, flag = self.func(a, e, cosw, sinw, cosi,
+                                                     sini, L)
         if np.any(flag):
             return
 
-        fs = [f1, f2]
+        fs = [(sinf1, cosf1), (sinf2, cosf2)]
         assert np.all(np.isfinite(fs))
-        for f in fs:
+        for sinf, cosf in fs:
             assert np.allclose(target,
-                               self.get_b2(f, a, e, cosw, sinw, cosi, sini))
+                               self.get_b2(sinf, cosf, a, e, cosw, sinw,
+                                           cosi, sini))
 
 
 @pytest.mark.parametrize("a", [5.0, 12.1234, 100.0, 1000.0, 20000.0])
