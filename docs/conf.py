@@ -2,17 +2,18 @@
 # -*- coding: utf-8 -*-
 
 import os
-import re
 import sys
 import glob
 import subprocess
 from itertools import chain
 
+import sphinx_typlog_theme
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def setup(app):
-    app.add_stylesheet("css/exoplanet.css")
+    app.add_stylesheet("css/exoplanet.css?v=3")
 
 
 extensions = [
@@ -68,18 +69,17 @@ exclude_patterns = ["_build"]
 pygments_style = "sphinx"
 
 # Readthedocs.
-html_theme_path = ["_themes"]
-html_theme = "daft"
+html_theme = "sphinx_typlog_theme"
+html_theme_path = [sphinx_typlog_theme.get_path()]
 html_theme_options = {
-    "tagline": "Fast & scalable MCMC for all your exoplanet needs!",
+    "logo": "logo.png"
 }
-
-html_context = dict(
-    display_github=True,
-    github_user="dfm",
-    github_repo="exoplanet",
-    github_version="master",
-    conf_py_path="/docs/",
-)
+html_sidebars = {
+    '**': [
+        'logo.html',
+        'globaltoc.html',
+        'relations.html',
+        'searchbox.html',
+    ]
+}
 html_static_path = ["_static"]
-html_show_sourcelink = False

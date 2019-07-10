@@ -25,3 +25,11 @@
 .dataframe tbody + tbody {
   border-top: 2px solid #dee2e6;
 }
+
+#searchbox {
+  padding-top: 20px;
+}
+
+.yue img {
+  max-width: 700px;
+}
