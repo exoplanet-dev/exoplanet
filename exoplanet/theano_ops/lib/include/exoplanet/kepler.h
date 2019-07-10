@@ -16,11 +16,12 @@
 namespace exoplanet {
 namespace kepler {
 
+    const double s[] = {1.0/6, 1.0/20, 1.0/42, 1.0/72, 1.0/110, 1.0/156, 1.0/210, 1.0/272, 1.0/342, 1.0/420};
+    const double c[] = {0.5, 1.0/12, 1.0/30, 1.0/56, 1.0/90, 1.0/132, 1.0/182, 1.0/240, 1.0/306, 1.0/380};
+
   // Calculates x - sin(x) and 1 - cos(x) to 20 significant digits for x in [0, pi)
   template <typename T>
   inline void sin_cos_reduc (T x, T* SnReduc, T* CsReduc) {
-    const T s[] = {T(1)/6, T(1)/20, T(1)/42, T(1)/72, T(1)/110, T(1)/156, T(1)/210, T(1)/272, T(1)/342, T(1)/420};
-    const T c[] = {T(0.5), T(1)/12, T(1)/30, T(1)/56, T(1)/90, T(1)/132, T(1)/182, T(1)/240, T(1)/306, T(1)/380};
 
     bool bigg = x > M_PI_2;
     T u = (bigg) ? M_PI - x : x;
@@ -102,7 +103,7 @@ namespace kepler {
 
     // Approximate Mstar = E - e*sin(E) with numerically stability
     T sE, cE;
-    sin_cos_reduc (E, &sE, &cE);
+    sin_cos_reduc(E, &sE, &cE);
 
     // Refine the starter
     T f_0 = ecc * sE + E * ome - M;
