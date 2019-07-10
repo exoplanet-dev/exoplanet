@@ -309,8 +309,8 @@ class KeplerianOrbit(object):
         M = (self._warp_times(t) - self.tref) * self.n
         if self.ecc is None:
             return M
-        _, f = self.kepler_op(M, self.ecc + tt.zeros_like(M))
-        return f
+        _, sinf, cosf = self.kepler_op(M, self.ecc + tt.zeros_like(M))
+        return sinf, cosf
 
     def _get_position(self, a, t, parallax=None):
         """Get the position of a body.
@@ -326,8 +326,7 @@ class KeplerianOrbit(object):
             of R_sun, but if parallax is provided, then in units of arcseconds.
 
         """
-        f = self._get_true_anomaly(t)
-        cosf = tt.cos(f)
+        sinf, cosf = self._get_true_anomaly(t)
         if self.ecc is None:
             r = a
         else:
@@ -337,7 +336,7 @@ class KeplerianOrbit(object):
             # convert r into arcseconds
             r = r * parallax / self.au_to_R_sun
 
-        return self._rotate_vector(r * cosf, r * tt.sin(f))
+        return self._rotate_vector(r * cosf, r * sinf)
 
     def get_planet_position(self, t, parallax=None):
         """The planets' positions in the barycentric frame
@@ -410,19 +409,18 @@ class KeplerianOrbit(object):
         X, Y, Z = self._get_position(-self.a, t, parallax)
 
         # calculate rho and theta
-        rho = tt.squeeze(tt.sqrt(X**2 + Y**2)) # arcsec
-        theta = tt.squeeze(tt.arctan2(Y,X)) # radians between [-pi, pi]
+        rho = tt.squeeze(tt.sqrt(X**2 + Y**2))  # arcsec
+        theta = tt.squeeze(tt.arctan2(Y, X))  # radians between [-pi, pi]
 
         return (rho, theta)
 
-
     def _get_velocity(self, m, t):
         """Get the velocity vector of a body in the observer frame"""
-        f = self._get_true_anomaly(t)
+        sinf, cosf = self._get_true_anomaly(t)
         K = self.K0 * m
         if self.ecc is None:
-            return self._rotate_vector(-K*tt.sin(f), K*tt.cos(f))
-        return self._rotate_vector(-K*tt.sin(f), K*(tt.cos(f) + self.ecc))
+            return self._rotate_vector(-K*sinf, K*cosf)
+        return self._rotate_vector(-K*sinf, K*(cosf + self.ecc))
 
     def get_planet_velocity(self, t):
         """Get the planets' velocity vector
@@ -500,12 +498,12 @@ class KeplerianOrbit(object):
 
         # Special case for K given: m_planet, incl, etc. is ignored
         if K is not None:
-            f = self._get_true_anomaly(t)
+            sinf, cosf = self._get_true_anomaly(t)
             if self.ecc is None:
-                return tt.squeeze(K * tt.cos(f))
+                return tt.squeeze(K * cosf)
             # cos(w + f) + e * cos(w) from Lovis & Fischer
             return tt.squeeze(
-                K * (self.cos_omega*tt.cos(f) - self.sin_omega*tt.sin(f) +
+                K * (self.cos_omega*cosf - self.sin_omega*sinf +
                      self.ecc * self.cos_omega))
 
         # Compute the velocity using the full orbit solution
@@ -516,14 +514,13 @@ class KeplerianOrbit(object):
         return -conv * v[2]
 
     def _get_acceleration(self, a, m, t):
-        f = self._get_true_anomaly(t)
+        sinf, cosf = self._get_true_anomaly(t)
         K = self.K0 * m
-        cosf = tt.cos(f)
         if self.ecc is None:
             factor = -K**2 / a
         else:
             factor = K**2 * (self.ecc*cosf + 1)**2 / (a*(self.ecc**2 - 1))
-        return self._rotate_vector(factor * cosf, factor * tt.sin(f))
+        return self._rotate_vector(factor * cosf, factor * sinf)
 
     def get_planet_acceleration(self, t):
         return tuple(tt.squeeze(x)
