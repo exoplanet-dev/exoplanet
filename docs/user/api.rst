@@ -21,7 +21,7 @@ Orbits
 Light curve models
 ------------------
 
-.. autoclass:: exoplanet.StarryLightCurve
+.. autoclass:: exoplanet.LimbDarkLightCurve
    :inherited-members:
 
 
