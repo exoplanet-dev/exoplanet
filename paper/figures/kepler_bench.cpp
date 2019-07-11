@@ -129,7 +129,7 @@ std::tuple<double, double, double, double> do_benchmark (double ecc, const int N
   Operator func;
   double sE, cE;
   for (int n = 0; n < N; ++n) {
-    double E_solve = func(M[n], ecc, &sE, &cE);
+    func(M[n], ecc, &sE, &cE);
     error[n] = std::abs(sin(E[n]) - sE);
   }
   double end = get_timestamp();
