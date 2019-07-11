@@ -7,6 +7,8 @@ unset __conda_setup
 cd /mnt/home/dforeman/research/projects/dfm/exoplanet_auto
 conda activate autoexoplanet
 
+export THEANO_FLAGS=base_compiledir=/mnt/home/dforeman/research/projects/dfm/exoplanet_auto/theano_cache
+
 git checkout master
 git pull origin master
 python setup.py develop
@@ -17,7 +19,6 @@ git checkout -b auto_notebooks master
 cd docs
 conda env export > auto_environment.yml
 
-export THEANO_FLAGS=base_compiledir=theano_cache
 python run_notebooks.py $*
 
 cp notebooks/notebook_setup.py _static/notebooks/notebook_setup.py
