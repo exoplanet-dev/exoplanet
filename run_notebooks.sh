@@ -8,8 +8,8 @@ cd /mnt/home/dforeman/research/projects/dfm/exoplanet_auto
 conda activate autoexoplanet
 
 CACHEDIR=/mnt/home/dforeman/research/projects/dfm/exoplanet_auto/theano_cache
-rm -rf $(CACHEDIR)
-export THEANO_FLAGS=base_compiledir=$(CACHEDIR)
+rm -rf $CACHEDIR
+export THEANO_FLAGS=base_compiledir=$CACHEDIR
 
 git checkout master
 git pull origin master
