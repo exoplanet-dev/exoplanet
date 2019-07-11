@@ -22,21 +22,22 @@ int APPLY_SPECIFIC(contact)(
   int ndim = -1;
   npy_intp* shape;
   auto a    = get_input<DTYPE_INPUT_0>(&ndim, &shape, input0, &success);
-  auto e    = get_input<DTYPE_INPUT_1>(&ndim, &shape, input1, &success);
-  auto cosw = get_input<DTYPE_INPUT_2>(&ndim, &shape, input2, &success);
-  auto sinw = get_input<DTYPE_INPUT_3>(&ndim, &shape, input3, &success);
-  auto cosi = get_input<DTYPE_INPUT_4>(&ndim, &shape, input4, &success);
-  auto sini = get_input<DTYPE_INPUT_5>(&ndim, &shape, input5, &success);
-  auto L    = get_input<DTYPE_INPUT_6>(&ndim, &shape, input6, &success);
+
+  npy_intp N = 1;
+  for (int n = 0; n < ndim; ++n) N *= shape[n];
+
+  auto e    = get_input<DTYPE_INPUT_1>(&N, input1, &success);
+  auto cosw = get_input<DTYPE_INPUT_2>(&N, input2, &success);
+  auto sinw = get_input<DTYPE_INPUT_3>(&N, input3, &success);
+  auto cosi = get_input<DTYPE_INPUT_4>(&N, input4, &success);
+  auto sini = get_input<DTYPE_INPUT_5>(&N, input5, &success);
+  auto L    = get_input<DTYPE_INPUT_6>(&N, input6, &success);
   if (success) return 1;
 
   auto M_left  = allocate_output<DTYPE_OUTPUT_0>(ndim, shape, TYPENUM_OUTPUT_0, output0, &success);
   auto M_right = allocate_output<DTYPE_OUTPUT_1>(ndim, shape, TYPENUM_OUTPUT_1, output1, &success);
   auto flag    = allocate_output<DTYPE_OUTPUT_2>(ndim, shape, TYPENUM_OUTPUT_2, output2, &success);
   if (success) return 1;
-
-  npy_intp N = 1;
-  for (int n = 0; n < ndim; ++n) N *= shape[n];
 
   for (npy_intp n = 0; n < N; ++n) {
     auto const solver = contact_points::ContactPointSolver<T>(a[n], e[n], cosw[n], sinw[n], cosi[n], sini[n]);

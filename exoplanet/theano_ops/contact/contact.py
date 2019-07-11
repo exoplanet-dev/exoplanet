@@ -24,8 +24,8 @@ class ContactPointsOp(gof.COp):
         self.tol = float(tol)
         super(ContactPointsOp, self).__init__(self.func_file, self.func_name)
 
-    def c_code_cache_version(self):
-        return get_cache_version()
+    # def c_code_cache_version(self):
+    #     return get_cache_version()
 
     def c_compile_args(self, compiler):
         return get_compile_args(compiler)
@@ -40,7 +40,7 @@ class ContactPointsOp(gof.COp):
         if len(args) != self.num_inputs:
             raise ValueError("expected {0} inputs".format(self.num_inputs))
         in_args = [tt.as_tensor_variable(a) for a in args]
-        out_args = [in_args[0].type(), in_args[1].type(),
+        out_args = [in_args[0].type(), in_args[0].type(),
                     tt.zeros_like(in_args[0], dtype="int32").type()]
         return gof.Apply(self, in_args, out_args)
 
