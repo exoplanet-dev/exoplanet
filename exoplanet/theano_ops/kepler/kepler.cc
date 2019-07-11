@@ -15,7 +15,7 @@ int APPLY_SPECIFIC(kepler)(
   int ndim = -1;
   npy_intp* shape;
   auto M_in = get_input<DTYPE_INPUT_0>(&ndim, &shape, input0, &success);
-  auto e_in = get_input<DTYPE_INPUT_0>(&ndim, &shape, input1, &success);
+  auto e_in = get_input<DTYPE_INPUT_1>(&ndim, &shape, input1, &success);
   if (success) return 1;
 
   auto E_out = allocate_output<DTYPE_OUTPUT_0>(ndim, shape, TYPENUM_OUTPUT_0, output0, &success);
@@ -30,8 +30,6 @@ int APPLY_SPECIFIC(kepler)(
   for (npy_intp n = 0; n < N; ++n) {
     M = M_in[n];
     e = e_in[n];
-    // E_out[n] = M;
-    // f_out[n] = M;
 
     if (e > 1) {
       PyErr_Format(PyExc_ValueError, "eccentricity must be 0 <= e < 1");

@@ -1,8 +1,12 @@
+#ifndef _EXOPLANET_CONTACT_POINTS_H_
+#define _EXOPLANET_CONTACT_POINTS_H_
+
 #include <cmath>
 #include <tuple>
 #include <vector>
 #include <functional>
 
+namespace exoplanet {
 namespace contact_points {
 
   template <typename T>
@@ -140,4 +144,7 @@ namespace contact_points {
 
   };
 
-}
+}  // namespace contact_points
+}  // namespace exoplanet
+
+#endif

@@ -4,13 +4,11 @@ from __future__ import division, print_function
 
 __all__ = ["ContactPointsOp"]
 
-import pkg_resources
-
 import theano
 from theano import gof
 import theano.tensor as tt
 
-from ..build_utils import get_cache_version, get_compile_args
+from ..build_utils import get_cache_version, get_compile_args, get_header_dirs
 
 
 class ContactPointsOp(gof.COp):
@@ -33,32 +31,17 @@ class ContactPointsOp(gof.COp):
         return get_compile_args(compiler)
 
     def c_headers(self, compiler):
-        return ["theano_helpers.h", "contact_points.h"]
+        return ["exoplanet/theano_helpers.h", "exoplanet/contact_points.h"]
 
     def c_header_dirs(self, compiler):
-        return [pkg_resources.resource_filename(__name__, "include")]
+        return get_header_dirs(eigen=False)
 
     def make_node(self, *args):
         if len(args) != self.num_inputs:
             raise ValueError("expected {0} inputs".format(self.num_inputs))
-        dtype = theano.config.floatX
-        in_args = []
-        for a in args:
-            try:
-                a = tt.as_tensor_variable(a)
-            except tt.AsTensorError:
-                pass
-            else:
-                dtype = theano.scalar.upcast(dtype, a.dtype)
-            in_args.append(a)
-        ndim = in_args[0].ndim
-        out_args = [
-            tt.TensorType(dtype=dtype,
-                          broadcastable=[False] * ndim)(),
-            tt.TensorType(dtype=dtype,
-                          broadcastable=[False] * ndim)(),
-            tt.TensorType(dtype="int32",
-                          broadcastable=[False] * ndim)()]
+        in_args = [tt.as_tensor_variable(a) for a in args]
+        out_args = [in_args[0].type(), in_args[1].type(),
+                    tt.zeros_like(in_args[0], dtype="int32").type()]
         return gof.Apply(self, in_args, out_args)
 
     def infer_shape(self, node, shapes):
