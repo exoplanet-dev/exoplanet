@@ -45,7 +45,7 @@ p.caption {
   font-size: 16px;
 }
 
-li.toctree-l1>ul {
+.t-sidebar>li.toctree-l1>ul {
   font-size: 80%;
 }
 
