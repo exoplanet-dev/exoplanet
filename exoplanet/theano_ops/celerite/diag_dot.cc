@@ -15,44 +15,40 @@ int APPLY_SPECIFIC(diag_dot)(
     PyArrayObject* input1,
     PyArrayObject** output0)
 {
+  using namespace exoplanet;
 
-  if (input0 == NULL || PyArray_NDIM(input0) != 2) {
-    PyErr_Format(PyExc_ValueError, "dimension mismatch");
-    return 1;
-  }
-  npy_intp N = PyArray_DIMS(input0)[0];
-  npy_intp J = PyArray_DIMS(input0)[1];
-  if (input1 == NULL || PyArray_NDIM(input1) != 2 || PyArray_DIMS(input1)[0] != J || PyArray_DIMS(input1)[1] != N) {
-    PyErr_Format(PyExc_ValueError, "dimension mismatch");
-    return 1;
-  }
+  int success = 0;
+  npy_intp N, J;
+  auto A_in = get_matrix_input<DTYPE_INPUT_0>(&N, &J, input0, &success, false);
+  if (success) return 1;
+  npy_intp shape_in[] = {J, N};
+  auto B_in = get_input<DTYPE_INPUT_1>(2, shape_in, input1, &success, false);
+  if (success) return 1;
 
-  npy_intp shape0[] = {N};
-  if (allocate_output(1, shape0, TYPENUM_OUTPUT_0, output0)) {
-    return 1;
-  }
+  npy_intp shape_out[] = {N};
+  auto r_out = allocate_output<DTYPE_OUTPUT_0>(1, shape_out, TYPENUM_OUTPUT_0, output0, &success);
 
   auto A_c = PyArray_IS_C_CONTIGUOUS(input0);
   auto A_f = PyArray_IS_F_CONTIGUOUS(input0);
   auto B_c = PyArray_IS_C_CONTIGUOUS(input1);
   auto B_f = PyArray_IS_F_CONTIGUOUS(input1);
 
-  Eigen::Map<Eigen::Matrix<DTYPE_OUTPUT_0, Eigen::Dynamic, 1> > r((DTYPE_OUTPUT_0*)PyArray_DATA(*output0), N);
+  Eigen::Map<Eigen::Matrix<DTYPE_OUTPUT_0, Eigen::Dynamic, 1> > r(r_out, N);
   if (A_c && B_c) {
-    Eigen::Map<Eigen::Matrix<DTYPE_INPUT_0, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > A((DTYPE_INPUT_0*)PyArray_DATA(input0), N, J);
-    Eigen::Map<Eigen::Matrix<DTYPE_INPUT_1, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > B((DTYPE_INPUT_1*)PyArray_DATA(input1), J, N);
+    Eigen::Map<Eigen::Matrix<DTYPE_INPUT_0, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > A(A_in, N, J);
+    Eigen::Map<Eigen::Matrix<DTYPE_INPUT_1, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > B(B_in, J, N);
     do_diag_dot(A, B, r);
   } else if (A_c && B_f) {
-    Eigen::Map<Eigen::Matrix<DTYPE_INPUT_0, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > A((DTYPE_INPUT_0*)PyArray_DATA(input0), N, J);
-    Eigen::Map<Eigen::Matrix<DTYPE_INPUT_1, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> > B((DTYPE_INPUT_1*)PyArray_DATA(input1), J, N);
+    Eigen::Map<Eigen::Matrix<DTYPE_INPUT_0, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > A(A_in, N, J);
+    Eigen::Map<Eigen::Matrix<DTYPE_INPUT_1, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> > B(B_in, J, N);
     do_diag_dot(A, B, r);
   } else if (A_f && B_c) {
-    Eigen::Map<Eigen::Matrix<DTYPE_INPUT_0, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> > A((DTYPE_INPUT_0*)PyArray_DATA(input0), N, J);
-    Eigen::Map<Eigen::Matrix<DTYPE_INPUT_1, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > B((DTYPE_INPUT_1*)PyArray_DATA(input1), J, N);
+    Eigen::Map<Eigen::Matrix<DTYPE_INPUT_0, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> > A(A_in, N, J);
+    Eigen::Map<Eigen::Matrix<DTYPE_INPUT_1, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > B(B_in, J, N);
     do_diag_dot(A, B, r);
   } else if (A_f && B_f) {
-    Eigen::Map<Eigen::Matrix<DTYPE_INPUT_0, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> > A((DTYPE_INPUT_0*)PyArray_DATA(input0), N, J);
-    Eigen::Map<Eigen::Matrix<DTYPE_INPUT_1, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> > B((DTYPE_INPUT_1*)PyArray_DATA(input1), J, N);
+    Eigen::Map<Eigen::Matrix<DTYPE_INPUT_0, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> > A(A_in, N, J);
+    Eigen::Map<Eigen::Matrix<DTYPE_INPUT_1, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> > B(B_in, J, N);
     do_diag_dot(A, B, r);
   } else {
     PyErr_Format(PyExc_ValueError, "invalid strides");

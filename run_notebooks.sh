@@ -17,6 +17,7 @@ git checkout -b auto_notebooks master
 cd docs
 conda env export > auto_environment.yml
 
+theano-cache purge
 python run_notebooks.py $*
 
 cp notebooks/notebook_setup.py _static/notebooks/notebook_setup.py

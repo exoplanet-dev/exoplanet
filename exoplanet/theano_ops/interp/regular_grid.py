@@ -10,7 +10,7 @@ import theano
 from theano import gof
 import theano.tensor as tt
 
-from ..build_utils import get_compile_args, get_cache_version
+from ..build_utils import get_compile_args, get_cache_version, get_header_dirs
 
 
 class RegularGridOp(gof.COp):
@@ -43,9 +43,7 @@ class RegularGridOp(gof.COp):
     def c_header_dirs(self, compiler):
         return [
             pkg_resources.resource_filename(__name__, "include"),
-            pkg_resources.resource_filename("exoplanet.theano_ops.starry",
-                                            "starry/lib/eigen_3.3.3")
-        ]
+        ] + get_header_dirs()
 
     def c_compile_args(self, compiler):
         args = get_compile_args(compiler)
