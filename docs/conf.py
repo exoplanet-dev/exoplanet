@@ -68,18 +68,19 @@ release = __version__
 exclude_patterns = ["_build"]
 pygments_style = "sphinx"
 
-# Readthedocs.
+# HTML theme
+html_favicon = "_static/logo.png"
 html_theme = "exoplanet"
 html_theme_path = ["_themes", sphinx_typlog_theme.get_path()]
 html_theme_options = {
     "logo": "logo.png"
 }
 html_sidebars = {
-    '**': [
-        'logo.html',
-        'globaltoc.html',
-        'relations.html',
-        'searchbox.html',
+    "**": [
+        "logo.html",
+        "globaltoc.html",
+        "relations.html",
+        "searchbox.html",
     ]
 }
 html_static_path = ["_static"]
