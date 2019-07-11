@@ -36,22 +36,17 @@ magnitude.
 <https://github.com/dfm/exoplanet>`_ so if you have any trouble, `open an issue
 <https://github.com/dfm/exoplanet/issues>`_ there.
 
-User guide
-----------
-
 .. toctree::
    :maxdepth: 2
+   :caption: User Guide
 
    user/install
    tutorials/citation
    user/api
 
-
-Tutorials
----------
-
 .. toctree::
    :maxdepth: 2
+   :caption: Tutorials
 
    tutorials/intro-to-pymc3
    tutorials/pymc3-extras

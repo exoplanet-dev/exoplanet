@@ -33,3 +33,22 @@
 .yue img {
   max-width: 700px;
 }
+
+p.caption {
+  font-weight: 700;
+  font-size: 1.42em;
+  margin: 1.42em 0 .4em;
+}
+
+.globaltoc>p.caption {
+  display: block;
+  font-size: 16px;
+}
+
+li.toctree-l1>ul {
+  font-size: 80%;
+}
+
+li.current>a {
+  color: var(--color-primary);
+}

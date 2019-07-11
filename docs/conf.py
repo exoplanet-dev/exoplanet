@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def setup(app):
-    app.add_stylesheet("css/exoplanet.css?v=3")
+    app.add_stylesheet("css/exoplanet.css?v=6")
 
 
 extensions = [
@@ -32,16 +32,16 @@ autodoc_mock_imports = [
 ]
 
 # Convert the tutorials
-for fn in chain(glob.glob("_static/notebooks/*.ipynb"),
-                glob.glob("_static/notebooks/gallery/*.ipynb")):
-    name = os.path.splitext(os.path.split(fn)[1])[0]
-    outfn = os.path.join("tutorials", name + ".rst")
-    print("Building {0}...".format(name))
-    subprocess.check_call(
-        "jupyter nbconvert --template tutorials/tutorial_rst --to rst "
-        + fn + " --output-dir tutorials", shell=True)
-    subprocess.check_call(
-        "python fix_internal_links.py " + outfn, shell=True)
+# for fn in chain(glob.glob("_static/notebooks/*.ipynb"),
+#                 glob.glob("_static/notebooks/gallery/*.ipynb")):
+#     name = os.path.splitext(os.path.split(fn)[1])[0]
+#     outfn = os.path.join("tutorials", name + ".rst")
+#     print("Building {0}...".format(name))
+#     subprocess.check_call(
+#         "jupyter nbconvert --template tutorials/tutorial_rst --to rst "
+#         + fn + " --output-dir tutorials", shell=True)
+#     subprocess.check_call(
+#         "python fix_internal_links.py " + outfn, shell=True)
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
@@ -69,8 +69,8 @@ exclude_patterns = ["_build"]
 pygments_style = "sphinx"
 
 # Readthedocs.
-html_theme = "sphinx_typlog_theme"
-html_theme_path = [sphinx_typlog_theme.get_path()]
+html_theme = "exoplanet"
+html_theme_path = ["_themes", sphinx_typlog_theme.get_path()]
 html_theme_options = {
     "logo": "logo.png"
 }
