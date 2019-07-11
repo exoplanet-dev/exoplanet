@@ -70,9 +70,7 @@ class KeplerOp(gof.COp):
                 bf -= tt.as_tensor_variable(bcosf) * sinf
 
             # Backpropagate f_bar
-            # sinf2 = tt.sin(0.5*f)
-            # cosf2 = tt.cos(0.5*f)
-            tanf2 = sinf / (1 + cosf)  # sinf2 / cosf2
+            tanf2 = sinf / (1 + cosf)  # tan(0.5*f)
             e2 = e**2
             ome2 = 1 - e2
             ome = 1 - e

@@ -661,4 +661,5 @@ def get_true_anomaly(M, e, **kwargs):
         The true anomaly of the orbit.
 
     """
-    return KeplerOp()(M, e)[1]
+    E, sinf, cosf = KeplerOp()(M, e)
+    return tt.arctan2(sinf, cosf)
