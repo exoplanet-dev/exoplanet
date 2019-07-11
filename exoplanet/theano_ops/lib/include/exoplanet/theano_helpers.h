@@ -53,10 +53,10 @@ DTYPE_OUTPUT_NUM* allocate_output(int ndim, npy_intp* shape, int typenum, PyArra
 }
 
 template <typename DTYPE_INPUT_NUM>
-DTYPE_INPUT_NUM* get_input (int* ndim, npy_intp** shape, PyArrayObject* input, int* flag) {
+DTYPE_INPUT_NUM* get_input (int* ndim, npy_intp** shape, PyArrayObject* input, int* flag, bool check_order=true) {
   *flag = 1;
 
-  if (input == NULL || !PyArray_CHKFLAGS(input, NPY_ARRAY_C_CONTIGUOUS)) {
+  if (input == NULL || (check_order && !PyArray_CHKFLAGS(input, NPY_ARRAY_C_CONTIGUOUS))) {
     PyErr_Format(PyExc_ValueError, "input must be C contiguous");
     return NULL;
   }
@@ -86,10 +86,10 @@ DTYPE_INPUT_NUM* get_input (int* ndim, npy_intp** shape, PyArrayObject* input, i
 }
 
 template <typename DTYPE_INPUT_NUM>
-DTYPE_INPUT_NUM* get_input (npy_intp* size, PyArrayObject* input, int* flag) {
+DTYPE_INPUT_NUM* get_input (npy_intp* size, PyArrayObject* input, int* flag, bool check_order=true) {
   *flag = 1;
 
-  if (input == NULL || !PyArray_CHKFLAGS(input, NPY_ARRAY_C_CONTIGUOUS)) {
+  if (input == NULL || (check_order && !PyArray_CHKFLAGS(input, NPY_ARRAY_C_CONTIGUOUS))) {
     PyErr_Format(PyExc_ValueError, "input must be C contiguous");
     return NULL;
   }
@@ -106,10 +106,10 @@ DTYPE_INPUT_NUM* get_input (npy_intp* size, PyArrayObject* input, int* flag) {
 }
 
 template <typename DTYPE_INPUT_NUM>
-DTYPE_INPUT_NUM* get_input (int ndim, npy_intp* shape, PyArrayObject* input, int* flag) {
+DTYPE_INPUT_NUM* get_input (int ndim, npy_intp* shape, PyArrayObject* input, int* flag, bool check_order=true) {
   *flag = 1;
 
-  if (input == NULL || !PyArray_CHKFLAGS(input, NPY_ARRAY_C_CONTIGUOUS)) {
+  if (input == NULL || (check_order && !PyArray_CHKFLAGS(input, NPY_ARRAY_C_CONTIGUOUS))) {
     PyErr_Format(PyExc_ValueError, "input must be C contiguous");
     return NULL;
   }
@@ -134,10 +134,10 @@ DTYPE_INPUT_NUM* get_input (int ndim, npy_intp* shape, PyArrayObject* input, int
 }
 
 template <typename DTYPE_INPUT_NUM>
-DTYPE_INPUT_NUM* get_matrix_input (npy_intp* N1, npy_intp* N2, PyArrayObject* input, int* flag) {
+DTYPE_INPUT_NUM* get_matrix_input (npy_intp* N1, npy_intp* N2, PyArrayObject* input, int* flag, bool check_order=true) {
   int ndim = -1;
   npy_intp* shape;
-  auto input_obj = get_input<DTYPE_INPUT_NUM>(&ndim, &shape, input, flag);
+  auto input_obj = get_input<DTYPE_INPUT_NUM>(&ndim, &shape, input, flag, check_order);
   if (*flag) return NULL;
   if (ndim != 2) {
     *flag = 1;
