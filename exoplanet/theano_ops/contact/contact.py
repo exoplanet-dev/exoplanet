@@ -24,8 +24,8 @@ class ContactPointsOp(gof.COp):
         self.tol = float(tol)
         super(ContactPointsOp, self).__init__(self.func_file, self.func_name)
 
-    # def c_code_cache_version(self):
-    #     return get_cache_version()
+    def c_code_cache_version(self):
+        return get_cache_version()
 
     def c_compile_args(self, compiler):
         return get_compile_args(compiler)
