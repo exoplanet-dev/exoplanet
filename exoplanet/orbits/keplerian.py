@@ -308,7 +308,7 @@ class KeplerianOrbit(object):
     def _get_true_anomaly(self, t):
         M = (self._warp_times(t) - self.tref) * self.n
         if self.ecc is None:
-            return M
+            return tt.sin(M), tt.cos(M)
         _, sinf, cosf = self.kepler_op(M, self.ecc + tt.zeros_like(M))
         return sinf, cosf
 
