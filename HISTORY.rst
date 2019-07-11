@@ -1,3 +1,15 @@
+0.2.0 (2019-07-11)
+++++++++++++++++++
+
+- Updates ``starry`` to get much better performance for high order spherical
+  harmonics
+- Renames ``StarryLightCurve`` to ``LimbDarkLightCurve``
+- Adds support for fitting of astrometric observations
+- Adds support for exposure time integration in ``celerite`` models
+- Restructures the C++ backend to reduce code duplication
+- Fixes many small bugs
+
+
 0.1.6 (2019-04-24)
 ++++++++++++++++++
 
