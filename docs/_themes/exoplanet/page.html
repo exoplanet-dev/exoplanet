@@ -1,0 +1,9 @@
+{% extends "sphinx_typlog_theme/page.html" %}
+
+{% block body %}
+{% if pagename == 'index' %}
+<h1>{{ project }}</h1>
+{% include 'badges.html' %}
+{% endif %}
+{{ super() }}
+{% endblock %}
