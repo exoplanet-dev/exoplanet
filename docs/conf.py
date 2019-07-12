@@ -100,3 +100,5 @@ html_context = dict(
     this_version=version,
 )
 
+for k, v in os.environ.items():
+    print(k, v)
