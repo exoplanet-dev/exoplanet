@@ -86,19 +86,7 @@ html_sidebars = {
 html_static_path = ["_static"]
 
 # Get the git branch name
-try:
-    r = subprocess.check_output("git branch | grep \\* | cut -d ' ' -f2",
-                                shell=True)
-    branch = r.strip()
-    version = "latest"
-except subprocess.CalledProcessError:
-    branch = "master"
-    version = "latest"
-
 html_context = dict(
-    this_branch=branch,
-    this_version=version,
+    this_branch="master",
+    this_version=os.environ.get("READTHEDOCS_VERSION", "latest"),
 )
-
-for k, v in os.environ.items():
-    print(k, v)
