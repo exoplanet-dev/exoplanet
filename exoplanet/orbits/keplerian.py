@@ -309,7 +309,10 @@ class KeplerianOrbit(object):
         M = (self._warp_times(t) - self.tref) * self.n
         if self.ecc is None:
             return tt.sin(M), tt.cos(M)
-        _, sinf, cosf = self.kepler_op(M, self.ecc + tt.zeros_like(M))
+        sinE, cosE, sinf, cosf = self.kepler_op(M, self.ecc + tt.zeros_like(M))
+        # f = 2 * tt.arctan(tt.sqrt((1+self.ecc)/(1-self.ecc))*tt.tan(0.5*E))
+        # sinf = tt.sin(f)
+        # cosf = tt.cos(f)
         return sinf, cosf
 
     def _get_position(self, a, t, parallax=None):
@@ -661,5 +664,5 @@ def get_true_anomaly(M, e, **kwargs):
         The true anomaly of the orbit.
 
     """
-    E, sinf, cosf = KeplerOp()(M, e)
+    _, _, sinf, cosf = KeplerOp()(M, e)
     return tt.arctan2(sinf, cosf)

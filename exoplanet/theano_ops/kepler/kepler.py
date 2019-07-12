@@ -39,50 +39,46 @@ class KeplerOp(gof.COp):
                    tt.as_tensor_variable(eccen)]
         return gof.Apply(self, in_args,
                          [in_args[0].type(), in_args[0].type(),
-                          in_args[0].type()])
+                          in_args[0].type(), in_args[0].type()])
 
     def infer_shape(self, node, shapes):
-        return shapes[0], shapes[0], shapes[0]
+        return shapes[0], shapes[0], shapes[0], shapes[0]
 
     def grad(self, inputs, gradients):
         M, e = inputs
-        E, sinf, cosf = self(M, e)
+        sinE, cosE, sinf, cosf = self(M, e)
 
         bM = tt.zeros_like(M)
         be = tt.zeros_like(M)
-        ecosE = e * tt.cos(E)
+
+        # Pre-define the E derivatives
+        ecosE = e * cosE
+        dEdM = 1 / (1 - ecosE)
+        dEde = sinE * dEdM
+
+        # Pre-define the f derivatives
+        sqrt1me2 = tt.sqrt(1 - e**2)
+        omecosE = 1 - e*cosE
+        dfdE = sqrt1me2 / omecosE
+        dfde = sinE / (sqrt1me2 * omecosE)
 
         if not isinstance(gradients[0].type, theano.gradient.DisconnectedType):
-            # Backpropagate E_bar
-            bM = gradients[0] / (1 - ecosE)
-            be = tt.sin(E) * bM
+            bM += gradients[0] * cosE * dEdM
+            be += gradients[0] * cosE * dEde
 
-        bsinf = gradients[1]
-        fs = isinstance(bsinf.type, theano.gradient.DisconnectedType)
-        bcosf = gradients[2]
-        fc = isinstance(bcosf.type, theano.gradient.DisconnectedType)
+        if not isinstance(gradients[1].type, theano.gradient.DisconnectedType):
+            bM -= gradients[1] * sinE * dEdM
+            be -= gradients[1] * sinE * dEde
 
-        if not (fs and fc):
-            bf = tt.zeros_like(M)
-            if not fs:
-                bf += tt.as_tensor_variable(bsinf) * cosf
-            if not fc:
-                bf -= tt.as_tensor_variable(bcosf) * sinf
+        if not isinstance(gradients[2].type, theano.gradient.DisconnectedType):
+            inner = cosf * dfdE
+            bM += gradients[2] * inner * dEdM
+            be += gradients[2] * (inner * dEde + cosf * dfde)
 
-            # Backpropagate f_bar
-            tanf2 = sinf / (1 + cosf)  # tan(0.5*f)
-            e2 = e**2
-            ome2 = 1 - e2
-            ome = 1 - e
-            ope = 1 + e
-            # cosf22 = cosf2**2
-            cosf22 = 0.5*(1 + cosf)
-            twoecosf22 = 2 * e * cosf22
-            factor = tt.sqrt(ope/ome)
-            inner = (twoecosf22+ome) * bf
-
-            bM += factor*(ome*tanf2**2+ope)*inner*cosf22/(ope*ome2)
-            be += -2*cosf22*tanf2/ome2**2*inner*(ecosE-2+e2)
+        if not isinstance(gradients[3].type, theano.gradient.DisconnectedType):
+            inner = sinf * dfdE
+            bM -= gradients[3] * inner * dEdM
+            be -= gradients[3] * (inner * dEde + sinf * dfde)
 
         return [bM, be]
 

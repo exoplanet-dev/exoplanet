@@ -62,8 +62,8 @@ class Solver:
         M1, M2, flag = self.op(a, e, cosw, sinw, cosi, sini, L)
 
         kepler_op = KeplerOp()
-        E1, sinf1, cosf1 = kepler_op(M1, e)
-        E2, sinf2, cosf2 = kepler_op(M2, e)
+        _, _, sinf1, cosf1 = kepler_op(M1, e)
+        _, _, sinf2, cosf2 = kepler_op(M2, e)
 
         self.func = theano.function([a, e, cosw, sinw, cosi, sini, L],
                                     [sinf1, cosf1, sinf2, cosf2, flag])
