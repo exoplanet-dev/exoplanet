@@ -1,5 +1,13 @@
 {% extends "sphinx_typlog_theme/page.html" %}
 
+{%- block htmltitle -%}
+{% if pagename == 'index' %}
+<title>exoplanet &mdash; Fast and scalable MCMC for all your exoplanet needs!</title>
+{% else %}
+{{ super() }}
+{% endif %}
+{% endblock %}
+
 {% block body %}
 {% if pagename == 'index' %}
 <h1>{{ project }}</h1>
