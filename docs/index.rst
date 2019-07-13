@@ -49,6 +49,7 @@ magnitude.
    tutorials/pymc3-extras
    tutorials/rv
    tutorials/transit
+   tutorials/astrometric
    tutorials/gp
    tutorials/stellar-variability
    tutorials/together
