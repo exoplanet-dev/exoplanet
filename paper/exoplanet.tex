@@ -620,17 +620,31 @@ This is a figure.}
 
 \section{Exposure time integration for celerite models}
 
+In this section we give expressions for the {\it exposure-time}
+integrated versions of the \celerite\ kernel and its power
+spectrum.  It turns out that the time-integrated \celerite\ kernel
+remains expressible as a semi-separable matrix when the exposures
+do not overlap, but when exposures overlap (or for zero time
+delay), the kernel no longer is semi-separable.
+
 \paragraph{Real term}
 
 For a real term:
 \begin{equation}
-k(\tau) = a\,\exp\left(-c\,(t_i - t_j)\right)
+%k(\tau) = a\,\exp\left(-c\,(t_i - t_j)\right)
+k(\tau) = a\,\exp\left(-c\,\tau\right)
 \end{equation}
-the integrated kernel is
+where $\tau = \vert t_i-t_j \vert$.  
+The integrated kernel is
 \begin{proof}{celerite-integral}
-k_\Delta(\tau) = \frac{2}{\left(c\,\Delta\right)^2}\,\left[
-    \cosh(c\,\Delta) - 1
-\right]\,k(\tau)
+k_\Delta(\tau) = \frac{2}{\left(c\,\Delta\right)^2}\,k(\tau)\,
+  \begin{cases}
+   \cosh(c\,\Delta) - 1  & \tau > \Delta \\
+   c(\Delta - \tau) e^{c\tau} + \cosh{(c\tau)} e^{-c(\Delta - \tau)} -1 & \tau \le \Delta
+    \end{cases}
+%k_\Delta(\tau) = \frac{2}{\left(c\,\Delta\right)^2}\,\left[
+%    \cosh(c\,\Delta) - 1
+%\right]\,k(\tau)
 \end{proof}
 where $\Delta$ is the integration time.
 
