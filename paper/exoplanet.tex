@@ -643,9 +643,6 @@ k_\Delta(\tau) = \frac{2}{\left(c\,\Delta\right)^2}\,k(\tau)\,
    c(\Delta - \tau) e^{c\tau} + \cosh{(c\tau)} e^{-c(\Delta - \tau)} -1 & 0 < \tau \le \Delta \\
    \cosh(c\,\Delta) - 1  & \Delta < \tau 
     \end{cases}
-%k_\Delta(\tau) = \frac{2}{\left(c\,\Delta\right)^2}\,\left[
-%    \cosh(c\,\Delta) - 1
-%\right]\,k(\tau)
 \end{proof}
 where $\Delta$ is the integration time.  Note that in the standard
 use case of a single light curve with a single telescope and a
@@ -654,7 +651,7 @@ by greater than the exposure time, and so the kernel will be
 semi-separable.  However, there is a slight difference in
 the implementation as the $\tau = 0$ term, which corresponds to
 the diagonal of the covariance matrix, has an extra term,
-$\frac{2}{(c\Delta)^2}(c\Delta-\sinh(c\Delta))$, times $k(\tau)$.
+$\frac{2a}{(c\Delta)^2}(c\Delta-\sinh(c\Delta))$.
 This additional term is negative, but can simply be added to the white 
 noise component of the covariance matrix when implementing the \celerite\
 kernel.   Given that the kernel is positive, the matrix will still
@@ -663,25 +660,25 @@ be positive definite.
 Although this expression appears complicated, the Fourier transform
 is less so, and is given by:
 \begin{equation}
-S(\omega) = \frac{ac}{\sqrt{2\pi}(c^2 + \omega^2)}  \frac{\sin^2(\tfrac{1}{2}\omega \Delta)}{(\tfrac{1}{2}\omega\Delta)^2}.
+S(\omega) = \frac{ac}{\sqrt{2\pi}(c^2 + \omega^2)}  \left(\frac{\sin(\tfrac{1}{2}\omega \Delta)}{\tfrac{1}{2}\omega\Delta}\right)^2.
 \end{equation}
 Note that this is the Fourier transform of the kernel, $k(\tau)$,
 multiplied by the square of a sinc function, $\mathrm{sinc}{(\omega\Delta/2)}$, 
 which results from the convolution of the kernel with a top-hat 
 time-integration of half-width $\Delta/2$.  Convolution in Fourier
-space turns into multiplication, and the square of the sinc function
+space turns into multiplication, and thus the square of the sinc function
 results from taking the square of the Fourier transform to obtain
-the power spectrum. Also note that the since function goes to zero
+the power spectrum. Also note that the sinc function goes to zero
 when $\omega\Delta = 2\pi$, which corresponds to the sampling
 frequency, $f = \frac{2\pi}{\omega} = \Delta^{-1}$.
-
 
 \paragraph{Complex term}
 
 The result is somewhat more complicated for a complex term:
 \begin{equation}
-k(\tau) = (a + i\,b)\,\exp\left(-(c+i\,d)\,(t_i - t_j)\right)
+k(\tau) = (a + i\,b)\,\exp\left(-(c+i\,d)\,\tau\right),
 \end{equation}
+where $\tau = \vert t_i-t_j \vert$ for times $t_i$ and $t_j$.
 In this case, the integrated kernel is
 \begin{equation}
 k_\Delta(\tau) = (A + i\,B)\,k(\tau)
@@ -706,25 +703,60 @@ C_2 = b\,c^2 - b\,d^2 - 2\,a\,c\,d
 \end{align}
 
 In practice a kernel must be real, and so two complex terms must be
-combined to yield a real term,
-\begin{equation}
-k(\tau) = a \exp\left(-c\,\tau\right)\cos\left(d\,\tau\right) + b \exp\left(-c\,\tau\right)\sin\left(d\,\tau\right),
-\end{equation}
-This yields a time-integrated kernel for $\tau > \Delta$ given by
+combined to yield a real kernel,
+\begin{align}
+k(\tau) &= \tfrac{1}{2}\left[(a + i\,b)\,\exp\left(-(c+i\,d)\,\tau\right)+ (a - i\,b)\,\exp\left(-(c-i\,d)\,\tau\right) \right]\\
+&= a \exp\left(-c\,\tau\right)\cos\left(d\,\tau\right) + b \exp\left(-c\,\tau\right)\sin\left(d\,\tau\right).
+\end{align}
+This results in a time-integrated kernel for $\tau \ge \Delta$ given by
 \begin{equation}
 k_\Delta(\tau) = A\exp\left(-c\,\tau\right)\cos\left(d\,\tau\right) + B\exp\left(-c\,\tau\right)\sin\left(d\,\tau\right).
 \end{equation}
-while for $\tau < \Delta$
-%\begin{equation}
-%k_\Delta(\tau) = A\exp\left(-c\,\tau\right)\cos\left(d\,\tau\right) + B\exp\left(-c\,\tau\right)\sin\left(d\,\tau\right)
-%+ \frac{2(ac+bd)(c^2+d^2)(\Delta-\tau)}{\Delta^2(c^2+d^2)^2}.
-%\end{equation}
+while for $0 \le \tau < \Delta$,
 \begin{align}
-k_\Delta(\tau) &=& A\exp\left(-c\,\tau\right)\cos\left(d\,\tau\right) + B\exp\left(-c\,\tau\right)\sin\left(d\,\tau\right) \nonumber\\
-&+&  \frac{2}{ \Delta^2(c^2+d^2)^2} \left\{(ac+bd)(c^2+d^2)(\Delta-\tau)\right. \nonumber \\
-&+&\left.  \sinh(c(\tau-\Delta)) \left(C_1\cos(d(\Delta-\tau)) +C_2 \sin(d(\Delta-\tau))\right) \right\}.
+k_\Delta(\tau) &= A\exp\left(-c\,\tau\right)\cos\left(d\,\tau\right) + B\exp\left(-c\,\tau\right)\sin\left(d\,\tau\right) \nonumber\\
+&+  \frac{2}{ \Delta^2(c^2+d^2)^2} \left\{(ac+bd)(c^2+d^2)(\Delta-\tau)\right. \nonumber \\
+&+\left.  \sinh(c(\tau-\Delta)) \left(C_1\cos(d(\Delta-\tau)) +C_2 \sin(d(\Delta-\tau))\right) \right\}.
 \end{align}
-Note that in the limit of $b = d = 0$, these kernels turn into the real kernel.
+Note that in the limit of $b = d = 0$, this kernel reverts to the real kernel.
+As with the real case, the kernel is only semi-separable when exposures
+do not overlap in time, i.e. $\vert t_i - t_j \vert > \Delta$ for all $i,j$, while the diagonal 
+components of the covariance matrix require adding the extra term:
+\begin{equation}
+\frac{2}{ \Delta^2(c^2+d^2)^2} \left\{(ac+bd)(c^2+d^2)\Delta
+-\sinh(c\Delta) \left(C_1\cos(d\Delta) +C_2 \sin(d\Delta)\right) \right\}.
+\end{equation}
+As with the real case, the power spectrum of the time-integrated kernel simply
+requires multiplication by the sinc-squared function:
+\begin{equation}
+S(\omega) = \sqrt{\frac{2}{\pi}} \left(\frac{(ac+bd)(c^2+d^2)+(ac-bd)\omega^2}
+{\omega^4+2(c^2-d^2)\omega^2+(c^2+d^2)^2}\right) 
+\left( \frac{\sin(\tfrac{1}{2}\omega \Delta)}{\tfrac{1}{2}\omega\Delta}\right)^2.
+\end{equation}
+
+Examples of these kernels and power spectra are shown in Figure \ref{fig:celerite-integral}
+for the simple-harmonic oscillator kernel which specifies the coefficients
+$a = S_0\omega_0 Q, b=a/\gamma, c=\omega_0/(2Q)$ and $d=c\gamma$ in terms of a characteristic
+frequency, $\omega_0$, a quality factor, $Q > \tfrac{1}{2}$, and a normalization
+factor, $S_0$, where $\gamma = \sqrt{4Q^2-1}$;  see \citet{Foreman-Mackey:2017} for the
+expressions when $Q \le \tfrac{1}{2}$.
+The kernels become smoother and lower amplitude for longer integration times, 
+while the power spectra are suppressed at high frequency, and show a series of 
+zeros at integer multiples of the sampling frequency, which is a consequence
+of aliasing at these frequencies.
+
+\begin{figure}[htbp]
+\begin{centering}
+\includegraphics[width=0.8\linewidth]{figures/celerite-integral.pdf}
+\oscaption{celerite-integral}{\label{fig:celerite-integral}
+(Top) Time-integrated \celerite\ kernels for $S_0 = 1, \omega_0 = 2\pi/5$, and
+$Q=2$, with $\Delta =t_{exp} = (4, 2, \tfrac{1}{2})$ (blue, orange, green
+solid lines), as well as no time integration
+(dashed black line).  Vertical dotted lines correspond to the sampling
+timescale. (Bottom) Corresponding power spectra.  The vertical dotted lines
+indicate the sampling frequency in all three time-integrated cases.}
+\end{centering}
+\end{figure}
 
 \newpage
 \acknowledgements
