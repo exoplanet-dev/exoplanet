@@ -688,22 +688,44 @@ k_\Delta(\tau) = (A + i\,B)\,k(\tau)
 \end{equation}
 where
 \begin{proof}{celerite-integral}
-  A = \frac{C_1\,\left[\cosh(c\,\Delta)\,\cos(d\,\Delta) - 1\right]
+  A = 2\frac{C_1\,\left[\cosh(c\,\Delta)\,\cos(d\,\Delta) - 1\right]
   - C_2\,\sinh(c\,\Delta)\,\sin(d\,\Delta)
 }{\Delta^2\,(c^2 + d^2)^2}
 \end{proof}
 and
 \begin{proof}{celerite-integral}
-  B = \frac{C_2\,\left[\cosh(c\,\Delta)\,\cos(d\,\Delta) - 1\right]
+  B = 2\frac{C_2\,\left[\cosh(c\,\Delta)\,\cos(d\,\Delta) - 1\right]
   + C_1\,\sinh(c\,\Delta)\,\sin(d\,\Delta)
 }{\Delta^2\,(c^2 + d^2)^2}
 \end{proof}
 where
 \begin{eqnarray}
-C_1 = 2\,(a\,c^2 - a\,d^2 + 2\,b\,c\,d)
+C_1 = a\,c^2 - a\,d^2 + 2\,b\,c\,d
 \quad\mathrm{and}\quad
-C_2 = 2\,(b\,c^2 - b\,d^2 - 2\,a\,c\,d)
+C_2 = b\,c^2 - b\,d^2 - 2\,a\,c\,d
 \end{eqnarray}
+
+In practice a kernel must be real, and so two complex terms must be
+combined to yield a real term,
+\begin{equation}
+k(\tau) = a \exp\left(-c\,\tau\right)\cos\left(d\,\tau\right) + b \exp\left(-c\,\tau\right)\sin\left(d\,\tau\right),
+\end{equation}
+This yields a time-integrated kernel for $\tau > \Delta$ given by
+\begin{equation}
+k_\Delta(\tau) = A\exp\left(-c\,\tau\right)\cos\left(d\,\tau\right) + B\exp\left(-c\,\tau\right)\sin\left(d\,\tau\right).
+\end{equation}
+while for $\tau < \Delta$
+%\begin{equation}
+%k_\Delta(\tau) = A\exp\left(-c\,\tau\right)\cos\left(d\,\tau\right) + B\exp\left(-c\,\tau\right)\sin\left(d\,\tau\right)
+%+ \frac{2(ac+bd)(c^2+d^2)(\Delta-\tau)}{\Delta^2(c^2+d^2)^2}.
+%\end{equation}
+\begin{eqnarray}
+k_\Delta(\tau) &=& A\exp\left(-c\,\tau\right)\cos\left(d\,\tau\right) + B\exp\left(-c\,\tau\right)\sin\left(d\,\tau\right)\\
+&+&  \frac{2}{ \Delta^2(c^2+d^2)^2}
+\left\{(ac+bd)(c^2+d^2)(\Delta-\tau)\right.\\
+&+&\left.  \sinh(c(\tau-\Delta)) \left(C_1\cos(d(\Delta-\tau)) +C_2 \sin(d(\Delta-\tau))\right) \right\}.
+\end{eqnarray}
+Note that in the limit of $b = d = 0$, these kernels turn into the real kernel.
 
 \newpage
 \acknowledgements
