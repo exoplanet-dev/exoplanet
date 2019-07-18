@@ -35,7 +35,7 @@ def test_light_curve():
         m = starry.Map(udeg=len(u_val), lazy=False)
         m[1:] = u_val
         expect = m.flux(xo=b_val, ro=r_val[0]) - 1
-    
+
     evaluated = func(u_val, b_val, r_val)
 
     utt.assert_allclose(expect, evaluated)
@@ -186,7 +186,7 @@ def test_singular_points():
         b_val = [b_val - b_eps, b_val + b_eps, b_val]
         r_val = [r_val - r_eps, r_val + r_eps, r_val]
         flux = func(u_val, b_val, r_val)
-        assert np.allclose(np.mean(flux[:2]), flux[2]) 
+        assert np.allclose(np.mean(flux[:2]), flux[2])
 
     # Test the b = 1 - r singular point
     compare(0.1, 0.9, 1e-8, 0.0)
