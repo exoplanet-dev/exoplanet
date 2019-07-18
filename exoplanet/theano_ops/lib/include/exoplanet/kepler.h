@@ -16,12 +16,11 @@
 namespace exoplanet {
 namespace kepler {
 
-    const double s[] = {1.0/6, 1.0/20, 1.0/42, 1.0/72, 1.0/110, 1.0/156, 1.0/210, 1.0/272, 1.0/342, 1.0/420};
-    const double c[] = {0.5, 1.0/12, 1.0/30, 1.0/56, 1.0/90, 1.0/132, 1.0/182, 1.0/240, 1.0/306, 1.0/380};
-
   // Calculates x - sin(x) and 1 - cos(x) to 20 significant digits for x in [0, pi)
   template <typename T>
   inline void sin_cos_reduc (T x, T* SnReduc, T* CsReduc) {
+    const T s[] = {1.0/6, 1.0/20, 1.0/42, 1.0/72, 1.0/110, 1.0/156, 1.0/210, 1.0/272, 1.0/342, 1.0/420};
+    const T c[] = {0.5, 1.0/12, 1.0/30, 1.0/56, 1.0/90, 1.0/132, 1.0/182, 1.0/240, 1.0/306, 1.0/380};
 
     bool bigg = x > M_PI_2;
     T u = (bigg) ? M_PI - x : x;
@@ -74,23 +73,12 @@ namespace kepler {
     return mod;
   }
 
-  const double FACTOR1 = 3*M_PI / (M_PI - 6/M_PI);
-  const double FACTOR2 = 1.6 / (M_PI - 6/M_PI);
-  const double two_pi = 2 * M_PI;
-
   template <typename T>
-  inline T solve_kepler (T M, T ecc) {
+  inline T get_markley_starter (T M, T ecc, T ome) {
+    // M must be in the range [0, pi)
+    const T FACTOR1 = 3*M_PI / (M_PI - 6/M_PI);
+    const T FACTOR2 = 1.6 / (M_PI - 6/M_PI);
 
-    M = npy_mod(M, T(two_pi));
-
-    bool high = M > M_PI;
-    if (high) {
-      M = two_pi - M;
-    }
-
-    T ome = 1.0 - ecc;
-
-    // Get starter
     T M2 = M*M;
     T alpha = FACTOR1 + FACTOR2*(M_PI-M)/(1+ecc);
     T d = 3*ome + alpha*ecc;
@@ -99,13 +87,17 @@ namespace kepler {
     T q = 2*alphad*ome - M2;
     T q2 = q*q;
     T w = pow(std::abs(r) + sqrt(q2*q + r*r), 2.0/3);
-    T E = (2*r*w/(w*w + w*q + q2) + M) / d;
+    return (2*r*w/(w*w + w*q + q2) + M) / d;
+  }
 
-    // Approximate Mstar = E - e*sin(E) with numerically stability
-    T sE, cE;
-    sin_cos_reduc(E, &sE, &cE);
+  template <typename T>
+  inline T refine_estimate (T M, T ecc, T ome, T E) {
+    // T sE, cE;
+    // sin_cos_reduc(E, &sE, &cE);
 
-    // Refine the starter
+    T sE = E - sin(E);
+    T cE = 1 - cos(E);
+
     T f_0 = ecc * sE + E * ome - M;
     T f_1 = ecc * cE + ome;
     T f_2 = ecc * (E - sE);
@@ -114,11 +106,29 @@ namespace kepler {
     T d_4 = -f_0/(f_1 + 0.5*d_3*f_2 + (d_3*d_3)*f_3/6);
     T d_42 = d_4*d_4;
     T dE = -f_0/(f_1 + 0.5*d_4*f_2 + d_4*d_4*f_3/6 - d_42*d_4*f_2/24);
-    E += dE;
 
-    if (high) {
-      E = two_pi - E;
-    }
+    return E + dE;
+  }
+
+  template <typename T>
+  inline T solve_kepler (T M, T ecc) {
+    const T two_pi = 2 * M_PI;
+
+    // Wrap M into the range [0, 2*pi]
+    M = npy_mod(M, T(two_pi));
+
+    //
+    bool high = M > M_PI;
+    if (high) M = two_pi - M;
+
+    // Get the starter
+    T ome = 1.0 - ecc;
+    T E = get_markley_starter(M, ecc, ome);
+
+    // Refine this estimate using a high order Newton step
+    E = refine_estimate(M, ecc, ome, E);
+
+    if (high) E = two_pi - E;
 
     return E;  // + M_ref;
   }
