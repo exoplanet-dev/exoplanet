@@ -86,11 +86,12 @@ class TestKeplerSolver(utt.InferShapeTester):
         np.random.seed(1234)
         M_val = np.concatenate((
             np.linspace(-10, 10, 100),
-            [0.0, -np.pi, np.pi, 0.5*np.pi, -0.5*np.pi, 1.5*np.pi, 2*np.pi]))
+            [0.0, -np.pi+1e-3, np.pi-1e-3, 0.5*np.pi, -0.5*np.pi,
+             1.5*np.pi, 2*np.pi+1e-3]))
         e_val = np.random.uniform(0, 0.9, len(M_val))
 
-        a = lambda *args: self.op(*args)[0]  # NOQA
+        a = lambda *args: tt.arctan2(*self.op(*args))  # NOQA
         utt.verify_grad(a, [M_val, e_val], eps=1e-8)
 
-        a = lambda *args: self.op(*args)[1]  # NOQA
-        utt.verify_grad(a, [M_val, e_val], eps=1e-8)
+        # a = lambda *args: self.op(*args)[0]  # NOQA
+        # utt.verify_grad(a, [M_val, e_val], eps=1e-8)
