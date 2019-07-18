@@ -4,9 +4,7 @@ int APPLY_SPECIFIC(kepler)(
     PyArrayObject*  input0,
     PyArrayObject*  input1,
     PyArrayObject** output0,
-    PyArrayObject** output1,
-    PyArrayObject** output2,
-    PyArrayObject** output3)
+    PyArrayObject** output1)
 {
   using namespace exoplanet;
 
@@ -19,14 +17,13 @@ int APPLY_SPECIFIC(kepler)(
   auto e_in = get_input<DTYPE_INPUT_1>(&ndim, &shape, input1, &success);
   if (success) return 1;
 
-  auto sinE_out = allocate_output<DTYPE_OUTPUT_0>(ndim, shape, TYPENUM_OUTPUT_0, output0, &success);
-  auto cosE_out = allocate_output<DTYPE_OUTPUT_1>(ndim, shape, TYPENUM_OUTPUT_1, output1, &success);
-  auto sinf_out = allocate_output<DTYPE_OUTPUT_2>(ndim, shape, TYPENUM_OUTPUT_2, output2, &success);
-  auto cosf_out = allocate_output<DTYPE_OUTPUT_3>(ndim, shape, TYPENUM_OUTPUT_3, output3, &success);
+  auto sinf_out = allocate_output<DTYPE_OUTPUT_0>(ndim, shape, TYPENUM_OUTPUT_0, output0, &success);
+  auto cosf_out = allocate_output<DTYPE_OUTPUT_1>(ndim, shape, TYPENUM_OUTPUT_1, output1, &success);
   if (success) return 1;
 
   npy_intp N = 1;
   for (int n = 0; n < ndim; ++n) N *= shape[n];
+  const T tol = 1e-10;
 
   T M, e, E, tanf2, tanf2_2, denom, sE, cE;
   for (npy_intp n = 0; n < N; ++n) {
@@ -38,22 +35,21 @@ int APPLY_SPECIFIC(kepler)(
       return 1;
     }
 
-    const T tol = 1e-10;
     if (e <= tol) {
 
       // Special case for zero eccentricity
-      sinE_out[n] = sinf_out[n] = sin(M);
-      cosE_out[n] = cosf_out[n] = cos(M);
+      sinf_out[n] = sin(M);
+      cosf_out[n] = cos(M);
 
     } else {
 
       E = kepler::solve_kepler(M, e);
-      sE = sinE_out[n] = sin(E);
-      cE = cosE_out[n] = cos(E);
+      sE = sin(E);
+      cE = cos(E);
 
       // First, compute tan(0.5*E) = sin(E) / (1 + cos(E))
       denom = 1 + cE;
-      if (std::abs(denom) > tol) {
+      if (denom > tol) {
         tanf2 = sqrt((1+e)/(1-e)) * sE / denom;  // tan(0.5*f)
         tanf2_2 = tanf2 * tanf2;
 
@@ -63,12 +59,8 @@ int APPLY_SPECIFIC(kepler)(
         denom = 1 / (1 + tanf2_2);
         sinf_out[n] = 2 * tanf2 * denom;
         cosf_out[n] = (1 - tanf2_2) * denom;
-
-        // f_out[n] = 2 * atan(sqrt((1+e)/(1-e))*tanE2);
       } else {
         // If cos(E) = -1, E = pi and tan(0.5*E) -> inf and f = E = pi
-        sinE_out[n] = 0;
-        cosE_out[n] = -1;
         sinf_out[n] = 0;
         cosf_out[n] = -1;
       }

@@ -38,47 +38,35 @@ class KeplerOp(gof.COp):
         in_args = [tt.as_tensor_variable(mean_anom),
                    tt.as_tensor_variable(eccen)]
         return gof.Apply(self, in_args,
-                         [in_args[0].type(), in_args[0].type(),
-                          in_args[0].type(), in_args[0].type()])
+                         [in_args[0].type(), in_args[0].type()])
 
     def infer_shape(self, node, shapes):
-        return shapes[0], shapes[0], shapes[0], shapes[0]
+        return shapes[0], shapes[0]
 
     def grad(self, inputs, gradients):
         M, e = inputs
-        sinE, cosE, sinf, cosf = self(M, e)
+        sinf, cosf = self(M, e)
 
         bM = tt.zeros_like(M)
         be = tt.zeros_like(M)
 
-        # Pre-define the E derivatives
-        ecosE = e * cosE
-        dEdM = 1 / (1 - ecosE)
-        dEde = sinE * dEdM
+        # cos^2(0.5*f) = (1 + cosf) / 2
+        cos2fo2 = 0.5 * cosf + 0.5
 
-        # Pre-define the f derivatives
-        sqrt1me2 = tt.sqrt(1 - e**2)
-        omecosE = 1 - e*cosE
-        dfdE = sqrt1me2 / omecosE
-        dfde = sinE / (sqrt1me2 * omecosE)
+        # 1 - e^2
+        ome2 = 1 - e**2
+
+        # Gradients
+        dfdM = (e - 1 - 2*e*cos2fo2)**2 / ome2**1.5
+        dfde = (e*cosf + 2) * sinf / ome2
 
         if not isinstance(gradients[0].type, theano.gradient.DisconnectedType):
-            bM += gradients[0] * cosE * dEdM
-            be += gradients[0] * cosE * dEde
+            bM += gradients[0] * cosf * dfdM
+            be += gradients[0] * cosf * dfde
 
         if not isinstance(gradients[1].type, theano.gradient.DisconnectedType):
-            bM -= gradients[1] * sinE * dEdM
-            be -= gradients[1] * sinE * dEde
-
-        if not isinstance(gradients[2].type, theano.gradient.DisconnectedType):
-            inner = cosf * dfdE
-            bM += gradients[2] * inner * dEdM
-            be += gradients[2] * (inner * dEde + cosf * dfde)
-
-        if not isinstance(gradients[3].type, theano.gradient.DisconnectedType):
-            inner = sinf * dfdE
-            bM -= gradients[3] * inner * dEdM
-            be -= gradients[3] * (inner * dEde + sinf * dfde)
+            bM -= gradients[1] * sinf * dfdM
+            be -= gradients[1] * sinf * dfde
 
         return [bM, be]
 

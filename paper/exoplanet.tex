@@ -361,17 +361,25 @@ In this case, the relevant gradients are
 \frac{\dd E}{\dd M} &=& \frac{1}{1 - e\,\cos E} \quad.
 \end{eqnarray}
 
-\paragraph{Implementation details}
-
-We find that directly evaluating the true anomaly $f$
-%\begin{eqnarray}
-%f &=& 2\,\tan^{-1}\,left(\frac{\sqrt{1+e}}{\sqrt{1-e}}\,\tan \frac{E}{2}\right)
-%\end{eqnarray}
-when solving Kepler's equation is more efficient than evaluating it separately
-within Theano.
-This means that we must also provide a method for evaluating the derivative of
-$f$ with respect to $e$ and $M$.
-
+In practice, we have found it more efficient to fuse the calculations of the eccentric anomaly $E$ and the true anomaly $f$ working only with the sine and cosines of these quantites.
+To compute the true anomaly for a given eccentric anomaly, the relation is
+\begin{equation}
+\tan\frac{f}{2} = \sqrt{\frac{1 + e}{1-e}}\tan\frac{E}{2}
+\end{equation}
+and we can compute this efficiently using the following trigonometric identities
+\begin{eqnarray}
+\tan \frac{E}{2} &=& \frac{\sin E}{1 + \cos E} \\
+\sin f &=& \frac{2\,\tan f/2}{1 + \tan^2 f/2} \\
+\cos f &=& \frac{1 - \tan^2 f/2}{1 + \tan^2 f/2} \quad.
+\end{eqnarray}
+Therefore, the relevant derivatives are
+\begin{eqnarray}
+\frac{\dd f}{\dd M} &=& \frac{\dd f}{\dd E}\,\frac{\dd E}{\dd M} \\
+&=& \frac{1 + 2\,e\,\cos^2{f/2} - e}{(1 - e^2)^{3/2}} \\
+\frac{\dd f}{\dd e} &=& \frac{\dd f}{\dd e} + \frac{\dd f}{\dd E}\,\frac{\dd E}{\dd e} \\
+&=& \dfmtodo{add\ derivation}
+\end{eqnarray}
+\dfmtodo{Add a plot showing the relative cost of the forward and reverse evaluation.}
 
 \subsection{Transit light curves}
 
@@ -421,6 +429,27 @@ As discussed by \citet{Foreman-Mackey:2017}, this covariance function can be int
 This operation is useful for many exoplanet applications where the datasets are large enough that traditional GP modeling is intractable.
 For example, the time series for a typical short cadence target from the \tess\ mission has a light curve with about 20,000 data points.
 Evaluating a GP model on these data using high-performance general linear algebra libraries would take \dfmtodo{how long?}.
+
+\section{Distributions}
+
+\section{Quadratic limb darkening parameters}
+
+\section{Radius and impact parameter}
+
+A parameterization has been proposed to parameterize the radius ratio $r$ and impact parameter $b$ to be sampled uniformly within the trapezoid $r_\mathrm{min} < r < r_\mathrm{max}$ and $0 < b < 1 + r$ (CITE).
+This parameterization is included within \exoplanet, but implies a non-uniform marginal for radius ratio (\dfmtodo{make plot}) so we recommend parameterizing as
+\begin{eqnarray}
+r &\sim& \mathrm{LogUniform}(r_\mathrm{min},\,r_\mathrm{max}) \\
+b &\sim& \mathrm{Uniform}(0,\,1+r)
+\end{eqnarray}
+which will introduce less bias when inferring radius ratios.
+This can be efficiently sampled using \exoplanet\ and the parameters
+\begin{eqnarray}
+  r &\sim& \mathrm{LogUniform}(r_\mathrm{min},\,r_\mathrm{max}) \\
+  \hat{b} &\sim& \mathrm{Uniform}(0,\,1) \\
+  b &=& \hat{b}\,(1 + r)
+\end{eqnarray}
+
 
 \section{Examples}
 
