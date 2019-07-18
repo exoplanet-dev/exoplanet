@@ -32,12 +32,8 @@ class TestKeplerSolver(utt.InferShapeTester):
         M_t = tt.dvector()
         e_t = tt.dvector()
         func = theano.function([M_t, e_t], self.op(M_t, e_t))
-        sinE0, cosE0, sinf0, cosf0 = func(M, e)
+        sinf0, cosf0 = func(M, e)
 
-        assert np.all(np.isfinite(sinE0))
-        assert np.all(np.isfinite(cosE0))
-        utt.assert_allclose(np.sin(E), sinE0)
-        utt.assert_allclose(np.cos(E), cosE0)
         assert np.all(np.isfinite(sinf0))
         assert np.all(np.isfinite(cosf0))
         utt.assert_allclose(np.sin(f), sinf0)
@@ -51,12 +47,8 @@ class TestKeplerSolver(utt.InferShapeTester):
         M_t = tt.dvector()
         e_t = tt.dvector()
         func = theano.function([M_t, e_t], self.op(M_t, e_t))
-        sinE0, cosE0, sinf0, cosf0 = func(M, e)
+        sinf0, cosf0 = func(M, e)
 
-        assert np.all(np.isfinite(sinE0))
-        assert np.all(np.isfinite(cosE0))
-        utt.assert_allclose(np.sin(E), sinE0)
-        utt.assert_allclose(np.cos(E), cosE0)
         assert np.all(np.isfinite(sinf0))
         assert np.all(np.isfinite(cosf0))
         utt.assert_allclose(np.sin(f), sinf0)
@@ -72,12 +64,8 @@ class TestKeplerSolver(utt.InferShapeTester):
         M_t = tt.matrix()
         e_t = tt.matrix()
         func = theano.function([M_t, e_t], self.op(M_t, e_t))
-        sinE0, cosE0, sinf0, cosf0 = func(M, e)
+        sinf0, cosf0 = func(M, e)
 
-        assert np.all(np.isfinite(sinE0))
-        assert np.all(np.isfinite(cosE0))
-        utt.assert_allclose(np.sin(E), sinE0)
-        utt.assert_allclose(np.cos(E), cosE0)
         assert np.all(np.isfinite(sinf0))
         assert np.all(np.isfinite(cosf0))
         utt.assert_allclose(np.sin(f), sinf0)
@@ -95,9 +83,11 @@ class TestKeplerSolver(utt.InferShapeTester):
                                 self.op_class)
 
     def test_grad(self):
-        np.random.seed(42)
-        M_val = np.linspace(-10, 10, 50)
-        e_val = np.random.uniform(0, 0.8, len(M_val))
+        np.random.seed(1234)
+        M_val = np.concatenate((
+            np.linspace(-10, 10, 100),
+            [0.0, -np.pi, np.pi, 0.5*np.pi, -0.5*np.pi, 1.5*np.pi, 2*np.pi]))
+        e_val = np.random.uniform(0, 0.9, len(M_val))
 
         a = lambda *args: self.op(*args)[0]  # NOQA
         utt.verify_grad(a, [M_val, e_val], eps=1e-8)
