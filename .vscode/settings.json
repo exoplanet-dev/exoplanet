@@ -1,0 +1,43 @@
+{
+    // C++ include files
+    "C_Cpp.intelliSenseEngineFallback": "Enabled",
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/exoplanet/theano_ops/lib/vendor/eigen_3.3.3",
+        "${HOME}/anaconda3/include/**",
+        "${HOME}/anaconda3/lib/**",
+        "${HOME}/miniconda3/include/**",
+        "${HOME}/miniconda3/lib/**",
+        "${HOME}/anaconda/include/**",
+        "${HOME}/anaconda/lib/**",
+        "${HOME}/miniconda/include/**",
+        "${HOME}/miniconda/lib/**"
+    ],
+
+    // Python testing
+    "python.pythonPath": "${HOME}/anaconda3/bin/python",
+    "python.testing.pytestArgs": [
+        "${workspaceFolder}/exoplanet"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestEnabled": true,
+
+    // Python formatting
+    "python.formatting.provider": "black",
+    "python.formatting.blackArgs": [
+        "--line-length",
+        "79"
+    ],
+    "autoDocstring.docstringFormat": "google",
+
+    // General formatting
+    "files.trimTrailingWhitespace": true,
+    "[cpp]": {
+        "editor.formatOnPaste": false,
+        "editor.formatOnSave": true
+    },
+    "[python]": {
+        "editor.formatOnPaste": false,
+        "editor.formatOnSave": true
+    }
+}
