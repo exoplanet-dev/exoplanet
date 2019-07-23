@@ -252,15 +252,42 @@ These methods can be substantial accelerated using gradients of the log probabil
 \subsection{Variational inference}
 
 \section{Orbital conventions}
-We choose to follow a set of orbital conventions that respects as many of the established conventions while also hewing to sensible choices of right-hand rule.
+A general introduction to Keplerian orbits is given by \citet{Murray:2010}; here we describe the implementation choices specific to the \emph{exoplanet} codebase.
+We follow a set of internally consistent orbital conventions that also attempts to respect as many of the established conventions of the stellar and exoplanetary fields as possible. The location of a body on a Keplerian orbit with respect to the center of mass is given in the perifocal plane by 
+\begin{equation}
+  \boldsymbol{r} = 
+  \left [
+    \begin{array}{c}
+      x\\
+      y\\
+      z\\
+    \end{array} 
+  \right ].
+\end{equation}
+By construction, the orbit of the body in the perifocal frame is constrained entirely to the $x -y$ plane (see Figure~\ref{fig:orbit3D}). The range of orbital convention choices mainly stems from how the location of the body in the perifocal frame is converted to the observer frame, 
+\begin{equation}
+  \boldsymbol{R} = 
+  \left [
+    \begin{array}{c}
+      X\\
+      Y\\
+      Z\\
+    \end{array} 
+  \right ].
+\end{equation}
+We choose to orient the $\hat{\boldsymbol{X}}$ unit vector in the north direction, $\hat{\boldsymbol{Y}}$ in the east direction, and $\hat{\boldsymbol{Z}}$ towards the observer. Under this convention, the inclination of an orbit is defined by the dot-product of the orbital angular momentum vector with $\hat{\boldsymbol{Z}}$, conforming to the common astrometric convention that a zero inclination ($i = 0\degr$) orbit is face-on, with the test body orbiting in a counter-clockwise manner around the primary body.
 
-The orbit is specified in the perifocal plane $x,y,z$, technically in the $x,y$ plane, where $z=0$. Then, the choice is to decide how to rotate this coordinate frame into the observed frame, which is specified by $X,Y,Z$.
+\begin{figure}[htbp]
+  \begin{centering}
+  \includegraphics{figures/orbit3D.pdf}
+  \oscaption{orbit3D}{\figurelabel{orbit3D}
+  The conventions used to orient the perifocal frame ($x, y, z$) relative to the observer frame ($X,Y,Z$).}
+  \end{centering}
+\end{figure}
 
-Where does the $+Z$ axis point? Towards observer. X is north, Y is east.
+In the stellar and exoplanetary fields, there is less agreement on which  segment of the line of nodes is defined as the \emph{ascending} node. We choose to define the ascending node as the point where the orbiting body crosses the plane of the sky moving \emph{away} from the observer (i.e., crossing from $Z > 0$ to $Z< 0$). This convention has historically been the choice of the visual binary field; the opposite convention occasionally appears in exoplanet and planetary studies. 
 
-What is the definition of the ascending node? Where the secondary is receding from the observer.
-
-To do this, we consider the rotation matrices
+To implement the transformation from perifocal frame to observer frame, we consider the rotation matrices
 \begin{equation}
   \boldsymbol{P}_x(\phi) = \left [
   \begin{array}{ccc}
@@ -277,28 +304,18 @@ To do this, we consider the rotation matrices
     0 & 0 & 1 \\
     \end{array}\right].
 \end{equation}
-These rotation matrices result in a \emph{clockwise} rotation of the axes, as defined using the right hand rule. This means when we look down the $z$-axis, for a positive angle $\phi$, it would be as if the $x$ and $y$ axes rotated clockwise.
-In order to find out what defines counter-clockwise when considering the other rotations, we look to the right hand rule and cross products of the axes unit vectors. Since, $\hat{\bm x} \times \hat{\bm y} = \hat{\bm z}$, we know that when looking down the $z$ axis the direction of the $x$-axis towards the $y$-axis defines counter clockwise.
-Similarly, we have $\hat{{\bm y}} \times \hat{{\bm z}} = \hat{{\bm x}}$, and $\hat{{\bm z}} \times \hat{{\bm x}} = \hat{{\bm y}}$.
+which result in a \emph{clockwise} rotation of the axes, as defined using the right hand rule.\footnote{This means when we look down the $z$-axis, for a positive angle $\phi$, it would be as if the $x$ and $y$ axes rotated clockwise.
+In order to find out what defines counter-clockwise when considering the other rotations, we look to the right hand rule and cross products of the axes unit vectors. Since $\hat{\bm x} \times \hat{\bm y} = \hat{\bm z}$, when looking down the $z$ axis the direction of the $x$-axis towards the $y$-axis defines counter clockwise.
+Similarly, we have $\hat{{\bm y}} \times \hat{{\bm z}} = \hat{{\bm x}}$, and $\hat{{\bm z}} \times \hat{{\bm x}} = \hat{{\bm y}}$.}
 
-One can see how we need to rotate by referencing Figure~\ref{fig:orbit3D}. The three rotations are (i) a rotation about the $z$-axis through an angle $\omega$ so that the $x$-axis coincides with the line of nodes at the ascending node (ii) a rotation about the $x$-axis through an angle ($-i$) so that the two planes are coincident and finally (iii) a rotation about the $z$-axis through an angle $\Omega$. As one might notice, we break from some conventions \citep[e.g.,][]{Murray:2010} in using a negative rotation for inclination, which is due to the change in how we label the ascending node. Applying these rotation matrices yields
+To convert a position $\boldsymbol{r}$ in the perifocal frame to the observer frame $\boldsymbol{R}$ (referencing Figure~\ref{fig:orbit3D}), three rotations are required: (i) a rotation about the $z$-axis through an angle $\omega$ so that the $x$-axis coincides with the line of nodes at the ascending node (ii) a rotation about the $x$-axis through an angle ($-i$) so that the two planes are coincident and finally (iii) a rotation about the $z$-axis through an angle $\Omega$. Applying these rotation matrices yields
 \begin{equation}
-  \left [ \begin{array}{c}
-  X \\
-  Y \\
-  Z \\
-\end{array}
-  \right ] =
+  \boldsymbol{R} =
   \boldsymbol{P}_z (\Omega) \boldsymbol{P}_x(-i) \boldsymbol{P}_z(\omega)
-  \left [
-  \begin{array}{c}
-  x \\
-  y \\
-  z \\
-  \end{array}
-  \right]
+  \boldsymbol{r}.
 \end{equation}
 
+As a function of true anomaly $f$, the position in the observer frame is given by
 \begin{equation}
   \begin{array}{lc}
     X =& r [ \cos \Omega (\cos \omega \cos f - \sin \omega \sin f)  - \sin \Omega  \cos i (\sin \omega \cos f + \cos \omega \sin f) ] \\
@@ -308,8 +325,7 @@ One can see how we need to rotate by referencing Figure~\ref{fig:orbit3D}. The t
 \label{eqn:Z}
 \end{equation}
 
-
-Using the sum angle identities to simplify the calculations, we find
+Simplifying the equations using the sum angle identities, we find
 \begin{equation}
   \begin{array}{lc}
     X =& r (\cos \Omega \cos(\omega + f) - \sin(\Omega) \sin(\omega + f) \cos(i)) \\
@@ -319,14 +335,6 @@ Using the sum angle identities to simplify the calculations, we find
 \label{eqn:Z}
 \end{equation}
 
-
-\begin{figure}[htbp]
-\begin{centering}
-\includegraphics{figures/orbit3D.pdf}
-\oscaption{orbit3D}{\figurelabel{orbit3D}
-The conventions used.}
-\end{centering}
-\end{figure}
 
 \section{The custom operations provided by exoplanet}
 
