@@ -48,15 +48,15 @@ class KeplerOp(gof.COp):
         bM = tt.zeros_like(M)
         be = tt.zeros_like(M)
 
-        # cos^2(0.5*f) = (1 + cosf) / 2
-        cos2fo2 = 0.5 * cosf + 0.5
+        # e * cos(f)
+        ecosf = e * cosf
 
         # 1 - e^2
         ome2 = 1 - e ** 2
 
-        # Gradients
-        dfdM = (e - 1 - 2 * e * cos2fo2) ** 2 / ome2 ** 1.5
-        dfde = (e * cosf + 2) * sinf / ome2
+        # Partials
+        dfdM = (1 + ecosf) ** 2 / ome2 ** 1.5
+        dfde = (2 + ecosf) * sinf / ome2
 
         if not isinstance(gradients[0].type, theano.gradient.DisconnectedType):
             bM += gradients[0] * cosf * dfdM

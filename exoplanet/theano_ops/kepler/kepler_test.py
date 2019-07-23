@@ -100,6 +100,3 @@ class TestKeplerSolver(utt.InferShapeTester):
 
         a = lambda *args: tt.arctan2(*self.op(*args))  # NOQA
         utt.verify_grad(a, [M_val, e_val], eps=1e-8)
-
-        # a = lambda *args: self.op(*args)[0]  # NOQA
-        # utt.verify_grad(a, [M_val, e_val], eps=1e-8)
