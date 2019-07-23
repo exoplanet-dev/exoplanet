@@ -14,6 +14,7 @@ import theano.tensor as tt
 
 class AbsoluteValueTransform(tr.Transform):
     """"""
+
     name = "absolutevalue"
 
     def backward(self, y):
@@ -42,6 +43,7 @@ class UnitVectorTransform(tr.Transform):
     is unity.
 
     """
+
     name = "unitvector"
 
     def backward(self, y):
@@ -55,7 +57,7 @@ class UnitVectorTransform(tr.Transform):
         return np.copy(x)
 
     def jacobian_det(self, y):
-        return -0.5*tt.sum(tt.square(y), axis=-1)
+        return -0.5 * tt.sum(tt.square(y), axis=-1)
 
 
 unit_vector = UnitVectorTransform()
@@ -86,10 +88,9 @@ class AngleTransform(tr.Transform):
         return tt.arctan2(y[0], y[1])
 
     def forward(self, x):
-        return tt.concatenate((
-            tt.shape_padleft(tt.sin(x)),
-            tt.shape_padleft(tt.cos(x))
-        ), axis=0)
+        return tt.concatenate(
+            (tt.shape_padleft(tt.sin(x)), tt.shape_padleft(tt.cos(x))), axis=0
+        )
 
     def forward_val(self, x, point=None):
         return np.array([np.sin(x), np.cos(x)])
@@ -97,8 +98,8 @@ class AngleTransform(tr.Transform):
     def jacobian_det(self, y):
         sm = tt.sum(tt.square(y), axis=0)
         if self.regularized is not None:
-            return self.regularized*tt.log(sm) - 0.5*sm
-        return -0.5*sm
+            return self.regularized * tt.log(sm) - 0.5 * sm
+        return -0.5 * sm
 
 
 angle = AngleTransform()
@@ -117,27 +118,18 @@ class QuadLimbDarkTransform(tr.Transform):
         q = tt.nnet.sigmoid(y)
         sqrtq1 = tt.sqrt(q[0])
         twoq2 = 2 * q[1]
-        u = tt.stack([
-            sqrtq1 * twoq2,
-            sqrtq1 * (1 - twoq2),
-        ])
+        u = tt.stack([sqrtq1 * twoq2, sqrtq1 * (1 - twoq2)])
 
         return u
 
     def forward(self, x):
         usum = tt.sum(x, axis=0)
-        q = tt.stack([
-            usum ** 2,
-            0.5 * x[0] / usum,
-        ])
+        q = tt.stack([usum ** 2, 0.5 * x[0] / usum])
         return tt.log(q) - tt.log(1 - q)
 
     def forward_val(self, x, point=None):
         usum = np.sum(x, axis=0)
-        q = np.array([
-            usum ** 2,
-            0.5 * x[0] / usum,
-        ])
+        q = np.array([usum ** 2, 0.5 * x[0] / usum])
         return np.log(q) - np.log(1 - q)
 
     def jacobian_det(self, y):
@@ -206,9 +198,7 @@ class RadiusImpactTransform(tr.Transform):
         r22 = q2
 
         y = tt.switch(
-            b <= 1,
-            tt.stack((r11, r21), axis=0),
-            tt.stack((r12, r22), axis=0),
+            b <= 1, tt.stack((r11, r21), axis=0), tt.stack((r12, r22), axis=0)
         )
 
         return tt.log(y) - tt.log(1 - y)
@@ -216,8 +206,9 @@ class RadiusImpactTransform(tr.Transform):
     def forward_val(self, x, point=None):
         p = x[0]
         b = x[1]
-        pl, Ar, dr = draw_values([self.min_radius-0., self.Ar-0., self.dr-0.],
-                                 point=point)
+        pl, Ar, dr = draw_values(
+            [self.min_radius - 0.0, self.Ar - 0.0, self.dr - 0.0], point=point
+        )
 
         m = b <= 1
         r = np.empty_like(x)

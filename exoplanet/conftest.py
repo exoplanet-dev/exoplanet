@@ -7,6 +7,6 @@ import pytest
 
 @pytest.fixture(scope="package", autouse=True)
 def theano_config():
-    config = theano.configparser.change_flags(compute_test_value='off')
+    config = theano.configparser.change_flags(compute_test_value="off")
     with config:
         yield

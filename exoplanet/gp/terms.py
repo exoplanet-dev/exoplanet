@@ -3,9 +3,15 @@
 from __future__ import division, print_function
 
 __all__ = [
-    "Term", "TermSum", "TermProduct", "TermDiff",
-    "RealTerm", "ComplexTerm",
-    "SHOTerm", "Matern32Term", "RotationTerm",
+    "Term",
+    "TermSum",
+    "TermProduct",
+    "TermDiff",
+    "RealTerm",
+    "ComplexTerm",
+    "SHOTerm",
+    "Matern32Term",
+    "RotationTerm",
 ]
 
 import numpy as np
@@ -31,10 +37,17 @@ class Term(object):
         self.dtype = kwargs.pop("dtype", theano.config.floatX)
         for name in self.parameter_names:
             if name not in kwargs and "log_" + name not in kwargs:
-                raise ValueError(("Missing required parameter {0}. "
-                                  "Provide {0} or log_{0}").format(name))
-            value = kwargs[name] if name in kwargs \
+                raise ValueError(
+                    (
+                        "Missing required parameter {0}. "
+                        "Provide {0} or log_{0}"
+                    ).format(name)
+                )
+            value = (
+                kwargs[name]
+                if name in kwargs
                 else tt.exp(kwargs["log_" + name])
+            )
             setattr(self, name, tt.cast(value, self.dtype))
 
         self.coefficients = self.get_coefficients()
@@ -43,7 +56,8 @@ class Term(object):
     def J(self):
         try:
             func = theano.function(
-                [], [self.coefficients[0], self.coefficients[2]])
+                [], [self.coefficients[0], self.coefficients[2]]
+            )
             a_real, a_comp = func()
         except MissingInputError:
             return -1
@@ -68,14 +82,15 @@ class Term(object):
         return TermProduct(b, self, dtype=dtype)
 
     def get_real_coefficients(self):
-        return (tt.zeros(0, dtype=self.dtype),
-                tt.zeros(0, dtype=self.dtype))
+        return (tt.zeros(0, dtype=self.dtype), tt.zeros(0, dtype=self.dtype))
 
     def get_complex_coefficients(self):
-        return (tt.zeros(0, dtype=self.dtype),
-                tt.zeros(0, dtype=self.dtype),
-                tt.zeros(0, dtype=self.dtype),
-                tt.zeros(0, dtype=self.dtype))
+        return (
+            tt.zeros(0, dtype=self.dtype),
+            tt.zeros(0, dtype=self.dtype),
+            tt.zeros(0, dtype=self.dtype),
+            tt.zeros(0, dtype=self.dtype),
+        )
 
     def get_coefficients(self):
         r = self.get_real_coefficients()
@@ -87,26 +102,35 @@ class Term(object):
         diag = tt.as_tensor_variable(diag)
         ar, cr, ac, bc, cc, dc = self.coefficients
         a = diag + tt.sum(ar) + tt.sum(ac)
-        U = tt.concatenate((
-            ar[None, :] + tt.zeros_like(x)[:, None],
-            ac[None, :] * tt.cos(dc[None, :] * x[:, None])
-            + bc[None, :] * tt.sin(dc[None, :] * x[:, None]),
-            ac[None, :] * tt.sin(dc[None, :] * x[:, None])
-            - bc[None, :] * tt.cos(dc[None, :] * x[:, None]),
-        ), axis=1)
+        U = tt.concatenate(
+            (
+                ar[None, :] + tt.zeros_like(x)[:, None],
+                ac[None, :] * tt.cos(dc[None, :] * x[:, None])
+                + bc[None, :] * tt.sin(dc[None, :] * x[:, None]),
+                ac[None, :] * tt.sin(dc[None, :] * x[:, None])
+                - bc[None, :] * tt.cos(dc[None, :] * x[:, None]),
+            ),
+            axis=1,
+        )
 
-        V = tt.concatenate((
-            tt.zeros_like(ar)[None, :] + tt.ones_like(x)[:, None],
-            tt.cos(dc[None, :] * x[:, None]),
-            tt.sin(dc[None, :] * x[:, None]),
-        ), axis=1)
+        V = tt.concatenate(
+            (
+                tt.zeros_like(ar)[None, :] + tt.ones_like(x)[:, None],
+                tt.cos(dc[None, :] * x[:, None]),
+                tt.sin(dc[None, :] * x[:, None]),
+            ),
+            axis=1,
+        )
 
         dx = x[1:] - x[:-1]
-        P = tt.concatenate((
-            tt.exp(-cr[None, :] * dx[:, None]),
-            tt.exp(-cc[None, :] * dx[:, None]),
-            tt.exp(-cc[None, :] * dx[:, None]),
-        ), axis=1)
+        P = tt.concatenate(
+            (
+                tt.exp(-cr[None, :] * dx[:, None]),
+                tt.exp(-cc[None, :] * dx[:, None]),
+                tt.exp(-cc[None, :] * dx[:, None]),
+            ),
+            axis=1,
+        )
 
         return a, U, V, P
 
@@ -117,29 +141,33 @@ class Term(object):
 
     def psd(self, omega):
         ar, cr, ac, bc, cc, dc = self.coefficients
-        omega = tt.reshape(omega, tt.concatenate([omega.shape, [1]]),
-                           ndim=omega.ndim+1)
-        w2 = omega**2
-        w02 = cc**2 + dc**2
-        power = tt.sum(ar * cr / (cr**2 + w2), axis=-1)
-        power += tt.sum(((ac*cc+bc*dc)*w02+(ac*cc-bc*dc)*w2) /
-                        (w2*w2 + 2.0*(cc**2-dc**2)*w2+w02*w02), axis=-1)
+        omega = tt.reshape(
+            omega, tt.concatenate([omega.shape, [1]]), ndim=omega.ndim + 1
+        )
+        w2 = omega ** 2
+        w02 = cc ** 2 + dc ** 2
+        power = tt.sum(ar * cr / (cr ** 2 + w2), axis=-1)
+        power += tt.sum(
+            ((ac * cc + bc * dc) * w02 + (ac * cc - bc * dc) * w2)
+            / (w2 * w2 + 2.0 * (cc ** 2 - dc ** 2) * w2 + w02 * w02),
+            axis=-1,
+        )
         return np.sqrt(2.0 / np.pi) * power
 
     def value(self, tau):
         ar, cr, ac, bc, cc, dc = self.coefficients
         tau = tt.abs_(tau)
-        tau = tt.reshape(tau, tt.concatenate([tau.shape, [1]]),
-                         ndim=tau.ndim+1)
-        K = tt.sum(ar * tt.exp(-cr*tau), axis=-1)
-        factor = tt.exp(-cc*tau)
-        K += tt.sum(ac * factor * tt.cos(dc*tau), axis=-1)
-        K += tt.sum(bc * factor * tt.sin(dc*tau), axis=-1)
+        tau = tt.reshape(
+            tau, tt.concatenate([tau.shape, [1]]), ndim=tau.ndim + 1
+        )
+        K = tt.sum(ar * tt.exp(-cr * tau), axis=-1)
+        factor = tt.exp(-cc * tau)
+        K += tt.sum(ac * factor * tt.cos(dc * tau), axis=-1)
+        K += tt.sum(bc * factor * tt.sin(dc * tau), axis=-1)
         return K
 
 
 class TermSum(Term):
-
     def __init__(self, *terms, **kwargs):
         self.terms = terms
         super(TermSum, self).__init__(**kwargs)
@@ -156,7 +184,6 @@ class TermSum(Term):
 
 
 class TermProduct(Term):
-
     def __init__(self, term1, term2, **kwargs):
         self.term1 = term1
         self.term2 = term2
@@ -193,29 +220,41 @@ class TermProduct(Term):
         aj, bj, cj, dj = c1[2:]
         ak, bk, ck, dk = c2[2:]
 
-        ac.append(tt.flatten(
-            0.5*(aj[:, None]*ak[None, :] + bj[:, None]*bk[None, :])))
-        bc.append(tt.flatten(
-            0.5*(bj[:, None]*ak[None, :] - aj[:, None]*bk[None, :])))
+        ac.append(
+            tt.flatten(
+                0.5 * (aj[:, None] * ak[None, :] + bj[:, None] * bk[None, :])
+            )
+        )
+        bc.append(
+            tt.flatten(
+                0.5 * (bj[:, None] * ak[None, :] - aj[:, None] * bk[None, :])
+            )
+        )
         cc.append(tt.flatten(cj[:, None] + ck[None, :]))
         dc.append(tt.flatten(dj[:, None] - dk[None, :]))
 
-        ac.append(tt.flatten(
-            0.5*(aj[:, None]*ak[None, :] - bj[:, None]*bk[None, :])))
-        bc.append(tt.flatten(
-            0.5*(bj[:, None]*ak[None, :] + aj[:, None]*bk[None, :])))
+        ac.append(
+            tt.flatten(
+                0.5 * (aj[:, None] * ak[None, :] - bj[:, None] * bk[None, :])
+            )
+        )
+        bc.append(
+            tt.flatten(
+                0.5 * (bj[:, None] * ak[None, :] + aj[:, None] * bk[None, :])
+            )
+        )
         cc.append(tt.flatten(cj[:, None] + ck[None, :]))
         dc.append(tt.flatten(dj[:, None] + dk[None, :]))
 
         return [
-            tt.concatenate(vals, axis=0) if len(vals)
+            tt.concatenate(vals, axis=0)
+            if len(vals)
             else tt.zeros(0, dtype=self.dtype)
             for vals in (ar, cr, ac, bc, cc, dc)
         ]
 
 
 class TermDiff(Term):
-
     def __init__(self, term, **kwargs):
         self.term = term
         super(TermDiff, self).__init__(**kwargs)
@@ -224,17 +263,17 @@ class TermDiff(Term):
         coeffs = self.term.coefficients
         a, b, c, d = coeffs[2:]
         final_coeffs = [
-            -coeffs[0]*coeffs[1]**2,
+            -coeffs[0] * coeffs[1] ** 2,
             coeffs[1],
-            a*(d**2 - c**2) + 2*b*c*d,
-            b*(d**2 - c**2) - 2*a*c*d,
-            c, d,
+            a * (d ** 2 - c ** 2) + 2 * b * c * d,
+            b * (d ** 2 - c ** 2) - 2 * a * c * d,
+            c,
+            d,
         ]
         return final_coeffs
 
 
 class IntegratedTerm(Term):
-
     def __init__(self, term, delta, **kwargs):
         self.term = term
         self.delta = tt.as_tensor_variable(delta)
@@ -249,27 +288,25 @@ class IntegratedTerm(Term):
 
         # Real componenets
         crd = cr * self.delta
-        coeffs = [
-            ar * (tt.exp(crd) + tt.exp(-crd) - 2) / (crd)**2,
-            cr
-        ]
+        coeffs = [ar * (tt.exp(crd) + tt.exp(-crd) - 2) / (crd) ** 2, cr]
 
         # Imaginary coefficients
         cd = c * self.delta
         dd = d * self.delta
-        c2 = c**2
-        d2 = d**2
-        factor = 1. / (self.delta * (c2 + d2))**2
+        c2 = c ** 2
+        d2 = d ** 2
+        factor = 1.0 / (self.delta * (c2 + d2)) ** 2
         cos_term = tt.cosh(cd) * tt.cos(dd) - 1
         sin_term = tt.sinh(cd) * tt.sin(dd)
 
-        C1 = 2*(a*(c2 - d2) + 2*b*c*d)
-        C2 = 2*(b*(c2 - d2) - 2*a*c*d)
+        C1 = 2 * (a * (c2 - d2) + 2 * b * c * d)
+        C2 = 2 * (b * (c2 - d2) - 2 * a * c * d)
 
         coeffs += [
-            factor*(C1 * cos_term - C2 * sin_term),
-            factor*(C2 * cos_term + C1 * sin_term),
-            c, d
+            factor * (C1 * cos_term - C2 * sin_term),
+            factor * (C2 * cos_term + C1 * sin_term),
+            c,
+            d,
         ]
 
         return coeffs
@@ -278,7 +315,7 @@ class IntegratedTerm(Term):
         psd0 = self.term.psd(omega)
         arg = 0.5 * self.delta * omega
         sinc = tt.switch(tt.neq(arg, 0), tt.sin(arg) / arg, tt.ones_like(arg))
-        return psd0 * sinc**2
+        return psd0 * sinc ** 2
 
     def value(self, tau0):
         dt = self.delta
@@ -286,8 +323,9 @@ class IntegratedTerm(Term):
 
         # Format the lags correctly
         tau0 = tt.abs_(tau0)
-        tau = tt.reshape(tau0, tt.concatenate([tau0.shape, [1]]),
-                         ndim=tau0.ndim+1)
+        tau = tt.reshape(
+            tau0, tt.concatenate([tau0.shape, [1]]), ndim=tau0.ndim + 1
+        )
 
         # Precompute some factors
         dpt = dt + tau
@@ -296,41 +334,56 @@ class IntegratedTerm(Term):
         # Real parts:
         # tau > Delta
         crd = cr * dt
-        norm = 1.0 / (crd)**2
-        factor = (tt.exp(crd) + tt.exp(-crd) - 2) * norm,
-        K_large = tt.sum(ar * tt.exp(-cr*tau) * factor, axis=-1)
+        norm = 1.0 / (crd) ** 2
+        factor = ((tt.exp(crd) + tt.exp(-crd) - 2) * norm,)
+        K_large = tt.sum(ar * tt.exp(-cr * tau) * factor, axis=-1)
 
         # tau < Delta
         K_small = tt.sum(
-            (2*cr*(dmt) + tt.exp(-cr*dmt) + tt.exp(-cr*dpt)
-             - 2*tt.exp(-cr*tau)) * norm, axis=-1)
+            (
+                2 * cr * (dmt)
+                + tt.exp(-cr * dmt)
+                + tt.exp(-cr * dpt)
+                - 2 * tt.exp(-cr * tau)
+            )
+            * norm,
+            axis=-1,
+        )
 
         # Complex part
         cd = c * dt
         dd = d * dt
-        c2 = c**2
-        d2 = d**2
+        c2 = c ** 2
+        d2 = d ** 2
         c2pd2 = c2 + d2
-        C1 = a*(c2 - d2) + 2*b*c*d
-        C2 = b*(c2 - d2) - 2*a*c*d
-        norm = 1.0 / (dt * c2pd2)**2
-        k0 = tt.exp(-c*tau)
-        cdt = tt.cos(d*tau)
-        sdt = tt.sin(d*tau)
+        C1 = a * (c2 - d2) + 2 * b * c * d
+        C2 = b * (c2 - d2) - 2 * a * c * d
+        norm = 1.0 / (dt * c2pd2) ** 2
+        k0 = tt.exp(-c * tau)
+        cdt = tt.cos(d * tau)
+        sdt = tt.sin(d * tau)
 
         # For tau > Delta
-        cos_term = 2*(tt.cosh(cd) * tt.cos(dd) - 1)
-        sin_term = 2*(tt.sinh(cd) * tt.sin(dd))
+        cos_term = 2 * (tt.cosh(cd) * tt.cos(dd) - 1)
+        sin_term = 2 * (tt.sinh(cd) * tt.sin(dd))
         factor = k0 * norm
-        K_large += tt.sum((C1*cos_term - C2*sin_term)*factor*cdt, axis=-1)
-        K_large += tt.sum((C2*cos_term + C1*sin_term)*factor*sdt, axis=-1)
+        K_large += tt.sum(
+            (C1 * cos_term - C2 * sin_term) * factor * cdt, axis=-1
+        )
+        K_large += tt.sum(
+            (C2 * cos_term + C1 * sin_term) * factor * sdt, axis=-1
+        )
 
         # Real part
-        edmt = tt.exp(-c*dmt)
-        edpt = tt.exp(-c*dpt)
-        cos_term = edmt*tt.cos(d*dmt) + edpt*tt.cos(d*dpt) - 2*k0*cdt
-        sin_term = edmt*tt.sin(d*dmt) + edpt*tt.sin(d*dpt) - 2*k0*sdt
-        K_small += tt.sum(2*(a*c + b*d)*c2pd2*dmt * norm, axis=-1)
+        edmt = tt.exp(-c * dmt)
+        edpt = tt.exp(-c * dpt)
+        cos_term = (
+            edmt * tt.cos(d * dmt) + edpt * tt.cos(d * dpt) - 2 * k0 * cdt
+        )
+        sin_term = (
+            edmt * tt.sin(d * dmt) + edpt * tt.sin(d * dpt) - 2 * k0 * sdt
+        )
+        K_small += tt.sum(2 * (a * c + b * d) * c2pd2 * dmt * norm, axis=-1)
         K_small += tt.sum((C1 * cos_term + C2 * sin_term) * norm, axis=-1)
 
         return tt.switch(tt.le(tau0, dt), K_small, K_large)
@@ -434,7 +487,7 @@ class SHOTerm(Term):
     def get_coefficients(self):
         def overdampled():
             Q = self.Q
-            f = tt.sqrt(tt.maximum(4.0*Q**2 - 1.0, self.eps))
+            f = tt.sqrt(tt.maximum(4.0 * Q ** 2 - 1.0, self.eps))
             a = self.S0 * self.w0 * Q
             c = 0.5 * self.w0 / Q
             return (
@@ -448,10 +501,14 @@ class SHOTerm(Term):
 
         def underdamped():
             Q = self.Q
-            f = tt.sqrt(tt.maximum(1.0 - 4.0*Q**2, self.eps))
+            f = tt.sqrt(tt.maximum(1.0 - 4.0 * Q ** 2, self.eps))
             return (
-                0.5*self.S0*self.w0*Q*tt.stack([1.0+1.0/f, 1.0-1.0/f]),
-                0.5*self.w0/Q*tt.stack([1.0-f, 1.0+f]),
+                0.5
+                * self.S0
+                * self.w0
+                * Q
+                * tt.stack([1.0 + 1.0 / f, 1.0 - 1.0 / f]),
+                0.5 * self.w0 / Q * tt.stack([1.0 - f, 1.0 + f]),
                 tt.zeros(0, dtype=self.dtype),
                 tt.zeros(0, dtype=self.dtype),
                 tt.zeros(0, dtype=self.dtype),
@@ -459,8 +516,7 @@ class SHOTerm(Term):
             )
 
         m = self.Q < 0.5
-        return [
-            ifelse(m, a, b) for a, b in zip(underdamped(), overdampled())]
+        return [ifelse(m, a, b) for a, b in zip(underdamped(), overdampled())]
 
 
 class Matern32Term(Term):
@@ -501,12 +557,12 @@ class Matern32Term(Term):
 
     def get_complex_coefficients(self):
         w0 = np.sqrt(3.0) / self.rho
-        S0 = self.sigma**2 / w0
+        S0 = self.sigma ** 2 / w0
         return (
-            tt.reshape(w0*S0, (w0.size,)),
-            tt.reshape(w0*w0*S0/self.eps, (w0.size,)),
+            tt.reshape(w0 * S0, (w0.size,)),
+            tt.reshape(w0 * w0 * S0 / self.eps, (w0.size,)),
             tt.reshape(w0, (w0.size,)),
-            tt.reshape(self.eps, (w0.size,))
+            tt.reshape(self.eps, (w0.size,)),
         )
 
 
@@ -538,17 +594,15 @@ class RotationTerm(TermSum):
 
         # One term with a period of period
         Q1 = 0.5 + self.Q0 + self.deltaQ
-        w1 = 4*np.pi*Q1/(self.period * tt.sqrt(4*Q1**2-1))
+        w1 = 4 * np.pi * Q1 / (self.period * tt.sqrt(4 * Q1 ** 2 - 1))
         S1 = self.amp / (w1 * Q1)
 
         # Another term at half the period
         Q2 = 0.5 + self.Q0
-        w2 = 8*np.pi*Q2/(self.period * tt.sqrt(4*Q2**2-1))
+        w2 = 8 * np.pi * Q2 / (self.period * tt.sqrt(4 * Q2 ** 2 - 1))
         S2 = self.mix * self.amp / (w2 * Q2)
 
-        self.terms = (
-            SHOTerm(S0=S1, w0=w1, Q=Q1),
-            SHOTerm(S0=S2, w0=w2, Q=Q2))
+        self.terms = (SHOTerm(S0=S1, w0=w1, Q=Q1), SHOTerm(S0=S2, w0=w2, Q=Q2))
         self.coefficients = self.get_coefficients()
 
     @property

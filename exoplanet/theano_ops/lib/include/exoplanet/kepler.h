@@ -13,17 +13,17 @@
 
 #include <cmath>
 
-namespace exoplanet
-{
-namespace kepler
-{
+namespace exoplanet {
+namespace kepler {
 
-// Calculates x - sin(x) and 1 - cos(x) to 20 significant digits for x in [0, pi)
+// Calculates x - sin(x) and 1 - cos(x) to 20 significant digits for x in [0,
+// pi)
 template <typename T>
-inline void sin_cos_reduc(T x, T *SnReduc, T *CsReduc)
-{
-  const T s[] = {1.0 / 6, 1.0 / 20, 1.0 / 42, 1.0 / 72, 1.0 / 110, 1.0 / 156, 1.0 / 210, 1.0 / 272, 1.0 / 342, 1.0 / 420};
-  const T c[] = {0.5, 1.0 / 12, 1.0 / 30, 1.0 / 56, 1.0 / 90, 1.0 / 132, 1.0 / 182, 1.0 / 240, 1.0 / 306, 1.0 / 380};
+inline void sin_cos_reduc(T x, T *SnReduc, T *CsReduc) {
+  const T s[] = {1.0 / 6,   1.0 / 20,  1.0 / 42,  1.0 / 72,  1.0 / 110,
+                 1.0 / 156, 1.0 / 210, 1.0 / 272, 1.0 / 342, 1.0 / 420};
+  const T c[] = {0.5,       1.0 / 12,  1.0 / 30,  1.0 / 56,  1.0 / 90,
+                 1.0 / 132, 1.0 / 182, 1.0 / 240, 1.0 / 306, 1.0 / 380};
 
   bool bigg = x > M_PI_2;
   T u = (bigg) ? M_PI - x : x;
@@ -33,26 +33,21 @@ inline void sin_cos_reduc(T x, T *SnReduc, T *CsReduc)
 
   T ss = T(1);
   T cc = T(1);
-  for (int i = 9; i >= 1; --i)
-  {
+  for (int i = 9; i >= 1; --i) {
     ss = 1 - w * s[i] * ss;
     cc = 1 - w * c[i] * cc;
   }
   ss *= v * w * s[0];
   cc *= w * c[0];
 
-  if (big)
-  {
+  if (big) {
     *SnReduc = u - 1 + cc;
     *CsReduc = 1 - M_PI_2 + u + ss;
-  }
-  else
-  {
+  } else {
     *SnReduc = ss;
     *CsReduc = cc;
   }
-  if (bigg)
-  {
+  if (bigg) {
     *SnReduc = 2 * x - M_PI + *SnReduc;
     *CsReduc = 2 - *CsReduc;
   }
@@ -60,26 +55,20 @@ inline void sin_cos_reduc(T x, T *SnReduc, T *CsReduc)
 
 // Implementation from numpy
 template <typename T>
-inline T npy_mod(T a, T b)
-{
+inline T npy_mod(T a, T b) {
   T mod = fmod(a, b);
 
-  if (!b)
-  {
+  if (!b) {
     // If b == 0, return result of fmod. For IEEE is nan
     return mod;
   }
 
   // adjust fmod result to conform to Python convention of remainder
-  if (mod)
-  {
-    if ((b < 0) != (mod < 0))
-    {
+  if (mod) {
+    if ((b < 0) != (mod < 0)) {
       mod += b;
     }
-  }
-  else
-  {
+  } else {
     // if mod is zero ensure correct sign
     mod = copysign(0, b);
   }
@@ -88,8 +77,7 @@ inline T npy_mod(T a, T b)
 }
 
 template <typename T>
-inline T get_markley_starter(T M, T ecc, T ome)
-{
+inline T get_markley_starter(T M, T ecc, T ome) {
   // M must be in the range [0, pi)
   const T FACTOR1 = 3 * M_PI / (M_PI - 6 / M_PI);
   const T FACTOR2 = 1.6 / (M_PI - 6 / M_PI);
@@ -106,8 +94,7 @@ inline T get_markley_starter(T M, T ecc, T ome)
 }
 
 template <typename T>
-inline T refine_estimate(T M, T ecc, T ome, T E)
-{
+inline T refine_estimate(T M, T ecc, T ome, T E) {
   // T sE, cE;
   // sin_cos_reduc(E, &sE, &cE);
 
@@ -121,14 +108,14 @@ inline T refine_estimate(T M, T ecc, T ome, T E)
   T d_3 = -f_0 / (f_1 - 0.5 * f_0 * f_2 / f_1);
   T d_4 = -f_0 / (f_1 + 0.5 * d_3 * f_2 + (d_3 * d_3) * f_3 / 6);
   T d_42 = d_4 * d_4;
-  T dE = -f_0 / (f_1 + 0.5 * d_4 * f_2 + d_4 * d_4 * f_3 / 6 - d_42 * d_4 * f_2 / 24);
+  T dE = -f_0 /
+         (f_1 + 0.5 * d_4 * f_2 + d_4 * d_4 * f_3 / 6 - d_42 * d_4 * f_2 / 24);
 
   return E + dE;
 }
 
 template <typename T>
-inline T solve_kepler(T M, T ecc)
-{
+inline T solve_kepler(T M, T ecc) {
   const T two_pi = 2 * M_PI;
 
   // Wrap M into the range [0, 2*pi]
@@ -136,8 +123,7 @@ inline T solve_kepler(T M, T ecc)
 
   //
   bool high = M > M_PI;
-  if (high)
-    M = two_pi - M;
+  if (high) M = two_pi - M;
 
   // Get the starter
   T ome = 1.0 - ecc;
@@ -146,13 +132,12 @@ inline T solve_kepler(T M, T ecc)
   // Refine this estimate using a high order Newton step
   E = refine_estimate(M, ecc, ome, E);
 
-  if (high)
-    E = two_pi - E;
+  if (high) E = two_pi - E;
 
-  return E; // + M_ref;
+  return E;  // + M_ref;
 }
 
-} // namespace kepler
-} // namespace exoplanet
+}  // namespace kepler
+}  // namespace exoplanet
 
 #endif

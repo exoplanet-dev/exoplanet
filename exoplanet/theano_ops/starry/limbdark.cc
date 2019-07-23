@@ -4,9 +4,7 @@ exoplanet::starry::limbdark::GreensLimbDark<DTYPE_OUTPUT_0>* APPLY_SPECIFIC(L);
 
 #section init_code_struct
 
-{
-  APPLY_SPECIFIC(L) = NULL;
-}
+{ APPLY_SPECIFIC(L) = NULL; }
 
 #section cleanup_code_struct
 
@@ -25,8 +23,7 @@ int APPLY_SPECIFIC(limbdark)(
     PyArrayObject** output1,  // dfdcl
     PyArrayObject** output2,  // dfdb
     PyArrayObject** output3   // dfdr
-  )
-{
+    ) {
   using namespace exoplanet;
 
   int success = 0;
@@ -40,8 +37,8 @@ int APPLY_SPECIFIC(limbdark)(
 
   int ndim = -1;
   npy_intp* shape;
-  auto b   = get_input<DTYPE_INPUT_1>(&ndim, &shape, input1, &success);
-  auto r   = get_input<DTYPE_INPUT_2>(&ndim, &shape, input2, &success);
+  auto b = get_input<DTYPE_INPUT_1>(&ndim, &shape, input1, &success);
+  auto r = get_input<DTYPE_INPUT_2>(&ndim, &shape, input2, &success);
   auto los = get_input<DTYPE_INPUT_3>(&ndim, &shape, input3, &success);
   if (success) return 1;
 
@@ -52,23 +49,29 @@ int APPLY_SPECIFIC(limbdark)(
     Nc *= shape_c[i];
   }
   for (int i = 0; i < ndim; ++i) {
-    new_shape[ndim_c+i] = shape[i];
+    new_shape[ndim_c + i] = shape[i];
     Nb *= shape[i];
   }
 
-  auto f     = allocate_output<DTYPE_OUTPUT_0>(ndim, shape, TYPENUM_OUTPUT_0, output0, &success);
-  auto dfdcl = allocate_output<DTYPE_OUTPUT_1>(ndim+ndim_c, &(new_shape[0]), TYPENUM_OUTPUT_1, output1, &success);
-  auto dfdb  = allocate_output<DTYPE_OUTPUT_2>(ndim, shape, TYPENUM_OUTPUT_2, output2, &success);
-  auto dfdr  = allocate_output<DTYPE_OUTPUT_3>(ndim, shape, TYPENUM_OUTPUT_3, output3, &success);
+  auto f = allocate_output<DTYPE_OUTPUT_0>(ndim, shape, TYPENUM_OUTPUT_0,
+                                           output0, &success);
+  auto dfdcl = allocate_output<DTYPE_OUTPUT_1>(
+      ndim + ndim_c, &(new_shape[0]), TYPENUM_OUTPUT_1, output1, &success);
+  auto dfdb = allocate_output<DTYPE_OUTPUT_2>(ndim, shape, TYPENUM_OUTPUT_2,
+                                              output2, &success);
+  auto dfdr = allocate_output<DTYPE_OUTPUT_3>(ndim, shape, TYPENUM_OUTPUT_3,
+                                              output3, &success);
   if (success) return 1;
 
-  Eigen::Map<Eigen::Matrix<DTYPE_OUTPUT_1, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> dfdcl_mat(dfdcl, Nc, Nb);
+  Eigen::Map<Eigen::Matrix<DTYPE_OUTPUT_1, Eigen::Dynamic, Eigen::Dynamic,
+                           Eigen::RowMajor>>
+      dfdcl_mat(dfdcl, Nc, Nb);
   dfdcl_mat.setZero();
 
   Eigen::Map<Eigen::Matrix<DTYPE_INPUT_0, Eigen::Dynamic, 1>> cvec(c, Nc);
   if (APPLY_SPECIFIC(L) == NULL || APPLY_SPECIFIC(L)->lmax != Nc - 1) {
     if (APPLY_SPECIFIC(L) != NULL) delete APPLY_SPECIFIC(L);
-    APPLY_SPECIFIC(L) = new starry::limbdark::GreensLimbDark<double>(Nc-1);
+    APPLY_SPECIFIC(L) = new starry::limbdark::GreensLimbDark<double>(Nc - 1);
   }
 
   for (npy_intp i = 0; i < Nb; ++i) {

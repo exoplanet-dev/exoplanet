@@ -1,9 +1,8 @@
 #section support_code_apply
 
 int APPLY_SPECIFIC(get_cl)(
-    PyArrayObject*  input0,  // Array of "u" limb darkening coeffs
-    PyArrayObject** output0)
-{
+    PyArrayObject* input0,  // Array of "u" limb darkening coeffs
+    PyArrayObject** output0) {
   using namespace exoplanet;
   typedef DTYPE_OUTPUT_0 T;
 
@@ -12,7 +11,9 @@ int APPLY_SPECIFIC(get_cl)(
   auto u = get_input<DTYPE_INPUT_0>(&N, input0, &success);
   if (success) return 1;
 
-  auto c = allocate_output<DTYPE_OUTPUT_0>(PyArray_NDIM(input0), PyArray_DIMS(input0), TYPENUM_OUTPUT_0, output0, &success);
+  auto c = allocate_output<DTYPE_OUTPUT_0>(PyArray_NDIM(input0),
+                                           PyArray_DIMS(input0),
+                                           TYPENUM_OUTPUT_0, output0, &success);
   if (success) return 1;
 
   Eigen::Matrix<T, Eigen::Dynamic, 1> a(N);

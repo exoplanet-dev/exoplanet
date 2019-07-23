@@ -13,7 +13,6 @@ from .factor import FactorOp
 
 
 class TestFactor(utt.InferShapeTester):
-
     def setUp(self):
         super(TestFactor, self).setUp()
         self.op_class = FactorOp
@@ -53,12 +52,7 @@ class TestFactor(utt.InferShapeTester):
         return M(*vals), K(*vals)
 
     def get_args(self):
-        args = [
-            tt.vector(),
-            tt.matrix(),
-            tt.matrix(),
-            tt.matrix(),
-        ]
+        args = [tt.vector(), tt.matrix(), tt.matrix(), tt.matrix()]
         f = theano.function(args, self.op(*args))
         vals, K = self.get_celerite_matrices()
         return f, args, vals, K
@@ -76,7 +70,8 @@ class TestFactor(utt.InferShapeTester):
                 ind = np.unravel_index(j, output0[i].shape)
 
                 g = theano.function(
-                    args, theano.grad(self.op(*args)[i][ind], args))
+                    args, theano.grad(self.op(*args)[i][ind], args)
+                )
                 grad0[-1].append(g(*vals))
 
         # Loop over each input and numerically compute the gradient
@@ -85,7 +80,7 @@ class TestFactor(utt.InferShapeTester):
                 inner = np.unravel_index(l, vals[k].shape)
                 vals[k][inner] += eps
                 plus = f(*vals)
-                vals[k][inner] -= 2*eps
+                vals[k][inner] -= 2 * eps
                 minus = f(*vals)
                 vals[k][inner] += eps
 
@@ -95,4 +90,4 @@ class TestFactor(utt.InferShapeTester):
                         ind = np.unravel_index(j, output0[i].shape)
                         delta = 0.5 * (plus[i][ind] - minus[i][ind]) / eps
                         ref = grad0[i][j][k][inner]
-                        assert np.abs(delta - ref) < 2*eps
+                        assert np.abs(delta - ref) < 2 * eps
