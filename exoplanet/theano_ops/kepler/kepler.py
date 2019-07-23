@@ -23,10 +23,7 @@ class KeplerOp(gof.COp):
         return get_cache_version()
 
     def c_headers(self, compiler):
-        return [
-            "exoplanet/theano_helpers.h",
-            "exoplanet/kepler.h"
-        ]
+        return ["exoplanet/theano_helpers.h", "exoplanet/kepler.h"]
 
     def c_header_dirs(self, compiler):
         return get_header_dirs(eigen=False)
@@ -35,10 +32,11 @@ class KeplerOp(gof.COp):
         return get_compile_args(compiler)
 
     def make_node(self, mean_anom, eccen):
-        in_args = [tt.as_tensor_variable(mean_anom),
-                   tt.as_tensor_variable(eccen)]
-        return gof.Apply(self, in_args,
-                         [in_args[0].type(), in_args[0].type()])
+        in_args = [
+            tt.as_tensor_variable(mean_anom),
+            tt.as_tensor_variable(eccen),
+        ]
+        return gof.Apply(self, in_args, [in_args[0].type(), in_args[0].type()])
 
     def infer_shape(self, node, shapes):
         return shapes[0], shapes[0]
@@ -54,11 +52,11 @@ class KeplerOp(gof.COp):
         cos2fo2 = 0.5 * cosf + 0.5
 
         # 1 - e^2
-        ome2 = 1 - e**2
+        ome2 = 1 - e ** 2
 
         # Gradients
-        dfdM = (e - 1 - 2*e*cos2fo2)**2 / ome2**1.5
-        dfde = (e*cosf + 2) * sinf / ome2
+        dfdM = (e - 1 - 2 * e * cos2fo2) ** 2 / ome2 ** 1.5
+        dfde = (e * cosf + 2) * sinf / ome2
 
         if not isinstance(gradients[0].type, theano.gradient.DisconnectedType):
             bM += gradients[0] * cosf * dfdM

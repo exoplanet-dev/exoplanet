@@ -65,24 +65,37 @@ class KeplerianOrbit(object):
 
     """
 
-    __citations__ = ("astropy", )
+    __citations__ = ("astropy",)
 
-    def __init__(self,
-                 period=None, a=None, t0=None, t_periastron=None,
-                 incl=None, b=None,
-                 duration=None, ecc=None, omega=None,
-                 Omega=None, m_planet=0.0, m_star=None,
-                 r_star=None, rho_star=None,
-                 m_planet_units=None, rho_star_units=None,
-                 model=None,
-                 contact_points_kwargs=None,
-                 **kwargs):
+    def __init__(
+        self,
+        period=None,
+        a=None,
+        t0=None,
+        t_periastron=None,
+        incl=None,
+        b=None,
+        duration=None,
+        ecc=None,
+        omega=None,
+        Omega=None,
+        m_planet=0.0,
+        m_star=None,
+        r_star=None,
+        rho_star=None,
+        m_planet_units=None,
+        rho_star_units=None,
+        model=None,
+        contact_points_kwargs=None,
+        **kwargs
+    ):
         add_citations_to_model(self.__citations__, model=model)
 
         self.gcc_to_sun = (
-            (constants.M_sun / constants.R_sun**3).to(u.g / u.cm**3).value)
+            (constants.M_sun / constants.R_sun ** 3).to(u.g / u.cm ** 3).value
+        )
         self.au_to_R_sun = (constants.au / constants.R_sun).value
-        self.G_grav = constants.G.to(u.R_sun**3 / u.M_sun / u.day**2).value
+        self.G_grav = constants.G.to(u.R_sun ** 3 / u.M_sun / u.day ** 2).value
 
         self.kepler_op = KeplerOp(**kwargs)
 
@@ -92,9 +105,9 @@ class KeplerianOrbit(object):
         if m_planet_units is not None:
             self.m_planet *= (1 * m_planet_units).to(u.M_sun).value
 
-        self.a, self.period, self.rho_star, self.r_star, self.m_star = \
-            self._get_consistent_inputs(a, period, rho_star, r_star, m_star,
-                                        rho_star_units)
+        self.a, self.period, self.rho_star, self.r_star, self.m_star = self._get_consistent_inputs(
+            a, period, rho_star, r_star, m_star, rho_star_units
+        )
         self.m_total = self.m_star + self.m_planet
 
         self.n = 2 * np.pi / self.period
@@ -130,41 +143,57 @@ class KeplerianOrbit(object):
             self.sin_omega = tt.sin(self.omega)
 
             opsw = 1 + self.sin_omega
-            E0 = 2 * tt.arctan2(tt.sqrt(1-self.ecc)*self.cos_omega,
-                                tt.sqrt(1+self.ecc)*opsw)
+            E0 = 2 * tt.arctan2(
+                tt.sqrt(1 - self.ecc) * self.cos_omega,
+                tt.sqrt(1 + self.ecc) * opsw,
+            )
             self.M0 = E0 - self.ecc * tt.sin(E0)
 
-            ome2 = 1 - self.ecc**2
+            ome2 = 1 - self.ecc ** 2
             self.K0 /= tt.sqrt(ome2)
             incl_factor = (1 + self.ecc * self.sin_omega) / ome2
 
         if b is not None:
             if incl is not None or duration is not None:
-                raise ValueError("only one of 'incl', 'b', and 'duration' can "
-                                 "be given")
+                raise ValueError(
+                    "only one of 'incl', 'b', and 'duration' can " "be given"
+                )
             self.b = tt.as_tensor_variable(b)
-            self.cos_incl = incl_factor*self.b*self.r_star/self.a_planet
+            self.cos_incl = incl_factor * self.b * self.r_star / self.a_planet
             self.incl = tt.arccos(self.cos_incl)
         elif incl is not None:
             if duration is not None:
-                raise ValueError("only one of 'incl', 'b', and 'duration' can "
-                                 "be given")
+                raise ValueError(
+                    "only one of 'incl', 'b', and 'duration' can " "be given"
+                )
             self.incl = tt.as_tensor_variable(incl)
             self.cos_incl = tt.cos(self.incl)
-            self.b = self.a_planet*self.cos_incl/(incl_factor*self.r_star)
+            self.b = (
+                self.a_planet * self.cos_incl / (incl_factor * self.r_star)
+            )
         elif duration is not None:
             if self.ecc is None:
-                raise ValueError("fitting with duration only works for "
-                                 "eccentric orbits")
+                raise ValueError(
+                    "fitting with duration only works for " "eccentric orbits"
+                )
             self.duration = tt.as_tensor_variable(duration)
             c = tt.sin(np.pi * self.duration * incl_factor / self.period)
             c2 = c * c
             aor = self.a_planet / self.r_star
             esinw = self.ecc * self.sin_omega
-            self.b = tt.sqrt((aor**2*c2 - 1)/(c2*esinw**2 + 2*c2*esinw + c2 -
-                                              self.ecc**4 + 2*self.ecc**2 - 1))
-            self.b *= (1-self.ecc**2)
-            self.cos_incl = incl_factor*self.b*self.r_star/self.a_planet
+            self.b = tt.sqrt(
+                (aor ** 2 * c2 - 1)
+                / (
+                    c2 * esinw ** 2
+                    + 2 * c2 * esinw
+                    + c2
+                    - self.ecc ** 4
+                    + 2 * self.ecc ** 2
+                    - 1
+                )
+            )
+            self.b *= 1 - self.ecc ** 2
+            self.cos_incl = incl_factor * self.b * self.r_star / self.a_planet
             self.incl = tt.arccos(self.cos_incl)
         else:
             zla = tt.zeros_like(self.a)
@@ -188,11 +217,13 @@ class KeplerianOrbit(object):
 
         self.sin_incl = tt.sin(self.incl)
 
-    def _get_consistent_inputs(self, a, period, rho_star, r_star, m_star,
-                               rho_star_units):
+    def _get_consistent_inputs(
+        self, a, period, rho_star, r_star, m_star, rho_star_units
+    ):
         if a is None and period is None:
-            raise ValueError("values must be provided for at least one of a "
-                             "and period")
+            raise ValueError(
+                "values must be provided for at least one of a " "and period"
+            )
 
         if a is not None:
             a = tt.as_tensor_variable(a)
@@ -203,8 +234,10 @@ class KeplerianOrbit(object):
         implied_rho_star = False
         if a is not None and period is not None:
             if rho_star is not None or m_star is not None:
-                raise ValueError("if both a and period are given, you can't "
-                                 "also define rho_star or m_star")
+                raise ValueError(
+                    "if both a and period are given, you can't "
+                    "also define rho_star or m_star"
+                )
 
             # Default to a stellar radius of 1 if not provided
             if r_star is None:
@@ -213,11 +246,11 @@ class KeplerianOrbit(object):
                 r_star = tt.as_tensor_variable(r_star)
 
             # Compute the implied mass via Kepler's 3rd law
-            m_tot = 4*np.pi*np.pi*a**3/(self.G_grav*period**2)
+            m_tot = 4 * np.pi * np.pi * a ** 3 / (self.G_grav * period ** 2)
 
             # Compute the implied density
             m_star = m_tot - self.m_planet
-            vol_star = 4 * np.pi * r_star**3 / 3.
+            vol_star = 4 * np.pi * r_star ** 3 / 3.0
             rho_star = self.gcc_to_sun * m_star / vol_star
             rho_star_units = None
             implied_rho_star = True
@@ -227,15 +260,20 @@ class KeplerianOrbit(object):
             r_star = 1.0
             if rho_star is None:
                 m_star = 1.0
-        if (not implied_rho_star) and sum(arg is None for arg in
-                                          (rho_star, r_star, m_star)) != 1:
-            raise ValueError("values must be provided for exactly two of "
-                             "rho_star, m_star, and r_star")
+        if (not implied_rho_star) and sum(
+            arg is None for arg in (rho_star, r_star, m_star)
+        ) != 1:
+            raise ValueError(
+                "values must be provided for exactly two of "
+                "rho_star, m_star, and r_star"
+            )
 
         if rho_star is not None:
             rho_star = tt.as_tensor_variable(rho_star)
             if rho_star_units is not None:
-                rho_star *= (1 * rho_star_units).to(u.M_sun / u.R_sun**3).value
+                rho_star *= (
+                    (1 * rho_star_units).to(u.M_sun / u.R_sun ** 3).value
+                )
             else:
                 rho_star /= self.gcc_to_sun
         if r_star is not None:
@@ -245,19 +283,27 @@ class KeplerianOrbit(object):
 
         # Work out the stellar parameters
         if rho_star is None:
-            rho_star = 3*m_star/(4*np.pi*r_star**3)
+            rho_star = 3 * m_star / (4 * np.pi * r_star ** 3)
         elif r_star is None:
-            r_star = (3*m_star/(4*np.pi*rho_star))**(1/3)
+            r_star = (3 * m_star / (4 * np.pi * rho_star)) ** (1 / 3)
         elif m_star is None:
-            m_star = 4*np.pi*r_star**3*rho_star/3.
+            m_star = 4 * np.pi * r_star ** 3 * rho_star / 3.0
 
         # Work out the planet parameters
         if a is None:
-            a = (self.G_grav*(m_star+self.m_planet)*period**2 /
-                 (4*np.pi**2))**(1./3)
+            a = (
+                self.G_grav
+                * (m_star + self.m_planet)
+                * period ** 2
+                / (4 * np.pi ** 2)
+            ) ** (1.0 / 3)
         elif period is None:
-            period = 2*np.pi*a**(3/2)/(
-                tt.sqrt(self.G_grav*(m_star+self.m_planet)))
+            period = (
+                2
+                * np.pi
+                * a ** (3 / 2)
+                / (tt.sqrt(self.G_grav * (m_star + self.m_planet)))
+            )
 
         return a, period, rho_star * self.gcc_to_sun, r_star, m_star
 
@@ -330,7 +376,7 @@ class KeplerianOrbit(object):
         if self.ecc is None:
             r = a
         else:
-            r = a * (1.0 - self.ecc**2) / (1 + self.ecc * cosf)
+            r = a * (1.0 - self.ecc ** 2) / (1 + self.ecc * cosf)
 
         if parallax is not None:
             # convert r into arcseconds
@@ -349,8 +395,10 @@ class KeplerianOrbit(object):
             ``R_sun``.
 
         """
-        return tuple(tt.squeeze(x)
-                     for x in self._get_position(self.a_planet, t, parallax))
+        return tuple(
+            tt.squeeze(x)
+            for x in self._get_position(self.a_planet, t, parallax)
+        )
 
     def get_star_position(self, t, parallax=None):
         """The star's position in the barycentric frame
@@ -368,8 +416,9 @@ class KeplerianOrbit(object):
             ``R_sun``.
 
         """
-        return tuple(tt.squeeze(x)
-                     for x in self._get_position(self.a_star, t, parallax))
+        return tuple(
+            tt.squeeze(x) for x in self._get_position(self.a_star, t, parallax)
+        )
 
     def get_relative_position(self, t, parallax=None):
         """The planets' positions relative to the star in the X,Y,Z frame.
@@ -386,8 +435,9 @@ class KeplerianOrbit(object):
             ``R_sun``.
 
         """
-        return tuple(tt.squeeze(x)
-                     for x in self._get_position(-self.a, t, parallax))
+        return tuple(
+            tt.squeeze(x) for x in self._get_position(-self.a, t, parallax)
+        )
 
     def get_relative_angles(self, t, parallax=None):
         """The planets' relative position to the star in the sky plane, in
@@ -409,7 +459,7 @@ class KeplerianOrbit(object):
         X, Y, Z = self._get_position(-self.a, t, parallax)
 
         # calculate rho and theta
-        rho = tt.squeeze(tt.sqrt(X**2 + Y**2))  # arcsec
+        rho = tt.squeeze(tt.sqrt(X ** 2 + Y ** 2))  # arcsec
         theta = tt.squeeze(tt.arctan2(Y, X))  # radians between [-pi, pi]
 
         return (rho, theta)
@@ -419,8 +469,8 @@ class KeplerianOrbit(object):
         sinf, cosf = self._get_true_anomaly(t)
         K = self.K0 * m
         if self.ecc is None:
-            return self._rotate_vector(-K*sinf, K*cosf)
-        return self._rotate_vector(-K*sinf, K*(cosf + self.ecc))
+            return self._rotate_vector(-K * sinf, K * cosf)
+        return self._rotate_vector(-K * sinf, K * (cosf + self.ecc))
 
     def get_planet_velocity(self, t):
         """Get the planets' velocity vector
@@ -433,8 +483,9 @@ class KeplerianOrbit(object):
             ``M_sun/day``.
 
         """
-        return tuple(tt.squeeze(x)
-                     for x in self._get_velocity(-self.m_star, t))
+        return tuple(
+            tt.squeeze(x) for x in self._get_velocity(-self.m_star, t)
+        )
 
     def get_star_velocity(self, t):
         """Get the star's velocity vector
@@ -451,8 +502,9 @@ class KeplerianOrbit(object):
             ``M_sun/day``.
 
         """
-        return tuple(tt.squeeze(x)
-                     for x in self._get_velocity(self.m_planet, t))
+        return tuple(
+            tt.squeeze(x) for x in self._get_velocity(self.m_planet, t)
+        )
 
     def get_relative_velocity(self, t):
         """The planets' velocity relative to the star
@@ -469,8 +521,9 @@ class KeplerianOrbit(object):
             ``R_sun/day``.
 
         """
-        return tuple(tt.squeeze(x)
-                     for x in self._get_velocity(-self.m_total, t))
+        return tuple(
+            tt.squeeze(x) for x in self._get_velocity(-self.m_total, t)
+        )
 
     def get_radial_velocity(self, t, K=None, output_units=None):
         """Get the radial velocity of the star
@@ -503,8 +556,13 @@ class KeplerianOrbit(object):
                 return tt.squeeze(K * cosf)
             # cos(w + f) + e * cos(w) from Lovis & Fischer
             return tt.squeeze(
-                K * (self.cos_omega*cosf - self.sin_omega*sinf +
-                     self.ecc * self.cos_omega))
+                K
+                * (
+                    self.cos_omega * cosf
+                    - self.sin_omega * sinf
+                    + self.ecc * self.cos_omega
+                )
+            )
 
         # Compute the velocity using the full orbit solution
         if output_units is None:
@@ -517,25 +575,30 @@ class KeplerianOrbit(object):
         sinf, cosf = self._get_true_anomaly(t)
         K = self.K0 * m
         if self.ecc is None:
-            factor = -K**2 / a
+            factor = -K ** 2 / a
         else:
-            factor = K**2 * (self.ecc*cosf + 1)**2 / (a*(self.ecc**2 - 1))
+            factor = (
+                K ** 2 * (self.ecc * cosf + 1) ** 2 / (a * (self.ecc ** 2 - 1))
+            )
         return self._rotate_vector(factor * cosf, factor * sinf)
 
     def get_planet_acceleration(self, t):
-        return tuple(tt.squeeze(x)
-                     for x in self._get_acceleration(self.a_planet,
-                                                     -self.m_star, t))
+        return tuple(
+            tt.squeeze(x)
+            for x in self._get_acceleration(self.a_planet, -self.m_star, t)
+        )
 
     def get_star_acceleration(self, t):
-        return tuple(tt.squeeze(x)
-                     for x in self._get_acceleration(self.a_star,
-                                                     self.m_planet, t))
+        return tuple(
+            tt.squeeze(x)
+            for x in self._get_acceleration(self.a_star, self.m_planet, t)
+        )
 
     def get_relative_acceleration(self, t):
-        return tuple(tt.squeeze(x)
-                     for x in self._get_acceleration(-self.a,
-                                                     -self.m_total, t))
+        return tuple(
+            tt.squeeze(x)
+            for x in self._get_acceleration(-self.a, -self.m_total, t)
+        )
 
     def get_stencil(self, t, r=None, texp=None):
         if r is None or texp is None:
@@ -559,19 +622,35 @@ class KeplerianOrbit(object):
 
         else:
             M_contact1 = self.contact_points_op(
-                self.a, self.ecc, self.cos_omega, self.sin_omega,
-                self.cos_incl + z, self.sin_incl + z, R + r)
+                self.a,
+                self.ecc,
+                self.cos_omega,
+                self.sin_omega,
+                self.cos_incl + z,
+                self.sin_incl + z,
+                R + r,
+            )
             M_contact2 = self.contact_points_op(
-                self.a, self.ecc, self.cos_omega, self.sin_omega,
-                self.cos_incl + z, self.sin_incl + z, R - r)
+                self.a,
+                self.ecc,
+                self.cos_omega,
+                self.sin_omega,
+                self.cos_incl + z,
+                self.sin_incl + z,
+                R - r,
+            )
 
             flag = M_contact1[2] + M_contact2[2]
 
             ts = [
-                tt.mod((M_contact1[0]-self.M0)/self.n+hp, self.period)-hp,
-                tt.mod((M_contact2[0]-self.M0)/self.n+hp, self.period)-hp,
-                tt.mod((M_contact2[1]-self.M0)/self.n+hp, self.period)-hp,
-                tt.mod((M_contact1[1]-self.M0)/self.n+hp, self.period)-hp
+                tt.mod((M_contact1[0] - self.M0) / self.n + hp, self.period)
+                - hp,
+                tt.mod((M_contact2[0] - self.M0) / self.n + hp, self.period)
+                - hp,
+                tt.mod((M_contact2[1] - self.M0) / self.n + hp, self.period)
+                - hp,
+                tt.mod((M_contact1[1] - self.M0) / self.n + hp, self.period)
+                - hp,
             ]
 
         start = self.period * tt.floor((tt.min(t) - self.t0) / self.period)
@@ -583,10 +662,12 @@ class KeplerianOrbit(object):
             if z.ndim < 1:
                 tout.append(ts[i] + tt.arange(start, end, self.period))
             else:
-                tout.append(theano.scan(
-                    fn=lambda t0, s0, e0, p0: t0 + tt.arange(s0, e0, p0),
-                    sequences=[ts[i], start, end, self.period],
-                )[0].flatten())
+                tout.append(
+                    theano.scan(
+                        fn=lambda t0, s0, e0, p0: t0 + tt.arange(s0, e0, p0),
+                        sequences=[ts[i], start, end, self.period],
+                    )[0].flatten()
+                )
 
         ts = tt.sort(tt.concatenate(tout))
         return ts, flag
@@ -624,8 +705,14 @@ class KeplerianOrbit(object):
 
         else:
             M_contact = self.contact_points_op(
-                self.a, self.ecc, self.cos_omega, self.sin_omega,
-                self.cos_incl + z, self.sin_incl + z, R + r)
+                self.a,
+                self.ecc,
+                self.cos_omega,
+                self.sin_omega,
+                self.cos_incl + z,
+                self.sin_incl + z,
+                R + r,
+            )
             flag = M_contact[2]
 
             t_start = (M_contact[0] - self.M0) / self.n
@@ -633,19 +720,19 @@ class KeplerianOrbit(object):
             t_end = (M_contact[1] - self.M0) / self.n
             t_end = tt.mod(t_end + hp, self.period) - hp
 
-            t_start = tt.switch(tt.gt(t_start, 0.0),
-                                t_start - self.period, t_start)
-            t_end = tt.switch(tt.lt(t_end, 0.0),
-                              t_end + self.period, t_end)
+            t_start = tt.switch(
+                tt.gt(t_start, 0.0), t_start - self.period, t_start
+            )
+            t_end = tt.switch(tt.lt(t_end, 0.0), t_end + self.period, t_end)
 
         if texp is not None:
-            t_start -= 0.5*texp
-            t_end += 0.5*texp
+            t_start -= 0.5 * texp
+            t_end += 0.5 * texp
 
         mask = tt.any(tt.and_(dt >= t_start, dt <= t_end), axis=-1)
-        result = ifelse(tt.all(tt.eq(flag, 0)),
-                        tt.arange(t.size)[mask],
-                        tt.arange(t.size))
+        result = ifelse(
+            tt.all(tt.eq(flag, 0)), tt.arange(t.size)[mask], tt.arange(t.size)
+        )
 
         return result
 
