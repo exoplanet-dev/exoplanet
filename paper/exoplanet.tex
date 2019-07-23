@@ -253,26 +253,26 @@ These methods can be substantial accelerated using gradients of the log probabil
 
 \section{Orbital conventions}
 A general introduction to Keplerian orbits is given by \citet{Murray:2010}; here we describe the implementation choices specific to the \emph{exoplanet} codebase.
-We follow a set of internally consistent orbital conventions that also attempts to respect as many of the established conventions of the stellar and exoplanetary fields as possible. The location of a body on a Keplerian orbit with respect to the center of mass is given in the perifocal plane by 
+We follow a set of internally consistent orbital conventions that also attempts to respect as many of the established conventions of the stellar and exoplanetary fields as possible. The location of a body on a Keplerian orbit with respect to the center of mass is given in the perifocal plane by
 \begin{equation}
-  \boldsymbol{r} = 
+  \boldsymbol{r} =
   \left [
     \begin{array}{c}
       x\\
       y\\
       z\\
-    \end{array} 
+    \end{array}
   \right ].
 \end{equation}
-By construction, the orbit of the body in the perifocal frame is constrained entirely to the $x -y$ plane (see Figure~\ref{fig:orbit3D}). The range of orbital convention choices mainly stems from how the location of the body in the perifocal frame is converted to the observer frame, 
+By construction, the orbit of the body in the perifocal frame is constrained entirely to the $x -y$ plane (see Figure~\ref{fig:orbit3D}). The range of orbital convention choices mainly stems from how the location of the body in the perifocal frame is converted to the observer frame,
 \begin{equation}
-  \boldsymbol{R} = 
+  \boldsymbol{R} =
   \left [
     \begin{array}{c}
       X\\
       Y\\
       Z\\
-    \end{array} 
+    \end{array}
   \right ].
 \end{equation}
 We choose to orient the $\hat{\boldsymbol{X}}$ unit vector in the north direction, $\hat{\boldsymbol{Y}}$ in the east direction, and $\hat{\boldsymbol{Z}}$ towards the observer. Under this convention, the inclination of an orbit is defined by the dot-product of the orbital angular momentum vector with $\hat{\boldsymbol{Z}}$, conforming to the common astrometric convention that a zero inclination ($i = 0\degr$) orbit is face-on, with the test body orbiting in a counter-clockwise manner around the primary body.
@@ -285,7 +285,7 @@ We choose to orient the $\hat{\boldsymbol{X}}$ unit vector in the north directio
   \end{centering}
 \end{figure}
 
-In the stellar and exoplanetary fields, there is less agreement on which  segment of the line of nodes is defined as the \emph{ascending} node. We choose to define the ascending node as the point where the orbiting body crosses the plane of the sky moving \emph{away} from the observer (i.e., crossing from $Z > 0$ to $Z< 0$). This convention has historically been the choice of the visual binary field; the opposite convention occasionally appears in exoplanet and planetary studies. 
+In the stellar and exoplanetary fields, there is less agreement on which  segment of the line of nodes is defined as the \emph{ascending} node. We choose to define the ascending node as the point where the orbiting body crosses the plane of the sky moving \emph{away} from the observer (i.e., crossing from $Z > 0$ to $Z< 0$). This convention has historically been the choice of the visual binary field; the opposite convention occasionally appears in exoplanet and planetary studies.
 
 To implement the transformation from perifocal frame to observer frame, we consider the rotation matrices
 \begin{equation}
@@ -378,14 +378,14 @@ and we can compute this efficiently using the following trigonometric identities
 \begin{eqnarray}
 \tan \frac{E}{2} &=& \frac{\sin E}{1 + \cos E} \\
 \sin f &=& \frac{2\,\tan f/2}{1 + \tan^2 f/2} \\
-\cos f &=& \frac{1 - \tan^2 f/2}{1 + \tan^2 f/2} \quad.
+\cos f &=& \frac{1 - \tan^2 f/2}{1 + \tan^2 f/2}
 \end{eqnarray}
-Therefore, the relevant derivatives are
+with the special case $\sin f = 0$ and $\cos f = -1$ when $\cos E = -1$.
+
+Then, the relevant derivatives can be evaluated using the results ($\sin f$ and $\cos f$) of the forward solve:
 \begin{eqnarray}
-\frac{\dd f}{\dd M} &=& \frac{\dd f}{\dd E}\,\frac{\dd E}{\dd M} \\
-&=& \frac{1 + 2\,e\,\cos^2{f/2} - e}{(1 - e^2)^{3/2}} \\
-\frac{\dd f}{\dd e} &=& \frac{\dd f}{\dd e} + \frac{\dd f}{\dd E}\,\frac{\dd E}{\dd e} \\
-&=& \dfmtodo{add\ derivation}
+\frac{\dd f}{\dd M} &=&  \frac{\left(1 + e\,\cos f\right)^2}{\left(1-e^2\right)^{3/2}} \\
+\frac{\dd f}{\dd e} &=& \frac{\left(2 + e\,\cos f\right)\,\sin f}{1 - e^2} \quad.
 \end{eqnarray}
 \dfmtodo{Add a plot showing the relative cost of the forward and reverse evaluation.}
 
@@ -457,7 +457,6 @@ This can be efficiently sampled using \exoplanet\ and the parameters
   \hat{b} &\sim& \mathrm{Uniform}(0,\,1) \\
   b &=& \hat{b}\,(1 + r)
 \end{eqnarray}
-
 
 \section{Examples}
 
@@ -671,14 +670,14 @@ For a real term:
 %k(\tau) = a\,\exp\left(-c\,(t_i - t_j)\right)
 k(\tau) = a\,\exp\left(-c\,\tau\right)
 \end{equation}
-where $\tau = \vert t_i-t_j \vert$.  
+where $\tau = \vert t_i-t_j \vert$.
 The integrated kernel is
 \begin{proof}{celerite-integral}
 k_\Delta(\tau) = \frac{2}{\left(c\,\Delta\right)^2}\,k(\tau)\,
   \begin{cases}
     \cosh(c\,\Delta) - 1 + c\,\Delta-\sinh(c\,\Delta) & \tau = 0 \\
    c(\Delta - \tau) e^{c\tau} + \cosh{(c\tau)} e^{-c(\Delta - \tau)} -1 & 0 < \tau \le \Delta \\
-   \cosh(c\,\Delta) - 1  & \Delta < \tau 
+   \cosh(c\,\Delta) - 1  & \Delta < \tau
     \end{cases}
 %k_\Delta(\tau) = \frac{2}{\left(c\,\Delta\right)^2}\,\left[
 %    \cosh(c\,\Delta) - 1
@@ -686,13 +685,13 @@ k_\Delta(\tau) = \frac{2}{\left(c\,\Delta\right)^2}\,k(\tau)\,
 \end{proof}
 where $\Delta$ is the integration time.  Note that in the standard
 use case of a single light curve with a single telescope and a
-uniform exposure time, the times of each cadence will be separated 
+uniform exposure time, the times of each cadence will be separated
 by greater than the exposure time, and so the kernel will be
 semi-separable.  However, there is a slight difference in
 the implementation as the $\tau = 0$ term, which corresponds to
 the diagonal of the covariance matrix, has an extra term,
 $\frac{2}{(c\Delta)^2}(c\Delta-\sinh(c\Delta))$, times $k(\tau)$.
-This additional term is negative, but can simply be added to the white 
+This additional term is negative, but can simply be added to the white
 noise component of the covariance matrix when implementing the \celerite\
 kernel.   Given that the kernel is positive, the matrix will still
 be positive definite.
@@ -703,8 +702,8 @@ is less so, and is given by:
 S(\omega) = \frac{ac}{\sqrt{2\pi}(c^2 + \omega^2)}  \frac{\sin^2(\tfrac{1}{2}\omega \Delta)}{(\tfrac{1}{2}\omega\Delta)^2}.
 \end{equation}
 Note that this is the Fourier transform of the kernel, $k(\tau)$,
-multiplied by the square of a sinc function, $\mathrm{sinc}{(\omega\Delta/2)}$, 
-which results from the convolution of the kernel with a top-hat 
+multiplied by the square of a sinc function, $\mathrm{sinc}{(\omega\Delta/2)}$,
+which results from the convolution of the kernel with a top-hat
 time-integration of half-width $\Delta/2$.  Convolution in Fourier
 space turns into multiplication, and the square of the sinc function
 results from taking the square of the Fourier transform to obtain

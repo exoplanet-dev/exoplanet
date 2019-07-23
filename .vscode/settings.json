@@ -14,7 +14,6 @@
     ],
 
     // Python testing
-    "python.pythonPath": "${HOME}/anaconda3/bin/python",
     "python.testing.pytestArgs": [
         "${workspaceFolder}/exoplanet"
     ],
