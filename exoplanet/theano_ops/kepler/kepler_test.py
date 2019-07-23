@@ -12,7 +12,6 @@ from .kepler import KeplerOp
 
 
 class TestKeplerSolver(utt.InferShapeTester):
-
     def setUp(self):
         super(TestKeplerSolver, self).setUp()
         self.op_class = KeplerOp
@@ -20,11 +19,11 @@ class TestKeplerSolver(utt.InferShapeTester):
 
     def _get_M_and_f(self, e, E):
         M = E - e * np.sin(E)
-        f = 2 * np.arctan(np.sqrt((1+e)/(1-e)) * np.tan(0.5*E))
+        f = 2 * np.arctan(np.sqrt((1 + e) / (1 - e)) * np.tan(0.5 * E))
         return M, f
 
     def test_edge(self):
-        E = np.array([0.0, 2*np.pi, -226.2, -170.4])
+        E = np.array([0.0, 2 * np.pi, -226.2, -170.4])
         e = (1 - 1e-6) * np.ones_like(E)
         e[-1] = 0.9939879759519037
         M, f = self._get_M_and_f(e, E)
@@ -77,17 +76,26 @@ class TestKeplerSolver(utt.InferShapeTester):
         e = tt.dvector()
         M_val = np.linspace(-10, 10, 50)
         e_val = np.random.uniform(0, 0.9, len(M_val))
-        self._compile_and_check([M, e],
-                                self.op(M, e),
-                                [M_val, e_val],
-                                self.op_class)
+        self._compile_and_check(
+            [M, e], self.op(M, e), [M_val, e_val], self.op_class
+        )
 
     def test_grad(self):
         np.random.seed(1234)
-        M_val = np.concatenate((
-            np.linspace(-10, 10, 100),
-            [0.0, -np.pi+1e-3, np.pi-1e-3, 0.5*np.pi, -0.5*np.pi,
-             1.5*np.pi, 2*np.pi+1e-3]))
+        M_val = np.concatenate(
+            (
+                np.linspace(-10, 10, 100),
+                [
+                    0.0,
+                    -np.pi + 1e-3,
+                    np.pi - 1e-3,
+                    0.5 * np.pi,
+                    -0.5 * np.pi,
+                    1.5 * np.pi,
+                    2 * np.pi + 1e-3,
+                ],
+            )
+        )
         e_val = np.random.uniform(0, 0.9, len(M_val))
 
         a = lambda *args: tt.arctan2(*self.op(*args))  # NOQA

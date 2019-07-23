@@ -21,7 +21,7 @@ class CeleriteBaseOp(gof.COp):
         super(CeleriteBaseOp, self).__init__(self.func_file, self.func_name)
 
     # def c_code_cache_version(self):
-        # return get_cache_version()
+    # return get_cache_version()
 
     def c_headers(self, compiler):
         return ["exoplanet/theano_helpers.h", "exoplanet/celerite.h"]
