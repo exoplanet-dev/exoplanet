@@ -13,7 +13,6 @@ from .integrated_limbdark import IntegratedLimbDarkOp
 
 
 class TestIntegratedLimbDark(utt.InferShapeTester):
-
     def setUp(self):
         super(TestIntegratedLimbDark, self).setUp()
         self.op_class = IntegratedLimbDarkOp
@@ -35,14 +34,15 @@ class TestIntegratedLimbDark(utt.InferShapeTester):
         dt = tt.dvector()
         f = theano.function(
             [c, r, x, xt, xtt, y, yt, ytt, z, zt, dt],
-            self.op(c, r, x, xt, xtt, y, yt, ytt, z, zt, dt)[0])
+            self.op(c, r, x, xt, xtt, y, yt, ytt, z, zt, dt)[0],
+        )
 
-        c_val = np.array([0.14691226,  0.25709645, -0.01836403])
+        c_val = np.array([0.14691226, 0.25709645, -0.01836403])
         r_val = np.random.uniform(0.01, 0.2, 100)
         x_val = np.linspace(-1.1, 1.1, len(r_val))
         xt_val = np.random.uniform(-10, 10, len(x_val))
         xtt_val = np.random.uniform(-10, 10, len(x_val))
-        y_val = np.linspace(-1., 1., 100)
+        y_val = np.linspace(-1.0, 1.0, 100)
         yt_val = np.random.uniform(-10, 10, len(x_val))
         ytt_val = np.random.uniform(-10, 10, len(x_val))
         z_val = np.ones_like(x_val)
@@ -52,8 +52,20 @@ class TestIntegratedLimbDark(utt.InferShapeTester):
         return (
             f,
             [c, r, x, xt, xtt, y, yt, ytt, z, zt, dt],
-            [c_val, r_val, x_val, xt_val, xtt_val, y_val, yt_val, ytt_val,
-             z_val, zt_val, dt_val])
+            [
+                c_val,
+                r_val,
+                x_val,
+                xt_val,
+                xtt_val,
+                y_val,
+                yt_val,
+                ytt_val,
+                z_val,
+                zt_val,
+                dt_val,
+            ],
+        )
 
     @pytest.mark.skip(reason="not yet implemented")
     def test_basic(self):
@@ -72,10 +84,7 @@ class TestIntegratedLimbDark(utt.InferShapeTester):
     @pytest.mark.skip(reason="not yet implemented")
     def test_infer_shape(self):
         f, args, arg_vals = self.get_args()
-        self._compile_and_check(args,
-                                self.op(*args),
-                                arg_vals,
-                                self.op_class)
+        self._compile_and_check(args, self.op(*args), arg_vals, self.op_class)
 
     @pytest.mark.skip(reason="not yet implemented")
     def test_grad(self):

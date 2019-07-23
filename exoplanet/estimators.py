@@ -2,8 +2,12 @@
 
 from __future__ import division, print_function
 
-__all__ = ["estimate_semi_amplitude", "estimate_minimum_mass",
-           "lomb_scargle_estimator", "autocorr_estimator"]
+__all__ = [
+    "estimate_semi_amplitude",
+    "estimate_minimum_mass",
+    "lomb_scargle_estimator",
+    "autocorr_estimator",
+]
 
 import numpy as np
 
@@ -18,15 +22,26 @@ from astropy.stats import LombScargle
 
 def _get_design_matrix(periods, t0s, x):
     if t0s is not None:
-        return np.vstack([
-            np.cos(2*np.pi*(x - (t0s[i] - 0.25*periods[i])) / periods[i])
+        return np.vstack(
+            [
+                np.cos(
+                    2 * np.pi * (x - (t0s[i] - 0.25 * periods[i])) / periods[i]
+                )
+                for i in range(len(periods))
+            ]
+            + [np.ones(len(x))]
+        ).T
+    return np.concatenate(
+        [
+            (
+                np.sin(2 * np.pi * x / periods[i]),
+                np.cos(2 * np.pi * x / periods[i]),
+            )
             for i in range(len(periods))
-        ] + [np.ones(len(x))]).T
-    return np.concatenate([
-        (np.sin(2*np.pi*x / periods[i]),
-         np.cos(2*np.pi*x / periods[i]))
-        for i in range(len(periods))
-    ] + [np.ones((1, len(x)))], axis=0).T
+        ]
+        + [np.ones((1, len(x)))],
+        axis=0,
+    ).T
 
 
 def estimate_semi_amplitude(periods, x, y, yerr=None, t0s=None):
@@ -50,7 +65,7 @@ def estimate_semi_amplitude(periods, x, y, yerr=None, t0s=None):
     if yerr is None:
         ivar = np.ones_like(y)
     else:
-        ivar = 1.0 / yerr**2
+        ivar = 1.0 / yerr ** 2
 
     periods = u.Quantity(np.atleast_1d(periods), unit=u.day)
     if t0s is not None:
@@ -60,13 +75,14 @@ def estimate_semi_amplitude(periods, x, y, yerr=None, t0s=None):
     ivar = u.Quantity(np.atleast_1d(ivar), unit=(u.s / u.m) ** 2)
 
     D = _get_design_matrix(periods.value, t0s, x.value)
-    w = np.linalg.solve(np.dot(D.T, D*ivar.value[:, None]),
-                        np.dot(D.T, y.value*ivar.value))
+    w = np.linalg.solve(
+        np.dot(D.T, D * ivar.value[:, None]), np.dot(D.T, y.value * ivar.value)
+    )
     if t0s is not None:
         K = w[:-1]
     else:
         w = w[:-1]
-        K = np.sqrt(w[::2]**2 + w[1::2]**2)
+        K = np.sqrt(w[::2] ** 2 + w[1::2] ** 2)
     return K
 
 
@@ -94,16 +110,21 @@ def estimate_minimum_mass(periods, x, y, yerr=None, t0s=None, m_star=1):
     periods = u.Quantity(np.atleast_1d(periods), unit=u.day)
     m_star = u.Quantity(m_star, unit=u.M_sun)
     K = estimate_semi_amplitude(periods, x, y, yerr=yerr, t0s=t0s)
-    m_J = K / 28.4329 * m_star.value**(2./3)
-    m_J *= (periods.to(u.year)).value**(1./3)
+    m_J = K / 28.4329 * m_star.value ** (2.0 / 3)
+    m_J *= (periods.to(u.year)).value ** (1.0 / 3)
     return m_J * u.M_jupiter
 
 
-def lomb_scargle_estimator(x, y, yerr=None,
-                           min_period=None, max_period=None,
-                           filter_period=None,
-                           max_peaks=2,
-                           **kwargs):
+def lomb_scargle_estimator(
+    x,
+    y,
+    yerr=None,
+    min_period=None,
+    max_period=None,
+    filter_period=None,
+    max_peaks=2,
+    **kwargs
+):
     """Estimate period of a time series using the periodogram
 
     Args:
@@ -136,29 +157,28 @@ def lomb_scargle_estimator(x, y, yerr=None,
     # Filter long periods
     if filter_period is not None:
         freq0 = 1.0 / filter_period
-        filt = 1.0 / np.sqrt(1 + (freq0 / freq) ** (2*3))
+        filt = 1.0 / np.sqrt(1 + (freq0 / freq) ** (2 * 3))
         power *= filt
 
     # Find and fit peaks
     peak_inds = (power[1:-1] > power[:-2]) & (power[1:-1] > power[2:])
-    peak_inds = np.arange(1, len(power)-1)[peak_inds]
+    peak_inds = np.arange(1, len(power) - 1)[peak_inds]
     peak_inds = peak_inds[np.argsort(power[peak_inds])][::-1]
     peaks = []
     for i in peak_inds[:max_peaks]:
-        A = np.vander(freq[i-1:i+2], 3)
-        w = np.linalg.solve(A, np.log(power[i-1:i+2]))
+        A = np.vander(freq[i - 1 : i + 2], 3)
+        w = np.linalg.solve(A, np.log(power[i - 1 : i + 2]))
         sigma2 = -0.5 / w[0]
         freq0 = w[1] * sigma2
-        peaks.append(dict(
-            log_power=w[2] + 0.5*freq0**2 / sigma2,
-            period=1.0 / freq0,
-            period_uncert=np.sqrt(sigma2 / freq0**4),
-        ))
+        peaks.append(
+            dict(
+                log_power=w[2] + 0.5 * freq0 ** 2 / sigma2,
+                period=1.0 / freq0,
+                period_uncert=np.sqrt(sigma2 / freq0 ** 4),
+            )
+        )
 
-    return dict(
-        periodogram=(freq, power_est),
-        peaks=peaks,
-    )
+    return dict(periodogram=(freq, power_est), peaks=peaks)
 
 
 def next_pow_two(n):
@@ -187,15 +207,22 @@ def autocorr_function(x):
     n = next_pow_two(len(x))
 
     # Compute the FFT and then (from that) the auto-correlation function
-    f = np.fft.fft(x - np.mean(x), n=2*n)
-    acf = np.fft.ifft(f * np.conjugate(f))[:len(x)].real
+    f = np.fft.fft(x - np.mean(x), n=2 * n)
+    acf = np.fft.ifft(f * np.conjugate(f))[: len(x)].real
     acf /= acf[0]
     return acf
 
 
-def autocorr_estimator(x, y, yerr=None,
-                       min_period=None, max_period=None,
-                       oversample=2.0, smooth=2.0, max_peaks=10):
+def autocorr_estimator(
+    x,
+    y,
+    yerr=None,
+    min_period=None,
+    max_period=None,
+    oversample=2.0,
+    smooth=2.0,
+    max_peaks=10,
+):
     """Estimate the period of a time series using the autocorrelation function
 
     .. note:: The signal is interpolated onto a uniform grid in time so that
@@ -242,13 +269,10 @@ def autocorr_estimator(x, y, yerr=None,
 
     # Find the peaks
     peak_inds = (acor[1:-1] > acor[:-2]) & (acor[1:-1] > acor[2:])
-    peak_inds = np.arange(1, len(acor)-1)[peak_inds]
+    peak_inds = np.arange(1, len(acor) - 1)[peak_inds]
     peak_inds = peak_inds[tau[peak_inds] >= min_period]
 
-    result = dict(
-        autocorr=(tau, acor),
-        peaks=[],
-    )
+    result = dict(autocorr=(tau, acor), peaks=[])
 
     # No peaks were found
     if len(peak_inds) == 0 or tau[peak_inds[0]] > max_period:
@@ -256,8 +280,9 @@ def autocorr_estimator(x, y, yerr=None,
 
     # Only one peak was found
     if len(peak_inds) == 1:
-        result["peaks"] = [dict(period=tau[peak_inds[0]],
-                                period_uncert=np.nan)]
+        result["peaks"] = [
+            dict(period=tau[peak_inds[0]], period_uncert=np.nan)
+        ]
         return result
 
     # Check to see if second peak is higher

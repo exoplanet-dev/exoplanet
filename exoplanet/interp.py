@@ -35,8 +35,9 @@ class RegularGridInterpolator(object):
 
     """
 
-    def __init__(self, points, values, check_sorted=True, bounds_error=False,
-                 nout=-1):
+    def __init__(
+        self, points, values, check_sorted=True, bounds_error=False, nout=-1
+    ):
         self.ndim = len(points)
         self.nout = int(nout)
 
@@ -48,9 +49,12 @@ class RegularGridInterpolator(object):
         self.check_sorted = bool(check_sorted)
         self.bounds_error = bool(bounds_error)
 
-        self.interp_op = RegularGridOp(self.ndim, nout=self.nout,
-                                       check_sorted=self.check_sorted,
-                                       bounds_error=self.bounds_error)
+        self.interp_op = RegularGridOp(
+            self.ndim,
+            nout=self.nout,
+            check_sorted=self.check_sorted,
+            bounds_error=self.bounds_error,
+        )
 
     def evaluate(self, t):
         return self.interp_op(t, self.values, *self.points)[0]

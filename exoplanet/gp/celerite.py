@@ -47,7 +47,7 @@ class GP(object):
 
     """
 
-    __citations__ = ("celerite", )
+    __citations__ = ("celerite",)
 
     def __init__(self, kernel, x, diag, J=-1, model=None):
         add_citations_to_model(self.__citations__, model=model)
@@ -62,21 +62,27 @@ class GP(object):
         self.x = tt.as_tensor_variable(x)
         self.diag = tt.as_tensor_variable(diag)
         self.a, self.U, self.V, self.P = self.kernel.get_celerite_matrices(
-            self.x, self.diag)
+            self.x, self.diag
+        )
         self.factor_op = FactorOp(J=self.J)
         self.d, self.W, _, self.flag = self.factor_op(
-            self.a, self.U, self.V, self.P)
+            self.a, self.U, self.V, self.P
+        )
 
         self.vector_solve_op = SolveOp(J=self.J, n_rhs=1)
         self.general_solve_op = SolveOp(J=self.J)
 
     def log_likelihood(self, y):
         self.y = y
-        self.z, _, _ = self.vector_solve_op(self.U, self.P, self.d, self.W,
-                                            tt.reshape(self.y,
-                                                       (self.y.size, 1)))
+        self.z, _, _ = self.vector_solve_op(
+            self.U,
+            self.P,
+            self.d,
+            self.W,
+            tt.reshape(self.y, (self.y.size, 1)),
+        )
         loglike = -0.5 * tt.sum(self.y * self.z[:, 0] + tt.log(self.d))
-        loglike -= 0.5 * self.y.size * np.log(2*np.pi)
+        loglike -= 0.5 * self.y.size * np.log(2 * np.pi)
         return tt.switch(tt.eq(self.flag, 0), loglike, -np.inf)
 
     def apply_inverse(self, rhs):

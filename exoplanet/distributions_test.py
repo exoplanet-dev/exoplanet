@@ -45,7 +45,7 @@ class TestDistributions(object):
             trace = self._sample()
 
         # Make sure that the unit vector constraint is satisfied
-        assert np.allclose(np.sum(trace["x"]**2, axis=-1), 1.0)
+        assert np.allclose(np.sum(trace["x"] ** 2, axis=-1), 1.0)
 
         # Pull out the component and compute the angle
         x = trace["x"][:, :, 0]

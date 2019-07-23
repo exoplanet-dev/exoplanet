@@ -14,7 +14,6 @@ from .factor import FactorOp
 
 
 class TestSolve(utt.InferShapeTester):
-
     def setUp(self):
         super(TestSolve, self).setUp()
         self.op_class = SolveOp
@@ -81,7 +80,8 @@ class TestSolve(utt.InferShapeTester):
                 ind = np.unravel_index(j, output0[i].shape)
 
                 g = theano.function(
-                    args, theano.grad(self.op(*args)[i][ind], args))
+                    args, theano.grad(self.op(*args)[i][ind], args)
+                )
                 grad0[-1].append(g(*vals))
 
         # Loop over each input and numerically compute the gradient
@@ -90,7 +90,7 @@ class TestSolve(utt.InferShapeTester):
                 inner = np.unravel_index(l, vals[k].shape)
                 vals[k][inner] += eps
                 plus = f(*vals)
-                vals[k][inner] -= 2*eps
+                vals[k][inner] -= 2 * eps
                 minus = f(*vals)
                 vals[k][inner] += eps
 
@@ -100,5 +100,6 @@ class TestSolve(utt.InferShapeTester):
                         ind = np.unravel_index(j, output0[i].shape)
                         delta = 0.5 * (plus[i][ind] - minus[i][ind]) / eps
                         ref = grad0[i][j][k][inner]
-                        assert np.abs(delta - ref) < 2*eps, \
-                            "{0}".format((k, l, i, j, delta, ref, delta-ref))
+                        assert np.abs(delta - ref) < 2 * eps, "{0}".format(
+                            (k, l, i, j, delta, ref, delta - ref)
+                        )

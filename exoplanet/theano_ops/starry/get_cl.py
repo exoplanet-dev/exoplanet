@@ -26,10 +26,10 @@ class GetClOp(StarryBaseOp):
         return gof.Apply(self, [tt.as_tensor_variable(arg)], [arg.type()])
 
     def infer_shape(self, node, shapes):
-        return shapes[0],
+        return (shapes[0],)
 
     def grad(self, inputs, gradients):
-        return self.grad_op(gradients[0]),
+        return (self.grad_op(gradients[0]),)
 
     def R_op(self, inputs, eval_points):
         if eval_points[0] is None:

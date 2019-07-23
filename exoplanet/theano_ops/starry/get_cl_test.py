@@ -13,7 +13,6 @@ from .get_cl_rev import GetClRevOp
 
 
 class TestGetCl(utt.InferShapeTester):
-
     def setUp(self):
         super(TestGetCl, self).setUp()
         self.op_class = GetClOp
@@ -30,17 +29,15 @@ class TestGetCl(utt.InferShapeTester):
 
     def test_infer_shape(self):
         x = tt.vector()
-        self._compile_and_check([x],
-                                [self.op(x)],
-                                [np.asarray(np.random.rand(5))],
-                                self.op_class)
+        self._compile_and_check(
+            [x], [self.op(x)], [np.asarray(np.random.rand(5))], self.op_class
+        )
 
     def test_grad(self):
         utt.verify_grad(self.op, [np.array([-1, 0.3, 0.2, 0.5])])
 
 
 class TestGetClRev(utt.InferShapeTester):
-
     def setUp(self):
         super(TestGetClRev, self).setUp()
         self.op_class = GetClRevOp
@@ -57,7 +54,6 @@ class TestGetClRev(utt.InferShapeTester):
 
     def test_infer_shape(self):
         x = tt.vector()
-        self._compile_and_check([x],
-                                [self.op(x)],
-                                [np.asarray(np.random.rand(5))],
-                                self.op_class)
+        self._compile_and_check(
+            [x], [self.op(x)], [np.asarray(np.random.rand(5))], self.op_class
+        )

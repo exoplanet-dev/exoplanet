@@ -25,9 +25,11 @@ class SolveOp(CeleriteBaseOp):
 
     def make_node(self, *args):
         in_args = [tt.as_tensor_variable(a) for a in args]
-        out_args = [in_args[-1].type(),
-                    tt.matrix(dtype=theano.config.floatX).type(),
-                    tt.matrix(dtype=theano.config.floatX).type()]
+        out_args = [
+            in_args[-1].type(),
+            tt.matrix(dtype=theano.config.floatX).type(),
+            tt.matrix(dtype=theano.config.floatX).type(),
+        ]
         return gof.Apply(self, in_args, out_args)
 
     def grad(self, inputs, gradients):

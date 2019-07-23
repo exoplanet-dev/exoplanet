@@ -31,14 +31,16 @@ class TTVOrbit(KeplerianOrbit):
         ttvs = kwargs.pop("ttvs", None)
         transit_times = kwargs.pop("transit_times", None)
         if ttvs is None and transit_times is None:
-            raise ValueError("one of 'ttvs' or 'transit_times' must be "
-                             "defined")
+            raise ValueError(
+                "one of 'ttvs' or 'transit_times' must be " "defined"
+            )
         if ttvs is not None:
             self.ttvs = [tt.as_tensor_variable(ttv) for ttv in ttvs]
         else:
             if kwargs.pop("period", None) is not None:
-                raise ValueError("a period cannot be given if 'transit_times' "
-                                 "is defined")
+                raise ValueError(
+                    "a period cannot be given if 'transit_times' " "is defined"
+                )
 
             self.transit_times = []
             self.ttvs = []
@@ -48,8 +50,10 @@ class TTVOrbit(KeplerianOrbit):
                 times = tt.as_tensor_variable(times)
 
                 N = times.shape[0]
-                AT = tt.stack((tt.arange(N, dtype=times.dtype),
-                               tt.ones_like(times)), axis=0)
+                AT = tt.stack(
+                    (tt.arange(N, dtype=times.dtype), tt.ones_like(times)),
+                    axis=0,
+                )
                 A = tt.transpose(AT)
                 ATA = tt.dot(AT, A)
                 ATy = tt.dot(AT, times)
@@ -70,12 +74,18 @@ class TTVOrbit(KeplerianOrbit):
         if ttvs is not None:
             self.transit_times = [
                 self.t0[i] + self.period[i] * tt.arange(ttv.shape[0]) + ttv
-                for i, ttv in enumerate(self.ttvs)]
+                for i, ttv in enumerate(self.ttvs)
+            ]
 
     def _warp_times(self, t):
         delta = tt.shape_padleft(t) / tt.shape_padright(self.period, t.ndim)
         delta += tt.shape_padright(self._base_time, t.ndim)
         ind = tt.cast(tt.floor(delta), "int64")
-        dt = tt.stack([ttv[tt.clip(ind[i], 0, ttv.shape[0]-1)]
-                       for i, ttv in enumerate(self.ttvs)], -1)
+        dt = tt.stack(
+            [
+                ttv[tt.clip(ind[i], 0, ttv.shape[0] - 1)]
+                for i, ttv in enumerate(self.ttvs)
+            ],
+            -1,
+        )
         return tt.shape_padright(t) + dt

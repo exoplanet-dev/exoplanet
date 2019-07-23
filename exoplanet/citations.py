@@ -34,17 +34,24 @@ def get_citations_for_model(model=None, width=79):
         logging.warning("no citations registered with model")
         return "", ""
 
-    cite = list(CITATIONS["exoplanet"][0]) + \
-        list(CITATIONS["pymc3"][0]) + \
-        list(CITATIONS["theano"][0])
-    bib = [CITATIONS["exoplanet"][1], CITATIONS["pymc3"][1],
-           CITATIONS["theano"][1]]
+    cite = (
+        list(CITATIONS["exoplanet"][0])
+        + list(CITATIONS["pymc3"][0])
+        + list(CITATIONS["theano"][0])
+    )
+    bib = [
+        CITATIONS["exoplanet"][1],
+        CITATIONS["pymc3"][1],
+        CITATIONS["theano"][1],
+    ]
     for k, v in model.__citations__.items():
         cite += list(v[0])
         bib.append(v[1])
 
-    txt = (r"This research made use of \textsf{{exoplanet}} "
-           r"\citep{{exoplanet}} and its dependencies \citep{{{0}}}.")
+    txt = (
+        r"This research made use of \textsf{{exoplanet}} "
+        r"\citep{{exoplanet}} and its dependencies \citep{{{0}}}."
+    )
     txt = txt.format(", ".join(sorted(cite)))
     txt = textwrap.wrap(txt, width=width)
 
@@ -52,8 +59,9 @@ def get_citations_for_model(model=None, width=79):
 
 
 CITATIONS = {
-
-    "exoplanet": (("exoplanet:exoplanet", ), r"""
+    "exoplanet": (
+        ("exoplanet:exoplanet",),
+        r"""
 @misc{exoplanet:exoplanet,
   author = {Dan Foreman-Mackey and
             Geert Barentsen and
@@ -64,9 +72,11 @@ CITATIONS = {
      doi = {10.5281/zenodo.2651251},
      url = {https://doi.org/10.5281/zenodo.2651251}
 }
-"""),
-
-    "pymc3": (("exoplanet:pymc3", ), r"""
+""",
+    ),
+    "pymc3": (
+        ("exoplanet:pymc3",),
+        r"""
 @article{exoplanet:pymc3,
     title={Probabilistic programming in Python using PyMC3},
    author={Salvatier, John and Wiecki, Thomas V and Fonnesbeck, Christopher},
@@ -76,9 +86,11 @@ CITATIONS = {
      year={2016},
 publisher={PeerJ Inc.}
 }
-"""),
-
-    "theano": (("exoplanet:theano", ), r"""
+""",
+    ),
+    "theano": (
+        ("exoplanet:theano",),
+        r"""
 @article{exoplanet:theano,
     title="{Theano: A {Python} framework for fast computation of mathematical
             expressions}",
@@ -89,9 +101,11 @@ publisher={PeerJ Inc.}
     month=may,
       url={http://arxiv.org/abs/1605.02688}
 }
-"""),
-
-    "astropy": (("exoplanet:astropy13", "exoplanet:astropy18"), r"""
+""",
+    ),
+    "astropy": (
+        ("exoplanet:astropy13", "exoplanet:astropy18"),
+        r"""
 @article{exoplanet:astropy13,
    author = {{Astropy Collaboration} and {Robitaille}, T.~P. and {Tollerud},
              E.~J. and {Greenfield}, P. and {Droettboom}, M. and {Bray}, E. and
@@ -175,9 +189,11 @@ publisher={PeerJ Inc.}
    adsurl = {http://adsabs.harvard.edu/abs/2018AJ....156..123A},
   adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
-"""),
-
-    "espinoza18": (("exoplanet:espinoza18", ), r"""
+""",
+    ),
+    "espinoza18": (
+        ("exoplanet:espinoza18",),
+        r"""
 @article{exoplanet:espinoza18,
    author = {{Espinoza}, N.},
     title = "{Efficient Joint Sampling of Impact Parameters and Transit Depths
@@ -192,9 +208,11 @@ publisher={PeerJ Inc.}
    adsurl = {http://adsabs.harvard.edu/abs/2018RNAAS...2d.209E},
   adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
-"""),
-
-    "kipping13": (("exoplanet:kipping13", ), r"""
+""",
+    ),
+    "kipping13": (
+        ("exoplanet:kipping13",),
+        r"""
 @ARTICLE{exoplanet:kipping13,
    author = {{Kipping}, D.~M.},
     title = "{Efficient, uninformative sampling of limb darkening coefficients
@@ -208,9 +226,11 @@ publisher={PeerJ Inc.}
    adsurl = {http://adsabs.harvard.edu/abs/2013MNRAS.435.2152K},
   adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
-"""),
-
-    "starry": (("exoplanet:luger18", ), r"""
+""",
+    ),
+    "starry": (
+        ("exoplanet:luger18",),
+        r"""
 @article{exoplanet:luger18,
    author = {{Luger}, R. and {Agol}, E. and {Foreman-Mackey}, D. and {Fleming},
              D.~P. and {Lustig-Yaeger}, J. and {Deitrick}, R.},
@@ -225,10 +245,11 @@ publisher={PeerJ Inc.}
   adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
 }
-"""),
-
-    "celerite": (("exoplanet:foremanmackey17", "exoplanet:foremanmackey18"),
-                 r"""
+""",
+    ),
+    "celerite": (
+        ("exoplanet:foremanmackey17", "exoplanet:foremanmackey18"),
+        r"""
 @article{exoplanet:foremanmackey17,
    author = {{Foreman-Mackey}, D. and {Agol}, E. and {Ambikasaran}, S. and
              {Angus}, R.},
@@ -257,6 +278,6 @@ publisher={PeerJ Inc.}
    adsurl = {http://adsabs.harvard.edu/abs/2018RNAAS...2a..31F},
   adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
-"""),
-
+""",
+    ),
 }

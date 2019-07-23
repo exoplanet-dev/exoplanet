@@ -27,8 +27,12 @@ class StarryBaseOp(gof.COp):
         st = lambda f: "exoplanet/starry/" + f  # NOQA
         return [
             xo("theano_helpers.h"),
-            vc("integrate.h"), vc("functors.h"),
-            st("ellip.h"), st("limbdark.h"), st("utils.h")]
+            vc("integrate.h"),
+            vc("functors.h"),
+            st("ellip.h"),
+            st("limbdark.h"),
+            st("utils.h"),
+        ]
 
     def c_header_dirs(self, compiler):
         return get_header_dirs(eigen=True)

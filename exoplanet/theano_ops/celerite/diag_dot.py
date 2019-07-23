@@ -25,5 +25,5 @@ class DiagDotOp(CeleriteBaseOp):
         A, B = inputs
         return (
             gradients[0][:, None] * tt.transpose(B),
-            gradients[1][None, :] * tt.transpose(A)
+            gradients[1][None, :] * tt.transpose(A),
         )

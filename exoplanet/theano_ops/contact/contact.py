@@ -13,10 +13,8 @@ from ..build_utils import get_cache_version, get_compile_args, get_header_dirs
 
 class ContactPointsOp(gof.COp):
     num_inputs = 7
-    params_type = gof.ParamsType(
-        tol=theano.scalar.float64,
-    )
-    __props__ = ("tol", )
+    params_type = gof.ParamsType(tol=theano.scalar.float64)
+    __props__ = ("tol",)
     func_file = "./contact.cc"
     func_name = "APPLY_SPECIFIC(contact)"
 
@@ -40,8 +38,11 @@ class ContactPointsOp(gof.COp):
         if len(args) != self.num_inputs:
             raise ValueError("expected {0} inputs".format(self.num_inputs))
         in_args = [tt.as_tensor_variable(a) for a in args]
-        out_args = [in_args[0].type(), in_args[0].type(),
-                    tt.zeros_like(in_args[0], dtype="int32").type()]
+        out_args = [
+            in_args[0].type(),
+            in_args[0].type(),
+            tt.zeros_like(in_args[0], dtype="int32").type(),
+        ]
         return gof.Apply(self, in_args, out_args)
 
     def infer_shape(self, node, shapes):
