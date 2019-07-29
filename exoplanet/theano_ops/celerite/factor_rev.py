@@ -20,6 +20,9 @@ class FactorRevOp(CeleriteBaseOp):
     def make_node(self, *args):
         in_args = [tt.as_tensor_variable(a) for a in args]
         out_args = [
-            in_args[2].type(), in_args[0].type(),
-            in_args[3].type(), in_args[1].type()]
+            in_args[2].type(),
+            in_args[0].type(),
+            in_args[3].type(),
+            in_args[1].type(),
+        ]
         return gof.Apply(self, in_args, out_args)

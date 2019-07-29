@@ -24,12 +24,9 @@ def get_cache_version():
 
 
 def get_header_dirs(eigen=True):
-    dirs = [
-        pkg_resources.resource_filename(__name__, "lib/include"),
-    ]
+    dirs = [pkg_resources.resource_filename(__name__, "lib/include")]
     if eigen:
         dirs += [
-            pkg_resources.resource_filename(
-                __name__, "lib/vendor/eigen_3.3.3"),
+            pkg_resources.resource_filename(__name__, "lib/vendor/eigen_3.3.3")
         ]
     return dirs

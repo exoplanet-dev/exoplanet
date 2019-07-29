@@ -3,7 +3,10 @@
 from __future__ import division, print_function
 
 __all__ = [
-    "UnitVector", "Angle", "RadiusImpact", "QuadLimbDark",
+    "UnitVector",
+    "Angle",
+    "RadiusImpact",
+    "QuadLimbDark",
     "get_joint_radius_impact",
 ]
 
@@ -32,13 +35,15 @@ class UnitVector(pm.Normal):
 
     def _random(self, size=None):
         x = np.random.normal(size=size)
-        return x / np.sqrt(np.sum(x**2, axis=-1, keepdims=True))
+        return x / np.sqrt(np.sum(x ** 2, axis=-1, keepdims=True))
 
     def random(self, point=None, size=None):
-        return generate_samples(self._random,
-                                dist_shape=self.shape,
-                                broadcast_shape=self.shape,
-                                size=size)
+        return generate_samples(
+            self._random,
+            dist_shape=self.shape,
+            broadcast_shape=self.shape,
+            size=size,
+        )
 
 
 class Angle(pm.Continuous):
@@ -64,10 +69,12 @@ class Angle(pm.Continuous):
         return np.random.uniform(-np.pi, np.pi, size)
 
     def random(self, point=None, size=None):
-        return generate_samples(self._random,
-                                dist_shape=self.shape,
-                                broadcast_shape=self.shape,
-                                size=size)
+        return generate_samples(
+            self._random,
+            dist_shape=self.shape,
+            broadcast_shape=self.shape,
+            size=size,
+        )
 
     def logp(self, value):
         return tt.zeros_like(value)
@@ -83,7 +90,7 @@ class QuadLimbDark(pm.Flat):
 
     """
 
-    __citations__ = ("kipping13", )
+    __citations__ = ("kipping13",)
 
     def __init__(self, *args, **kwargs):
         add_citations_to_model(self.__citations__, kwargs.get("model", None))
@@ -109,21 +116,21 @@ class QuadLimbDark(pm.Flat):
         self._default = default
 
     def _random(self, size=None):
-        q = np.moveaxis(np.random.uniform(0, 1, size=size),
-                        0, -len(self.shape))
+        q = np.moveaxis(
+            np.random.uniform(0, 1, size=size), 0, -len(self.shape)
+        )
         sqrtq1 = np.sqrt(q[0])
         twoq2 = 2 * q[1]
-        u = np.stack([
-            sqrtq1 * twoq2,
-            sqrtq1 * (1 - twoq2),
-        ], axis=0)
+        u = np.stack([sqrtq1 * twoq2, sqrtq1 * (1 - twoq2)], axis=0)
         return np.moveaxis(u, 0, -len(self.shape))
 
     def random(self, point=None, size=None):
-        return generate_samples(self._random,
-                                dist_shape=self.shape,
-                                broadcast_shape=self.shape,
-                                size=size)
+        return generate_samples(
+            self._random,
+            dist_shape=self.shape,
+            broadcast_shape=self.shape,
+            size=size,
+        )
 
 
 class RadiusImpact(pm.Flat):
@@ -140,7 +147,8 @@ class RadiusImpact(pm.Flat):
         max_radius: The maximum allowed radius.
 
     """
-    __citations__ = ("espinoza18", )
+
+    __citations__ = ("espinoza18",)
 
     def __init__(self, *args, **kwargs):
         add_citations_to_model(self.__citations__, kwargs.get("model", None))
@@ -164,14 +172,15 @@ class RadiusImpact(pm.Flat):
 
         # Work out some reasonable starting values for the parameters
         default = np.zeros(shape)
-        mn, mx = draw_values([self.min_radius-0., self.max_radius-0.])
+        mn, mx = draw_values([self.min_radius - 0.0, self.max_radius - 0.0])
         default[0] = 0.5 * (mn + mx)
         default[1] = 0.5
         self._default = default
 
     def _random(self, pl, pu, size=None):
-        r = np.moveaxis(np.random.uniform(0, 1, size=size),
-                        0, -len(self.shape))
+        r = np.moveaxis(
+            np.random.uniform(0, 1, size=size), 0, -len(self.shape)
+        )
 
         dr = pu - pl
         denom = 2 + pu + pl
@@ -197,18 +206,28 @@ class RadiusImpact(pm.Flat):
         return np.moveaxis(pb, 0, -len(self.shape))
 
     def random(self, point=None, size=None):
-        mn, mx = draw_values([self.min_radius-0., self.max_radius-0.],
-                             point=point)
-        return generate_samples(self._random, mn, mx,
-                                dist_shape=self.shape,
-                                broadcast_shape=self.shape,
-                                size=size)
+        mn, mx = draw_values(
+            [self.min_radius - 0.0, self.max_radius - 0.0], point=point
+        )
+        return generate_samples(
+            self._random,
+            mn,
+            mx,
+            dist_shape=self.shape,
+            broadcast_shape=self.shape,
+            size=size,
+        )
 
 
-def get_joint_radius_impact(name="", N_planets=None,
-                            min_radius=0, max_radius=1,
-                            testval_r=None, testval_b=None,
-                            **kwargs):
+def get_joint_radius_impact(
+    name="",
+    N_planets=None,
+    min_radius=0,
+    max_radius=1,
+    testval_r=None,
+    testval_b=None,
+    **kwargs
+):
     """Get the joint distribution over radius and impact parameter
 
     This uses the Espinoza (2018) parameterization of the distribution (see
@@ -259,8 +278,13 @@ def get_joint_radius_impact(name="", N_planets=None,
 
     # Construct the join distribution
     rb = RadiusImpact(
-        name + "rb", min_radius=min_radius, max_radius=max_radius,
-        shape=(2, N_planets), testval=rb_test, **kwargs)
+        name + "rb",
+        min_radius=min_radius,
+        max_radius=max_radius,
+        shape=(2, N_planets),
+        testval=rb_test,
+        **kwargs
+    )
 
     # Extract the individual components
     r = pm.Deterministic(name + "r", rb[0])

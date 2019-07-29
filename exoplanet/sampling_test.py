@@ -18,8 +18,7 @@ def test_tuning():
 
         trace = sampler.tune(tune=200, progressbar=False)
 
-        start, step = sampler._get_start_and_step(
-            start=None, step=None)
+        start, step = sampler._get_start_and_step(start=None, step=None)
 
         # Expected step size
         expected = []

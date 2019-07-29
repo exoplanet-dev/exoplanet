@@ -31,8 +31,9 @@ class LimbDarkOp(StarryBaseOp):
 
         out_args = [
             in_args[1].type(),
-            tt.TensorType(dtype=dtype,
-                          broadcastable=[False] * (in_args[1].ndim + 1))(),
+            tt.TensorType(
+                dtype=dtype, broadcastable=[False] * (in_args[1].ndim + 1)
+            )(),
             in_args[1].type(),
             in_args[2].type(),
         ]
@@ -40,8 +41,11 @@ class LimbDarkOp(StarryBaseOp):
 
     def infer_shape(self, node, shapes):
         return (
-            shapes[1], list(shapes[0]) + list(shapes[1]),
-            shapes[1], shapes[2])
+            shapes[1],
+            list(shapes[0]) + list(shapes[1]),
+            shapes[1],
+            shapes[2],
+        )
 
     def grad(self, inputs, gradients):
         c, b, r, los = inputs
@@ -49,10 +53,14 @@ class LimbDarkOp(StarryBaseOp):
         bf = gradients[0]
         for i, g in enumerate(gradients[1:]):
             if not isinstance(g.type, theano.gradient.DisconnectedType):
-                raise ValueError("can't propagate gradients wrt parameter {0}"
-                                 .format(i+1))
-        bc = tt.sum(tt.reshape(bf, (1, bf.size)) *
-                    tt.reshape(dfdcl, (c.size, bf.size)), axis=-1)
+                raise ValueError(
+                    "can't propagate gradients wrt parameter {0}".format(i + 1)
+                )
+        bc = tt.sum(
+            tt.reshape(bf, (1, bf.size))
+            * tt.reshape(dfdcl, (c.size, bf.size)),
+            axis=-1,
+        )
         bb = bf * dfdb
         br = bf * dfdr
         return bc, bb, br, tt.zeros_like(los)
