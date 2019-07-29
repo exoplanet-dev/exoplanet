@@ -24,8 +24,9 @@ class RegularGridOp(gof.COp):
     func_file = "./regular_grid.cc"
     func_name = "APPLY_SPECIFIC(regular_grid)"
 
-    def __init__(self, ndim, nout=-1, check_sorted=True, bounds_error=True,
-                 **kwargs):
+    def __init__(
+        self, ndim, nout=-1, check_sorted=True, bounds_error=True, **kwargs
+    ):
         self.ndim = int(ndim)
         if not 0 < self.ndim <= 5:
             raise ValueError("ndim must be less than or equal to 5")
@@ -42,7 +43,7 @@ class RegularGridOp(gof.COp):
 
     def c_header_dirs(self, compiler):
         return [
-            pkg_resources.resource_filename(__name__, "include"),
+            pkg_resources.resource_filename(__name__, "include")
         ] + get_header_dirs()
 
     def c_compile_args(self, compiler):
@@ -89,10 +90,8 @@ class RegularGridOp(gof.COp):
                 dtype = theano.scalar.upcast(dtype, a.dtype)
             in_args.append(a)
         out_args = [
-            tt.TensorType(dtype=dtype,
-                          broadcastable=[False, False])(),
-            tt.TensorType(dtype=dtype,
-                          broadcastable=[False, False, False])(),
+            tt.TensorType(dtype=dtype, broadcastable=[False, False])(),
+            tt.TensorType(dtype=dtype, broadcastable=[False, False, False])(),
         ]
         return gof.Apply(self, in_args, out_args)
 
@@ -101,8 +100,9 @@ class RegularGridOp(gof.COp):
         zi, dz = self(*inputs)
         bz = gradients[0]
 
-        bx = tt.sum(tt.reshape(bz, (xi.shape[0], 1, zi.shape[1])) * dz,
-                    axis=-1)
+        bx = tt.sum(
+            tt.reshape(bz, (xi.shape[0], 1, zi.shape[1])) * dz, axis=-1
+        )
         return tuple([bx] + [tt.zeros_like(i) for i in inputs[1:]])
 
     def R_op(self, inputs, eval_points):

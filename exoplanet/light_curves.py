@@ -26,7 +26,7 @@ class LimbDarkLightCurve(object):
 
     """
 
-    __citations__ = ("starry", )
+    __citations__ = ("starry",)
 
     def __init__(self, u, model=None):
         add_citations_to_model(self.__citations__, model=model)
@@ -35,9 +35,16 @@ class LimbDarkLightCurve(object):
         self.c = get_cl(u_ext)
         self.c_norm = self.c / (np.pi * (self.c[0] + 2 * self.c[1] / 3))
 
-    def get_light_curve(self, orbit=None, r=None, t=None,
-                        texp=None, oversample=7, order=0,
-                        use_in_transit=True):
+    def get_light_curve(
+        self,
+        orbit=None,
+        r=None,
+        t=None,
+        texp=None,
+        oversample=7,
+        order=0,
+        use_in_transit=True,
+    ):
         """Get the light curve for an orbit at a set of times
 
         Args:
@@ -86,15 +93,17 @@ class LimbDarkLightCurve(object):
         t = tt.as_tensor_variable(t)
 
         if use_in_transit:
-            transit_model = tt.shape_padleft(tt.zeros_like(r), t.ndim) \
-                + tt.shape_padright(tt.zeros_like(t), r.ndim)
+            transit_model = tt.shape_padleft(
+                tt.zeros_like(r), t.ndim
+            ) + tt.shape_padright(tt.zeros_like(t), r.ndim)
             inds = orbit.in_transit(t, r=r, texp=texp)
             t = t[inds]
 
         if texp is None:
             tgrid = t
-            rgrid = tt.shape_padleft(r, tgrid.ndim) \
-                + tt.shape_padright(tt.zeros_like(tgrid), r.ndim)
+            rgrid = tt.shape_padleft(r, tgrid.ndim) + tt.shape_padright(
+                tt.zeros_like(tgrid), r.ndim
+            )
         else:
             texp = tt.as_tensor_variable(texp)
 
@@ -104,7 +113,7 @@ class LimbDarkLightCurve(object):
 
             # Construct the exposure time integration stencil
             if order == 0:
-                dt = np.linspace(-0.5, 0.5, 2*oversample+1)[1:-1:2]
+                dt = np.linspace(-0.5, 0.5, 2 * oversample + 1)[1:-1:2]
             elif order == 1:
                 dt = np.linspace(-0.5, 0.5, oversample)
                 stencil[1:-1] = 2
@@ -126,16 +135,18 @@ class LimbDarkLightCurve(object):
             tgrid = tt.shape_padright(t) + dt
 
             # Madness to get the shapes to work out...
-            rgrid = tt.shape_padleft(r, tgrid.ndim) \
-                + tt.shape_padright(tt.zeros_like(tgrid), 1)
+            rgrid = tt.shape_padleft(r, tgrid.ndim) + tt.shape_padright(
+                tt.zeros_like(tgrid), 1
+            )
 
         coords = orbit.get_relative_position(tgrid)
-        b = tt.sqrt(coords[0]**2 + coords[1]**2)
+        b = tt.sqrt(coords[0] ** 2 + coords[1] ** 2)
         b = tt.reshape(b, rgrid.shape)
         los = tt.reshape(coords[2], rgrid.shape)
 
         lc = self._compute_light_curve(
-            b/orbit.r_star, rgrid/orbit.r_star, los/orbit.r_star)
+            b / orbit.r_star, rgrid / orbit.r_star, los / orbit.r_star
+        )
 
         if texp is not None:
             stencil = tt.shape_padright(tt.shape_padleft(stencil, t.ndim), 1)
@@ -168,11 +179,12 @@ class LimbDarkLightCurve(object):
 
 
 class StarryLightCurve(LimbDarkLightCurve):
-
     def __init__(self, *args, **kwargs):
-        warnings.warn("StarryLightCurve has been deprecated. "
-                      "Use LimbDarkLightCurve instead.",
-                      DeprecationWarning)
+        warnings.warn(
+            "StarryLightCurve has been deprecated. "
+            "Use LimbDarkLightCurve instead.",
+            DeprecationWarning,
+        )
         super(StarryLightCurve, self).__init__(*args, **kwargs)
 
 

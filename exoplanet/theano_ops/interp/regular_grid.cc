@@ -1,26 +1,23 @@
 #section support_code_apply
 
 // Apply-specific main function
-int APPLY_SPECIFIC(regular_grid)(
-    PyArrayObject* xi_obj,
-    PyArrayObject* values_obj,
-    PyArrayObject* points0_obj,
+int APPLY_SPECIFIC(regular_grid)(PyArrayObject* xi_obj,
+                                 PyArrayObject* values_obj,
+                                 PyArrayObject* points0_obj,
 #ifdef REGULAR_GRID_1
-    PyArrayObject* points1_obj,
+                                 PyArrayObject* points1_obj,
 #endif
 #ifdef REGULAR_GRID_2
-    PyArrayObject* points2_obj,
+                                 PyArrayObject* points2_obj,
 #endif
 #ifdef REGULAR_GRID_3
-    PyArrayObject* points3_obj,
+                                 PyArrayObject* points3_obj,
 #endif
 #ifdef REGULAR_GRID_4
-    PyArrayObject* points4_obj,
+                                 PyArrayObject* points4_obj,
 #endif
-    PyArrayObject** zi_obj,
-    PyArrayObject** dz_obj,
-    PARAMS_TYPE* params)
-{
+                                 PyArrayObject** zi_obj, PyArrayObject** dz_obj,
+                                 PARAMS_TYPE* params) {
   bool check_sorted = params->check_sorted;
   bool bounds_error = params->bounds_error;
 
@@ -44,27 +41,33 @@ int APPLY_SPECIFIC(regular_grid)(
 
   // Sort out the values shape
   // must be (nx, ny, ..., nout)
-  if (values_obj == NULL || PyArray_NDIM(values_obj) != (REGULAR_GRID_NDIM + 1) || !PyArray_CHKFLAGS(values_obj, NPY_ARRAY_C_CONTIGUOUS)) {
+  if (values_obj == NULL ||
+      PyArray_NDIM(values_obj) != (REGULAR_GRID_NDIM + 1) ||
+      !PyArray_CHKFLAGS(values_obj, NPY_ARRAY_C_CONTIGUOUS)) {
     PyErr_Format(PyExc_ValueError, "dimension mismatch (values)");
     return 1;
   }
   npy_intp nout = PyArray_DIM(values_obj, REGULAR_GRID_NDIM);
   if (REGULAR_GRID_NOUT != Eigen::Dynamic && REGULAR_GRID_NOUT != nout) {
-    PyErr_Format(PyExc_ValueError, "number of outputs does not match compiled number");
+    PyErr_Format(PyExc_ValueError,
+                 "number of outputs does not match compiled number");
     return 1;
   }
   npy_intp ngrid = 1;
   for (npy_intp n = 0; n < REGULAR_GRID_NDIM; ++n) {
     ngrid *= shape[n];
     if (shape[n] != PyArray_DIM(values_obj, n)) {
-      PyErr_Format(PyExc_ValueError, "size of values dimension %d does not match", n);
+      PyErr_Format(PyExc_ValueError,
+                   "size of values dimension %d does not match", n);
       return 1;
     }
   }
 
   // Sort out the test points
   // must be (ntest, ndim)
-  if (xi_obj == NULL || PyArray_NDIM(xi_obj) != 2 || PyArray_DIM(xi_obj, 1) != ndim || !PyArray_CHKFLAGS(xi_obj, NPY_ARRAY_C_CONTIGUOUS)) {
+  if (xi_obj == NULL || PyArray_NDIM(xi_obj) != 2 ||
+      PyArray_DIM(xi_obj, 1) != ndim ||
+      !PyArray_CHKFLAGS(xi_obj, NPY_ARRAY_C_CONTIGUOUS)) {
     PyErr_Format(PyExc_ValueError, "dimension mismatch (xi)");
     return 1;
   }
@@ -78,21 +81,33 @@ int APPLY_SPECIFIC(regular_grid)(
   if (success) return 1;
 
   // Cast the values and test points as a matrix with the right shape
-  Eigen::Map<Eigen::Matrix<DTYPE_INPUT_0, Eigen::Dynamic, REGULAR_GRID_NDIM, REGULAR_GRID_NDIM_ORDER>> xi((DTYPE_INPUT_0*)PyArray_DATA(xi_obj), ntest, ndim);
-  Eigen::Map<Eigen::Matrix<DTYPE_INPUT_1, Eigen::Dynamic, REGULAR_GRID_NOUT, REGULAR_GRID_NOUT_ORDER>> values((DTYPE_INPUT_1*)PyArray_DATA(values_obj), ngrid, nout);
+  Eigen::Map<Eigen::Matrix<DTYPE_INPUT_0, Eigen::Dynamic, REGULAR_GRID_NDIM,
+                           REGULAR_GRID_NDIM_ORDER>>
+  xi((DTYPE_INPUT_0*)PyArray_DATA(xi_obj), ntest, ndim);
+  Eigen::Map<Eigen::Matrix<DTYPE_INPUT_1, Eigen::Dynamic, REGULAR_GRID_NOUT,
+                           REGULAR_GRID_NOUT_ORDER>>
+  values((DTYPE_INPUT_1*)PyArray_DATA(values_obj), ngrid, nout);
 
   // Outputs
-  Eigen::Map<Eigen::Matrix<DTYPE_OUTPUT_0, Eigen::Dynamic, REGULAR_GRID_NOUT, REGULAR_GRID_NOUT_ORDER>> zi((DTYPE_OUTPUT_0*)PyArray_DATA(*zi_obj), ntest, nout);
-  Eigen::Map<Eigen::Matrix<DTYPE_OUTPUT_1, Eigen::Dynamic, REGULAR_GRID_NDIM_NOUT, REGULAR_GRID_NDIM_NOUT_ORDER>> dz((DTYPE_OUTPUT_1*)PyArray_DATA(*dz_obj), ntest, ndim*nout);
+  Eigen::Map<Eigen::Matrix<DTYPE_OUTPUT_0, Eigen::Dynamic, REGULAR_GRID_NOUT,
+                           REGULAR_GRID_NOUT_ORDER>>
+  zi((DTYPE_OUTPUT_0*)PyArray_DATA(*zi_obj), ntest, nout);
+  Eigen::Map<
+      Eigen::Matrix<DTYPE_OUTPUT_1, Eigen::Dynamic, REGULAR_GRID_NDIM_NOUT,
+                    REGULAR_GRID_NDIM_NOUT_ORDER>>
+  dz((DTYPE_OUTPUT_1*)PyArray_DATA(*dz_obj), ntest, ndim * nout);
 
   // Allocate temporary arrays to store indices and weights
   typedef DTYPE_OUTPUT_0 T;
-  Eigen::Matrix<npy_intp, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> inds(ntest, ndim);
-  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> numerator(ntest, ndim);
-  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> denominator(ntest, ndim);
+  Eigen::Matrix<npy_intp, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> inds(
+      ntest, ndim);
+  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> numerator(
+      ntest, ndim);
+  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> denominator(
+      ntest, ndim);
   Eigen::Matrix<T, Eigen::Dynamic, 1> accumulator(ndim);
 
-  std::vector<Eigen::Matrix<T, Eigen::Dynamic, 1> > points_vec(ndim);
+  std::vector<Eigen::Matrix<T, Eigen::Dynamic, 1>> points_vec(ndim);
   points_vec[0] = get_points_grid<DTYPE_INPUT_2, T>(points0_obj);
 #ifdef REGULAR_GRID_1
   points_vec[1] = get_points_grid<DTYPE_INPUT_3, T>(points1_obj);
@@ -107,14 +122,16 @@ int APPLY_SPECIFIC(regular_grid)(
   points_vec[4] = get_points_grid<DTYPE_INPUT_6, T>(points4_obj);
 #endif
 
-  // Loop over dimensions and compute the indices of each test point in each grid
+  // Loop over dimensions and compute the indices of each test point in each
+  // grid
   for (npy_intp dim = 0; dim < ndim; ++dim) {
     auto points = points_vec[dim];
     npy_intp N = shape[dim];
     if (check_sorted) {
-      for (npy_intp n = 0; n < N-1; ++n)
-        if (points(n+1) <= points(n)) {
-          PyErr_Format(PyExc_ValueError, "each tensor in 'points' must be sorted");
+      for (npy_intp n = 0; n < N - 1; ++n)
+        if (points(n + 1) <= points(n)) {
+          PyErr_Format(PyExc_ValueError,
+                       "each tensor in 'points' must be sorted");
           return 1;
         }
     }
@@ -127,26 +144,26 @@ int APPLY_SPECIFIC(regular_grid)(
         out_of_bounds = true;
         ind = 0;
       }
-      if (ind > N-2) {
+      if (ind > N - 2) {
         out_of_bounds = true;
-        ind = N-2;
+        ind = N - 2;
       }
       if (bounds_error) {
         if (out_of_bounds) {
-          PyErr_Format(PyExc_ValueError, "target point out of bounds n=%d dim=%d", n, dim);
+          PyErr_Format(PyExc_ValueError,
+                       "target point out of bounds n=%d dim=%d", n, dim);
           return 1;
         }
       }
       inds(n, dim) = ind;
       numerator(n, dim) = xi(n, dim) - points(ind);
-      denominator(n, dim) = points(ind+1) - points(ind);
+      denominator(n, dim) = points(ind + 1) - points(ind);
     }
   }
 
   // Loop over test points and compute the interpolation for that point
   unsigned ncorner = pow(2, ndim);
   for (int n = 0; n < ntest; ++n) {
-
     // Madness to find the coordinates of every corner
     zi.row(n).setZero();
     dz.row(n).setZero();
@@ -154,7 +171,7 @@ int APPLY_SPECIFIC(regular_grid)(
       npy_intp factor = 1;
       npy_intp ind = 0;
       T weight = T(1.0);
-      for (int dim = ndim-1; dim >= 0; --dim) {
+      for (int dim = ndim - 1; dim >= 0; --dim) {
         unsigned offset = (corner >> unsigned(dim)) & 1;
         ind += factor * (inds(n, dim) + offset);
         factor *= shape[dim];
@@ -162,7 +179,7 @@ int APPLY_SPECIFIC(regular_grid)(
           weight *= numerator(n, dim) / denominator(n, dim);
           accumulator(dim) = numerator(n, dim);
         } else {
-          //T norm_dist = T(1.0) - numerator(n, dim) / denominator(n, dim);
+          // T norm_dist = T(1.0) - numerator(n, dim) / denominator(n, dim);
           weight *= T(1.0) - numerator(n, dim) / denominator(n, dim);
           accumulator(dim) = (numerator(n, dim) - denominator(n, dim));
         }
@@ -171,7 +188,8 @@ int APPLY_SPECIFIC(regular_grid)(
       if (std::abs(weight) > std::numeric_limits<T>::epsilon()) {
         zi.row(n).noalias() += weight * values.row(ind);
         for (int dim = 0; dim < ndim; ++dim) {
-          dz.block(n, dim * nout, 1, nout).noalias() += (weight / accumulator(dim)) * values.row(ind);
+          dz.block(n, dim * nout, 1, nout).noalias() +=
+              (weight / accumulator(dim)) * values.row(ind);
         }
       }
     }

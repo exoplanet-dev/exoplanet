@@ -2,8 +2,13 @@
 
 from __future__ import division, print_function
 
-__all__ = ["eval_in_model", "get_samples_from_trace", "optimize",
-           "get_args_for_theano_function", "get_theano_function_for_var"]
+__all__ = [
+    "eval_in_model",
+    "get_samples_from_trace",
+    "optimize",
+    "get_args_for_theano_function",
+    "get_theano_function_for_var",
+]
 
 import numpy as np
 
@@ -74,8 +79,14 @@ def get_samples_from_trace(trace, size=1):
         yield trace._straces[chain_idx][sample_idx]
 
 
-def optimize(start=None, vars=None, model=None, return_info=False,
-             verbose=True, **kwargs):
+def optimize(
+    start=None,
+    vars=None,
+    model=None,
+    return_info=False,
+    verbose=True,
+    **kwargs
+):
     """Maximize the log prob of a PyMC3 model using scipy
 
     All extra arguments are passed directly to the ``scipy.optimize.minimize``
@@ -112,7 +123,7 @@ def optimize(start=None, vars=None, model=None, return_info=False,
 
     # Pre-compile the theano model and gradient
     nlp = -model.logpt
-    grad = theano.grad(nlp, vars, disconnected_inputs='ignore')
+    grad = theano.grad(nlp, vars, disconnected_inputs="ignore")
     func = get_theano_function_for_var([nlp] + grad, model=model)
 
     # This returns the objective function and its derivatives
@@ -123,8 +134,9 @@ def optimize(start=None, vars=None, model=None, return_info=False,
         return res[0], g
 
     if verbose:
-        print("optimizing logp for variables: {0}"
-              .format([v.name for v in vars]))
+        print(
+            "optimizing logp for variables: {0}".format([v.name for v in vars])
+        )
 
     # Optimize using scipy.optimize
     x0 = bij.map(start)
@@ -137,8 +149,10 @@ def optimize(start=None, vars=None, model=None, return_info=False,
 
     # Coerce the output into the right format
     vars = get_default_varnames(model.unobserved_RVs, True)
-    point = {var.name: value
-             for var, value in zip(vars, model.fastfn(vars)(bij.rmap(x)))}
+    point = {
+        var.name: value
+        for var, value in zip(vars, model.fastfn(vars)(bij.rmap(x)))
+    }
 
     if verbose:
         print("message: {0}".format(info.message))

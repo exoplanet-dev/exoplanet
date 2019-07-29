@@ -33,8 +33,7 @@ class PyMC3Sampler(object):
 
     # Ref: src/stan/mcmc/windowed_adaptation.hpp in stan repo
 
-    def __init__(self, start=75, finish=50, window=25, dense=True,
-                 **kwargs):
+    def __init__(self, start=75, finish=50, window=25, dense=True, **kwargs):
         self.dense = dense
 
         self.start = int(start)
@@ -45,9 +44,14 @@ class PyMC3Sampler(object):
         self._current_trace = None
         self.kwargs = kwargs
 
-    def get_step_for_trace(self, trace=None, model=None,
-                           regular_window=0, regular_variance=1e-3,
-                           **kwargs):
+    def get_step_for_trace(
+        self,
+        trace=None,
+        model=None,
+        regular_window=0,
+        regular_variance=1e-3,
+        **kwargs
+    ):
         """Get a PyMC3 NUTS step tuned for a given burn-in trace
 
         Args:
@@ -83,15 +87,21 @@ class PyMC3Sampler(object):
                 cov = np.cov(samples, rowvar=0)
                 if regular_window > 0:
                     cov = cov * N / (N + regular_window)
-                    cov[np.diag_indices_from(cov)] += \
-                        regular_variance * regular_window / (N+regular_window)
+                    cov[np.diag_indices_from(cov)] += (
+                        regular_variance
+                        * regular_window
+                        / (N + regular_window)
+                    )
                 potential = quad.QuadPotentialFull(cov)
             else:
                 var = np.var(samples, axis=0)
                 if regular_window > 0:
                     var = var * N / (N + regular_window)
-                    var += \
-                        regular_variance * regular_window / (N+regular_window)
+                    var += (
+                        regular_variance
+                        * regular_window
+                        / (N + regular_window)
+                    )
                 potential = quad.QuadPotentialDiag(var)
 
         return pm.NUTS(potential=potential, **kwargs)
@@ -118,7 +128,8 @@ class PyMC3Sampler(object):
         logger.setLevel(logging.ERROR)
 
         self._current_trace = pm.sample(
-            start=start, tune=steps, step=step, **kwargs)
+            start=start, tune=steps, step=step, **kwargs
+        )
         self.count += steps
 
         logger.propagate = propagate
@@ -132,8 +143,9 @@ class PyMC3Sampler(object):
         self._extend(self.start, start=start, step=step, **kwargs)
         return self._current_trace
 
-    def _get_start_and_step(self, start=None, step_kwargs=None, trace=None,
-                            step=None):
+    def _get_start_and_step(
+        self, start=None, step_kwargs=None, trace=None, step=None
+    ):
         if step_kwargs is None:
             step_kwargs = {}
         if trace is not None:
@@ -148,8 +160,15 @@ class PyMC3Sampler(object):
                 start = [t[-1] for t in trace._straces.values()]
         return start, step
 
-    def extend_tune(self, steps, start=None,
-                    step_kwargs=None, trace=None, step=None, **kwargs):
+    def extend_tune(
+        self,
+        steps,
+        start=None,
+        step_kwargs=None,
+        trace=None,
+        step=None,
+        **kwargs
+    ):
         """Extend the tuning phase by a given number of steps
 
         After running the sampling, the mass matrix is re-estimated based on
@@ -162,7 +181,8 @@ class PyMC3Sampler(object):
         if step_kwargs is None:
             step_kwargs = {}
         start, step = self._get_start_and_step(
-            start=start, step_kwargs=step_kwargs, trace=trace, step=step)
+            start=start, step_kwargs=step_kwargs, trace=trace, step=step
+        )
         self._extend(steps, start=start, step=step, **kwargs)
         self._current_step = step
         return self._current_trace
@@ -181,23 +201,35 @@ class PyMC3Sampler(object):
 
         ntot = self.start + self.window + self.finish
         if tune < ntot:
-            raise ValueError("'tune' must be at least {0}".format(ntot) +
-                             "(start + window + finish)")
+            raise ValueError(
+                "'tune' must be at least {0}".format(ntot)
+                + "(start + window + finish)"
+            )
 
         self.count = 0
         self.warmup(start=start, step_kwargs=step_kwargs, **kwargs)
         steps = self.window
         trace = None
         while self.count < tune:
-            trace = self.extend_tune(start=start, step_kwargs=step_kwargs,
-                                     steps=steps, trace=trace, **kwargs)
+            trace = self.extend_tune(
+                start=start,
+                step_kwargs=step_kwargs,
+                steps=steps,
+                trace=trace,
+                **kwargs
+            )
             steps *= 2
-            if self.count + steps + steps*2 > tune:
+            if self.count + steps + steps * 2 > tune:
                 steps = tune - self.count
 
         # Final tuning stage for step size
-        self.extend_tune(start=start, step_kwargs=step_kwargs,
-                         steps=self.finish, trace=trace, **kwargs)
+        self.extend_tune(
+            start=start,
+            step_kwargs=step_kwargs,
+            steps=self.finish,
+            trace=trace,
+            **kwargs
+        )
 
         # Copy across the step size from the parallel runs
         self._current_step.stop_tuning()
@@ -219,8 +251,9 @@ class PyMC3Sampler(object):
         self._current_step = pm.NUTS(**step_kwargs)
         return self._current_trace
 
-    def sample(self, trace=None, step=None, start=None, step_kwargs=None,
-               **kwargs):
+    def sample(
+        self, trace=None, step=None, start=None, step_kwargs=None, **kwargs
+    ):
         """Run the production sampling using the tuned mass matrix
 
         This is a light wrapper around ``pymc3.sample`` and any arguments used
@@ -228,11 +261,13 @@ class PyMC3Sampler(object):
 
         """
         start, step = self._get_start_and_step(
-            start=start, step_kwargs=step_kwargs, step=step)
+            start=start, step_kwargs=step_kwargs, step=step
+        )
         if trace is not None:
             start = None
         kwargs["tune"] = kwargs.get("tune", 0)
         kwargs = self._get_sample_kwargs(kwargs)
-        self._current_trace = pm.sample(start=start, step=step, trace=trace,
-                                        **kwargs)
+        self._current_trace = pm.sample(
+            start=start, step=step, trace=trace, **kwargs
+        )
         return self._current_trace

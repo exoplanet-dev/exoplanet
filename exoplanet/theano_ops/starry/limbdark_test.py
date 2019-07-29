@@ -12,7 +12,6 @@ from .limbdark import LimbDarkOp
 
 
 class TestLimbDark(utt.InferShapeTester):
-
     def setUp(self):
         super(TestLimbDark, self).setUp()
         self.op_class = LimbDarkOp
@@ -46,10 +45,7 @@ class TestLimbDark(utt.InferShapeTester):
 
     def test_infer_shape(self):
         f, args, arg_vals = self.get_args()
-        self._compile_and_check(args,
-                                self.op(*args),
-                                arg_vals,
-                                self.op_class)
+        self._compile_and_check(args, self.op(*args), arg_vals, self.op_class)
 
     def test_grad(self):
         _, _, in_args = self.get_args()

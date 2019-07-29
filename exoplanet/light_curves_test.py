@@ -35,7 +35,7 @@ def test_light_curve():
         m = starry.Map(udeg=len(u_val), lazy=False)
         m[1:] = u_val
         expect = m.flux(xo=b_val, ro=r_val[0]) - 1
-    
+
     evaluated = func(u_val, b_val, r_val)
 
     utt.assert_allclose(expect, evaluated)
@@ -73,8 +73,9 @@ def test_in_transit():
     utt.assert_allclose(*vals)
 
     model1 = lc.get_light_curve(r=r, orbit=orbit, t=t, texp=0.1)
-    model2 = lc.get_light_curve(r=r, orbit=orbit, t=t, texp=0.1,
-                                use_in_transit=False)
+    model2 = lc.get_light_curve(
+        r=r, orbit=orbit, t=t, texp=0.1, use_in_transit=False
+    )
     vals = theano.function([], [model1, model2])()
     utt.assert_allclose(*vals)
 
@@ -97,16 +98,23 @@ def test_variable_texp():
     texp0 = 0.1
 
     lc = StarryLightCurve(u)
-    model1 = lc.get_light_curve(r=r, orbit=orbit, t=t, texp=texp0,
-                                use_in_transit=False)
-    model2 = lc.get_light_curve(r=r, orbit=orbit, t=t, use_in_transit=False,
-                                texp=texp0 + np.zeros_like(t))
+    model1 = lc.get_light_curve(
+        r=r, orbit=orbit, t=t, texp=texp0, use_in_transit=False
+    )
+    model2 = lc.get_light_curve(
+        r=r,
+        orbit=orbit,
+        t=t,
+        use_in_transit=False,
+        texp=texp0 + np.zeros_like(t),
+    )
     vals = theano.function([], [model1, model2])()
     utt.assert_allclose(*vals)
 
     model1 = lc.get_light_curve(r=r, orbit=orbit, t=t, texp=texp0)
-    model2 = lc.get_light_curve(r=r, orbit=orbit, t=t,
-                                texp=texp0 + np.zeros_like(t))
+    model2 = lc.get_light_curve(
+        r=r, orbit=orbit, t=t, texp=texp0 + np.zeros_like(t)
+    )
     vals = theano.function([], [model1, model2])()
     utt.assert_allclose(*vals)
 
@@ -115,15 +123,24 @@ def test_contact_bug():
     orbit = KeplerianOrbit(period=3.456, ecc=0.6, omega=-1.5)
     t = np.linspace(-0.1, 0.1, 1000)
     u = [0.3, 0.2]
-    y1 = StarryLightCurve(u).get_light_curve(
-        orbit=orbit, r=0.1, t=t, texp=0.02).eval()
-    y2 = StarryLightCurve(u).get_light_curve(
-        orbit=orbit, r=0.1, t=t, texp=0.02, use_in_transit=False).eval()
+    y1 = (
+        StarryLightCurve(u)
+        .get_light_curve(orbit=orbit, r=0.1, t=t, texp=0.02)
+        .eval()
+    )
+    y2 = (
+        StarryLightCurve(u)
+        .get_light_curve(
+            orbit=orbit, r=0.1, t=t, texp=0.02, use_in_transit=False
+        )
+        .eval()
+    )
     assert np.allclose(y1, y2)
 
 
 def test_small_star():
     from batman.transitmodel import TransitModel, TransitParams
+
     u_star = [0.2, 0.1]
     r = 0.04221468
 
@@ -139,9 +156,14 @@ def test_small_star():
     r_pl = r * r_star
 
     orbit = KeplerianOrbit(
-        r_star=r_star, m_star=m_star,
-        period=period, t0=t0, b=b,
-        ecc=ecc, omega=omega)
+        r_star=r_star,
+        m_star=m_star,
+        period=period,
+        t0=t0,
+        b=b,
+        ecc=ecc,
+        omega=omega,
+    )
     a = orbit.a.eval()
     incl = orbit.incl.eval()
 
@@ -186,7 +208,7 @@ def test_singular_points():
         b_val = [b_val - b_eps, b_val + b_eps, b_val]
         r_val = [r_val - r_eps, r_val + r_eps, r_val]
         flux = func(u_val, b_val, r_val)
-        assert np.allclose(np.mean(flux[:2]), flux[2]) 
+        assert np.allclose(np.mean(flux[:2]), flux[2])
 
     # Test the b = 1 - r singular point
     compare(0.1, 0.9, 1e-8, 0.0)

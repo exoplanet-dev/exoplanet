@@ -13,29 +13,35 @@ from .keplerian import KeplerianOrbit
 
 def test_sky_coords():
     from batman import _rsky
+
     t = np.linspace(-100, 100, 1000)
 
-    t0, period, a, e, omega, incl = (x.flatten() for x in np.meshgrid(
-        np.linspace(-5.0, 5.0, 2),
-        np.exp(np.linspace(np.log(5.0), np.log(50.0), 3)),
-        np.linspace(50.0, 100.0, 2),
-        np.linspace(0.0, 0.9, 5),
-        np.linspace(-np.pi, np.pi, 3),
-        np.arccos(np.linspace(0, 1, 5)[:-1]),
-    ))
+    t0, period, a, e, omega, incl = (
+        x.flatten()
+        for x in np.meshgrid(
+            np.linspace(-5.0, 5.0, 2),
+            np.exp(np.linspace(np.log(5.0), np.log(50.0), 3)),
+            np.linspace(50.0, 100.0, 2),
+            np.linspace(0.0, 0.9, 5),
+            np.linspace(-np.pi, np.pi, 3),
+            np.arccos(np.linspace(0, 1, 5)[:-1]),
+        )
+    )
     r_batman = np.empty((len(t), len(t0)))
 
     for i in range(len(t0)):
-        r_batman[:, i] = _rsky._rsky(t, t0[i], period[i], a[i],
-                                     incl[i], e[i], omega[i], 1, 1)
+        r_batman[:, i] = _rsky._rsky(
+            t, t0[i], period[i], a[i], incl[i], e[i], omega[i], 1, 1
+        )
     m = r_batman < 100.0
     assert m.sum() > 0
 
     orbit = KeplerianOrbit(
-        period=period, a=a, t0=t0, ecc=e, omega=omega, incl=incl)
+        period=period, a=a, t0=t0, ecc=e, omega=omega, incl=incl
+    )
     func = theano.function([], orbit.get_relative_position(t))
     x, y, z = func()
-    r = np.sqrt(x**2 + y**2)
+    r = np.sqrt(x ** 2 + y ** 2)
 
     # Make sure that the in-transit impact parameter matches batman
     utt.assert_allclose(r_batman[m], r[m], atol=2e-5)
@@ -61,16 +67,21 @@ def test_center_of_mass():
         ecc=np.array([0.1, 0.8]),
         omega=np.array([0.5, 1.3]),
         Omega=np.array([0.0, 1.0]),
-        incl=np.array([0.25*np.pi, 0.3*np.pi]),
+        incl=np.array([0.25 * np.pi, 0.3 * np.pi]),
         m_planet=m_planet,
     )
 
     planet_coords = theano.function([], orbit.get_planet_position(t))()
     star_coords = theano.function([], orbit.get_star_position(t))()
 
-    com = np.sum((m_planet[None, :] * np.array(planet_coords) +
-                  m_star * np.array(star_coords)) /
-                 (m_star + m_planet)[None, :], axis=0)
+    com = np.sum(
+        (
+            m_planet[None, :] * np.array(planet_coords)
+            + m_star * np.array(star_coords)
+        )
+        / (m_star + m_planet)[None, :],
+        axis=0,
+    )
     assert np.allclose(com, 0.0)
 
 
@@ -87,7 +98,7 @@ def test_velocity():
         ecc=0.1,
         omega=0.5,
         Omega=1.0,
-        incl=0.25*np.pi,
+        incl=0.25 * np.pi,
         m_planet=m_planet,
     )
 
@@ -128,7 +139,7 @@ def test_acceleration():
         period=100.0,
         ecc=0.1,
         omega=0.5,
-        incl=0.25*np.pi,
+        incl=0.25 * np.pi,
         m_planet=m_planet,
     )
 
@@ -175,15 +186,15 @@ def test_in_transit():
 
     r_pl = np.array([0.1, 0.03])
     coords = theano.function([], orbit.get_relative_position(t))()
-    r2 = coords[0]**2 + coords[1]**2
+    r2 = coords[0] ** 2 + coords[1] ** 2
     inds = theano.function([], orbit.in_transit(t, r=r_pl))()
 
     m = np.isin(np.arange(len(t)), inds)
-    in_ = r2[inds] <= ((r_star + r_pl)**2)[None, :]
+    in_ = r2[inds] <= ((r_star + r_pl) ** 2)[None, :]
     in_ &= coords[2][inds] > 0
     assert np.all(np.any(in_, axis=1))
 
-    out = r2[~m] > ((r_star + r_pl)**2)[None, :]
+    out = r2[~m] > ((r_star + r_pl) ** 2)[None, :]
     out |= coords[2][~m] <= 0
     assert np.all(out)
 
@@ -218,6 +229,7 @@ def test_in_transit_circ():
 
 def test_small_star():
     from batman import _rsky
+
     m_star = 0.151
     r_star = 0.189
     period = 0.4626413
@@ -228,9 +240,14 @@ def test_small_star():
     t = np.linspace(0, period, 500)
 
     orbit = KeplerianOrbit(
-        r_star=r_star, m_star=m_star,
-        period=period, t0=t0, b=b,
-        ecc=ecc, omega=omega)
+        r_star=r_star,
+        m_star=m_star,
+        period=period,
+        t0=t0,
+        b=b,
+        ecc=ecc,
+        omega=omega,
+    )
     a = orbit.a.eval()
     incl = orbit.incl.eval()
 
@@ -240,7 +257,7 @@ def test_small_star():
 
     func = theano.function([], orbit.get_relative_position(t))
     x, y, z = func()
-    r = np.sqrt(x**2 + y**2)
+    r = np.sqrt(x ** 2 + y ** 2)
 
     # Make sure that the in-transit impact parameter matches batman
     utt.assert_allclose(r_batman[m], r[m], atol=2e-5)
@@ -256,12 +273,18 @@ def test_impact():
     omega = 0.1
 
     orbit = KeplerianOrbit(
-        r_star=r_star, m_star=m_star,
-        period=period, t0=t0, b=b,
-        ecc=ecc, omega=omega)
+        r_star=r_star,
+        m_star=m_star,
+        period=period,
+        t0=t0,
+        b=b,
+        ecc=ecc,
+        omega=omega,
+    )
     coords = orbit.get_relative_position(t0)
-    utt.assert_allclose((tt.sqrt(coords[0]**2 + coords[1]**2) / r_star).eval(),
-                        b)
+    utt.assert_allclose(
+        (tt.sqrt(coords[0] ** 2 + coords[1] ** 2) / r_star).eval(), b
+    )
     assert coords[2].eval() > 0
 
 
@@ -280,15 +303,17 @@ def test_consistent_coords():
     kappa = 0.45
 
     # calculate Mtot from a, P
-    Mtot = (4*np.pi**2*(a*u.au)**3/(c.G*(P*u.day)**2)).to(u.M_sun).value
+    Mtot = (
+        (4 * np.pi ** 2 * (a * u.au) ** 3 / (c.G * (P * u.day) ** 2))
+        .to(u.M_sun)
+        .value
+    )
 
     M2 = kappa * Mtot
     M1 = Mtot - M2
 
-    orbit = KeplerianOrbit(a=a * au_to_R_sun, period=P,
-                           m_planet=M2)
+    orbit = KeplerianOrbit(a=a * au_to_R_sun, period=P, m_planet=M2)
 
     assert np.allclose(M1, orbit.m_star.eval())
     assert np.allclose(M2, orbit.m_planet.eval())
     assert np.allclose(Mtot, orbit.m_total.eval())
-

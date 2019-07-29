@@ -252,15 +252,42 @@ These methods can be substantial accelerated using gradients of the log probabil
 \subsection{Variational inference}
 
 \section{Orbital conventions}
-We choose to follow a set of orbital conventions that respects as many of the established conventions while also hewing to sensible choices of right-hand rule.
+A general introduction to Keplerian orbits is given by \citet{Murray:2010}; here we describe the implementation choices specific to the \emph{exoplanet} codebase.
+We follow a set of internally consistent orbital conventions that also attempts to respect as many of the established conventions of the stellar and exoplanetary fields as possible. The location of a body on a Keplerian orbit with respect to the center of mass is given in the perifocal plane by
+\begin{equation}
+  \boldsymbol{r} =
+  \left [
+    \begin{array}{c}
+      x\\
+      y\\
+      z\\
+    \end{array}
+  \right ].
+\end{equation}
+By construction, the orbit of the body in the perifocal frame is constrained entirely to the $x -y$ plane (see Figure~\ref{fig:orbit3D}). The range of orbital convention choices mainly stems from how the location of the body in the perifocal frame is converted to the observer frame,
+\begin{equation}
+  \boldsymbol{R} =
+  \left [
+    \begin{array}{c}
+      X\\
+      Y\\
+      Z\\
+    \end{array}
+  \right ].
+\end{equation}
+We choose to orient the $\hat{\boldsymbol{X}}$ unit vector in the north direction, $\hat{\boldsymbol{Y}}$ in the east direction, and $\hat{\boldsymbol{Z}}$ towards the observer. Under this convention, the inclination of an orbit is defined by the dot-product of the orbital angular momentum vector with $\hat{\boldsymbol{Z}}$, conforming to the common astrometric convention that a zero inclination ($i = 0\degr$) orbit is face-on, with the test body orbiting in a counter-clockwise manner around the primary body.
 
-The orbit is specified in the perifocal plane $x,y,z$, technically in the $x,y$ plane, where $z=0$. Then, the choice is to decide how to rotate this coordinate frame into the observed frame, which is specified by $X,Y,Z$.
+\begin{figure}[htbp]
+  \begin{centering}
+  \includegraphics{figures/orbit3D.pdf}
+  \oscaption{orbit3D}{\figurelabel{orbit3D}
+  The conventions used to orient the perifocal frame ($x, y, z$) relative to the observer frame ($X,Y,Z$).}
+  \end{centering}
+\end{figure}
 
-Where does the $+Z$ axis point? Towards observer. X is north, Y is east.
+In the stellar and exoplanetary fields, there is less agreement on which  segment of the line of nodes is defined as the \emph{ascending} node. We choose to define the ascending node as the point where the orbiting body crosses the plane of the sky moving \emph{away} from the observer (i.e., crossing from $Z > 0$ to $Z< 0$). This convention has historically been the choice of the visual binary field; the opposite convention occasionally appears in exoplanet and planetary studies.
 
-What is the definition of the ascending node? Where the secondary is receding from the observer.
-
-To do this, we consider the rotation matrices
+To implement the transformation from perifocal frame to observer frame, we consider the rotation matrices
 \begin{equation}
   \boldsymbol{P}_x(\phi) = \left [
   \begin{array}{ccc}
@@ -277,28 +304,18 @@ To do this, we consider the rotation matrices
     0 & 0 & 1 \\
     \end{array}\right].
 \end{equation}
-These rotation matrices result in a \emph{clockwise} rotation of the axes, as defined using the right hand rule. This means when we look down the $z$-axis, for a positive angle $\phi$, it would be as if the $x$ and $y$ axes rotated clockwise.
-In order to find out what defines counter-clockwise when considering the other rotations, we look to the right hand rule and cross products of the axes unit vectors. Since, $\hat{\bm x} \times \hat{\bm y} = \hat{\bm z}$, we know that when looking down the $z$ axis the direction of the $x$-axis towards the $y$-axis defines counter clockwise.
-Similarly, we have $\hat{{\bm y}} \times \hat{{\bm z}} = \hat{{\bm x}}$, and $\hat{{\bm z}} \times \hat{{\bm x}} = \hat{{\bm y}}$.
+which result in a \emph{clockwise} rotation of the axes, as defined using the right hand rule.\footnote{This means when we look down the $z$-axis, for a positive angle $\phi$, it would be as if the $x$ and $y$ axes rotated clockwise.
+In order to find out what defines counter-clockwise when considering the other rotations, we look to the right hand rule and cross products of the axes unit vectors. Since $\hat{\bm x} \times \hat{\bm y} = \hat{\bm z}$, when looking down the $z$ axis the direction of the $x$-axis towards the $y$-axis defines counter clockwise.
+Similarly, we have $\hat{{\bm y}} \times \hat{{\bm z}} = \hat{{\bm x}}$, and $\hat{{\bm z}} \times \hat{{\bm x}} = \hat{{\bm y}}$.}
 
-One can see how we need to rotate by referencing Figure~\ref{fig:orbit3D}. The three rotations are (i) a rotation about the $z$-axis through an angle $\omega$ so that the $x$-axis coincides with the line of nodes at the ascending node (ii) a rotation about the $x$-axis through an angle ($-i$) so that the two planes are coincident and finally (iii) a rotation about the $z$-axis through an angle $\Omega$. As one might notice, we break from some conventions \citep[e.g.,][]{Murray:2010} in using a negative rotation for inclination, which is due to the change in how we label the ascending node. Applying these rotation matrices yields
+To convert a position $\boldsymbol{r}$ in the perifocal frame to the observer frame $\boldsymbol{R}$ (referencing Figure~\ref{fig:orbit3D}), three rotations are required: (i) a rotation about the $z$-axis through an angle $\omega$ so that the $x$-axis coincides with the line of nodes at the ascending node (ii) a rotation about the $x$-axis through an angle ($-i$) so that the two planes are coincident and finally (iii) a rotation about the $z$-axis through an angle $\Omega$. Applying these rotation matrices yields
 \begin{equation}
-  \left [ \begin{array}{c}
-  X \\
-  Y \\
-  Z \\
-\end{array}
-  \right ] =
+  \boldsymbol{R} =
   \boldsymbol{P}_z (\Omega) \boldsymbol{P}_x(-i) \boldsymbol{P}_z(\omega)
-  \left [
-  \begin{array}{c}
-  x \\
-  y \\
-  z \\
-  \end{array}
-  \right]
+  \boldsymbol{r}.
 \end{equation}
 
+As a function of true anomaly $f$, the position in the observer frame is given by
 \begin{equation}
   \begin{array}{lc}
     X =& r [ \cos \Omega (\cos \omega \cos f - \sin \omega \sin f)  - \sin \Omega  \cos i (\sin \omega \cos f + \cos \omega \sin f) ] \\
@@ -308,8 +325,7 @@ One can see how we need to rotate by referencing Figure~\ref{fig:orbit3D}. The t
 \label{eqn:Z}
 \end{equation}
 
-
-Using the sum angle identities to simplify the calculations, we find
+Simplifying the equations using the sum angle identities, we find
 \begin{equation}
   \begin{array}{lc}
     X =& r (\cos \Omega \cos(\omega + f) - \sin(\Omega) \sin(\omega + f) \cos(i)) \\
@@ -319,14 +335,6 @@ Using the sum angle identities to simplify the calculations, we find
 \label{eqn:Z}
 \end{equation}
 
-
-\begin{figure}[htbp]
-\begin{centering}
-\includegraphics{figures/orbit3D.pdf}
-\oscaption{orbit3D}{\figurelabel{orbit3D}
-The conventions used.}
-\end{centering}
-\end{figure}
 
 \section{The custom operations provided by exoplanet}
 
@@ -361,17 +369,25 @@ In this case, the relevant gradients are
 \frac{\dd E}{\dd M} &=& \frac{1}{1 - e\,\cos E} \quad.
 \end{eqnarray}
 
-\paragraph{Implementation details}
+In practice, we have found it more efficient to fuse the calculations of the eccentric anomaly $E$ and the true anomaly $f$ working only with the sine and cosines of these quantites.
+To compute the true anomaly for a given eccentric anomaly, the relation is
+\begin{equation}
+\tan\frac{f}{2} = \sqrt{\frac{1 + e}{1-e}}\tan\frac{E}{2}
+\end{equation}
+and we can compute this efficiently using the following trigonometric identities
+\begin{eqnarray}
+\tan \frac{E}{2} &=& \frac{\sin E}{1 + \cos E} \\
+\sin f &=& \frac{2\,\tan f/2}{1 + \tan^2 f/2} \\
+\cos f &=& \frac{1 - \tan^2 f/2}{1 + \tan^2 f/2}
+\end{eqnarray}
+with the special case $\sin f = 0$ and $\cos f = -1$ when $\cos E = -1$.
 
-We find that directly evaluating the true anomaly $f$
-%\begin{eqnarray}
-%f &=& 2\,\tan^{-1}\,left(\frac{\sqrt{1+e}}{\sqrt{1-e}}\,\tan \frac{E}{2}\right)
-%\end{eqnarray}
-when solving Kepler's equation is more efficient than evaluating it separately
-within Theano.
-This means that we must also provide a method for evaluating the derivative of
-$f$ with respect to $e$ and $M$.
-
+Then, the relevant derivatives can be evaluated using the results ($\sin f$ and $\cos f$) of the forward solve:
+\begin{eqnarray}
+\frac{\dd f}{\dd M} &=&  \frac{\left(1 + e\,\cos f\right)^2}{\left(1-e^2\right)^{3/2}} \\
+\frac{\dd f}{\dd e} &=& \frac{\left(2 + e\,\cos f\right)\,\sin f}{1 - e^2} \quad.
+\end{eqnarray}
+\dfmtodo{Add a plot showing the relative cost of the forward and reverse evaluation.}
 
 \subsection{Transit light curves}
 
@@ -421,6 +437,29 @@ As discussed by \citet{Foreman-Mackey:2017}, this covariance function can be int
 This operation is useful for many exoplanet applications where the datasets are large enough that traditional GP modeling is intractable.
 For example, the time series for a typical short cadence target from the \tess\ mission has a light curve with about 20,000 data points.
 Evaluating a GP model on these data using high-performance general linear algebra libraries would take \dfmtodo{how long?}.
+
+\section{Distributions}
+
+\section{Quadratic limb darkening parameters}
+
+We could follow \citep{Kipping:2013}.
+Alternatively we could sample in $\bvec{q} = (q_1, q_2, q_3)$ with the constraint that $q_1 + q_2 + q3 = 1$
+
+\section{Radius and impact parameter}
+
+A parameterization has been proposed to parameterize the radius ratio $r$ and impact parameter $b$ to be sampled uniformly within the trapezoid $r_\mathrm{min} < r < r_\mathrm{max}$ and $0 < b < 1 + r$ (CITE).
+This parameterization is included within \exoplanet, but implies a non-uniform marginal for radius ratio (\dfmtodo{make plot}) so we recommend parameterizing as
+\begin{eqnarray}
+r &\sim& \mathrm{LogUniform}(r_\mathrm{min},\,r_\mathrm{max}) \\
+b &\sim& \mathrm{Uniform}(0,\,1+r)
+\end{eqnarray}
+which will introduce less bias when inferring radius ratios.
+This can be efficiently sampled using \exoplanet\ and the parameters
+\begin{eqnarray}
+  r &\sim& \mathrm{LogUniform}(r_\mathrm{min},\,r_\mathrm{max}) \\
+  \hat{b} &\sim& \mathrm{Uniform}(0,\,1) \\
+  b &=& \hat{b}\,(1 + r)
+\end{eqnarray}
 
 \section{Examples}
 
@@ -634,19 +673,19 @@ For a real term:
 %k(\tau) = a\,\exp\left(-c\,(t_i - t_j)\right)
 k(\tau) = a\,\exp\left(-c\,\tau\right)
 \end{equation}
-where $\tau = \vert t_i-t_j \vert$.  
+where $\tau = \vert t_i-t_j \vert$.
 The integrated kernel is
 \begin{proof}{celerite-integral}
 k_\Delta(\tau) = \frac{2}{\left(c\,\Delta\right)^2}\,k(\tau)\,
   \begin{cases}
     \cosh(c\,\Delta) - 1 + c\,\Delta-\sinh(c\,\Delta) & \tau = 0 \\
    c(\Delta - \tau) e^{c\tau} + \cosh{(c\tau)} e^{-c(\Delta - \tau)} -1 & 0 < \tau \le \Delta \\
-   \cosh(c\,\Delta) - 1  & \Delta < \tau 
+   \cosh(c\,\Delta) - 1  & \Delta < \tau
     \end{cases}
 \end{proof}
 where $\Delta$ is the integration time.  Note that in the standard
 use case of a single light curve with a single telescope and a
-uniform exposure time, the times of each cadence will be separated 
+uniform exposure time, the times of each cadence will be separated
 by greater than the exposure time, and so the kernel will be
 semi-separable.  However, there is a slight difference in
 the implementation as the $\tau = 0$ term, which corresponds to
@@ -663,8 +702,8 @@ is less so, and is given by:
 S(\omega) = \frac{ac}{\sqrt{2\pi}(c^2 + \omega^2)}  \left(\frac{\sin(\tfrac{1}{2}\omega \Delta)}{\tfrac{1}{2}\omega\Delta}\right)^2.
 \end{equation}
 Note that this is the Fourier transform of the kernel, $k(\tau)$,
-multiplied by the square of a sinc function, $\mathrm{sinc}{(\omega\Delta/2)}$, 
-which results from the convolution of the kernel with a top-hat 
+multiplied by the square of a sinc function, $\mathrm{sinc}{(\omega\Delta/2)}$,
+which results from the convolution of the kernel with a top-hat
 time-integration of half-width $\Delta/2$.  Convolution in Fourier
 space turns into multiplication, and thus the square of the sinc function
 results from taking the square of the Fourier transform to obtain
