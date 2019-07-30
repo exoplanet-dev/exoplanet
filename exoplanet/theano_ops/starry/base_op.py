@@ -23,15 +23,16 @@ class StarryBaseOp(gof.COp):
 
     def c_headers(self, compiler):
         xo = lambda f: "exoplanet/" + f  # NOQA
-        vc = lambda f: "exoplanet/vice/" + f  # NOQA
+        vc = lambda f: "exoplanet/integrate/" + f  # NOQA
         st = lambda f: "exoplanet/starry/" + f  # NOQA
         return [
             xo("theano_helpers.h"),
-            vc("integrate.h"),
+            vc("integrators.h"),
             vc("functors.h"),
             st("ellip.h"),
             st("limbdark.h"),
             st("utils.h"),
+            "vector",
         ]
 
     def c_header_dirs(self, compiler):

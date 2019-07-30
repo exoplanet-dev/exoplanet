@@ -14,16 +14,15 @@ if (APPLY_SPECIFIC(L) != NULL) {
 
 #section support_code_struct
 
-int APPLY_SPECIFIC(limbdark)(
-    PyArrayObject* input0,    // Array of "cl"
-    PyArrayObject* input1,    // Array of impact parameters "b"
-    PyArrayObject* input2,    // Array of radius ratios "r"
-    PyArrayObject* input3,    // Array of line-of-sight position "los"
-    PyArrayObject** output0,  // Flux
-    PyArrayObject** output1,  // dfdcl
-    PyArrayObject** output2,  // dfdb
-    PyArrayObject** output3   // dfdr
-    ) {
+int APPLY_SPECIFIC(limbdark)(PyArrayObject* input0,    // Array of "cl"
+                             PyArrayObject* input1,    // Array of impact parameters "b"
+                             PyArrayObject* input2,    // Array of radius ratios "r"
+                             PyArrayObject* input3,    // Array of line-of-sight position "los"
+                             PyArrayObject** output0,  // Flux
+                             PyArrayObject** output1,  // dfdcl
+                             PyArrayObject** output2,  // dfdb
+                             PyArrayObject** output3   // dfdr
+) {
   using namespace exoplanet;
 
   int success = 0;
@@ -53,18 +52,14 @@ int APPLY_SPECIFIC(limbdark)(
     Nb *= shape[i];
   }
 
-  auto f = allocate_output<DTYPE_OUTPUT_0>(ndim, shape, TYPENUM_OUTPUT_0,
-                                           output0, &success);
-  auto dfdcl = allocate_output<DTYPE_OUTPUT_1>(
-      ndim + ndim_c, &(new_shape[0]), TYPENUM_OUTPUT_1, output1, &success);
-  auto dfdb = allocate_output<DTYPE_OUTPUT_2>(ndim, shape, TYPENUM_OUTPUT_2,
-                                              output2, &success);
-  auto dfdr = allocate_output<DTYPE_OUTPUT_3>(ndim, shape, TYPENUM_OUTPUT_3,
-                                              output3, &success);
+  auto f = allocate_output<DTYPE_OUTPUT_0>(ndim, shape, TYPENUM_OUTPUT_0, output0, &success);
+  auto dfdcl = allocate_output<DTYPE_OUTPUT_1>(ndim + ndim_c, &(new_shape[0]), TYPENUM_OUTPUT_1,
+                                               output1, &success);
+  auto dfdb = allocate_output<DTYPE_OUTPUT_2>(ndim, shape, TYPENUM_OUTPUT_2, output2, &success);
+  auto dfdr = allocate_output<DTYPE_OUTPUT_3>(ndim, shape, TYPENUM_OUTPUT_3, output3, &success);
   if (success) return 1;
 
-  Eigen::Map<Eigen::Matrix<DTYPE_OUTPUT_1, Eigen::Dynamic, Eigen::Dynamic,
-                           Eigen::RowMajor>>
+  Eigen::Map<Eigen::Matrix<DTYPE_OUTPUT_1, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
       dfdcl_mat(dfdcl, Nc, Nb);
   dfdcl_mat.setZero();
 

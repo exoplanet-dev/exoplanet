@@ -44,42 +44,49 @@ class IntegratedLimbDarkOp(StarryBaseOp):
     def make_node(self, *args):
         if len(args) != 11:
             raise ValueError("wrong number of inputs")
-        dtype = theano.config.floatX
         in_args = [tt.as_tensor_variable(a) for a in args]
         out_args = [
             in_args[1].type(),
             tt.TensorType(
                 dtype=theano.config.floatX,
-                broadcastable=[False] * (in_args[1].ndim + 1),
+                broadcastable=[False] * (in_args[0].ndim + in_args[1].ndim),
             )(),
             in_args[1].type(),
-            in_args[2].type(),
-            in_args[3].type(),
-            in_args[4].type(),
-            in_args[5].type(),
-            in_args[6].type(),
-            in_args[7].type(),
+            in_args[1].type(),
+            in_args[1].type(),
+            in_args[1].type(),
+            in_args[1].type(),
+            in_args[1].type(),
+            in_args[1].type(),
+            in_args[1].type(),
             tt.lscalar().type(),
         ]
         return gof.Apply(self, in_args, out_args)
 
     def infer_shape(self, node, shapes):
+        shape = shapes[1]
         return (
-            shapes[1],
+            shape,
             list(shapes[0]) + list(shapes[1]),
-            shapes[1],
-            shapes[2],
-            shapes[3],
-            shapes[4],
-            shapes[5],
-            shapes[6],
-            shapes[7],
+            shape,
+            shape,
+            shape,
+            shape,
+            shape,
+            shape,
+            shape,
+            shape,
             (),
         )
 
+    def c_compile_args(self, compiler):
+        args = super(IntegratedLimbDarkOp, self).c_compile_args(compiler)
+        args.append("-DLIMBDARK_NC={0}".format(self.Nc))
+        return args
+
     def grad(self, inputs, gradients):
-        c, r, x, xt, xtt, y, yt, ytt, z, zt, dt = inputs
-        f, dfdcl, dfdr, dfdx, dfdxt, dfdxtt, dfdy, dfdyt, dfdytt, neval = self(
+        c = inputs[0]
+        f, dcl, dr, dt, dn, daome2, de, dsinw, dcosw, dcosi, neval = self(
             *inputs
         )
         bf = gradients[0]
@@ -89,29 +96,21 @@ class IntegratedLimbDarkOp(StarryBaseOp):
                     "can't propagate gradients wrt parameter {0}".format(i + 1)
                 )
         bc = tt.sum(
-            tt.reshape(bf, (1, bf.size))
-            * tt.reshape(dfdcl, (c.size, bf.size)),
+            tt.reshape(bf, (1, bf.size)) * tt.reshape(dcl, (c.size, bf.size)),
             axis=-1,
         )
-        br = bf * dfdr
-        bx = bf * dfdx
-        bxt = bf * dfdxt
-        bxtt = bf * dfdxtt
-        by = bf * dfdy
-        byt = bf * dfdyt
-        bytt = bf * dfdytt
         return (
             bc,
-            br,
-            bx,
-            bxt,
-            bxtt,
-            by,
-            byt,
-            bytt,
-            tt.zeros_like(z),
-            tt.zeros_like(zt),
-            tt.zeros_like(dt),
+            bf * dr,
+            bf * dt,
+            bf * dn,
+            bf * daome2,
+            bf * de,
+            bf * dsinw,
+            bf * dcosw,
+            tt.zeros_like(dcosi),
+            bf * dcosi,
+            tt.zeros_like(bf),
         )
 
     def R_op(self, inputs, eval_points):
