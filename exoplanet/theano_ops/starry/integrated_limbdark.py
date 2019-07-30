@@ -18,7 +18,7 @@ class IntegratedLimbDarkOp(StarryBaseOp):
         min_depth=theano.scalar.int32,
         max_depth=theano.scalar.int32,
         Nc=theano.scalar.int32,
-        include_contacts=theano.scalar.bool,
+        circular=theano.scalar.bool,
     )
 
     __props__ = ()
@@ -31,14 +31,14 @@ class IntegratedLimbDarkOp(StarryBaseOp):
         min_depth=0,
         max_depth=50,
         Nc=-1,
-        include_contacts=False,
+        circular=False,
         **kwargs
     ):
         self.tol = float(tol)
         self.min_depth = max(0, int(min_depth))
         self.max_depth = max(self.min_depth + 1, int(max_depth))
         self.Nc = int(Nc)
-        self.include_contacts = bool(include_contacts)
+        self.circular = bool(circular)
         super(IntegratedLimbDarkOp, self).__init__()
 
     def make_node(self, *args):
@@ -47,6 +47,7 @@ class IntegratedLimbDarkOp(StarryBaseOp):
         in_args = [tt.as_tensor_variable(a) for a in args]
         out_args = [
             in_args[1].type(),
+            tt.lscalar().type(),
             tt.TensorType(
                 dtype=theano.config.floatX,
                 broadcastable=[False] * (in_args[0].ndim + in_args[1].ndim),
@@ -56,37 +57,49 @@ class IntegratedLimbDarkOp(StarryBaseOp):
             in_args[1].type(),
             in_args[1].type(),
             in_args[1].type(),
-            in_args[1].type(),
-            in_args[1].type(),
-            in_args[1].type(),
-            tt.lscalar().type(),
         ]
+        if self.circular:
+            out_args += [
+                tt.lscalar().type(),
+                tt.lscalar().type(),
+                tt.lscalar().type(),
+            ]
+        else:
+            out_args += [
+                in_args[1].type(),
+                in_args[1].type(),
+                in_args[1].type(),
+            ]
         return gof.Apply(self, in_args, out_args)
 
     def infer_shape(self, node, shapes):
         shape = shapes[1]
-        return (
+        out_shapes = [
             shape,
+            (),
             list(shapes[0]) + list(shapes[1]),
             shape,
             shape,
             shape,
             shape,
             shape,
-            shape,
-            shape,
-            shape,
-            (),
-        )
+        ]
+        if self.circular:
+            out_shapes += [(), (), ()]
+        else:
+            out_shapes += [shape, shape, shape]
+        return tuple(out_shapes)
 
     def c_compile_args(self, compiler):
         args = super(IntegratedLimbDarkOp, self).c_compile_args(compiler)
         args.append("-DLIMBDARK_NC={0}".format(self.Nc))
+        if self.circular:
+            args.append("-DLIMBDARK_CIRCULAR")
         return args
 
     def grad(self, inputs, gradients):
         c = inputs[0]
-        f, dcl, dr, dt, dn, daome2, de, dsinw, dcosw, dcosi, neval = self(
+        f, neval, dcl, dt, dr, dn, daome2, dcosi, de, dsinw, dcosw = self(
             *inputs
         )
         bf = gradients[0]
@@ -99,19 +112,27 @@ class IntegratedLimbDarkOp(StarryBaseOp):
             tt.reshape(bf, (1, bf.size)) * tt.reshape(dcl, (c.size, bf.size)),
             axis=-1,
         )
-        return (
+        results = [
             bc,
-            bf * dr,
+            tt.zeros_like(bf),
             bf * dt,
+            bf * dr,
             bf * dn,
             bf * daome2,
-            bf * de,
-            bf * dsinw,
-            bf * dcosw,
             tt.zeros_like(dcosi),
             bf * dcosi,
-            tt.zeros_like(bf),
-        )
+        ]
+
+        if self.circular:
+            results += [
+                tt.zeros_like(inputs[-3]),
+                tt.zeros_like(inputs[-2]),
+                tt.zeros_like(inputs[-1]),
+            ]
+        else:
+            results += [bf * de, bf * dsinw, bf * dcosw]
+
+        return tuple(results)
 
     def R_op(self, inputs, eval_points):
         if eval_points[0] is None:
