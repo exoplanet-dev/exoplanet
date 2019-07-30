@@ -27,7 +27,7 @@ class IntegratedLimbDarkOp(StarryBaseOp):
 
     def __init__(
         self,
-        tol=1e-6,
+        tol=1e-5,
         min_depth=0,
         max_depth=50,
         Nc=-1,
@@ -113,24 +113,28 @@ class IntegratedLimbDarkOp(StarryBaseOp):
             axis=-1,
         )
         results = [
-            bc,
-            tt.zeros_like(bf),
-            bf * dt,
-            bf * dr,
-            bf * dn,
-            bf * daome2,
-            tt.zeros_like(dcosi),
-            bf * dcosi,
+            tt.reshape(bc, inputs[0].shape),
+            tt.zeros_like(inputs[1]),
+            tt.reshape(bf * dt, inputs[2].shape),
+            tt.reshape(bf * dr, inputs[3].shape),
+            tt.reshape(bf * dn, inputs[4].shape),
+            tt.reshape(bf * daome2, inputs[5].shape),
+            tt.zeros_like(inputs[6]),
+            tt.reshape(bf * dcosi, inputs[7].shape),
         ]
 
         if self.circular:
             results += [
-                tt.zeros_like(inputs[-3]),
-                tt.zeros_like(inputs[-2]),
-                tt.zeros_like(inputs[-1]),
+                tt.zeros_like(inputs[8]),
+                tt.zeros_like(inputs[9]),
+                tt.zeros_like(inputs[10]),
             ]
         else:
-            results += [bf * de, bf * dsinw, bf * dcosw]
+            results += [
+                tt.reshape(bf * de, inputs[8].shape),
+                tt.reshape(bf * dsinw, inputs[9].shape),
+                tt.reshape(bf * dcosw, inputs[10].shape),
+            ]
 
         return tuple(results)
 

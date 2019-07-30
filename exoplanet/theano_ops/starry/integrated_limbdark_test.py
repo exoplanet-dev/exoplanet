@@ -2,7 +2,6 @@
 
 from __future__ import division, print_function
 
-import pytest
 import numpy as np
 
 import theano
@@ -96,13 +95,13 @@ class TestCircIntegratedLimbDark(utt.InferShapeTester):
     def setUp(self):
         super(TestCircIntegratedLimbDark, self).setUp()
 
-        class _DemoClass(IntegratedLimbDarkOp):
+        class _DummyClass(IntegratedLimbDarkOp):
             def __init__(self, *args, **kwargs):
                 kwargs["circular"] = True
-                super(_DemoClass, self).__init__(*args, **kwargs)
+                super(_DummyClass, self).__init__(*args, **kwargs)
 
-        self.op_class = _DemoClass
-        self.op = IntegratedLimbDarkOp(Nc=3, circular=True)
+        self.op_class = _DummyClass
+        self.op = _DummyClass(Nc=3)
 
     def get_args(self):
         np.random.seed(1234)
@@ -168,6 +167,6 @@ class TestCircIntegratedLimbDark(utt.InferShapeTester):
     def test_grad(self):
         _, args, in_args = self.get_args()
         func = lambda *args: self.op(  # NOQA
-            *([args[0]] + [in_args[1]] + list(args[1:]) + [0, 0, 0])
+            *([args[0]] + [in_args[1]] + list(args[1:]) + [0.0, 0.0, 0.0])
         )[0]
         utt.verify_grad(func, [in_args[0]] + list(in_args[2:-3]), eps=1e-8)

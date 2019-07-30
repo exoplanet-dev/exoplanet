@@ -22,6 +22,8 @@ import theano.tensor as tt
 from theano.ifelse import ifelse
 from theano.gof import MissingInputError
 
+from ..utils import eval_in_model
+
 
 class Term(object):
     """The abstract base "term" that is the superclass of all other terms
@@ -60,7 +62,12 @@ class Term(object):
             )
             a_real, a_comp = func()
         except MissingInputError:
-            return -1
+            try:
+                a_real, a_comp = eval_in_model(
+                    [self.coefficients[0], self.coefficients[2]]
+                )
+            except (MissingInputError, TypeError):
+                return -1
         a_real = np.atleast_1d(a_real)
         a_comp = np.atleast_1d(a_comp)
         return len(a_real) + 2 * len(a_comp)
