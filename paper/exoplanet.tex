@@ -442,13 +442,71 @@ Evaluating a GP model on these data using high-performance general linear algebr
 
 \section{Quadratic limb darkening parameters}
 
-We could follow \citep{Kipping:2013}.
-Alternatively we could sample in $\bvec{q} = (q_1, q_2, q_3)$ with the constraint that $q_1 + q_2 + q3 = 1$
+\exoplanet\ has support for limb darkening profiles of arbitrary order as described in LIMB DARK, but a commonly used model is the quadratic limb darkening model so exoplanet includes some features to make this easier.
+The algorithm for efficiently evaluating the light curve for a transit of a quadratically limb darkened star was first presented by \citet{Mandel:2002}, but the light curve model in \exoplanet\ is evaluated following Agol et al.\ including the performance and numerical stability improvements described in that paper.
+The form of the limb darkening law is
+\begin{equation}
+I(\mu)/I(1) = 1 - u_1\,(1 - \mu) - u_2\,(1 - \mu)^2
+\end{equation}
+where $\mu = \sqrt{1 - b^2}$ and $b$ is the distance from the center of the star in units where the stellar radius is one.
+For this limb darkening profile to be everywhere positive and monotonically decreasing as a function of $b$, the parameters $u_1$ and $u_2$ must satisfy the following relations
+\begin{eqnarray}
+u_1 + u_2 &<& 1 \\
+u_1 &>& 0 \\
+u_1 + 2\,u_2 &>& 0
+\end{eqnarray}
+It has been demonstrated \citep[by][]{Kipping:2013} that these constraints can be enforced by reparameterizing as
+\begin{eqnarray}
+q_1 &=& (u_1 + u_2)^2 \\
+q_2 &=& \frac{u_1}{2\,(u_1 + u_2)}
+\end{eqnarray}
+with the simpler constraints
+\begin{eqnarray}
+0 < q_1 < 1 \\
+0 < q_2 < 1
+\end{eqnarray}
+\citet{Kipping:2013} argues that this is an ``uninformative'' parameterization because the log determinant of the Jacobian of the transformation is zero, \dfmtodo{discuss details of this:} but it's worth noting that the marginal priors $p(u_1)$ and $p(u_2)$ are not uniform.
+
+In \exoplanet, we make one further change of variables to
+\begin{eqnarray}
+\tilde{q} &=& \log(q) - \log(1-q)
+\end{eqnarray}
+where $\tilde{q}$ has support across the full real line.
+This is not an uninformative change of variables so we must take this into account by adding the log determinant of the Jacobian to the log probability.
+For this change of variables, the correction is
+\begin{eqnarray}
+\log\left(\frac{\dd q}{\dd\tilde{q}}\right) &=& \log q + \log(1 - q) \quad.
+\end{eqnarray}
 
 \section{Radius and impact parameter}
 
 A parameterization has been proposed to parameterize the radius ratio $r$ and impact parameter $b$ to be sampled uniformly within the trapezoid $r_\mathrm{min} < r < r_\mathrm{max}$ and $0 < b < 1 + r$ (CITE).
-This parameterization is included within \exoplanet, but implies a non-uniform marginal for radius ratio (\dfmtodo{make plot}) so we recommend parameterizing as
+This parameterization is included within \exoplanet, but implies a non-uniform marginal for radius ratio (\dfmtodo{make plot}).
+
+The marginal density for the Espinoza distribution is
+\begin{eqnarray}
+p(r\,b) &=& \left\{\begin{array}{ll}
+1/A & \mathrm{if}\,r_\mathrm{min} \le r < r_\mathrm{max}\,\mathrm{and}\,b\le 1+r\\
+0 & \mathrm{otherwise}
+\end{array} \right.
+\end{eqnarray}
+where
+\begin{eqnarray}
+A &=& \int_{r_\mathrm{min}}^{r_\mathrm{max}} \int_{0}^{1+r}\dd b\,\dd r \\
+&=& \int_{r_\mathrm{min}}^{r_\mathrm{max}} (1 + r)\,\dd r\\
+&=& (r_\mathrm{max} - r_\mathrm{min}) + \frac{1}{2}\,(r_\mathrm{max}^2 - r_\mathrm{min}^2)
+\end{eqnarray}
+therefore
+\begin{eqnarray}
+p(r) &=& \frac{1}{A}\,\int_{0}^{1+r}\dd b \\
+&=& \left\{\begin{array}{ll}
+  (1+r)/A & \mathrm{if}\,r_\mathrm{min} \le r < r_\mathrm{max} \\
+  0 & \mathrm{otherwise}
+\end{array}\right.
+\end{eqnarray}
+This means that the inference will be biased towards measuring large radius planets.
+Instead, we argue that the less informative prior would be uniform in log radius or log radius ratio.
+Therefore, we recommend reparameterizing as
 \begin{eqnarray}
 r &\sim& \mathrm{LogUniform}(r_\mathrm{min},\,r_\mathrm{max}) \\
 b &\sim& \mathrm{Uniform}(0,\,1+r)
@@ -691,7 +749,7 @@ semi-separable.  However, there is a slight difference in
 the implementation as the $\tau = 0$ term, which corresponds to
 the diagonal of the covariance matrix, has an extra term,
 $\frac{2a}{(c\Delta)^2}(c\Delta-\sinh(c\Delta))$.
-This additional term is negative, but can simply be added to the white 
+This additional term is negative, but can simply be added to the white
 noise component of the covariance matrix when implementing the \celerite\
 kernel.   Given that the kernel is positive, the matrix will still
 be positive definite.
@@ -759,7 +817,7 @@ k_\Delta(\tau) &= A\exp\left(-c\,\tau\right)\cos\left(d\,\tau\right) + B\exp\lef
 \end{align}
 Note that in the limit of $b = d = 0$, this kernel reverts to the real kernel.
 As with the real case, the kernel is only semi-separable when exposures
-do not overlap in time, i.e. $\vert t_i - t_j \vert > \Delta$ for all $i,j$, while the diagonal 
+do not overlap in time, i.e. $\vert t_i - t_j \vert > \Delta$ for all $i,j$, while the diagonal
 components of the covariance matrix require adding the extra term:
 \begin{equation}
 \frac{2}{ \Delta^2(c^2+d^2)^2} \left\{(ac+bd)(c^2+d^2)\Delta
@@ -769,7 +827,7 @@ As with the real case, the power spectrum of the time-integrated kernel simply
 requires multiplication by the sinc-squared function:
 \begin{equation}
 S(\omega) = \sqrt{\frac{2}{\pi}} \left(\frac{(ac+bd)(c^2+d^2)+(ac-bd)\omega^2}
-{\omega^4+2(c^2-d^2)\omega^2+(c^2+d^2)^2}\right) 
+{\omega^4+2(c^2-d^2)\omega^2+(c^2+d^2)^2}\right)
 \left( \frac{\sin(\tfrac{1}{2}\omega \Delta)}{\tfrac{1}{2}\omega\Delta}\right)^2.
 \end{equation}
 
@@ -779,8 +837,8 @@ $a = S_0\omega_0 Q, b=a/\gamma, c=\omega_0/(2Q)$ and $d=c\gamma$ in terms of a c
 frequency, $\omega_0$, a quality factor, $Q > \tfrac{1}{2}$, and a normalization
 factor, $S_0$, where $\gamma = \sqrt{4Q^2-1}$;  see \citet{Foreman-Mackey:2017} for the
 expressions when $Q \le \tfrac{1}{2}$.
-The kernels become smoother and lower amplitude for longer integration times, 
-while the power spectra are suppressed at high frequency, and show a series of 
+The kernels become smoother and lower amplitude for longer integration times,
+while the power spectra are suppressed at high frequency, and show a series of
 zeros at integer multiples of the sampling frequency, which is a consequence
 of aliasing at these frequencies.
 

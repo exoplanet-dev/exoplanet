@@ -296,17 +296,17 @@ class IntegratedLimbDarkLightCurve(object):
         op = IntegratedLimbDarkOp(**kwargs)
         res = op(
             self.c_norm,
-            rgrid / orbit.r_star,
+            texp,
             orbit._warp_times(t) - orbit.tref,
+            rgrid / orbit.r_star,
             n,
             aome2,
+            sini,
+            cosi,
             e,
             sinw,
             cosw,
-            sini,
-            cosi,
-            texp,
         )
         if return_num_eval:
-            return res[0], res[-1]
+            return res[0], res[1]
         return res[0]
