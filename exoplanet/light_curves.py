@@ -15,6 +15,7 @@ import theano
 import theano.tensor as tt
 from theano.gof import MissingInputError
 
+from .utils import eval_in_model
 from .citations import add_citations_to_model
 from .theano_ops.starry.get_cl import GetClOp
 from .theano_ops.starry.limbdark import LimbDarkOp
@@ -219,6 +220,10 @@ class IntegratedLimbDarkLightCurve(object):
             func = theano.function([], self.c_norm.size)
             return int(func())
         except MissingInputError:
+            pass
+        try:
+            return int(eval_in_model(self.c_norm.size))
+        except (MissingInputError, TypeError):
             return -1
 
     def get_light_curve(
@@ -283,13 +288,22 @@ class IntegratedLimbDarkLightCurve(object):
             )[0]
 
         n = pad(orbit.n)
-        aome2 = pad(-orbit.a * (1 - orbit.ecc ** 2))
-        e = pad(orbit.ecc)
-        sinw = pad(orbit.sin_omega)
-        cosw = pad(orbit.cos_omega)
         sini = pad(orbit.sin_incl)
         cosi = pad(orbit.cos_incl)
         texp = tt.as_tensor_variable(texp) + tt.zeros_like(rgrid)
+
+        if orbit.ecc is None:
+            aome2 = pad(-orbit.a)
+            e = 0.0
+            sinw = 0.0
+            cosw = 0.0
+            kwargs["circular"] = True
+        else:
+            aome2 = pad(-orbit.a * (1 - orbit.ecc ** 2))
+            e = pad(orbit.ecc)
+            sinw = pad(orbit.sin_omega)
+            cosw = pad(orbit.cos_omega)
+            kwargs["circular"] = False
 
         # Apply the time integrated op
         kwargs["Nc"] = kwargs.get("Nc", self.num_cl)
