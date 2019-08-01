@@ -273,9 +273,10 @@ class IntegratedLimbDarkLightCurve(object):
         t = tt.as_tensor_variable(t)
 
         def pad(arg):
-            return tt.shape_padleft(arg, t.ndim) + tt.shape_padright(
-                tt.zeros_like(t), arg.ndim
-            )
+            return arg
+            # return tt.shape_padleft(arg, t.ndim) + tt.shape_padright(
+            #     tt.zeros_like(t), arg.ndim
+            # )
 
         rgrid = pad(r)
         if texp is None:
@@ -290,7 +291,7 @@ class IntegratedLimbDarkLightCurve(object):
         n = pad(orbit.n)
         sini = pad(orbit.sin_incl)
         cosi = pad(orbit.cos_incl)
-        texp = tt.as_tensor_variable(texp) + tt.zeros_like(rgrid)
+        # texp = tt.as_tensor_variable(texp) + tt.zeros_like(rgrid)
 
         if orbit.ecc is None:
             aome2 = pad(-orbit.a)
@@ -306,12 +307,14 @@ class IntegratedLimbDarkLightCurve(object):
             kwargs["circular"] = False
 
         # Apply the time integrated op
+        tgrid = tt.transpose(orbit._warp_times(t) - orbit.tref)
+        texp = tt.as_tensor_variable(texp) + tt.zeros_like(tgrid)
         kwargs["Nc"] = kwargs.get("Nc", self.num_cl)
         op = IntegratedLimbDarkOp(**kwargs)
         res = op(
             self.c_norm,
             texp,
-            orbit._warp_times(t) - orbit.tref,
+            tgrid,
             rgrid / orbit.r_star,
             n,
             aome2,

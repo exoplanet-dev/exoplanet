@@ -166,9 +166,9 @@ struct simpson_fixed {
                             const YScalar& ym, const YScalar& yp, unsigned points) {
     points = std::max<unsigned>(3, points + (points + 1) % 2);  // points must be odd
 
-    auto dx = (upper - lower) / (points - 1);
-    auto x = lower + dx;
-    auto f = ym;
+    XScalar dx = (upper - lower) / (points - 1);
+    XScalar x = lower + dx;
+    YScalar f = ym;
     for (unsigned i = 1; i < points - 1; ++i) {
       f += (2 + 2 * (i % 2)) * func(x);
       x += dx;
