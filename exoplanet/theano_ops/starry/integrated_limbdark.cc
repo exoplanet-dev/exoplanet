@@ -44,7 +44,7 @@ int APPLY_SPECIFIC(integrated_limbdark)(PyArrayObject* input0,     // cl
   int min_depth = params->min_depth;
   int max_depth = params->max_depth;
 
-  npy_intp Nc = -1, Nt = -1;
+  npy_intp Nc = -1;
   int success = 0;
   auto c = get_input<DTYPE_INPUT_0>(&Nc, input0, &success);
   if (LIMBDARK_NC != Eigen::Dynamic && Nc != LIMBDARK_NC) {
@@ -52,32 +52,33 @@ int APPLY_SPECIFIC(integrated_limbdark)(PyArrayObject* input0,     // cl
     return 1;
   }
 
-  auto dt = get_input<DTYPE_INPUT_1>(&Nt, input1, &success);
-  auto t = get_input<DTYPE_INPUT_2>(&Nt, input2, &success);
-  auto r = get_input<DTYPE_INPUT_3>(&Nt, input3, &success);
-  auto n = get_input<DTYPE_INPUT_4>(&Nt, input4, &success);
-  auto aome2 = get_input<DTYPE_INPUT_5>(&Nt, input5, &success);
-  auto sini = get_input<DTYPE_INPUT_6>(&Nt, input6, &success);
-  auto cosi = get_input<DTYPE_INPUT_7>(&Nt, input7, &success);
+  npy_intp Np = -1, Nt = -1;
+  // npy_intp Nt = -1;
+  auto dt = get_matrix_input<DTYPE_INPUT_1>(&Np, &Nt, input1, &success);
+  auto t = get_matrix_input<DTYPE_INPUT_2>(&Np, &Nt, input2, &success);
+
+  auto r = get_input<DTYPE_INPUT_3>(&Np, input3, &success);
+  auto n = get_input<DTYPE_INPUT_4>(&Np, input4, &success);
+  auto aome2 = get_input<DTYPE_INPUT_5>(&Np, input5, &success);
+  auto sini = get_input<DTYPE_INPUT_6>(&Np, input6, &success);
+  auto cosi = get_input<DTYPE_INPUT_7>(&Np, input7, &success);
 #ifndef LIMBDARK_CIRCULAR
-  auto e = get_input<DTYPE_INPUT_8>(&Nt, input8, &success);
-  auto sinw = get_input<DTYPE_INPUT_9>(&Nt, input9, &success);
-  auto cosw = get_input<DTYPE_INPUT_10>(&Nt, input10, &success);
+  auto e = get_input<DTYPE_INPUT_8>(&Np, input8, &success);
+  auto sinw = get_input<DTYPE_INPUT_9>(&Np, input9, &success);
+  auto cosw = get_input<DTYPE_INPUT_10>(&Np, input10, &success);
 #endif
   if (success) return 1;
 
-  npy_intp ndim = PyArray_NDIM(input1);
-  npy_intp* dims = PyArray_DIMS(input1);
-  std::vector<npy_intp> shape(ndim + 1);
-  shape[0] = Nc;
-  for (npy_intp i = 0; i < ndim; ++i) shape[i + 1] = dims[i];
+  int ndim = 2;
+  npy_intp dims[] = {Np, Nt};
+  npy_intp dims_c[] = {Nc, Np, Nt};
 
   npy_intp empty[] = {};
   auto f = allocate_output<DTYPE_OUTPUT_0>(ndim, dims, TYPENUM_OUTPUT_0, output0, &success);
   auto num_eval =
       allocate_output<DTYPE_OUTPUT_1>(0, empty, TYPENUM_OUTPUT_1, output1, &success);
   auto dfdcl =
-      allocate_output<DTYPE_OUTPUT_2>(ndim + 1, &(shape[0]), TYPENUM_OUTPUT_2, output2, &success);
+      allocate_output<DTYPE_OUTPUT_2>(ndim + 1, dims_c, TYPENUM_OUTPUT_2, output2, &success);
   auto dfdt = allocate_output<DTYPE_OUTPUT_3>(ndim, dims, TYPENUM_OUTPUT_3, output3, &success);
   auto dfdr = allocate_output<DTYPE_OUTPUT_4>(ndim, dims, TYPENUM_OUTPUT_4, output4, &success);
   auto dfdn = allocate_output<DTYPE_OUTPUT_5>(ndim, dims, TYPENUM_OUTPUT_5, output5, &success);
@@ -95,7 +96,7 @@ int APPLY_SPECIFIC(integrated_limbdark)(PyArrayObject* input0,     // cl
   if (success) return 1;
 
   Eigen::Map<Eigen::Matrix<DTYPE_OUTPUT_2, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
-      dfdcl_mat(dfdcl, Nc, Nt);
+      dfdcl_mat(dfdcl, Nc, Np*Nt);
   dfdcl_mat.setZero();
 
   // Eigen::Map<Eigen::Matrix<DTYPE_INPUT_0, Eigen::Dynamic, 1>> cvec(c, Nc);
@@ -125,52 +126,72 @@ int APPLY_SPECIFIC(integrated_limbdark)(PyArrayObject* input0,     // cl
   integrate::CircLimbDarkFunctor<Diff, Scalar> func(APPLY_SPECIFIC(L), cvec);
 #endif
 
-  for (npy_intp i = 0; i < Nt; ++i) {
-    auto t_ = Diff(t[i], n_grad, 0);
-    auto r_ = Diff(r[i], n_grad, 1);
-    auto n_ = Diff(n[i], n_grad, 2);
-    auto aome2_ = Diff(aome2[i], n_grad, 3);
-    auto sini_ = Diff(sini[i], n_grad, 0);
-    sini_.derivatives().setZero();  // This gradient is always zero
-    auto cosi_ = Diff(cosi[i], n_grad, 4);
+  auto t_ = Diff(t[0], n_grad, 0);
+  auto r_ = Diff(r[0], n_grad, 1);
+  auto n_ = Diff(n[0], n_grad, 2);
+  auto aome2_ = Diff(aome2[0], n_grad, 3);
+  auto sini_ = Diff(sini[0], n_grad, 0);
+  sini_.derivatives().setZero();  // This gradient is always zero
+  auto cosi_ = Diff(cosi[0], n_grad, 4);
 
 #ifndef LIMBDARK_CIRCULAR
-    auto e_ = Diff(e[i], n_grad, 5);
-    auto sinw_ = Diff(sinw[i], n_grad, 6);
-    auto cosw_ = Diff(cosw[i], n_grad, 7);
+  auto e_ = Diff(e[0], n_grad, 5);
+  auto sinw_ = Diff(sinw[0], n_grad, 6);
+  auto cosw_ = Diff(cosw[0], n_grad, 7);
 #endif
 
-    Diff xm = t_ - 0.5 * dt[i];
-    Diff xp = t_ + 0.5 * dt[i];
+  npy_intp ind = 0;
+  for (npy_intp i = 0; i < Np; ++i) {
+    r_.value() = r[i];
+    n_.value() = n[i];
+    aome2_.value() = aome2[i];
+    sini_.value() = sini[i];
+    cosi_.value() = cosi[i];
 
 #ifndef LIMBDARK_CIRCULAR
-    func.set_parameters(n_, aome2_, e_, sinw_, cosw_, sini_, cosi_, r_);
-    Diff val = integrator.operator()<Diff, Diff, Scalar, integrate::LimbDarkFunctor<Diff, Scalar>>(
-                   func, xm, xp, tol, max_depth, min_depth) /
-               dt[i];
+    e_.value() = e[i];
+    sinw_.value() = sinw[i];
+    cosw_.value() = cosw[i];
+#endif
+
+    for (npy_intp j = 0; j < Nt; ++j) {
+      t_.value() = t[ind];
+
+      Diff xm = t_ - 0.5 * dt[ind];
+      Diff xp = t_ + 0.5 * dt[ind];
+
+#ifndef LIMBDARK_CIRCULAR
+      func.set_parameters(n_, aome2_, e_, sinw_, cosw_, sini_, cosi_, r_);
+      Diff val = integrator.operator()<Diff, Diff, Scalar, integrate::LimbDarkFunctor<Diff, Scalar>>(
+                    func, xm, xp, tol, max_depth, min_depth) /
+                dt[i];
 #else
-    func.set_parameters(n_, aome2_, sini_, cosi_, r_);
-    Diff val = integrator.operator()<Diff, Diff, Scalar, integrate::CircLimbDarkFunctor<Diff, Scalar>>(
-                   func, xm, xp, tol, max_depth, min_depth) /
-               dt[i];
+      func.set_parameters(n_, aome2_, sini_, cosi_, r_);
+      Diff val = integrator.operator()<Diff, Diff, Scalar, integrate::CircLimbDarkFunctor<Diff, Scalar>>(
+                    func, xm, xp, tol, max_depth, min_depth) /
+                dt[i];
 #endif
 
-    f[i] = val.value();
-    auto grad = val.derivatives();
+      f[ind] = val.value();
 
-    dfdt[i] = grad(0);
-    dfdr[i] = grad(1);
-    dfdn[i] = grad(2);
-    dfdaome2[i] = grad(3);
-    dfdcosi[i] = grad(4);
+      // auto grad = val.derivatives();
+
+      // dfdt[ind] = grad(0);
+      // dfdr[ind] = grad(1);
+      // dfdn[ind] = grad(2);
+      // dfdaome2[ind] = grad(3);
+      // dfdcosi[ind] = grad(4);
 
 #ifndef LIMBDARK_CIRCULAR
-    dfde[i] = grad(5);
-    dfdsinw[i] = grad(6);
-    dfdcosw[i] = grad(7);
+      // dfde[ind] = grad(5);
+      // dfdsinw[ind] = grad(6);
+      // dfdcosw[ind] = grad(7);
 #endif
 
-    dfdcl_mat.col(i) = grad.tail(Nc).transpose();
+      // dfdcl_mat.col(ind) = grad.tail(Nc).transpose();
+
+      ind++;
+    }
   }
 
 #ifdef LIMBDARK_CIRCULAR
