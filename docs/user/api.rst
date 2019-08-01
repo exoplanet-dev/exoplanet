@@ -54,7 +54,9 @@ Distributions
 -------------
 
 .. autoclass:: exoplanet.distributions.UnitVector
+.. autoclass:: exoplanet.distributions.UnitUniform
 .. autoclass:: exoplanet.distributions.Angle
+.. autoclass:: exoplanet.distributions.Periodic
 .. autoclass:: exoplanet.distributions.QuadLimbDark
 .. autoclass:: exoplanet.distributions.RadiusImpact
 .. autofunction:: exoplanet.distributions.get_joint_radius_impact

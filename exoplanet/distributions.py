@@ -5,6 +5,7 @@ from __future__ import division, print_function
 __all__ = [
     "UnitVector",
     "Angle",
+    "UnitUniform",
     "RadiusImpact",
     "QuadLimbDark",
     "get_joint_radius_impact",
@@ -56,7 +57,16 @@ class Angle(pm.Continuous):
     """
 
     def __init__(self, *args, **kwargs):
-        kwargs["transform"] = kwargs.pop("transform", tr.angle)
+        transform = kwargs.pop("transform", None)
+        if transform is None:
+            if "regularized" in kwargs:
+                transform = tr.AngleTransform(
+                    regularized=kwargs.pop("regularized")
+                )
+            else:
+                transform = tr.angle
+        kwargs["transform"] = transform
+
         shape = kwargs.get("shape", None)
         if shape is None:
             testval = 0.0
@@ -78,6 +88,88 @@ class Angle(pm.Continuous):
 
     def logp(self, value):
         return tt.zeros_like(value)
+
+
+class Periodic(pm.Continuous):
+    """An periodic parameter in a given range
+
+    Like the :class:`Angle` distribution, the actual sampling is performed in
+    a two dimensional vector space ``(sin(theta), cos(theta))`` and then
+    transformed into the range ``[lower, upper)``.
+
+    Args:
+        lower: The lower bound on the range.
+        upper: The upper bound on the range.
+
+    """
+
+    def __init__(self, lower=0, upper=1, **kwargs):
+        self.lower = lower
+        self.upper = upper
+
+        transform = kwargs.pop("transform", None)
+        if transform is None:
+            transform = tr.PeriodicTransform(
+                lower=lower,
+                upper=upper,
+                regularized=kwargs.pop("regularized", 10.0),
+            )
+        kwargs["transform"] = transform
+
+        shape = kwargs.get("shape", None)
+        if shape is None:
+            testval = 0.5 * (lower + upper)
+        else:
+            testval = 0.5 * (lower + upper) + np.zeros(shape)
+        kwargs["testval"] = kwargs.pop("testval", testval)
+        super(Periodic, self).__init__(**kwargs)
+
+    def _random(self, size=None):
+        return np.random.uniform(self.lower, self.upper, size)
+
+    def random(self, point=None, size=None):
+        return generate_samples(
+            self._random,
+            dist_shape=self.shape,
+            broadcast_shape=self.shape,
+            size=size,
+        )
+
+    def logp(self, value):
+        return tt.zeros_like(value)
+
+
+class UnitUniform(pm.Flat):
+    """A uniform distribution between zero and one
+
+    This can sometimes get better performance than ``pm.Uniform.dist(0, 1)``.
+
+    """
+
+    def __init__(self, *args, **kwargs):
+        kwargs["transform"] = kwargs.pop(
+            "transform", pm.distributions.transforms.logodds
+        )
+
+        shape = kwargs.get("shape", None)
+        if shape is None:
+            testval = 0.5
+        else:
+            testval = 0.5 + np.zeros(shape)
+        kwargs["testval"] = kwargs.pop("testval", testval)
+
+        super(UnitUniform, self).__init__(*args, **kwargs)
+
+    def _random(self, size=None):
+        return np.random.uniform(0, 1, size)
+
+    def random(self, point=None, size=None):
+        return generate_samples(
+            self._random,
+            dist_shape=self.shape,
+            broadcast_shape=self.shape,
+            size=size,
+        )
 
 
 class QuadLimbDark(pm.Flat):

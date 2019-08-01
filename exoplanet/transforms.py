@@ -64,7 +64,7 @@ unit_vector = UnitVectorTransform()
 
 
 class AngleTransform(tr.Transform):
-    """An angle transformation for PyMC3
+    """An angle transformation
 
     The variable is augmented to sample an isotropic 2D normal and the angle
     is given by the arctan of the ratio of the two coordinates. This will have
@@ -103,6 +103,52 @@ class AngleTransform(tr.Transform):
 
 
 angle = AngleTransform()
+
+
+class PeriodicTransform(tr.Transform):
+    """An periodic transformation
+
+    This extends the :class:`Angle` transform to have a uniform distribution
+    between ``lower`` and ``upper``.
+
+    Args:
+        lower: The lower bound of the range.
+        upper: The upper bound of the range.
+        regularized: The amplitude of the regularization term. If ``None``,
+            no regularization is applied. This has no effect on the
+            distribution over the transformed parameter, but it can make
+            sampling more efficient in some cases.
+
+    """
+
+    name = "periodic"
+
+    def __init__(self, lower=0, upper=1, **kwargs):
+        self.mid = tt.as_tensor_variable(0.5 * (lower + upper))
+        self.delta = tt.as_tensor_variable(0.5 * (upper - lower) / np.pi)
+        self.mid_ = 0.5 * (lower + upper)
+        self.delta_ = 0.5 * (upper - lower) / np.pi
+        self.regularized = kwargs.pop("regularized", 10.0)
+        super(PeriodicTransform, self).__init__(**kwargs)
+
+    def backward(self, y):
+        return self.mid + self.delta * tt.arctan2(y[0], y[1])
+
+    def forward(self, x):
+        a = (x - self.mid) / self.delta
+        return tt.concatenate(
+            (tt.shape_padleft(tt.sin(a)), tt.shape_padleft(tt.cos(a))), axis=0
+        )
+
+    def forward_val(self, x, point=None):
+        a = (x - self.mid_) / self.delta_
+        return np.array([np.sin(a), np.cos(a)])
+
+    def jacobian_det(self, y):
+        sm = tt.sum(tt.square(y), axis=0)
+        if self.regularized is not None:
+            return self.regularized * tt.log(sm) - 0.5 * sm
+        return -0.5 * sm
 
 
 class QuadLimbDarkTransform(tr.Transform):
