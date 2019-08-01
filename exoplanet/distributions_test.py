@@ -8,7 +8,14 @@ from scipy.stats import kstest
 
 import pymc3 as pm
 
-from .distributions import UnitVector, Angle, QuadLimbDark, RadiusImpact
+from .distributions import (
+    UnitVector,
+    UnitUniform,
+    Angle,
+    QuadLimbDark,
+    RadiusImpact,
+    Periodic,
+)
 
 
 class TestDistributions(object):
@@ -76,6 +83,32 @@ class TestDistributions(object):
         cdf = lambda x: np.clip((x + np.pi) / (2 * np.pi), 0, 1)  # NOQA
         for i in range(theta.shape[1]):
             s, p = kstest(theta[:, i], cdf)
+            assert s < 0.05
+
+    def test_periodic(self):
+        lower = -3.245
+        upper = 5.123
+        with self._model():
+            Periodic("p", lower=lower, upper=upper, shape=(5, 2))
+            trace = self._sample()
+
+        p = trace["p"]
+        p = np.reshape(p, (len(p), -1))
+        cdf = lambda x: np.clip((x - lower) / (upper - lower), 0, 1)  # NOQA
+        for i in range(p.shape[1]):
+            s, _ = kstest(p[:, i], cdf)
+            assert s < 0.05
+
+    def test_unit_uniform(self):
+        with self._model():
+            UnitUniform("u", shape=(5, 2))
+            trace = self._sample()
+
+        u = trace["u"]
+        u = np.reshape(u, (len(u), -1))
+        cdf = lambda x: np.clip(x, 0, 1)  # NOQA
+        for i in range(u.shape[1]):
+            s, p = kstest(u[:, i], cdf)
             assert s < 0.05
 
     def test_quad_limb_dark(self):
