@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def setup(app):
-    app.add_stylesheet("css/exoplanet.css?v=3")
+    app.add_stylesheet("css/exoplanet.css?v=2019-08-02")
 
 
 extensions = [
@@ -23,31 +23,29 @@ extensions = [
     "sphinx.ext.mathjax",
 ]
 
-autodoc_mock_imports = [
-    "numpy",
-    "scipy",
-    "astropy",
-    "pymc3",
-    "theano",
-]
+autodoc_mock_imports = ["numpy", "scipy", "astropy", "pymc3", "theano"]
 
 # Convert the tutorials
-for fn in chain(glob.glob("_static/notebooks/*.ipynb"),
-                glob.glob("_static/notebooks/gallery/*.ipynb")):
+for fn in chain(
+    glob.glob("_static/notebooks/*.ipynb"),
+    glob.glob("_static/notebooks/gallery/*.ipynb"),
+):
     name = os.path.splitext(os.path.split(fn)[1])[0]
     outfn = os.path.join("tutorials", name + ".rst")
     print("Building {0}...".format(name))
     subprocess.check_call(
         "jupyter nbconvert --template tutorials/tutorial_rst --to rst "
-        + fn + " --output-dir tutorials", shell=True)
-    subprocess.check_call(
-        "python fix_internal_links.py " + outfn, shell=True)
+        + fn
+        + " --output-dir tutorials",
+        shell=True,
+    )
+    subprocess.check_call("python fix_internal_links.py " + outfn, shell=True)
 
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3/', None),
-    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
-    'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
-    'astropy': ('http://docs.astropy.org/en/stable/', None),
+    "python": ("https://docs.python.org/3/", None),
+    "numpy": ("https://docs.scipy.org/doc/numpy/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/reference/", None),
+    "astropy": ("http://docs.astropy.org/en/stable/", None),
 }
 
 templates_path = ["_templates"]
@@ -59,9 +57,15 @@ project = "exoplanet"
 author = "Dan Foreman-Mackey"
 copyright = "2018, 2019, " + author
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(
-    os.path.abspath(__file__))), "exoplanet"))
+sys.path.insert(
+    0,
+    os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "exoplanet",
+    ),
+)
 from exoplanet_version import __version__  # NOQA
+
 version = __version__
 release = __version__
 
@@ -72,16 +76,9 @@ pygments_style = "sphinx"
 html_favicon = "_static/logo.png"
 html_theme = "exoplanet"
 html_theme_path = ["_themes", sphinx_typlog_theme.get_path()]
-html_theme_options = {
-    "logo": "logo.png"
-}
+html_theme_options = {"logo": "logo.png"}
 html_sidebars = {
-    "**": [
-        "logo.html",
-        "globaltoc.html",
-        "relations.html",
-        "searchbox.html",
-    ]
+    "**": ["logo.html", "globaltoc.html", "relations.html", "searchbox.html"]
 }
 html_static_path = ["_static"]
 
