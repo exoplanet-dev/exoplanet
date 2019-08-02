@@ -16,3 +16,7 @@ if not __EXOPLANET_SETUP__:
     from .light_curves import *  # NOQA
 
     from . import distributions, gp, orbits, interp
+
+    from .citations import CITATIONS
+
+    __bibtex__ = __citation__ = CITATIONS["exoplanet"][1]
