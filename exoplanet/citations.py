@@ -244,7 +244,6 @@ publisher={PeerJ Inc.}
    adsurl = {http://adsabs.harvard.edu/abs/2019AJ....157...64L},
   adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
-}
 """,
     ),
     "celerite": (
