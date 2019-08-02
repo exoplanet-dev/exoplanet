@@ -1,0 +1,136 @@
+error while running: notebooks/transit.ipynb
+
+An error occurred while executing the following cell:
+------------------
+import numpy as np
+import matplotlib.pyplot as plt
+
+import exoplanet as xo
+
+# The light curve calculation requires an orbit
+orbit = xo.orbits.KeplerianOrbit(period=3.456)
+
+# Compute a limb-darkened light curve using starry
+t = np.linspace(-0.1, 0.1, 1000)
+u = [0.3, 0.2]
+light_curve = xo.IntegratedLimbDarkLightCurve(u).get_light_curve(
+    orbit=orbit, r=0.1, t=t, texp=0.02).eval()
+# Note: the `eval` is needed because this is using Theano in
+# the background
+
+plt.plot(t, light_curve, color="C0", lw=2)
+plt.ylabel("relative flux")
+plt.xlabel("time [days]")
+plt.xlim(t.min(), t.max());
+------------------
+
+---------------------------------------------------------------------------
+ValueError                                Traceback (most recent call last)
+~/miniconda3/envs/autoexoplanet/lib/python3.7/site-packages/theano/compile/function_module.py in __call__(self, *args, **kwargs)
+    902             outputs =\
+--> 903                 self.fn() if output_subset is None else\
+    904                 self.fn(output_subset=output_subset)
+
+ValueError: dimension mismatch
+
+During handling of the above exception, another exception occurred:
+
+ValueError                                Traceback (most recent call last)
+<ipython-input-3-d645b477ab2d> in <module>
+     11 u = [0.3, 0.2]
+     12 light_curve = xo.IntegratedLimbDarkLightCurve(u).get_light_curve(
+---> 13     orbit=orbit, r=0.1, t=t, texp=0.02).eval()
+     14 # Note: the `eval` is needed because this is using Theano in
+     15 # the background
+
+~/miniconda3/envs/autoexoplanet/lib/python3.7/site-packages/theano/gof/graph.py in eval(self, inputs_to_values)
+    523         args = [inputs_to_values[param] for param in inputs]
+    524 
+--> 525         rval = self._fn_cache[inputs](*args)
+    526 
+    527         return rval
+
+~/miniconda3/envs/autoexoplanet/lib/python3.7/site-packages/theano/compile/function_module.py in __call__(self, *args, **kwargs)
+    915                     node=self.fn.nodes[self.fn.position_of_error],
+    916                     thunk=thunk,
+--> 917                     storage_map=getattr(self.fn, 'storage_map', None))
+    918             else:
+    919                 # old-style linkers raise their own exceptions
+
+~/miniconda3/envs/autoexoplanet/lib/python3.7/site-packages/theano/gof/link.py in raise_with_op(node, thunk, exc_info, storage_map)
+    323         # extra long error message in that case.
+    324         pass
+--> 325     reraise(exc_type, exc_value, exc_trace)
+    326 
+    327 
+
+~/miniconda3/envs/autoexoplanet/lib/python3.7/site-packages/six.py in reraise(tp, value, tb)
+    690                 value = tp()
+    691             if value.__traceback__ is not tb:
+--> 692                 raise value.with_traceback(tb)
+    693             raise value
+    694         finally:
+
+~/miniconda3/envs/autoexoplanet/lib/python3.7/site-packages/theano/compile/function_module.py in __call__(self, *args, **kwargs)
+    901         try:
+    902             outputs =\
+--> 903                 self.fn() if output_subset is None else\
+    904                 self.fn(output_subset=output_subset)
+    905         except Exception:
+
+ValueError: dimension mismatch
+Apply node that caused the error: IntegratedLimbDarkOp(TensorConstant{[ 0.146912...01836403]}, TensorConstant{(1, 1000) of 0.02}, TensorConstant{[[0.764   ..964     ]]}, TensorConstant{(1,) of 0.1}, TensorConstant{1.81805130416076}, TensorConstant{-9.61952468132868}, TensorConstant{1.0}, TensorConstant{0.0}, TensorConstant{0.0}, TensorConstant{0.0}, TensorConstant{0.0})
+Toposort index: 0
+Inputs types: [TensorType(float64, vector), TensorType(float64, row), TensorType(float64, row), TensorType(float64, vector), TensorType(float64, scalar), TensorType(float64, scalar), TensorType(float64, scalar), TensorType(float64, scalar), TensorType(float32, scalar), TensorType(float32, scalar), TensorType(float32, scalar)]
+Inputs shapes: [(3,), (1, 1000), (1, 1000), (1,), (), (), (), (), (), (), ()]
+Inputs strides: [(8,), (8000, 8), (8000, 8), (8,), (), (), (), (), (), (), ()]
+Inputs values: [array([ 0.14691226,  0.25709645, -0.01836403]), 'not shown', 'not shown', array([0.1]), array(1.8180513), array(-9.61952468), array(1.), array(0.), array(0., dtype=float32), array(0., dtype=float32), array(0., dtype=float32)]
+Outputs clients: [['output'], [], [], [], [], [], [], [], [], [], []]
+
+Backtrace when the node is created(use Theano flag traceback.limit=N to make it longer):
+  File "/mnt/home/dforeman/miniconda3/envs/autoexoplanet/lib/python3.7/site-packages/IPython/core/async_helpers.py", line 67, in _pseudo_sync_runner
+    coro.send(None)
+  File "/mnt/home/dforeman/miniconda3/envs/autoexoplanet/lib/python3.7/site-packages/IPython/core/interactiveshell.py", line 3020, in run_cell_async
+    interactivity=interactivity, compiler=compiler, result=result)
+  File "/mnt/home/dforeman/miniconda3/envs/autoexoplanet/lib/python3.7/site-packages/IPython/core/interactiveshell.py", line 3185, in run_ast_nodes
+    if (yield from self.run_code(code, result)):
+  File "/mnt/home/dforeman/miniconda3/envs/autoexoplanet/lib/python3.7/site-packages/IPython/core/interactiveshell.py", line 3267, in run_code
+    exec(code_obj, self.user_global_ns, self.user_ns)
+  File "<ipython-input-3-d645b477ab2d>", line 13, in <module>
+    orbit=orbit, r=0.1, t=t, texp=0.02).eval()
+  File "/mnt/home/dforeman/research/projects/dfm/exoplanet_auto/exoplanet/light_curves.py", line 325, in get_light_curve
+    cosw,
+  File "/mnt/home/dforeman/miniconda3/envs/autoexoplanet/lib/python3.7/site-packages/theano/gof/op.py", line 615, in __call__
+    node = self.make_node(*inputs, **kwargs)
+  File "/mnt/home/dforeman/research/projects/dfm/exoplanet_auto/exoplanet/theano_ops/starry/integrated_limbdark.py", line 49, in make_node
+    in_args[1].type(),
+
+HINT: Use the Theano flag 'exception_verbosity=high' for a debugprint and storage map footprint of this apply node.
+ValueError: dimension mismatch
+Apply node that caused the error: IntegratedLimbDarkOp(TensorConstant{[ 0.146912...01836403]}, TensorConstant{(1, 1000) of 0.02}, TensorConstant{[[0.764   ..964     ]]}, TensorConstant{(1,) of 0.1}, TensorConstant{1.81805130416076}, TensorConstant{-9.61952468132868}, TensorConstant{1.0}, TensorConstant{0.0}, TensorConstant{0.0}, TensorConstant{0.0}, TensorConstant{0.0})
+Toposort index: 0
+Inputs types: [TensorType(float64, vector), TensorType(float64, row), TensorType(float64, row), TensorType(float64, vector), TensorType(float64, scalar), TensorType(float64, scalar), TensorType(float64, scalar), TensorType(float64, scalar), TensorType(float32, scalar), TensorType(float32, scalar), TensorType(float32, scalar)]
+Inputs shapes: [(3,), (1, 1000), (1, 1000), (1,), (), (), (), (), (), (), ()]
+Inputs strides: [(8,), (8000, 8), (8000, 8), (8,), (), (), (), (), (), (), ()]
+Inputs values: [array([ 0.14691226,  0.25709645, -0.01836403]), 'not shown', 'not shown', array([0.1]), array(1.8180513), array(-9.61952468), array(1.), array(0.), array(0., dtype=float32), array(0., dtype=float32), array(0., dtype=float32)]
+Outputs clients: [['output'], [], [], [], [], [], [], [], [], [], []]
+
+Backtrace when the node is created(use Theano flag traceback.limit=N to make it longer):
+  File "/mnt/home/dforeman/miniconda3/envs/autoexoplanet/lib/python3.7/site-packages/IPython/core/async_helpers.py", line 67, in _pseudo_sync_runner
+    coro.send(None)
+  File "/mnt/home/dforeman/miniconda3/envs/autoexoplanet/lib/python3.7/site-packages/IPython/core/interactiveshell.py", line 3020, in run_cell_async
+    interactivity=interactivity, compiler=compiler, result=result)
+  File "/mnt/home/dforeman/miniconda3/envs/autoexoplanet/lib/python3.7/site-packages/IPython/core/interactiveshell.py", line 3185, in run_ast_nodes
+    if (yield from self.run_code(code, result)):
+  File "/mnt/home/dforeman/miniconda3/envs/autoexoplanet/lib/python3.7/site-packages/IPython/core/interactiveshell.py", line 3267, in run_code
+    exec(code_obj, self.user_global_ns, self.user_ns)
+  File "<ipython-input-3-d645b477ab2d>", line 13, in <module>
+    orbit=orbit, r=0.1, t=t, texp=0.02).eval()
+  File "/mnt/home/dforeman/research/projects/dfm/exoplanet_auto/exoplanet/light_curves.py", line 325, in get_light_curve
+    cosw,
+  File "/mnt/home/dforeman/miniconda3/envs/autoexoplanet/lib/python3.7/site-packages/theano/gof/op.py", line 615, in __call__
+    node = self.make_node(*inputs, **kwargs)
+  File "/mnt/home/dforeman/research/projects/dfm/exoplanet_auto/exoplanet/theano_ops/starry/integrated_limbdark.py", line 49, in make_node
+    in_args[1].type(),
+
+HINT: Use the Theano flag 'exception_verbosity=high' for a debugprint and storage map footprint of this apply node.
