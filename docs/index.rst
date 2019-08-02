@@ -67,6 +67,10 @@ If you make use of this code, please cite this package and its dependencies.
 You can find more information about how and what to cite in the
 :ref:`citation` documentation.
 
+These docs were made using `Sphinx <https://www.sphinx-doc.org>`_ and the
+`Typlog theme <https://github.com/typlog/sphinx-typlog-theme>`_. They are
+built and hosted on `Read the Docs <https://readthedocs.org>`_.
+
 
 Changelog
 ---------

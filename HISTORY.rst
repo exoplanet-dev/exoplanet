@@ -1,4 +1,4 @@
-0.2.0 (2019-07-11)
+0.2.0 (2019-08-02)
 ++++++++++++++++++
 
 - Updates ``starry`` to get much better performance for high order spherical
