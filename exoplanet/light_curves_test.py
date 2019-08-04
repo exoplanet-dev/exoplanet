@@ -12,14 +12,14 @@ import starry
 from packaging import version
 
 from .orbits import KeplerianOrbit
-from .light_curves import StarryLightCurve
+from .light_curves import LimbDarkLightCurve
 
 
 def test_light_curve():
     u = tt.vector()
     b = tt.vector()
     r = tt.vector()
-    lc = StarryLightCurve(u)
+    lc = LimbDarkLightCurve(u)
     f = lc._compute_light_curve(b, r)
     func = theano.function([u, b, r], f)
 
@@ -46,7 +46,9 @@ def test_light_curve_grad():
     b_val = np.linspace(-1.5, 1.5, 20)
     r_val = 0.1 + np.zeros_like(b_val)
 
-    lc = lambda u, b, r: StarryLightCurve(u)._compute_light_curve(b, r)  # NOQA
+    lc = lambda u, b, r: LimbDarkLightCurve(u)._compute_light_curve(
+        b, r
+    )  # NOQA
     utt.verify_grad(lc, [u_val, b_val, r_val])
 
 
@@ -66,7 +68,7 @@ def test_in_transit():
     u = np.array([0.2, 0.3, 0.1, 0.5])
     r = np.array([0.1, 0.01])
 
-    lc = StarryLightCurve(u)
+    lc = LimbDarkLightCurve(u)
     model1 = lc.get_light_curve(r=r, orbit=orbit, t=t)
     model2 = lc.get_light_curve(r=r, orbit=orbit, t=t, use_in_transit=False)
     vals = theano.function([], [model1, model2])()
@@ -97,7 +99,7 @@ def test_variable_texp():
     r = np.array([0.1, 0.01])
     texp0 = 0.1
 
-    lc = StarryLightCurve(u)
+    lc = LimbDarkLightCurve(u)
     model1 = lc.get_light_curve(
         r=r, orbit=orbit, t=t, texp=texp0, use_in_transit=False
     )
@@ -124,12 +126,12 @@ def test_contact_bug():
     t = np.linspace(-0.1, 0.1, 1000)
     u = [0.3, 0.2]
     y1 = (
-        StarryLightCurve(u)
+        LimbDarkLightCurve(u)
         .get_light_curve(orbit=orbit, r=0.1, t=t, texp=0.02)
         .eval()
     )
     y2 = (
-        StarryLightCurve(u)
+        LimbDarkLightCurve(u)
         .get_light_curve(
             orbit=orbit, r=0.1, t=t, texp=0.02, use_in_transit=False
         )
@@ -167,7 +169,7 @@ def test_small_star():
     a = orbit.a.eval()
     incl = orbit.incl.eval()
 
-    lc = StarryLightCurve(u_star)
+    lc = LimbDarkLightCurve(u_star)
 
     model1 = lc.get_light_curve(r=r_pl, orbit=orbit, t=t)
     model2 = lc.get_light_curve(r=r_pl, orbit=orbit, t=t, use_in_transit=False)
@@ -194,7 +196,7 @@ def test_singular_points():
     u = tt.vector()
     b = tt.vector()
     r = tt.vector()
-    lc = StarryLightCurve(u)
+    lc = LimbDarkLightCurve(u)
     f = lc._compute_light_curve(b, r)
     func = theano.function([u, b, r], f)
     u_val = np.array([0.2, 0.3, 0.1, 0.5])
