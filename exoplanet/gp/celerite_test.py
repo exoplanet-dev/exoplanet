@@ -136,6 +136,7 @@ def test_gp(celerite_kernel, seed=1234):
     assert np.allclose(loglike, celerite_loglike)
 
 
+@pytest.mark.skip(reason="WIP")
 def test_integrated(seed=1234):
     np.random.seed(seed)
     x = np.sort(np.random.uniform(0, 100, 100))
