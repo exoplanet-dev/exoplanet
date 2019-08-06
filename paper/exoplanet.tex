@@ -416,6 +416,16 @@ In this case, the time integral is performed using an adaptive Simpson's rule \d
 This routine works by recursively subdividing the exposure interval until a parabolic approximation to the flux in the subexposure matches the computed flux to a specified tolerance.
 The derivative of this integral is accumulated using during the forward pass.
 
+The second aspect of exposure time integration incorporated into \exoplanet\
+applies to the Gaussian Process kernel.  The standard \celerite\ kernel assumes that each
+exposure time is infinitesimal in duration.  This is an adequate approximation
+if the kernel varies slowly and smoothly across an exposure time;
+however, the finite exposure time modifies the kernel significantly when it is
+comparable to, or longer than, any of the timescales occurring in the components of
+the kernel.  In appendix \ref{sec:time_integration} we present novel expressions for
+the time-integrated \celerite\ kernel, which retains the necessary properties
+for fast computation when the exposures times do not overlap.
+
 \paragraph{Performance}
 As demonstrated in the papers describing this algorithm \citep{Luger:2019} \dfmtodo{cite limbdark}, the performance of the algorithms implemented in \starry\ is competitive with the other standard light curve implementations \dfmtodo{cite}.
 Figure \dfmtodo{whatever} demonstrates this in the context of \exoplanet.
@@ -715,14 +725,14 @@ This is a figure.}
 \end{centering}
 \end{figure}
 
-\section{Exposure time integration for celerite models}
+\section{Exposure time integration for celerite models} \label{sec:time_integration}
 
 In this section we give expressions for the {\it exposure-time}
 integrated versions of the \celerite\ kernel and its power
 spectrum.  It turns out that the time-integrated \celerite\ kernel
 remains expressible as a semi-separable matrix when the exposures
-do not overlap, but when exposures overlap (or for zero time
-delay), the kernel no longer is semi-separable.
+do not overlap, but when exposures overlap for non-zero time delay,
+the kernel no longer is semi-separable.
 
 \paragraph{Real term}
 
@@ -732,14 +742,14 @@ For a real term:
 k(\tau) = a\,\exp\left(-c\,\tau\right)
 \end{equation}
 where $\tau = \vert t_i-t_j \vert$.
-The integrated kernel is
+The time-integrated kernel is
 \begin{proof}{celerite-integral}
 k_\Delta(\tau) = \frac{2}{\left(c\,\Delta\right)^2}\,k(\tau)\,
   \begin{cases}
     \cosh(c\,\Delta) - 1 + c\,\Delta-\sinh(c\,\Delta) & \tau = 0 \\
    c(\Delta - \tau) e^{c\tau} + \cosh{(c\tau)} e^{-c(\Delta - \tau)} -1 & 0 < \tau \le \Delta \\
    \cosh(c\,\Delta) - 1  & \Delta < \tau
-    \end{cases}
+    \end{cases},
 \end{proof}
 where $\Delta$ is the integration time.  Note that in the standard
 use case of a single light curve with a single telescope and a
@@ -760,7 +770,7 @@ is less so, and is given by:
 S(\omega) = \frac{ac}{\sqrt{2\pi}(c^2 + \omega^2)}  \left(\frac{\sin(\tfrac{1}{2}\omega \Delta)}{\tfrac{1}{2}\omega\Delta}\right)^2.
 \end{equation}
 Note that this is the Fourier transform of the kernel, $k(\tau)$,
-multiplied by the square of a sinc function, $\mathrm{sinc}{(\omega\Delta/2)}$,
+multiplied by the square of a sinc function, $\mathrm{sinc}^2{(\omega\Delta/2)}$,
 which results from the convolution of the kernel with a top-hat
 time-integration of half-width $\Delta/2$.  Convolution in Fourier
 space turns into multiplication, and thus the square of the sinc function
@@ -778,25 +788,25 @@ k(\tau) = (a + i\,b)\,\exp\left(-(c+i\,d)\,\tau\right),
 where $\tau = \vert t_i-t_j \vert$ for times $t_i$ and $t_j$.
 In this case, the integrated kernel is
 \begin{equation}
-k_\Delta(\tau) = (A + i\,B)\,k(\tau)
+k_\Delta(\tau) = (A + i\,B)\,k(\tau),
 \end{equation}
 where
 \begin{proof}{celerite-integral}
   A = 2\frac{C_1\,\left[\cosh(c\,\Delta)\,\cos(d\,\Delta) - 1\right]
   - C_2\,\sinh(c\,\Delta)\,\sin(d\,\Delta)
-}{\Delta^2\,(c^2 + d^2)^2}
+}{\Delta^2\,(c^2 + d^2)^2},
 \end{proof}
 and
 \begin{proof}{celerite-integral}
   B = 2\frac{C_2\,\left[\cosh(c\,\Delta)\,\cos(d\,\Delta) - 1\right]
   + C_1\,\sinh(c\,\Delta)\,\sin(d\,\Delta)
-}{\Delta^2\,(c^2 + d^2)^2}
+}{\Delta^2\,(c^2 + d^2)^2},
 \end{proof}
 where
 \begin{align}
 C_1 = a\,c^2 - a\,d^2 + 2\,b\,c\,d
 \quad\mathrm{and}\quad
-C_2 = b\,c^2 - b\,d^2 - 2\,a\,c\,d
+C_2 = b\,c^2 - b\,d^2 - 2\,a\,c\,d.
 \end{align}
 
 In practice a kernel must be real, and so two complex terms must be
