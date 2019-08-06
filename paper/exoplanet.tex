@@ -807,22 +807,23 @@ k(\tau) &= \tfrac{1}{2}\left[(a + i\,b)\,\exp\left(-(c+i\,d)\,\tau\right)+ (a - 
 \end{align}
 This results in a time-integrated kernel for $\tau \ge \Delta$ given by
 \begin{equation}
-k_\Delta(\tau) = A\exp\left(-c\,\tau\right)\cos\left(d\,\tau\right) + B\exp\left(-c\,\tau\right)\sin\left(d\,\tau\right).
+k_{\Delta\le\tau}(\tau) = A\exp\left(-c\,\tau\right)\cos\left(d\,\tau\right) + B\exp\left(-c\,\tau\right)\sin\left(d\,\tau\right).
 \end{equation}
 while for $0 \le \tau < \Delta$,
-\begin{align}
-k_\Delta(\tau) &= A\exp\left(-c\,\tau\right)\cos\left(d\,\tau\right) + B\exp\left(-c\,\tau\right)\sin\left(d\,\tau\right) \nonumber\\
-&+  \frac{2}{ \Delta^2(c^2+d^2)^2} \left\{(ac+bd)(c^2+d^2)(\Delta-\tau)\right. \nonumber \\
-&+\left.  \sinh(c(\tau-\Delta)) \left(C_1\cos(d(\Delta-\tau)) +C_2 \sin(d(\Delta-\tau))\right) \right\}.
-\end{align}
+\begin{eqnarray}
+k_{\Delta>\tau}(\tau) &=& k_{\Delta\le\tau}(\tau) + 2\,\left[
+  - C_1\,\sinh(c\,\Delta-c\,\tau)\,\cos(d\,\Delta-d\,\tau) \right. \nonumber\\
+&&  + C_2\,\cosh(c\,\Delta-c\,\tau)\,\sin(d\,\Delta-d\,\tau) \nonumber \\
+&&  \left. + (a\,c + b\,d)\,(c^2 + d^2)\,(\Delta-\tau)\right] / [\Delta\,(c^2+d^2)]^2
+\end{eqnarray}
 Note that in the limit of $b = d = 0$, this kernel reverts to the real kernel.
 As with the real case, the kernel is only semi-separable when exposures
 do not overlap in time, i.e. $\vert t_i - t_j \vert > \Delta$ for all $i,j$, while the diagonal
 components of the covariance matrix require adding the extra term:
-\begin{equation}
-\frac{2}{ \Delta^2(c^2+d^2)^2} \left\{(ac+bd)(c^2+d^2)\Delta
--\sinh(c\Delta) \left(C_1\cos(d\Delta) +C_2 \sin(d\Delta)\right) \right\}.
-\end{equation}
+\begin{eqnarray}
+  \frac{2\,\left[
+    - C_1\,\sinh(c\,\Delta)\,\cos(d\,\Delta) + C_2\,\cosh(c\,\Delta)\,\sin(d\,\Delta) + (a\,c + b\,d)\,(c^2 + d^2)\,\Delta\right]}{[\Delta\,(c^2+d^2)]^2}
+\end{eqnarray}
 As with the real case, the power spectrum of the time-integrated kernel simply
 requires multiplication by the sinc-squared function:
 \begin{equation}
