@@ -11,5 +11,3 @@ celerite>=0.3.1
 starry
 batman-package
 radvel
-pre-commit
-black
