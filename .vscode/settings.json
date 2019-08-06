@@ -29,11 +29,11 @@
     // General formatting
     "files.trimTrailingWhitespace": true,
     "[cpp]": {
-        "editor.formatOnPaste": true,
+        "editor.formatOnPaste": false,
         "editor.formatOnSave": true
     },
     "[python]": {
-        "editor.formatOnPaste": true,
+        "editor.formatOnPaste": false,
         "editor.formatOnSave": true
     },
     "files.associations": {
