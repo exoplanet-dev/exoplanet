@@ -317,7 +317,7 @@ class IntegratedTerm(Term):
 
         # Real part
         cd = cr * dt
-        delta_diag = tt.sum(2 * ar * (cr * dt - tt.sinh(cd)) / cd ** 2)
+        delta_diag = 2 * tt.sum(ar * (cd - tt.sinh(cd)) / cd ** 2)
 
         # Complex part
         cd = c * dt
@@ -395,14 +395,14 @@ class IntegratedTerm(Term):
         # Real parts:
         # tau > Delta
         crd = cr * dt
-        norm = 1.0 / (crd) ** 2
-        factor = ((tt.exp(crd) + tt.exp(-crd) - 2) * norm,)
+        norm = 1.0 / crd ** 2
+        factor = (tt.exp(crd) + tt.exp(-crd) - 2) * norm
         K_large = tt.sum(ar * tt.exp(-cr * tau) * factor, axis=-1)
 
         # tau < Delta
         K_small = tt.sum(
             (
-                2 * cr * (dmt)
+                2 * cr * dmt
                 + tt.exp(-cr * dmt)
                 + tt.exp(-cr * dpt)
                 - 2 * tt.exp(-cr * tau)
