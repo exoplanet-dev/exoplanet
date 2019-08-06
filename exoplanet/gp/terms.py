@@ -349,7 +349,7 @@ class IntegratedTerm(Term):
 
         # Real componenets
         crd = cr * self.delta
-        coeffs = [ar * (tt.exp(crd) + tt.exp(-crd) - 2) / (crd) ** 2, cr]
+        coeffs = [2 * ar * (tt.cosh(crd) - 1) / crd ** 2, cr]
 
         # Imaginary coefficients
         cd = c * self.delta
@@ -395,21 +395,13 @@ class IntegratedTerm(Term):
         # Real parts:
         # tau > Delta
         crd = cr * dt
-        norm = 1.0 / crd ** 2
-        factor = (tt.exp(crd) + tt.exp(-crd) - 2) * norm
-        K_large = tt.sum(ar * tt.exp(-cr * tau) * factor, axis=-1)
+        cosh = tt.cosh(crd)
+        norm = 2 * ar / crd ** 2
+        K_large = tt.sum(norm * (cosh - 1) * tt.exp(-cr * tau), axis=-1)
 
         # tau < Delta
-        K_small = tt.sum(
-            (
-                2 * cr * dmt
-                + tt.exp(-cr * dmt)
-                + tt.exp(-cr * dpt)
-                - 2 * tt.exp(-cr * tau)
-            )
-            * norm,
-            axis=-1,
-        )
+        crdmt = cr * dmt
+        K_small = K_large + tt.sum(norm * (crdmt - tt.sinh(crdmt)), axis=-1)
 
         # Complex part
         cd = c * dt

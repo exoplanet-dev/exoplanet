@@ -839,15 +839,17 @@ A + \frac{2\,\left[
   (a\,c + b\,d)\,(c^2 + d^2)\,\Delta - C_1\,\sinh(c\,\Delta)\,\cos(d\,\Delta) + C_2\,\cosh(c\,\Delta)\,\sin(d\,\Delta)\right]}{[\Delta\,(c^2+d^2)]^2}
 \end{eqnarray}
 
-Note that in the limit of $b = d = 0$, this kernel reverts to the real kernel.
-As with the real case, the kernel is only semi-separable when exposures
-do not overlap in time, i.e. $\vert t_i - t_j \vert > \Delta$ for all $i,j$, while the diagonal
-components of the covariance matrix require adding the extra term:
-\begin{eqnarray}
-  \frac{2\,\left[
-    - C_1\,\sinh(c\,\Delta)\,\cos(d\,\Delta) + C_2\,\cosh(c\,\Delta)\,\sin(d\,\Delta) + (a\,c + b\,d)\,(c^2 + d^2)\,\Delta\right]}{[\Delta\,(c^2+d^2)]^2}
-\end{eqnarray}
-As with the real case, the power spectrum of the time-integrated kernel simply
+For the case of $b=0$ and $c=0$ (called the ``real'' term by \citealt{Foreman-Mackey:2017}), the integrated kernel simplifies to
+\begin{proof}{celerite-integral}
+  k_\Delta(\tau) = \frac{2\,a\,e^{-c\,\tau}}{\left(c\,\Delta\right)^2}\,
+    \begin{cases}
+    e^{-c\,\Delta} - 1 + c\,\Delta & \tau = 0 \\
+    \left[c\,(\Delta - \tau) - \sinh{(c\,\Delta-c\,\tau)}\right] e^{c\,\tau} + \cosh{(c\,\Delta)} -1 & 0 < \tau \le \Delta \\
+    \cosh(c\,\Delta) - 1  & \Delta < \tau
+    \end{cases} \quad.
+\end{proof}
+
+The power spectrum of the time-integrated kernel simply
 requires multiplication by the sinc-squared function:
 \begin{equation}
 S(\omega) = \sqrt{\frac{2}{\pi}} \left(\frac{(ac+bd)(c^2+d^2)+(ac-bd)\omega^2}
