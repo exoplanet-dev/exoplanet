@@ -153,7 +153,4 @@ def test_integrated(seed=1234):
     kernel = terms.IntegratedTerm(kernel, dt)
     a = kernel.get_celerite_matrices(x, diag)[0].eval()
     k0 = kernel.value(tt.zeros(1)).eval()
-    print(a, k0 + diag)
     assert np.allclose(a, k0 + diag)
-
-    assert 0
