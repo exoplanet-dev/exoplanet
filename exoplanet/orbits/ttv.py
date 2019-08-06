@@ -77,15 +77,28 @@ class TTVOrbit(KeplerianOrbit):
                 for i, ttv in enumerate(self.ttvs)
             ]
 
+        # Set up a histogram for identifying the transit offsets
+        self._bin_edges = [
+            tt.concatenate(
+                (
+                    [tts[0] - 0.5 * self.period[i]],
+                    0.5 * (tts[1:] + tts[:-1]),
+                    [tts[-1] + 0.5 * self.period[i]],
+                )
+            )
+            for i, tts in enumerate(self.transit_times)
+        ]
+        self._bin_values = [
+            tt.concatenate(([0], self.ttvs[i], [0]))
+            for i in range(len(self.ttvs))
+        ]
+
+    def _get_model_dt(self, t):
+        vals = []
+        for i in range(len(self.ttvs)):
+            inds = tt.extra_ops.searchsorted(self._bin_edges[i], t)
+            vals.append(self._bin_values[i][inds])
+        return tt.stack(vals, -1)
+
     def _warp_times(self, t):
-        delta = tt.shape_padleft(t) / tt.shape_padright(self.period, t.ndim)
-        delta += tt.shape_padright(self._base_time, t.ndim)
-        ind = tt.cast(tt.floor(delta), "int64")
-        dt = tt.stack(
-            [
-                ttv[tt.clip(ind[i], 0, ttv.shape[0] - 1)]
-                for i, ttv in enumerate(self.ttvs)
-            ],
-            -1,
-        )
-        return tt.shape_padright(t) + dt
+        return tt.shape_padright(t) - self._get_model_dt(t)
