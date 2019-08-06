@@ -317,7 +317,7 @@ class IntegratedTerm(Term):
 
         # Real part
         cd = cr * dt
-        delta_diag = 2 * tt.sum(cd + tt.exp(-cd) - 1)
+        delta_diag = tt.sum(2 * ar * (cr * dt - tt.sinh(cd)) / cd ** 2)
 
         # Complex part
         cd = c * dt
@@ -327,14 +327,16 @@ class IntegratedTerm(Term):
         c2pd2 = c2 + d2
         C1 = a * (c2 - d2) + 2 * b * c * d
         C2 = b * (c2 - d2) - 2 * a * c * d
-        norm = 1.0 / (dt * c2pd2) ** 2
-        delta_diag += tt.sum(
-            2
-            * norm
-            * (
-                (a * c + b * d) * c2pd2 * dt
-                - tt.sinh(cd) * (C1 * tt.cos(dd) + C2 * tt.sin(dd))
+        norm = (dt * c2pd2) ** 2
+        sinh = tt.sinh(cd)
+        cosh = tt.cosh(cd)
+        delta_diag += 2 * tt.sum(
+            (
+                C2 * cosh * tt.sin(dd)
+                - C1 * sinh * tt.cos(dd)
+                + (a * c + b * d) * dt * c2pd2
             )
+            / norm
         )
 
         new_diag = diag + delta_diag
