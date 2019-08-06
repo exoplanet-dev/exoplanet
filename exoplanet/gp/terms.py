@@ -356,12 +356,12 @@ class IntegratedTerm(Term):
         dd = d * self.delta
         c2 = c ** 2
         d2 = d ** 2
-        factor = 1.0 / (self.delta * (c2 + d2)) ** 2
+        factor = 2.0 / (self.delta * (c2 + d2)) ** 2
         cos_term = tt.cosh(cd) * tt.cos(dd) - 1
         sin_term = tt.sinh(cd) * tt.sin(dd)
 
-        C1 = 2 * (a * (c2 - d2) + 2 * b * c * d)
-        C2 = 2 * (b * (c2 - d2) - 2 * a * c * d)
+        C1 = a * (c2 - d2) + 2 * b * c * d
+        C2 = b * (c2 - d2) - 2 * a * c * d
 
         coeffs += [
             factor * (C1 * cos_term - C2 * sin_term),
