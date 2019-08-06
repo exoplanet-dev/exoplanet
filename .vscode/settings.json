@@ -24,10 +24,6 @@
 
     // Python formatting
     "python.formatting.provider": "black",
-    "python.formatting.blackArgs": [
-        "--line-length",
-        "79"
-    ],
     "autoDocstring.docstringFormat": "google",
 
     // General formatting

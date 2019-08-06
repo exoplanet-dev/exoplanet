@@ -38,7 +38,7 @@ for filename in glob.glob(pattern):
             nbformat.write(notebook, f)
 
 txt = "\n\n".join(errors)
-ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
+ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
 txt = ansi_escape.sub("", txt)
 
 with open("notebook_errors.log", "wb") as f:

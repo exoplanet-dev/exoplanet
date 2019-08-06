@@ -134,3 +134,26 @@ def test_gp(celerite_kernel, seed=1234):
     loglike = gp.log_likelihood(y).eval()
 
     assert np.allclose(loglike, celerite_loglike)
+
+
+def test_integrated(seed=1234):
+    np.random.seed(seed)
+    x = np.sort(np.random.uniform(0, 100, 100))
+    dt = 0.4 * np.min(np.diff(x))
+    yerr = np.random.uniform(0.1, 0.5, len(x))
+    diag = yerr ** 2
+
+    kernel = terms.SHOTerm(log_S0=0.1, log_Q=1.0, log_w0=0.5)
+    # kernel += terms.RealTerm(log_a=0.1, log_c=0.4)
+
+    a = kernel.get_celerite_matrices(x, diag)[0].eval()
+    k0 = kernel.value(tt.zeros(1)).eval()
+    assert np.allclose(a, k0 + diag)
+
+    kernel = terms.IntegratedTerm(kernel, dt)
+    a = kernel.get_celerite_matrices(x, diag)[0].eval()
+    k0 = kernel.value(tt.zeros(1)).eval()
+    print(a, k0 + diag)
+    assert np.allclose(a, k0 + diag)
+
+    assert 0
