@@ -31,9 +31,11 @@ procs = []
 files = []
 for version in range(cpus):
     files.append(open("log_{0}_{1}.log".format(n_planets, version), "a"))
-    procs.append(sp.Popen(
-        exe + ["{0}".format(version)],
-        stdout=files[-1], stderr=files[-1]))
+    procs.append(
+        sp.Popen(
+            exe + ["{0}".format(version)], stdout=files[-1], stderr=files[-1]
+        )
+    )
     print(version, "started")
 
 finished = [False for _ in procs]

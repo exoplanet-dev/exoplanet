@@ -7,6 +7,7 @@ __all__ = [
     "TermSum",
     "TermProduct",
     "TermDiff",
+    "IntegratedTerm",
     "RealTerm",
     "ComplexTerm",
     "SHOTerm",
@@ -176,6 +177,12 @@ class Term(object):
 
 class TermSum(Term):
     def __init__(self, *terms, **kwargs):
+        if any(isinstance(term, IntegratedTerm) for term in terms):
+            raise TypeError(
+                "You cannot perform operations on an "
+                "IntegratedTerm, it must be the outer term in "
+                "the kernel"
+            )
         self.terms = terms
         super(TermSum, self).__init__(**kwargs)
 
@@ -192,6 +199,14 @@ class TermSum(Term):
 
 class TermProduct(Term):
     def __init__(self, term1, term2, **kwargs):
+        int1 = isinstance(term1, IntegratedTerm)
+        int2 = isinstance(term2, IntegratedTerm)
+        if int1 or int2:
+            raise TypeError(
+                "You cannot perform operations on an "
+                "IntegratedTerm, it must be the outer term in "
+                "the kernel"
+            )
         self.term1 = term1
         self.term2 = term2
         super(TermProduct, self).__init__(**kwargs)
@@ -263,6 +278,12 @@ class TermProduct(Term):
 
 class TermDiff(Term):
     def __init__(self, term, **kwargs):
+        if isinstance(term, IntegratedTerm):
+            raise TypeError(
+                "You cannot perform operations on an "
+                "IntegratedTerm, it must be the outer term in "
+                "the kernel"
+            )
         self.term = term
         super(TermDiff, self).__init__(**kwargs)
 
@@ -289,6 +310,37 @@ class IntegratedTerm(Term):
     @property
     def J(self):
         return self.term.J
+
+    def get_celerite_matrices(self, x, diag):
+        dt = self.delta
+        ar, cr, a, b, c, d = self.term.coefficients
+
+        # Real part
+        cd = cr * dt
+        delta_diag = 2 * tt.sum(cd + tt.exp(-cd) - 1)
+
+        # Complex part
+        cd = c * dt
+        dd = d * dt
+        c2 = c ** 2
+        d2 = d ** 2
+        c2pd2 = c2 + d2
+        C1 = a * (c2 - d2) + 2 * b * c * d
+        C2 = b * (c2 - d2) - 2 * a * c * d
+        norm = 1.0 / (dt * c2pd2) ** 2
+        delta_diag += tt.sum(
+            2
+            * norm
+            * (
+                (a * c + b * d) * c2pd2 * dt
+                - tt.sinh(cd) * (C1 * tt.cos(dd) + C2 * tt.sin(dd))
+            )
+        )
+
+        new_diag = diag + delta_diag
+
+        # new_diag = diag
+        return super(IntegratedTerm, self).get_celerite_matrices(x, new_diag)
 
     def get_coefficients(self):
         ar, cr, a, b, c, d = self.term.coefficients
@@ -381,7 +433,7 @@ class IntegratedTerm(Term):
             (C2 * cos_term + C1 * sin_term) * factor * sdt, axis=-1
         )
 
-        # Real part
+        # tau < Delta
         edmt = tt.exp(-c * dmt)
         edpt = tt.exp(-c * dpt)
         cos_term = (

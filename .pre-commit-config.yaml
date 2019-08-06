@@ -1,0 +1,16 @@
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v2.3.0
+  hooks:
+  - id: trailing-whitespace
+    exclude: exoplanet/theano_ops/lib/vendor
+  - id: end-of-file-fixer
+    exclude: exoplanet/theano_ops/lib/vendor
+  - id: debug-statements
+    exclude: exoplanet/theano_ops/lib/vendor
+
+- repo: https://github.com/psf/black
+  rev: 19.3b0
+  hooks:
+  - id: black
+    language_version: python3.6

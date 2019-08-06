@@ -19,21 +19,22 @@ else:
 os.makedirs(dirname, exist_ok=True)
 
 os.environ["OMP_NUM_THREADS"] = "1"
-os.environ["THEANO_FLAGS"] = \
-    "compiledir=./{0}/cache".format(dirname)
+os.environ["THEANO_FLAGS"] = "compiledir=./{0}/cache".format(dirname)
 
-import h5py                      # NOQA
-import time                      # NOQA
-import emcee                     # NOQA
-import string                    # NOQA
-import numpy as np               # NOQA
-import pymc3 as pm               # NOQA
+import h5py  # NOQA
+import time  # NOQA
+import emcee  # NOQA
+import string  # NOQA
+import numpy as np  # NOQA
+import pymc3 as pm  # NOQA
 import matplotlib.pyplot as plt  # NOQA
-                                 # NOQA
-import theano                    # NOQA
-import theano.tensor as tt       # NOQA
-                                 # NOQA
-import exoplanet as xo           # NOQA
+
+# NOQA
+import theano  # NOQA
+import theano.tensor as tt  # NOQA
+
+# NOQA
+import exoplanet as xo  # NOQA
 
 # Parameters
 target_n_eff = 2000
@@ -48,9 +49,9 @@ omegas = np.random.uniform(-np.pi, np.pi, N_pl)
 
 # Simulate the time sampling
 N = 25 + 25 * N_pl
-x = np.sort(np.random.uniform(-2*365, 2*365, N))
+x = np.sort(np.random.uniform(-2 * 365, 2 * 365, N))
 yerr = np.random.uniform(0.5, 5.0, N)
-t = np.linspace(x.min()-5, x.max()+5, 1000)
+t = np.linspace(x.min() - 5, x.max() + 5, 1000)
 
 # Define the model
 with pm.Model() as model:
@@ -65,7 +66,7 @@ with pm.Model() as model:
 
     # This is a sanity check that restricts the semiamplitude to reasonable
     # values because things can get ugly as K -> 0
-    pm.Potential("logK_bound", tt.switch(logK < -2., -np.inf, 0.0))
+    pm.Potential("logK_bound", tt.switch(logK < -2.0, -np.inf, 0.0))
 
     # The amlitudes should be sorted
     pm.Potential("logK_order", tt.switch(logK[1:] > logK[:-1], -np.inf, 0.0))
@@ -74,18 +75,15 @@ with pm.Model() as model:
     pm.Potential("P_bound", tt.switch(P <= 0, -np.inf, 0.0))
 
     # Eccentricity & argument of periasteron
-    ecc = pm.Uniform("ecc", lower=0, upper=0.99, shape=N_pl,
-                     testval=eccs)
+    ecc = pm.Uniform("ecc", lower=0, upper=0.99, shape=N_pl, testval=eccs)
     omega = xo.distributions.Angle("omega", shape=N_pl, testval=omegas)
 
     # Jitter & a quadratic RV trend
     # logs = pm.Normal("logs", mu=np.log(np.median(yerr)), sd=5.0)
-    trend = pm.Normal("trend", mu=0, sd=10.0**-np.arange(3)[::-1], shape=3)
+    trend = pm.Normal("trend", mu=0, sd=10.0 ** -np.arange(3)[::-1], shape=3)
 
     # Set up the orbit
-    orbit = xo.orbits.KeplerianOrbit(
-        period=P, t0=t0,
-        ecc=ecc, omega=omega)
+    orbit = xo.orbits.KeplerianOrbit(period=P, t0=t0, ecc=ecc, omega=omega)
 
     # Set up the RV model and save it as a deterministic
     # for plotting purposes later
@@ -94,7 +92,7 @@ with pm.Model() as model:
         vrad = vrad[:, None]
 
     # Define the background model
-    A = np.vander(x - 0.5*(x.min() + x.max()), 3)
+    A = np.vander(x - 0.5 * (x.min() + x.max()), 3)
     bkg = tt.dot(A, trend)
 
     # Sum over planets and add the background to get the full model
@@ -108,7 +106,7 @@ with pm.Model() as model:
     vrad_pred = orbit.get_radial_velocity(t, K=tt.exp(logK))
     if N_pl == 1:
         vrad_pred = vrad_pred[:, None]
-    A_pred = np.vander(t - 0.5*(x.min() + x.max()), 3)
+    A_pred = np.vander(t - 0.5 * (x.min() + x.max()), 3)
     bkg_pred = tt.dot(A_pred, trend)
     rv_model_pred = tt.sum(vrad_pred, axis=-1) + bkg_pred
 
@@ -134,16 +132,18 @@ def check_convergence(samples):
 chains = 2
 sampler = xo.PyMC3Sampler(start=500, finish=500, window=500)
 with model:
-    burnin = sampler.tune(tune=100000, start=map_soln, chains=chains, cores=1,
-                          progressbar=False)
+    burnin = sampler.tune(
+        tune=100000, start=map_soln, chains=chains, cores=1, progressbar=False
+    )
 
 tottime = 0
 trace = None
 with model:
     while True:
         strt = time.time()
-        trace = sampler.sample(draws=2000, trace=trace, chains=chains, cores=1,
-                               progressbar=False)
+        trace = sampler.sample(
+            draws=2000, trace=trace, chains=chains, cores=1, progressbar=False
+        )
         tottime += time.time() - strt
 
         samples = np.array(trace.get_values("P", combine=False))
@@ -161,7 +161,7 @@ df = pm.trace_to_dataframe(trace)
 df.to_hdf(os.path.join(dirname, "pymc-trace.h5"), "trace")
 
 # Make the plots
-for n, letter in enumerate(string.ascii_lowercase[1:N_pl+1]):
+for n, letter in enumerate(string.ascii_lowercase[1 : N_pl + 1]):
     fig = plt.figure()
 
     # Get the posterior median orbital parameters
@@ -169,27 +169,40 @@ for n, letter in enumerate(string.ascii_lowercase[1:N_pl+1]):
     t0 = np.median(trace["t0"][:, n])
 
     # Plot the folded data
-    x_fold = (x - t0 + 0.5*p) % p - 0.5*p
+    x_fold = (x - t0 + 0.5 * p) % p - 0.5 * p
     plt.errorbar(x_fold, y, yerr=yerr, fmt=".k")
 
-    plt.annotate("period = {0:.4f} +/- {1:.4f} d"
-                 .format(p, np.std(trace["P"][:, n])),
-                 (0, 1), xycoords="axes fraction",
-                 xytext=(5, -5), textcoords="offset points",
-                 va="top", ha="left", fontsize=12)
+    plt.annotate(
+        "period = {0:.4f} +/- {1:.4f} d".format(p, np.std(trace["P"][:, n])),
+        (0, 1),
+        xycoords="axes fraction",
+        xytext=(5, -5),
+        textcoords="offset points",
+        va="top",
+        ha="left",
+        fontsize=12,
+    )
 
-    plt.annotate("true period = {0:.4f} d".format(periods[n]),
-                 (0, 0), xycoords="axes fraction",
-                 xytext=(5, 5), textcoords="offset points",
-                 va="bottom", ha="left", fontsize=12)
+    plt.annotate(
+        "true period = {0:.4f} d".format(periods[n]),
+        (0, 0),
+        xycoords="axes fraction",
+        xytext=(5, 5),
+        textcoords="offset points",
+        va="bottom",
+        ha="left",
+        fontsize=12,
+    )
 
     plt.legend(fontsize=10)
-    plt.xlim(-0.5*p, 0.5*p)
+    plt.xlim(-0.5 * p, 0.5 * p)
     plt.xlabel("phase [days]")
     plt.ylabel("radial velocity [m/s]")
 
-    fig.savefig(os.path.join(dirname, "phase-{0}.pdf".format(letter)),
-                bbox_inches="tight")
+    fig.savefig(
+        os.path.join(dirname, "phase-{0}.pdf".format(letter)),
+        bbox_inches="tight",
+    )
     plt.close(fig)
 
 
@@ -207,8 +220,9 @@ with model:
             i += 1
 
     # Build a wrapper around the theano model
-    f = theano.function(model.vars,
-                        [model.logpt] + model.vars + model.deterministics)
+    f = theano.function(
+        model.vars, [model.logpt] + model.vars + model.deterministics
+    )
 
     def log_prob_func(params):
         dct = model.bijection.rmap(params)
@@ -220,14 +234,19 @@ with model:
     res = model.test_point
     vec = model.bijection.map(res)
     initial_blobs = log_prob_func(vec)[1:]
-    dtype = [(var.name, float, np.shape(b)) for var, b in
-             zip(model.vars + model.deterministics, initial_blobs)]
+    dtype = [
+        (var.name, float, np.shape(b))
+        for var, b in zip(model.vars + model.deterministics, initial_blobs)
+    ]
 
     # Then sample as usual
-    coords = samples[np.random.randint(len(samples), size=2*samples.shape[1])]
+    coords = samples[
+        np.random.randint(len(samples), size=2 * samples.shape[1])
+    ]
     nwalkers, ndim = coords.shape
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_prob_func,
-                                    blobs_dtype=dtype)
+    sampler = emcee.EnsembleSampler(
+        nwalkers, ndim, log_prob_func, blobs_dtype=dtype
+    )
     thin_by = 10
     tottime = 0
     for i in range(1000):
@@ -250,8 +269,9 @@ with h5py.File(os.path.join(dirname, "emcee-trace.h5"), "w") as f:
 
 print("time per ind. sample, emcee: {0}".format(time_ind_emcee))
 print("time per ind. sample, pymc: {0}".format(time_ind_pymc))
-print("time per ind. sample, ratio: {0}"
-      .format(time_ind_emcee / time_ind_pymc))
+print(
+    "time per ind. sample, ratio: {0}".format(time_ind_emcee / time_ind_pymc)
+)
 ndim = model.ndim
 with open(os.path.join(dirname, "results.csv"), "w") as f:
     f.write("method,ndim,time\n")
