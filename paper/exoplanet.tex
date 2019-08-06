@@ -780,51 +780,65 @@ frequency, $f = \frac{2\pi}{\omega} = \Delta^{-1}$.
 
 \paragraph{Complex term}
 
-The result is somewhat more complicated for a complex term:
+For the \celerite\ model, the general kernel function is expressed as
 \begin{equation}
-k(\tau) = (a + i\,b)\,\exp\left(-(c+i\,d)\,\tau\right),
+k(\tau) = a\,e^{-c\,\tau}\,\cos(d\,\tau) + b\,e^{-c\,\tau}\,\sin(d\,\tau) \quad,
 \end{equation}
-where $\tau = \vert t_i-t_j \vert$ for times $t_i$ and $t_j$.
-In this case, the integrated kernel is
-\begin{equation}
-k_\Delta(\tau) = (A + i\,B)\,k(\tau),
-\end{equation}
-where
+where $\tau = \vert t_n-t_m \vert$ is the lag between times $t_n$ and $t_m$, and the parameters of the model are $a$, $b$, $c$, and $d$.
+To find the exposure time-integrated kernel, we must evaluate the following integral
+\begin{eqnarray}
+k_\Delta(\tau) = \frac{1}{\Delta^2}\int_{t_i-\Delta/2}^{t_i+\Delta/2} \mathrm{d}t \,\int_{t_j-\Delta/2}^{t_j+\Delta/2}\mathrm{d}t^\prime\,k(|t - t^\prime|)
+\end{eqnarray}
+where $\Delta$ is the length of the exposure.
+
+When $\Delta \le \tau$ the exposures do not overlap and the exposure time integrated model still falls within the class of \celerite\ models:
+\begin{proof}{celerite-integral}\eqlabel{delta-small}
+k_{\Delta \le \tau}(\tau) = A\,e^{-c\,\tau}\,\cos{(d\,\tau)} + B\,e^{-c\,\tau}\,\sin{(d\,\tau)} \quad,
+\end{proof}
+where $c$ and $d$ have not changed, but the amplitudes are given by the updated expressions:
 \begin{proof}{celerite-integral}
-  A = 2\frac{C_1\,\left[\cosh(c\,\Delta)\,\cos(d\,\Delta) - 1\right]
-  - C_2\,\sinh(c\,\Delta)\,\sin(d\,\Delta)
+  A = \frac{2\,C_1\,\left[\cosh(c\,\Delta)\,\cos(d\,\Delta) - 1\right]
+  - 2\,C_2\,\sinh(c\,\Delta)\,\sin(d\,\Delta)
 }{\Delta^2\,(c^2 + d^2)^2},
 \end{proof}
 and
 \begin{proof}{celerite-integral}
-  B = 2\frac{C_2\,\left[\cosh(c\,\Delta)\,\cos(d\,\Delta) - 1\right]
-  + C_1\,\sinh(c\,\Delta)\,\sin(d\,\Delta)
-}{\Delta^2\,(c^2 + d^2)^2},
+  B = \frac{2\,C_2\,\left[\cosh(c\,\Delta)\,\cos(d\,\Delta) - 1\right]
+  + 2\,C_1\,\sinh(c\,\Delta)\,\sin(d\,\Delta)}{\Delta^2\,(c^2 + d^2)^2},
 \end{proof}
-where
+with
 \begin{align}
 C_1 = a\,c^2 - a\,d^2 + 2\,b\,c\,d
 \quad\mathrm{and}\quad
-C_2 = b\,c^2 - b\,d^2 - 2\,a\,c\,d.
+C_2 = b\,c^2 - b\,d^2 - 2\,a\,c\,d \quad.
 \end{align}
+For most real datasets, the constraint that $\Delta \le \tau$ will be satisfied because, for a light curve from a single telescope and a uniform exposure time, the times of each cadence will be separated by greater than the exposure time.
+In this case, \celerite\ can still be used to efficiently evaluate the GP model.
 
-In practice a kernel must be real, and so two complex terms must be
-combined to yield a real kernel,
-\begin{align}
-k(\tau) &= \tfrac{1}{2}\left[(a + i\,b)\,\exp\left(-(c+i\,d)\,\tau\right)+ (a - i\,b)\,\exp\left(-(c-i\,d)\,\tau\right) \right]\\
-&= a \exp\left(-c\,\tau\right)\cos\left(d\,\tau\right) + b \exp\left(-c\,\tau\right)\sin\left(d\,\tau\right).
-\end{align}
-This results in a time-integrated kernel for $\tau \ge \Delta$ given by
-\begin{equation}
-k_{\Delta\le\tau}(\tau) = A\exp\left(-c\,\tau\right)\cos\left(d\,\tau\right) + B\exp\left(-c\,\tau\right)\sin\left(d\,\tau\right).
-\end{equation}
-while for $0 \le \tau < \Delta$,
+For the case of overlapping exposures $0 \le \tau < \Delta$, the result is not as simple because of the absolute value in the definition of $\tau$.
+In this case, we separate the integral into three integrals that can be easily evaluated
 \begin{eqnarray}
-k_{\Delta>\tau}(\tau) &=& k_{\Delta\le\tau}(\tau) + 2\,\left[
-  - C_1\,\sinh(c\,\Delta-c\,\tau)\,\cos(d\,\Delta-d\,\tau) \right. \nonumber\\
-&&  + C_2\,\cosh(c\,\Delta-c\,\tau)\,\sin(d\,\Delta-d\,\tau) \nonumber \\
-&&  \left. + (a\,c + b\,d)\,(c^2 + d^2)\,(\Delta-\tau)\right] / [\Delta\,(c^2+d^2)]^2
+  \Delta^2\,k_{0 \le \tau < \Delta}(\tau)
+&=& \int_{t_j+\Delta/2}^{t_i+\Delta/2} \mathrm{d}t \,\int_{t_j-\Delta/2}^{t_j+\Delta/2}\mathrm{d}t^\prime\,k(t - t^\prime) \nonumber\\
+&+& \int_{t_i-\Delta/2}^{t_j+\Delta/2} \mathrm{d}t \,\int_{t_j-\Delta/2}^{t}\mathrm{d}t^\prime\,k(t - t^\prime) \nonumber\\
+&+& \int_{t_i-\Delta/2}^{t_j+\Delta/2} \mathrm{d}t \,\int_{t}^{t_j+\Delta/2}\mathrm{d}t^\prime\,k(t^\prime - t) \quad.
 \end{eqnarray}
+Evaluating and simplifying the result gives
+\begin{proof}{celerite-integral}
+k_{0 \le \tau < \Delta}(\tau) =& k_{\Delta\le\tau}(\tau) + 2\,\left[
+  (a\,c + b\,d)\,(c^2 + d^2)\,(\Delta-\tau) \right. \nonumber\\
+&  - C_1\,\sinh(c\,\Delta-c\,\tau)\,\cos(d\,\Delta-d\,\tau) \nonumber \\
+&  \left. + C_2\,\cosh(c\,\Delta-c\,\tau)\,\sin(d\,\Delta-d\,\tau) \right] / [\Delta\,(c^2+d^2)]^2
+\end{proof}
+where $k_{\Delta\le\tau}(\tau)$ is the result from above where $\Delta \le \tau$ (\eqalt{delta-small}).
+
+An important implementation note is that the diagonal of the \celerite\ matrix is not simply $A$ (as we would normally get when using \celerite) because the lag on the diagonal is $\tau = 0$.
+This means that the diagonal entries will be
+\begin{eqnarray}
+A + \frac{2\,\left[
+  (a\,c + b\,d)\,(c^2 + d^2)\,\Delta - C_1\,\sinh(c\,\Delta)\,\cos(d\,\Delta) + C_2\,\cosh(c\,\Delta)\,\sin(d\,\Delta)\right]}{[\Delta\,(c^2+d^2)]^2}
+\end{eqnarray}
+
 Note that in the limit of $b = d = 0$, this kernel reverts to the real kernel.
 As with the real case, the kernel is only semi-separable when exposures
 do not overlap in time, i.e. $\vert t_i - t_j \vert > \Delta$ for all $i,j$, while the diagonal
