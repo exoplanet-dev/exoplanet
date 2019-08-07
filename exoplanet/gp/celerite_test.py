@@ -4,6 +4,7 @@ from __future__ import division, print_function
 
 import pytest
 import numpy as np
+from scipy.linalg import cholesky, cho_solve
 
 import theano
 import theano.tensor as tt
@@ -136,7 +137,7 @@ def test_gp(celerite_kernel, seed=1234):
     assert np.allclose(loglike, celerite_loglike)
 
 
-def test_integrated(seed=1234):
+def test_integrated_diag(seed=1234):
     np.random.seed(seed)
     x = np.sort(np.random.uniform(0, 100, 100))
     dt = 0.4 * np.min(np.diff(x))
@@ -154,3 +155,48 @@ def test_integrated(seed=1234):
     a = kernel.get_celerite_matrices(x, diag)[0].eval()
     k0 = kernel.value(tt.zeros(1)).eval()
     assert np.allclose(a, k0 + diag)
+
+
+def _check_model(kernel, x, diag, y):
+    gp = GP(kernel, x, diag)
+    loglike = gp.log_likelihood(y).eval()
+
+    K = kernel.value(x[:, None] - x[None, :]).eval()
+    K[np.diag_indices_from(K)] += diag
+    factor = (cholesky(K, overwrite_a=True, lower=False), False)
+    loglike0 = -np.sum(np.log(np.diag(factor[0])))
+    loglike0 -= 0.5 * len(x) * np.log(2 * np.pi)
+    loglike0 -= 0.5 * np.dot(y, cho_solve(factor, y))
+
+    assert np.allclose(loglike, loglike0)
+
+
+@pytest.mark.parametrize(
+    "kernel",
+    [
+        terms.RealTerm(log_a=0.1, log_c=0.5),
+        terms.RealTerm(log_a=0.1, log_c=0.5)
+        + terms.RealTerm(log_a=-0.1, log_c=0.7),
+        terms.ComplexTerm(log_a=0.1, b=0.0, log_c=0.5, log_d=0.1),
+        terms.ComplexTerm(log_a=0.1, log_b=-0.2, log_c=0.5, log_d=0.1),
+        terms.SHOTerm(log_S0=0.1, log_Q=-1, log_w0=0.5),
+        terms.SHOTerm(log_S0=0.1, log_Q=1.0, log_w0=0.5),
+        terms.SHOTerm(log_S0=0.1, log_Q=1.0, log_w0=0.5)
+        + terms.RealTerm(log_a=0.1, log_c=0.4),
+        terms.SHOTerm(log_S0=0.1, log_Q=1.0, log_w0=0.5)
+        * terms.RealTerm(log_a=0.1, log_c=0.4),
+        terms.Matern32Term(log_sigma=0.1, log_rho=0.4),
+    ],
+)
+def test_integrated(kernel, seed=1234):
+    np.random.seed(seed)
+    x = np.sort(np.random.uniform(0, 100, 100))
+    dt = 0.4 * np.min(np.diff(x))
+    y = np.sin(x)
+    yerr = np.random.uniform(0.1, 0.5, len(x))
+    diag = yerr ** 2
+
+    _check_model(kernel, x, diag, y)
+
+    kernel = terms.IntegratedTerm(kernel, dt)
+    _check_model(kernel, x, diag, y)
