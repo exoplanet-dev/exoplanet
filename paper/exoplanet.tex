@@ -763,20 +763,6 @@ noise component of the covariance matrix when implementing the \celerite\
 kernel.   Given that the kernel is positive, the matrix will still
 be positive definite.
 
-Although this expression appears complicated, the Fourier transform
-is less so, and is given by:
-\begin{equation}
-S(\omega) = \frac{ac}{\sqrt{2\pi}(c^2 + \omega^2)}  \left(\frac{\sin(\tfrac{1}{2}\omega \Delta)}{\tfrac{1}{2}\omega\Delta}\right)^2.
-\end{equation}
-Note that this is the Fourier transform of the kernel, $k(\tau)$,
-multiplied by the square of a sinc function, $\mathrm{sinc}^2{(\omega\Delta/2)}$,
-which results from the convolution of the kernel with a top-hat
-time-integration of half-width $\Delta/2$.  Convolution in Fourier
-space turns into multiplication, and thus the square of the sinc function
-results from taking the square of the Fourier transform to obtain
-the power spectrum. Also note that the sinc function goes to zero
-when $\omega\Delta = 2\pi$, which corresponds to the sampling
-frequency, $f = \frac{2\pi}{\omega} = \Delta^{-1}$.
 
 \paragraph{Complex term}
 
@@ -832,30 +818,27 @@ k_{0 \le \tau < \Delta}(\tau) =& k_{\Delta\le\tau}(\tau) + 2\,\left[
 \end{proof}
 where $k_{\Delta\le\tau}(\tau)$ is the result from above where $\Delta \le \tau$ (\eqalt{delta-small}).
 
-An important implementation note is that the diagonal of the \celerite\ matrix is not simply $A$ (as we would normally get when using \celerite) because the lag on the diagonal is $\tau = 0$.
-This means that the diagonal entries will be
+An important implementation note is that, while a non-integrated \celerite\ term would generate a matrix with the amplitude $a$ on the diagonal, the diagonal for the integrated term is not simply $A$ because the lag on the diagonal is $\tau = 0 < \Delta$.
+This means that the diagonal entries in the covariance matrix for an time-integrated \celerite\ model are
+\begin{align}
+A + \frac{2}{[\Delta\,(c^2+d^2)]^2}\,&\left[
+  (a\,c + b\,d)\,(c^2 + d^2)\,\Delta \right. \nonumber\\
+  & - C_1\,\sinh(c\,\Delta)\,\cos(d\,\Delta) \nonumber\\
+  & \left. + C_2\,\cosh(c\,\Delta)\,\sin(d\,\Delta)\right] \quad.
+\end{align}
+This additional term can be negative, but can simply be added to the white noise component of the covariance matrix when implementing the \celerite\ kernel.
+Given that the kernel is positive, the matrix will still
+be positive definite.
+
+The power spectrum of the time-integrated term derived above can be computed by taking the Fourier transform and, after some simplifications, it reduces to the expected result
 \begin{eqnarray}
-A + \frac{2\,\left[
-  (a\,c + b\,d)\,(c^2 + d^2)\,\Delta - C_1\,\sinh(c\,\Delta)\,\cos(d\,\Delta) + C_2\,\cosh(c\,\Delta)\,\sin(d\,\Delta)\right]}{[\Delta\,(c^2+d^2)]^2}
+S_\Delta(\omega) &=& S(\omega)\,\mathrm{sinc}^{2}(\omega\,\Delta/2)\nonumber\\
+&=& \sqrt{\frac{2}{\pi}} \left(\frac{(ac+bd)(c^2+d^2)+(ac-bd)\omega^2}
+  {\omega^4+2(c^2-d^2)\omega^2+(c^2+d^2)^2}\right)
+  \left( \frac{\sin(\tfrac{1}{2}\omega \Delta)}{\tfrac{1}{2}\omega\Delta}\right)^2
 \end{eqnarray}
-
-For the case of $b=0$ and $c=0$ (called the ``real'' term by \citealt{Foreman-Mackey:2017}), the integrated kernel simplifies to
-\begin{proof}{celerite-integral}
-  k_\Delta(\tau) = \frac{2\,a\,e^{-c\,\tau}}{\left(c\,\Delta\right)^2}\,
-    \begin{cases}
-    e^{-c\,\Delta} - 1 + c\,\Delta & \tau = 0 \\
-    \left[c\,(\Delta - \tau) - \sinh{(c\,\Delta-c\,\tau)}\right] e^{c\,\tau} + \cosh{(c\,\Delta)} -1 & 0 < \tau \le \Delta \\
-    \cosh(c\,\Delta) - 1  & \Delta < \tau
-    \end{cases} \quad.
-\end{proof}
-
-The power spectrum of the time-integrated kernel simply
-requires multiplication by the sinc-squared function:
-\begin{equation}
-S(\omega) = \sqrt{\frac{2}{\pi}} \left(\frac{(ac+bd)(c^2+d^2)+(ac-bd)\omega^2}
-{\omega^4+2(c^2-d^2)\omega^2+(c^2+d^2)^2}\right)
-\left( \frac{\sin(\tfrac{1}{2}\omega \Delta)}{\tfrac{1}{2}\omega\Delta}\right)^2.
-\end{equation}
+where $S(\omega)$ is the power spectrum of the original term and $\mathrm{sinc}(x) = \sin(x)/x$ is the Fourier transform of a top hat representing the exposure.
+An interesting consequence of this form is that, since the sinc function goes to zero when $\omega\,\Delta = 2\,\pi\,n$ for integers $n \ne 0$, there is no power at integer multiples of the sampling frequency $f = \frac{2\pi}{\omega} = \Delta^{-1}$.
 
 Examples of these kernels and power spectra are shown in Figure \ref{fig:celerite-integral}
 for the simple-harmonic oscillator kernel which specifies the coefficients
@@ -867,6 +850,16 @@ The kernels become smoother and lower amplitude for longer integration times,
 while the power spectra are suppressed at high frequency, and show a series of
 zeros at integer multiples of the sampling frequency, which is a consequence
 of aliasing at these frequencies.
+
+For the case of $b=0$ and $c=0$ (called the ``real'' term by \citealt{Foreman-Mackey:2017}), the integrated kernel simplifies to
+\begin{proof}{celerite-integral}
+  k_\Delta(\tau) = \frac{2\,a\,e^{-c\,\tau}}{\left(c\,\Delta\right)^2}\,
+    \begin{cases}
+    e^{-c\,\Delta} - 1 + c\,\Delta & \tau = 0 \\
+    \left[c\,(\Delta - \tau) - \sinh{(c\,\Delta-c\,\tau)}\right] e^{c\,\tau} + \cosh{(c\,\Delta)} -1 & 0 < \tau \le \Delta \\
+    \cosh(c\,\Delta) - 1  & \Delta < \tau
+    \end{cases} \quad.
+\end{proof}
 
 \begin{figure}[htbp]
 \begin{centering}
