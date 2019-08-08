@@ -730,41 +730,8 @@ This is a figure.}
 In this section we give expressions for the {\it exposure time}-integrated versions of the \celerite\ kernel and its power
 spectrum.  It turns out that the time-integrated \celerite\ kernel
 remains expressible as a semi-separable matrix when the exposures
-do not overlap, but when exposures overlap for non-zero time delay,
+do not overlap, but when exposures overlap for non-zero time lags,
 the kernel no longer is semi-separable.
-
-\paragraph{Real term}
-
-For a real term:
-\begin{equation}
-%k(\tau) = a\,\exp\left(-c\,(t_i - t_j)\right)
-k(\tau) = a\,\exp\left(-c\,\tau\right)
-\end{equation}
-where $\tau = \vert t_i-t_j \vert$.
-The time-integrated kernel is
-\begin{proof}{celerite-integral}
-k_\Delta(\tau) = \frac{2}{\left(c\,\Delta\right)^2}\,k(\tau)\,
-  \begin{cases}
-    \cosh(c\,\Delta) - 1 + c\,\Delta-\sinh(c\,\Delta) & \tau = 0 \\
-   c(\Delta - \tau) e^{c\tau} + \cosh{(c\tau)} e^{-c(\Delta - \tau)} -1 & 0 < \tau \le \Delta \\
-   \cosh(c\,\Delta) - 1  & \Delta < \tau
-    \end{cases},
-\end{proof}
-where $\Delta$ is the integration time.  Note that in the standard
-use case of a single light curve with a single telescope and a
-uniform exposure time, the times of each cadence will be separated
-by greater than the exposure time, and so the kernel will be
-semi-separable.  However, there is a slight difference in
-the implementation as the $\tau = 0$ term, which corresponds to
-the diagonal of the covariance matrix, has an extra term,
-$\frac{2a}{(c\Delta)^2}(c\Delta-\sinh(c\Delta))$.
-This additional term is negative, but can simply be added to the white
-noise component of the covariance matrix when implementing the \celerite\
-kernel.   Given that the kernel is positive, the matrix will still
-be positive definite.
-
-
-\paragraph{Complex term}
 
 For the \celerite\ model, the general kernel function is expressed as
 \begin{equation}
@@ -818,18 +785,6 @@ k_{0 \le \tau < \Delta}(\tau) =& k_{\Delta\le\tau}(\tau) + 2\,\left[
 \end{proof}
 where $k_{\Delta\le\tau}(\tau)$ is the result from above where $\Delta \le \tau$ (\eqalt{delta-small}).
 
-An important implementation note is that, while a non-integrated \celerite\ term would generate a matrix with the amplitude $a$ on the diagonal, the diagonal for the integrated term is not simply $A$ because the lag on the diagonal is $\tau = 0 < \Delta$.
-This means that the diagonal entries in the covariance matrix for an time-integrated \celerite\ model are
-\begin{align}
-A + \frac{2}{[\Delta\,(c^2+d^2)]^2}\,&\left[
-  (a\,c + b\,d)\,(c^2 + d^2)\,\Delta \right. \nonumber\\
-  & - C_1\,\sinh(c\,\Delta)\,\cos(d\,\Delta) \nonumber\\
-  & \left. + C_2\,\cosh(c\,\Delta)\,\sin(d\,\Delta)\right] \quad.
-\end{align}
-This additional term can be negative, but can simply be added to the white noise component of the covariance matrix when implementing the \celerite\ kernel.
-Given that the kernel is positive, the matrix will still
-be positive definite.
-
 The power spectrum of the time-integrated term derived above can be computed by taking the Fourier transform and, after some simplifications, it reduces to the expected result
 \begin{eqnarray}
 S_\Delta(\omega) &=& S(\omega)\,\mathrm{sinc}^{2}(\omega\,\Delta/2)\nonumber\\
@@ -839,6 +794,25 @@ S_\Delta(\omega) &=& S(\omega)\,\mathrm{sinc}^{2}(\omega\,\Delta/2)\nonumber\\
 \end{eqnarray}
 where $S(\omega)$ is the power spectrum of the original term and $\mathrm{sinc}(x) = \sin(x)/x$ is the Fourier transform of a top hat representing the exposure.
 An interesting consequence of this form is that, since the sinc function goes to zero when $\omega\,\Delta = 2\,\pi\,n$ for integers $n \ne 0$, there is no power at integer multiples of the sampling frequency $f = \frac{2\pi}{\omega} = \Delta^{-1}$.
+
+An important implementation note is that, while a non-integrated \celerite\ term would generate a matrix with the amplitude $a$ on the diagonal, the diagonal for the integrated term is not simply $A$ because the lag on the diagonal is $\tau = 0 < \Delta$.
+This means that the diagonal entries in the covariance matrix for an time-integrated \celerite\ model are
+\begin{align}
+k_\Delta(0) = A + \frac{2}{[\Delta\,(c^2+d^2)]^2}\,&\left[
+  (a\,c + b\,d)\,(c^2 + d^2)\,\Delta \right. \nonumber\\
+  & - C_1\,\sinh(c\,\Delta)\,\cos(d\,\Delta) \nonumber\\
+  & \left. + C_2\,\cosh(c\,\Delta)\,\sin(d\,\Delta)\right]
+\end{align}
+which can be simplified to
+\begin{proof}{celerite-integral}
+k_\Delta(0) = \frac{2\,\left[ (a\,c + b\,d)\,(c^2+d^2)\,\Delta - C_1 + e^{-c\,\Delta}\,\left(C_1\,\cos(d\,\Delta)+C_2\,\sin(d\,\Delta)\right) \right]}{\Delta^2\,(c^2 + d^2)^2}
+\quad.
+\end{proof}
+While, in general, this diagonal can be negative, for positive semi-definite kernels where $S(w) \ge 0$, the diagonal entry can also be computed as
+\begin{eqnarray}
+k_\Delta (0) = \sqrt{2\,\pi}\,\int_{-\infty} ^{\infty} S(\omega)\,\mathrm{sinc}^2(\omega\,\Delta/2)\,\dd\omega
+\end{eqnarray}
+which will be everywhere non-negative since $S(\omega) \ge 0$ and $\mathrm{sinc}^2(\omega\,\Delta/2) \ge 0$.
 
 Examples of these kernels and power spectra are shown in Figure \ref{fig:celerite-integral}
 for the simple-harmonic oscillator kernel which specifies the coefficients
