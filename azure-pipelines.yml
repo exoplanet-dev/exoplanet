@@ -14,13 +14,13 @@ steps:
 - script: |
     sudo chown -R $USER $CONDA
     . $CONDA/etc/profile.d/conda.sh
-    conda create --yes --quiet --name exoplanet pip
+    conda create --yes --quiet --name exoplanet python=3.7.3 pip
   displayName: 'Setup conda'
 
 - script: |
     . $CONDA/etc/profile.d/conda.sh
     conda activate exoplanet
-    # python -m pip install --upgrade pip setuptools wheel
+    pip install -U pip
     pip install -U setuptools
     pip install -U -r requirements.txt
     pip install -U -r paper/requirements.txt
