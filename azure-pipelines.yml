@@ -20,7 +20,7 @@ steps:
 - script: |
     . $CONDA/etc/profile.d/conda.sh
     conda activate exoplanet
-    pip install -U pip
+    python -m pip install --upgrade pip setuptools wheel
     pip install -U setuptools
     pip install -U -r requirements.txt
     pip install -U -r paper/requirements.txt
