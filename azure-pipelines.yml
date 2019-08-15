@@ -14,7 +14,7 @@ steps:
 - script: |
     sudo chown -R $USER $CONDA
     . $CONDA/etc/profile.d/conda.sh
-    conda create --yes --quiet --name exoplanet python=3.7 pip
+    conda create --yes --quiet --name exoplanet python=3.7.3 pip
   displayName: 'Setup conda'
 
 - script: |
