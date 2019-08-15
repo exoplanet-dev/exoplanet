@@ -17,6 +17,11 @@ from ..citations import add_citations_to_model
 from ..theano_ops.kepler import KeplerOp
 from ..theano_ops.contact import ContactPointsOp
 
+# Constants in the units that we'll use
+gcc_to_sun = (constants.M_sun / constants.R_sun ** 3).to(u.g / u.cm ** 3).value
+au_to_R_sun = (constants.au / constants.R_sun).value
+G_grav = constants.G.to(u.R_sun ** 3 / u.M_sun / u.day ** 2).value
+
 
 class KeplerianOrbit(object):
     """A system of bodies on Keplerian orbits around a common central
@@ -91,22 +96,22 @@ class KeplerianOrbit(object):
     ):
         add_citations_to_model(self.__citations__, model=model)
 
-        self.gcc_to_sun = (
-            (constants.M_sun / constants.R_sun ** 3).to(u.g / u.cm ** 3).value
-        )
-        self.au_to_R_sun = (constants.au / constants.R_sun).value
-        self.G_grav = constants.G.to(u.R_sun ** 3 / u.M_sun / u.day ** 2).value
-
         self.kepler_op = KeplerOp(**kwargs)
 
         # Parameters
-        # self.period = tt.as_tensor_variable(period)
-        self.m_planet = tt.as_tensor_variable(m_planet)
-        if m_planet_units is not None:
-            self.m_planet *= (1 * m_planet_units).to(u.M_sun).value
 
-        self.a, self.period, self.rho_star, self.r_star, self.m_star = self._get_consistent_inputs(
-            a, period, rho_star, r_star, m_star, rho_star_units
+        inputs = _get_consistent_inputs(
+            a,
+            period,
+            rho_star,
+            r_star,
+            m_star,
+            rho_star_units,
+            m_planet,
+            m_planet_units,
+        )
+        self.a, self.period, self.rho_star, self.r_star, self.m_star, self.m_planet = (
+            inputs
         )
         self.m_total = self.m_star + self.m_planet
 
@@ -217,96 +222,6 @@ class KeplerianOrbit(object):
 
         self.sin_incl = tt.sin(self.incl)
 
-    def _get_consistent_inputs(
-        self, a, period, rho_star, r_star, m_star, rho_star_units
-    ):
-        if a is None and period is None:
-            raise ValueError(
-                "values must be provided for at least one of a " "and period"
-            )
-
-        if a is not None:
-            a = tt.as_tensor_variable(a)
-        if period is not None:
-            period = tt.as_tensor_variable(period)
-
-        # Compute the implied density if a and period are given
-        implied_rho_star = False
-        if a is not None and period is not None:
-            if rho_star is not None or m_star is not None:
-                raise ValueError(
-                    "if both a and period are given, you can't "
-                    "also define rho_star or m_star"
-                )
-
-            # Default to a stellar radius of 1 if not provided
-            if r_star is None:
-                r_star = tt.as_tensor_variable(1.0)
-            else:
-                r_star = tt.as_tensor_variable(r_star)
-
-            # Compute the implied mass via Kepler's 3rd law
-            m_tot = 4 * np.pi * np.pi * a ** 3 / (self.G_grav * period ** 2)
-
-            # Compute the implied density
-            m_star = m_tot - self.m_planet
-            vol_star = 4 * np.pi * r_star ** 3 / 3.0
-            rho_star = self.gcc_to_sun * m_star / vol_star
-            rho_star_units = None
-            implied_rho_star = True
-
-        # Make sure that the right combination of stellar parameters are given
-        if r_star is None and m_star is None:
-            r_star = 1.0
-            if rho_star is None:
-                m_star = 1.0
-        if (not implied_rho_star) and sum(
-            arg is None for arg in (rho_star, r_star, m_star)
-        ) != 1:
-            raise ValueError(
-                "values must be provided for exactly two of "
-                "rho_star, m_star, and r_star"
-            )
-
-        if rho_star is not None:
-            rho_star = tt.as_tensor_variable(rho_star)
-            if rho_star_units is not None:
-                rho_star *= (
-                    (1 * rho_star_units).to(u.M_sun / u.R_sun ** 3).value
-                )
-            else:
-                rho_star /= self.gcc_to_sun
-        if r_star is not None:
-            r_star = tt.as_tensor_variable(r_star)
-        if m_star is not None:
-            m_star = tt.as_tensor_variable(m_star)
-
-        # Work out the stellar parameters
-        if rho_star is None:
-            rho_star = 3 * m_star / (4 * np.pi * r_star ** 3)
-        elif r_star is None:
-            r_star = (3 * m_star / (4 * np.pi * rho_star)) ** (1 / 3)
-        elif m_star is None:
-            m_star = 4 * np.pi * r_star ** 3 * rho_star / 3.0
-
-        # Work out the planet parameters
-        if a is None:
-            a = (
-                self.G_grav
-                * (m_star + self.m_planet)
-                * period ** 2
-                / (4 * np.pi ** 2)
-            ) ** (1.0 / 3)
-        elif period is None:
-            period = (
-                2
-                * np.pi
-                * a ** (3 / 2)
-                / (tt.sqrt(self.G_grav * (m_star + self.m_planet)))
-            )
-
-        return a, period, rho_star * self.gcc_to_sun, r_star, m_star
-
     def _rotate_vector(self, x, y):
         """Apply the rotation matrices to go from obrit to observer frame
 
@@ -380,7 +295,7 @@ class KeplerianOrbit(object):
 
         if parallax is not None:
             # convert r into arcseconds
-            r = r * parallax / self.au_to_R_sun
+            r = r * parallax / au_to_R_sun
 
         return self._rotate_vector(r * cosf, r * sinf)
 
@@ -750,3 +665,97 @@ def get_true_anomaly(M, e, **kwargs):
     """
     sinf, cosf = KeplerOp()(M, e)
     return tt.arctan2(sinf, cosf)
+
+
+def _get_consistent_inputs(
+    a,
+    period,
+    rho_star,
+    r_star,
+    m_star,
+    rho_star_units,
+    m_planet,
+    m_planet_units,
+):
+    m_planet = tt.as_tensor_variable(m_planet)
+    if m_planet_units is not None:
+        m_planet *= (1 * m_planet_units).to(u.M_sun).value
+
+    if a is None and period is None:
+        raise ValueError(
+            "values must be provided for at least one of a " "and period"
+        )
+
+    if a is not None:
+        a = tt.as_tensor_variable(a)
+    if period is not None:
+        period = tt.as_tensor_variable(period)
+
+    # Compute the implied density if a and period are given
+    implied_rho_star = False
+    if a is not None and period is not None:
+        if rho_star is not None or m_star is not None:
+            raise ValueError(
+                "if both a and period are given, you can't "
+                "also define rho_star or m_star"
+            )
+
+        # Default to a stellar radius of 1 if not provided
+        if r_star is None:
+            r_star = tt.as_tensor_variable(1.0)
+        else:
+            r_star = tt.as_tensor_variable(r_star)
+
+        # Compute the implied mass via Kepler's 3rd law
+        m_tot = 4 * np.pi * np.pi * a ** 3 / (G_grav * period ** 2)
+
+        # Compute the implied density
+        m_star = m_tot - m_planet
+        vol_star = 4 * np.pi * r_star ** 3 / 3.0
+        rho_star = gcc_to_sun * m_star / vol_star
+        rho_star_units = None
+        implied_rho_star = True
+
+    # Make sure that the right combination of stellar parameters are given
+    if r_star is None and m_star is None:
+        r_star = 1.0
+        if rho_star is None:
+            m_star = 1.0
+    if (not implied_rho_star) and sum(
+        arg is None for arg in (rho_star, r_star, m_star)
+    ) != 1:
+        raise ValueError(
+            "values must be provided for exactly two of "
+            "rho_star, m_star, and r_star"
+        )
+
+    if rho_star is not None:
+        rho_star = tt.as_tensor_variable(rho_star)
+        if rho_star_units is not None:
+            rho_star *= (1 * rho_star_units).to(u.M_sun / u.R_sun ** 3).value
+        else:
+            rho_star /= gcc_to_sun
+    if r_star is not None:
+        r_star = tt.as_tensor_variable(r_star)
+    if m_star is not None:
+        m_star = tt.as_tensor_variable(m_star)
+
+    # Work out the stellar parameters
+    if rho_star is None:
+        rho_star = 3 * m_star / (4 * np.pi * r_star ** 3)
+    elif r_star is None:
+        r_star = (3 * m_star / (4 * np.pi * rho_star)) ** (1 / 3)
+    elif m_star is None:
+        m_star = 4 * np.pi * r_star ** 3 * rho_star / 3.0
+
+    # Work out the planet parameters
+    if a is None:
+        a = (
+            G_grav * (m_star + m_planet) * period ** 2 / (4 * np.pi ** 2)
+        ) ** (1.0 / 3)
+    elif period is None:
+        period = (
+            2 * np.pi * a ** (3 / 2) / (tt.sqrt(G_grav * (m_star + m_planet)))
+        )
+
+    return a, period, rho_star * gcc_to_sun, r_star, m_star, m_planet
