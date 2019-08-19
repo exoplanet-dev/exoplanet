@@ -12,7 +12,6 @@ import pymc3 as pm
 import theano.tensor as tt
 
 from .keplerian import _get_consistent_inputs, KeplerianOrbit
-from ..utils import eval_in_model
 
 
 def duration_to_eccentricity(func, duration, ror, **kwargs):
@@ -41,7 +40,6 @@ def duration_to_eccentricity(func, duration, ror, **kwargs):
     const /= np.pi * a
 
     u = duration / const
-    print(eval_in_model([u, 1 / umax_inv, 1 / u, umax_inv]))
 
     e1 = -s * u ** 2 / ((s * u) ** 2 + 1)
     e2 = tt.sqrt((s ** 2 - 1) * u ** 2 + 1) / ((s * u) ** 2 + 1)
@@ -56,8 +54,9 @@ def duration_to_eccentricity(func, duration, ror, **kwargs):
         ecc = tt.stack([e1[i] + signs[i] * e2[i] for i in range(num_planets)])
 
         # Work out the Jacobian
+        valid_ecc = tt.and_(tt.lt(ecc, 1.0), tt.ge(ecc, 0.0))
         logjac = tt.switch(
-            tt.all(tt.and_(tt.lt(ecc, 1.0), tt.ge(ecc, 0.0))),
+            tt.all(valid_ecc),
             tt.sum(
                 0.5 * tt.log(1 - ecc ** 2)
                 + 2 * tt.log(s * ecc + 1)
@@ -66,7 +65,7 @@ def duration_to_eccentricity(func, duration, ror, **kwargs):
             ),
             -np.inf,
         )
-        ecc = tt.clip(ecc, 0, 1)
+        ecc = tt.switch(valid_ecc, ecc, tt.zeros_like(ecc))
 
         # Create a sub-model to capture this component
         with pm.Model(name="dur_ecc_" + "_".join(labels)) as model:
@@ -83,7 +82,7 @@ def duration_to_eccentricity(func, duration, ror, **kwargs):
     logprobs = tt.stack(logprobs)
     logprob = tt.switch(
         tt.gt(1.0 / u, umax_inv),
-        tt.log(tt.sum(tt.exp(logprobs + logjacs))),
+        tt.sum(pm.logsumexp(logprobs + logjacs)),
         -np.inf,
     )
     pm.Potential(name + "_logp", logprob)
@@ -92,10 +91,10 @@ def duration_to_eccentricity(func, duration, ror, **kwargs):
 
     # Loop over models and compute the marginalized values for all the
     # parameters and deterministics
-    norm = tt.log(tt.sum(tt.exp(logjacs)))
+    norm = tt.sum(pm.logsumexp(logjacs))
     logw = tt.switch(
         tt.gt(1.0 / u, umax_inv),
-        logjacs + logprob - norm,
+        logjacs - norm,
         -np.inf + tt.zeros_like(logjacs),
     )
     pm.Deterministic(name + "_logw", logw)

@@ -158,28 +158,29 @@ class KeplerianOrbit(object):
             self.K0 /= tt.sqrt(ome2)
             incl_factor = (1 + self.ecc * self.sin_omega) / ome2
 
+        # The Jacobian for the transform cos(i) -> b
+        self.dcosidb = incl_factor * self.r_star / self.a
+
         if b is not None:
             if incl is not None or duration is not None:
                 raise ValueError(
-                    "only one of 'incl', 'b', and 'duration' can " "be given"
+                    "only one of 'incl', 'b', and 'duration' can be given"
                 )
             self.b = tt.as_tensor_variable(b)
-            self.cos_incl = incl_factor * self.b * self.r_star / self.a_planet
+            self.cos_incl = self.dcosidb * self.b
             self.incl = tt.arccos(self.cos_incl)
         elif incl is not None:
             if duration is not None:
                 raise ValueError(
-                    "only one of 'incl', 'b', and 'duration' can " "be given"
+                    "only one of 'incl', 'b', and 'duration' can be given"
                 )
             self.incl = tt.as_tensor_variable(incl)
             self.cos_incl = tt.cos(self.incl)
-            self.b = (
-                self.a_planet * self.cos_incl / (incl_factor * self.r_star)
-            )
+            self.b = self.cos_incl / self.dcosidb
         elif duration is not None:
             if self.ecc is None:
                 raise ValueError(
-                    "fitting with duration only works for " "eccentric orbits"
+                    "fitting with duration only works for eccentric orbits"
                 )
             self.duration = tt.as_tensor_variable(duration)
             c = tt.sin(np.pi * self.duration * incl_factor / self.period)
@@ -198,7 +199,7 @@ class KeplerianOrbit(object):
                 )
             )
             self.b *= 1 - self.ecc ** 2
-            self.cos_incl = incl_factor * self.b * self.r_star / self.a_planet
+            self.cos_incl = self.dcosidb * self.b
             self.incl = tt.arccos(self.cos_incl)
         else:
             zla = tt.zeros_like(self.a)

@@ -27,6 +27,7 @@
     "autoDocstring.docstringFormat": "google",
 
     // General formatting
+    "python.linting.flake8Args": ["--ignore=E203", "--verbose"],
     "files.trimTrailingWhitespace": true,
     "[cpp]": {
         "editor.formatOnPaste": false,
