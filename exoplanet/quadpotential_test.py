@@ -66,3 +66,26 @@ def test_draw_samples(ndim=10, seed=8976):
     samples = [pot.random() for n in range(10000)]
     sample_cov = np.cov(samples, rowvar=0)
     assert np.all(np.abs(sample_cov - sample_cov0) < 0.1)
+
+
+def test_sample_p(seed=4566):
+    # ref: https://github.com/stan-dev/stan/pull/2672
+    np.random.seed(seed)
+    m = np.array([[3.0, -2.0], [-2.0, 4.0]])
+    m_inv = np.linalg.inv(m)
+
+    var = np.array(
+        [
+            [2 * m[0, 0], m[1, 0] * m[1, 0] + m[1, 1] * m[0, 0]],
+            [m[0, 1] * m[0, 1] + m[1, 1] * m[0, 0], 2 * m[1, 1]],
+        ]
+    )
+
+    n_samples = 1000
+    pot = QuadPotentialDenseAdapt(2, np.zeros(2), m_inv, 1)
+    samples = [pot.random() for n in range(n_samples)]
+    sample_cov = np.cov(samples, rowvar=0)
+
+    # Covariance matrix within 5 sigma of expected value
+    # (comes from a Wishart distribution)
+    assert np.all(np.abs(m - sample_cov) < 5 * np.sqrt(var / n_samples))
