@@ -3,6 +3,7 @@ channels:
   - astropy
   - defaults
 dependencies:
+  - _libgcc_mutex=0.1=main
   - asn1crypto=0.24.0=py37_0
   - astropy=3.1.2=py37h7b6447c_0
   - astroquery=0.3.9=py_1000
@@ -13,6 +14,7 @@ dependencies:
   - binutils_impl_linux-64=2.31.1=h6176602_1
   - binutils_linux-64=2.31.1=h6176602_6
   - blas=1.0=mkl
+  - bleach=3.1.0=py37_0
   - ca-certificates=2019.1.23=0
   - certifi=2019.3.9=py37_0
   - cffi=1.11.5=py37he75722e_1
@@ -150,7 +152,6 @@ dependencies:
   - zlib=1.2.11=h7b6447c_3
   - pip:
     - arviz==0.4.1
-    - bleach==3.1.0
     - cftime==1.0.3.4
     - corner==2.0.1
     - coverage==4.5.3
