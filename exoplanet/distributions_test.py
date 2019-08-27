@@ -2,6 +2,7 @@
 
 from __future__ import division, print_function
 
+import pytest
 import logging
 import numpy as np
 from scipy.stats import kstest
@@ -15,6 +16,7 @@ from .distributions import (
     QuadLimbDark,
     RadiusImpact,
     Periodic,
+    get_joint_radius_impact,
 )
 
 
@@ -48,7 +50,19 @@ class TestDistributions(object):
 
     def test_unit_vector(self):
         with self._model():
-            UnitVector("x", shape=(2, 3))
+            dist = UnitVector("x", shape=(2, 3))
+
+            # Test random sampling
+            samples = dist.random(size=100)
+            assert np.shape(samples) == (100, 2, 3)
+            assert np.allclose(np.sum(samples ** 2, axis=-1), 1.0)
+
+            logp = np.sum(
+                UnitVector.dist(shape=(2, 3)).logp(samples).eval(), axis=-1
+            ).flatten()
+            assert np.all(np.isfinite(logp))
+            assert np.allclose(logp[0], logp)
+
             trace = self._sample()
 
         # Make sure that the unit vector constraint is satisfied
@@ -72,9 +86,20 @@ class TestDistributions(object):
             s, p = kstest(z[:, i], cdf)
             assert s < 0.05
 
-    def test_angle(self):
+    @pytest.mark.parametrize("regularized", [None, 10.0])
+    def test_angle(self, regularized):
         with self._model():
-            Angle("theta", shape=(5, 2))
+            dist = Angle("theta", shape=(5, 2), regularized=regularized)
+
+            # Test random sampling
+            samples = dist.random(size=100)
+            assert np.shape(samples) == (100, 5, 2)
+            assert np.all((-np.pi <= samples) & (samples <= np.pi))
+
+            logp = Angle.dist(shape=(5, 2)).logp(samples).eval().flatten()
+            assert np.all(np.isfinite(logp))
+            assert np.allclose(logp[0], logp)
+
             trace = self._sample()
 
         # The angle should be uniformly distributed
@@ -85,11 +110,33 @@ class TestDistributions(object):
             s, p = kstest(theta[:, i], cdf)
             assert s < 0.05
 
-    def test_periodic(self):
+    @pytest.mark.parametrize("regularized", [None, 10.0])
+    def test_periodic(self, regularized):
         lower = -3.245
         upper = 5.123
         with self._model():
-            Periodic("p", lower=lower, upper=upper, shape=(5, 2))
+            dist = Periodic(
+                "p",
+                lower=lower,
+                upper=upper,
+                shape=(5, 2),
+                regularized=regularized,
+            )
+
+            # Test random sampling
+            samples = dist.random(size=100)
+            assert np.shape(samples) == (100, 5, 2)
+            assert np.all((lower <= samples) & (samples <= upper))
+
+            logp = (
+                Periodic.dist(lower=lower, upper=upper, shape=(5, 2))
+                .logp(samples)
+                .eval()
+                .flatten()
+            )
+            assert np.all(np.isfinite(logp))
+            assert np.allclose(logp[0], logp)
+
             trace = self._sample()
 
         p = trace["p"]
@@ -101,7 +148,19 @@ class TestDistributions(object):
 
     def test_unit_uniform(self):
         with self._model():
-            UnitUniform("u", shape=(5, 2))
+            dist = UnitUniform("u", shape=(5, 2))
+
+            # Test random sampling
+            samples = dist.random(size=100)
+            assert np.shape(samples) == (100, 5, 2)
+            assert np.all((0 <= samples) & (samples <= 1))
+
+            logp = (
+                UnitUniform.dist(shape=(5, 2)).logp(samples).eval().flatten()
+            )
+            assert np.all(np.isfinite(logp))
+            assert np.allclose(logp[0], logp)
+
             trace = self._sample()
 
         u = trace["u"]
@@ -113,7 +172,16 @@ class TestDistributions(object):
 
     def test_quad_limb_dark(self):
         with self._model():
-            QuadLimbDark("u", shape=2)
+            dist = QuadLimbDark("u", shape=2)
+
+            # Test random sampling
+            samples = dist.random(size=100)
+            assert np.shape(samples) == (100, 2)
+
+            logp = QuadLimbDark.dist(shape=2).logp(samples).eval().flatten()
+            assert np.all(np.isfinite(logp))
+            assert np.allclose(logp[0], logp)
+
             trace = self._sample()
 
         u1 = trace["u"][:, 0]
@@ -137,11 +205,48 @@ class TestDistributions(object):
         min_radius = 0.01
         max_radius = 0.1
         with self._model():
-            RadiusImpact("rb", min_radius=min_radius, max_radius=max_radius)
+            dist = RadiusImpact(
+                "rb", min_radius=min_radius, max_radius=max_radius
+            )
+
+            # Test random sampling
+            samples = dist.random(size=100)
+            assert np.shape(samples) == (100, 2)
+            assert np.all(
+                (min_radius <= samples[:, 0]) & (samples[:, 0] <= max_radius)
+            )
+
+            logp = (
+                RadiusImpact.dist(min_radius=min_radius, max_radius=max_radius)
+                .logp(samples)
+                .eval()
+                .flatten()
+            )
+            assert np.all(np.isfinite(logp))
+            assert np.allclose(logp[0], logp)
+
             trace = self._sample()
 
         r = trace["rb"][:, 0]
         b = trace["rb"][:, 1]
+
+        # Make sure that the physical constraints are satisfied
+        assert np.all((r <= max_radius) & (min_radius <= r))
+        assert np.all((b >= 0) & (b <= 1 + r))
+
+    def test_get_joint_radius_impact(self):
+        min_radius = 0.01
+        max_radius = 0.1
+        with self._model() as model:
+            r, b = get_joint_radius_impact(
+                min_radius=min_radius, max_radius=max_radius
+            )
+            assert model.r is r
+            assert model.b is b
+            trace = self._sample()
+
+        r = trace["r"]
+        b = trace["b"]
 
         # Make sure that the physical constraints are satisfied
         assert np.all((r <= max_radius) & (min_radius <= r))

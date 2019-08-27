@@ -129,12 +129,21 @@ def test_gp(celerite_kernel, seed=1234):
     celerite_gp = celerite.GP(celerite_kernel)
     celerite_gp.compute(x, yerr)
     celerite_loglike = celerite_gp.log_likelihood(y)
+    celerite_mu, celerite_cov = celerite_gp.predict(y)
+    _, celerite_var = celerite_gp.predict(y, return_cov=False, return_var=True)
 
     kernel = _get_theano_kernel(celerite_kernel)
     gp = GP(kernel, x, diag)
     loglike = gp.log_likelihood(y).eval()
 
     assert np.allclose(loglike, celerite_loglike)
+
+    mu = gp.predict()
+    _, var = gp.predict(return_var=True)
+    _, cov = gp.predict(return_cov=True)
+    assert np.allclose(mu.eval(), celerite_mu)
+    assert np.allclose(var.eval(), celerite_var)
+    assert np.allclose(cov.eval(), celerite_cov)
 
 
 def test_integrated_diag(seed=1234):
