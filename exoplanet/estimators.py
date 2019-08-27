@@ -17,7 +17,11 @@ except ImportError:
     gaussian_filter = None
 
 import astropy.units as u
-from astropy.stats import LombScargle
+
+try:
+    from astropy.timeseries import LombScargle
+except ImportError:
+    from astropy.stats import LombScargle
 
 
 def _get_design_matrix(periods, t0s, x):
