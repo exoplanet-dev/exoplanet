@@ -14,3 +14,4 @@ backups
 .ipynb_checkpoints
 .cache
 .github_api_key
+htmlcov
