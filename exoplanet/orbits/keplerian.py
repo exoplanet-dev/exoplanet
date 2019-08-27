@@ -4,6 +4,8 @@ from __future__ import division, print_function
 
 __all__ = ["KeplerianOrbit", "get_true_anomaly"]
 
+import warnings
+
 import numpy as np
 
 import theano
@@ -13,6 +15,7 @@ from theano.ifelse import ifelse
 from astropy import constants
 from astropy import units as u
 
+from ..units import to_unit, has_unit, with_unit
 from ..citations import add_citations_to_model
 from ..theano_ops.kepler import KeplerOp
 from ..theano_ops.contact import ContactPointsOp
@@ -99,16 +102,22 @@ class KeplerianOrbit(object):
         self.kepler_op = KeplerOp(**kwargs)
 
         # Parameters
-
+        if m_planet_units is not None:
+            warnings.warn(
+                "The `m_planet_units` argument has been deprecated. "
+                "Use `with_unit` instead.",
+                DeprecationWarning,
+            )
+            m_planet = with_unit(m_planet, m_planet_units)
+        if rho_star_units is not None:
+            warnings.warn(
+                "The `rho_star_units` argument has been deprecated. "
+                "Use `with_unit` instead.",
+                DeprecationWarning,
+            )
+            rho_star = with_unit(rho_star, rho_star_units)
         inputs = _get_consistent_inputs(
-            a,
-            period,
-            rho_star,
-            r_star,
-            m_star,
-            rho_star_units,
-            m_planet,
-            m_planet_units,
+            a, period, rho_star, r_star, m_star, m_planet
         )
         self.a, self.period, self.rho_star, self.r_star, self.m_star, self.m_planet = (
             inputs
@@ -516,78 +525,6 @@ class KeplerianOrbit(object):
             for x in self._get_acceleration(-self.a, -self.m_total, t)
         )
 
-    def get_stencil(self, t, r=None, texp=None):
-        if r is None or texp is None:
-            return tt.shape_padright(t)
-
-        z = tt.zeros_like(self.a)
-        r = tt.as_tensor_variable(r)
-        R = self.r_star + z
-        hp = 0.5 * self.period
-
-        if self.ecc is None:
-            # Equation 14 from Winn (2010)
-            k = r / self.r_star
-            arg1 = tt.square(1 + k) - tt.square(self.b)
-            arg2 = tt.square(1 - k) - tt.square(self.b)
-            factor = R / (self.a * self.sin_incl)
-            hdur1 = hp * tt.arcsin(factor * tt.sqrt(arg1)) / np.pi
-            hdur2 = hp * tt.arcsin(factor * tt.sqrt(arg2)) / np.pi
-            ts = [-hdur1, -hdur2, hdur2, hdur1]
-            flag = z
-
-        else:
-            M_contact1 = self.contact_points_op(
-                self.a,
-                self.ecc,
-                self.cos_omega,
-                self.sin_omega,
-                self.cos_incl + z,
-                self.sin_incl + z,
-                R + r,
-            )
-            M_contact2 = self.contact_points_op(
-                self.a,
-                self.ecc,
-                self.cos_omega,
-                self.sin_omega,
-                self.cos_incl + z,
-                self.sin_incl + z,
-                R - r,
-            )
-
-            flag = M_contact1[2] + M_contact2[2]
-
-            ts = [
-                tt.mod((M_contact1[0] - self.M0) / self.n + hp, self.period)
-                - hp,
-                tt.mod((M_contact2[0] - self.M0) / self.n + hp, self.period)
-                - hp,
-                tt.mod((M_contact2[1] - self.M0) / self.n + hp, self.period)
-                - hp,
-                tt.mod((M_contact1[1] - self.M0) / self.n + hp, self.period)
-                - hp,
-            ]
-
-        start = self.period * tt.floor((tt.min(t) - self.t0) / self.period)
-        end = self.period * (tt.ceil((tt.max(t) - self.t0) / self.period) + 1)
-        start += self.t0
-        end += self.t0
-        tout = []
-        for i in range(4):
-            if z.ndim < 1:
-                tout.append(ts[i] + tt.arange(start, end, self.period))
-            else:
-                tout.append(
-                    theano.scan(
-                        fn=lambda t0, s0, e0, p0: t0 + tt.arange(s0, e0, p0),
-                        sequences=[ts[i], start, end, self.period],
-                    )[0].flatten()
-                )
-
-        ts = tt.sort(tt.concatenate(tout))
-        return ts, flag
-
     def in_transit(self, t, r=0.0, texp=None):
         """Get a list of timestamps that are in transit
 
@@ -668,19 +605,11 @@ def get_true_anomaly(M, e, **kwargs):
     return tt.arctan2(sinf, cosf)
 
 
-def _get_consistent_inputs(
-    a,
-    period,
-    rho_star,
-    r_star,
-    m_star,
-    rho_star_units,
-    m_planet,
-    m_planet_units,
-):
-    m_planet = tt.as_tensor_variable(m_planet)
-    if m_planet_units is not None:
-        m_planet *= (1 * m_planet_units).to(u.M_sun).value
+def _get_consistent_inputs(a, period, rho_star, r_star, m_star, m_planet):
+    if m_planet is None:
+        m_planet = 0.0
+    else:
+        m_planet = tt.as_tensor_variable(to_unit(m_planet, u.M_sun))
 
     if a is None and period is None:
         raise ValueError(
@@ -688,9 +617,9 @@ def _get_consistent_inputs(
         )
 
     if a is not None:
-        a = tt.as_tensor_variable(a)
+        a = tt.as_tensor_variable(to_unit(a, u.R_sun))
     if period is not None:
-        period = tt.as_tensor_variable(period)
+        period = tt.as_tensor_variable(to_unit(period, u.day))
 
     # Compute the implied density if a and period are given
     implied_rho_star = False
@@ -705,7 +634,7 @@ def _get_consistent_inputs(
         if r_star is None:
             r_star = tt.as_tensor_variable(1.0)
         else:
-            r_star = tt.as_tensor_variable(r_star)
+            r_star = tt.as_tensor_variable(to_unit(r_star, u.R_sun))
 
         # Compute the implied mass via Kepler's 3rd law
         m_tot = 4 * np.pi * np.pi * a ** 3 / (G_grav * period ** 2)
@@ -713,8 +642,7 @@ def _get_consistent_inputs(
         # Compute the implied density
         m_star = m_tot - m_planet
         vol_star = 4 * np.pi * r_star ** 3 / 3.0
-        rho_star = gcc_to_sun * m_star / vol_star
-        rho_star_units = None
+        rho_star = m_star / vol_star
         implied_rho_star = True
 
     # Make sure that the right combination of stellar parameters are given
@@ -730,16 +658,17 @@ def _get_consistent_inputs(
             "rho_star, m_star, and r_star"
         )
 
-    if rho_star is not None:
-        rho_star = tt.as_tensor_variable(rho_star)
-        if rho_star_units is not None:
-            rho_star *= (1 * rho_star_units).to(u.M_sun / u.R_sun ** 3).value
+    if rho_star is not None and not implied_rho_star:
+        if has_unit(rho_star):
+            rho_star = tt.as_tensor_variable(
+                to_unit(rho_star, u.M_sun / u.R_sun ** 3)
+            )
         else:
-            rho_star /= gcc_to_sun
+            rho_star = tt.as_tensor_variable(rho_star) / gcc_to_sun
     if r_star is not None:
-        r_star = tt.as_tensor_variable(r_star)
+        r_star = tt.as_tensor_variable(to_unit(r_star, u.R_sun))
     if m_star is not None:
-        m_star = tt.as_tensor_variable(m_star)
+        m_star = tt.as_tensor_variable(to_unit(m_star, u.M_sun))
 
     # Work out the stellar parameters
     if rho_star is None:

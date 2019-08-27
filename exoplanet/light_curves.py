@@ -185,7 +185,7 @@ class LimbDarkLightCurve(object):
         return limbdark(self.c_norm, b, r, los)[0]
 
 
-class StarryLightCurve(LimbDarkLightCurve):
+class StarryLightCurve(LimbDarkLightCurve):  # pragma: no cover
     def __init__(self, *args, **kwargs):
         warnings.warn(
             "StarryLightCurve has been deprecated. "
@@ -195,7 +195,7 @@ class StarryLightCurve(LimbDarkLightCurve):
         super(StarryLightCurve, self).__init__(*args, **kwargs)
 
 
-class IntegratedLimbDarkLightCurve(object):
+class IntegratedLimbDarkLightCurve(object):  # pragma: no cover
 
     """A limb darkened light curve computed using starry
 

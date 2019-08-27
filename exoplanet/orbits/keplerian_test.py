@@ -2,13 +2,16 @@
 
 from __future__ import division, print_function
 
+import pytest
 import numpy as np
 
+import astropy.units as u
 import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
-from .keplerian import KeplerianOrbit
+from ..units import with_unit
+from .keplerian import KeplerianOrbit, _get_consistent_inputs
 
 
 def test_sky_coords():
@@ -125,6 +128,29 @@ def test_velocity():
         g = theano.grad(tt.sum(pos[i]), t_tensor)
         vel_expect[i] = theano.function([t_tensor], g)(t)
     utt.assert_allclose(vel, vel_expect)
+
+
+def test_radial_velocity():
+    t = np.linspace(0, 100, 1000)
+    m_planet = 0.1
+    m_star = 1.3
+    orbit = KeplerianOrbit(
+        m_star=m_star,
+        r_star=1.0,
+        t0=0.5,
+        period=100.0,
+        ecc=0.1,
+        omega=0.5,
+        Omega=1.0,
+        incl=0.25 * np.pi,
+        m_planet=m_planet,
+    )
+
+    rv1 = orbit.get_radial_velocity(t, output_units=u.R_sun / u.day).eval()
+    rv2 = orbit.get_radial_velocity(
+        t, K=orbit.K0 * orbit.m_planet * orbit.sin_incl
+    ).eval()
+    utt.assert_allclose(rv1, rv2)
 
 
 def test_acceleration():
@@ -317,3 +343,70 @@ def test_consistent_coords():
     assert np.allclose(M1, orbit.m_star.eval())
     assert np.allclose(M2, orbit.m_planet.eval())
     assert np.allclose(Mtot, orbit.m_total.eval())
+
+
+def test_get_consistent_inputs():
+    period0 = np.array([12.567, 45.132])
+    r_star0 = 1.235
+    m_star0 = 0.986
+    m_planet0 = with_unit(np.array([1.543, 2.354]), u.M_earth)
+    a1, period1, rho_star1, r_star1, m_star1, m_planet1 = _get_consistent_inputs(
+        None, period0, None, r_star0, m_star0, m_planet0
+    )
+
+    assert np.allclose(period0, period1.eval())
+    assert np.allclose(r_star0, r_star1.eval())
+    assert np.allclose(m_star0, m_star1.eval())
+    assert np.allclose(
+        m_planet0.eval(), m_planet1.eval() * u.M_sun.to(u.M_earth)
+    )
+
+    a2, period2, rho_star2, r_star2, m_star2, m_planet2 = _get_consistent_inputs(
+        a1, None, rho_star1, r_star0, None, m_planet1
+    )
+    assert np.allclose(period1.eval(), period2.eval())
+    assert np.allclose(rho_star1.eval(), rho_star2.eval())
+    assert np.allclose(r_star1.eval(), r_star2.eval())
+    assert np.allclose(m_star1.eval(), m_star2.eval())
+    assert np.allclose(m_planet1.eval(), m_planet2.eval())
+
+    a3, period3, rho_star3, r_star3, m_star3, m_planet3 = _get_consistent_inputs(
+        a2, None, rho_star2, None, m_star2, m_planet2
+    )
+    assert np.allclose(period1.eval(), period3.eval())
+    assert np.allclose(rho_star1.eval(), rho_star3.eval())
+    assert np.allclose(r_star1.eval(), r_star3.eval())
+    assert np.allclose(m_star1.eval(), m_star3.eval())
+    assert np.allclose(m_planet1.eval(), m_planet3.eval())
+
+    a4, period4, rho_star4, r_star4, m_star4, m_planet4 = _get_consistent_inputs(
+        a3, period3, None, r_star3, None, m_planet3
+    )
+    assert np.allclose(period1.eval(), period4.eval())
+    assert np.allclose(rho_star1.eval(), rho_star4.eval())
+    assert np.allclose(r_star1.eval(), r_star4.eval())
+    assert np.allclose(m_star1.eval(), m_star4.eval())
+    assert np.allclose(m_planet1.eval(), m_planet4.eval())
+
+    a5, period5, rho_star5, r_star5, m_star5, m_planet5 = _get_consistent_inputs(
+        a3,
+        None,
+        with_unit(rho_star3, u.g / u.cm ** 3),
+        r_star3,
+        None,
+        m_planet3,
+    )
+    assert np.allclose(period1.eval(), period5.eval())
+    assert np.allclose(rho_star1.eval(), rho_star5.eval())
+    assert np.allclose(r_star1.eval(), r_star5.eval())
+    assert np.allclose(m_star1.eval(), m_star5.eval())
+    assert np.allclose(m_planet1.eval(), m_planet5.eval())
+
+    with pytest.raises(ValueError):
+        _get_consistent_inputs(None, None, None, r_star3, m_star3, None)
+
+    with pytest.raises(ValueError):
+        _get_consistent_inputs(a3, period3, None, r_star3, m_star3, None)
+
+    with pytest.raises(ValueError):
+        _get_consistent_inputs(a3, None, rho_star3, r_star3, m_star3, None)
