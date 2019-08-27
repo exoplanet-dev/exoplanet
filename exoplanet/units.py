@@ -4,7 +4,7 @@ __all__ = ["with_unit", "has_unit", "to_unit"]
 
 import theano.tensor as tt
 
-UNIT_ATTR_NAME = "__exoplanet_units__"
+UNIT_ATTR_NAME = "__exoplanet_unit__"
 
 
 def with_unit(obj, unit):

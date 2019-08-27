@@ -191,7 +191,7 @@ class KeplerianOrbit(object):
                 raise ValueError(
                     "fitting with duration only works for eccentric orbits"
                 )
-            self.duration = tt.as_tensor_variable(duration)
+            self.duration = tt.as_tensor_variable(to_unit(duration, u.day))
             c = tt.sin(np.pi * self.duration * incl_factor / self.period)
             c2 = c * c
             aor = self.a_planet / self.r_star
@@ -233,7 +233,7 @@ class KeplerianOrbit(object):
         self.sin_incl = tt.sin(self.incl)
 
     def _rotate_vector(self, x, y):
-        """Apply the rotation matrices to go from obrit to observer frame
+        """Apply the rotation matrices to go from orbit to observer frame
 
         In order,
         1. rotate about the z axis by an amount omega -> x1, y1, z1
