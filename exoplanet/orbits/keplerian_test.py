@@ -49,7 +49,7 @@ def test_sky_coords():
     # Make sure that the in-transit impact parameter matches batman
     utt.assert_allclose(r_batman[m], r[m], atol=2e-5)
 
-    # In-transit should correspond to negative z in our parameterization
+    # In-transit should correspond to positive z in our parameterization
     assert np.all(z[m] > 0)
 
     # Therefore, when batman doesn't see a transit we shouldn't be transiting
