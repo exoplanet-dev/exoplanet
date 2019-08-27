@@ -87,7 +87,7 @@ class Angle(pm.Continuous):
         )
 
     def logp(self, value):
-        return tt.zeros_like(value)
+        return tt.zeros_like(tt.as_tensor_variable(value))
 
 
 class Periodic(pm.Continuous):
@@ -136,7 +136,7 @@ class Periodic(pm.Continuous):
         )
 
     def logp(self, value):
-        return tt.zeros_like(value)
+        return tt.zeros_like(tt.as_tensor_variable(value))
 
 
 class UnitUniform(pm.Flat):
@@ -170,6 +170,9 @@ class UnitUniform(pm.Flat):
             broadcast_shape=self.shape,
             size=size,
         )
+
+    def logp(self, value):
+        return tt.zeros_like(tt.as_tensor_variable(value))
 
 
 class QuadLimbDark(pm.Flat):
@@ -223,6 +226,9 @@ class QuadLimbDark(pm.Flat):
             broadcast_shape=self.shape,
             size=size,
         )
+
+    def logp(self, value):
+        return tt.zeros_like(tt.as_tensor_variable(value))
 
 
 class RadiusImpact(pm.Flat):
@@ -309,6 +315,9 @@ class RadiusImpact(pm.Flat):
             broadcast_shape=self.shape,
             size=size,
         )
+
+    def logp(self, value):
+        return tt.zeros_like(tt.as_tensor_variable(value))
 
 
 def get_joint_radius_impact(
