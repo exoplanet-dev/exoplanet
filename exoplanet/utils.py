@@ -3,12 +3,15 @@
 from __future__ import division, print_function
 
 __all__ = [
+    "logger",
     "eval_in_model",
     "get_samples_from_trace",
     "optimize",
     "get_args_for_theano_function",
     "get_theano_function_for_var",
 ]
+
+import logging
 
 import numpy as np
 
@@ -20,6 +23,9 @@ from pymc3.model import Point
 from pymc3.theanof import inputvars
 from pymc3.util import update_start_vals, get_default_varnames
 from pymc3.blocking import DictToArrayBijection, ArrayOrdering
+
+
+logger = logging.getLogger("exoplanet")
 
 
 def get_args_for_theano_function(point=None, model=None):
@@ -134,7 +140,7 @@ def optimize(
         return res[0], g
 
     if verbose:
-        print(
+        logger.info(
             "optimizing logp for variables: {0}".format([v.name for v in vars])
         )
 
@@ -155,8 +161,14 @@ def optimize(
     }
 
     if verbose:
-        print("message: {0}".format(info.message))
-        print("logp: {0} -> {1}".format(-initial, -info.fun))
+        logger.info("message: {0}".format(info.message))
+        logger.info("logp: {0} -> {1}".format(-initial, -info.fun))
+        if not np.isfinite(info.fun):
+            logger.warning("final logp not finite, returning initial point")
+            logger.warning(
+                "this suggests that something is wrong with the model"
+            )
+            logger.debug("{0}".format(info))
 
     if return_info:
         return point, info
