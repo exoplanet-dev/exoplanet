@@ -219,7 +219,7 @@ class KeplerianOrbit(object):
         if t0 is not None and t_periastron is not None:
             raise ValueError("you can't define both t0 and t_periastron")
         if t0 is None and t_periastron is None:
-            t0 = 0.0
+            t0 = tt.zeros_like(self.period)
 
         if t0 is None:
             self.t_periastron = tt.as_tensor_variable(t_periastron)

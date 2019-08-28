@@ -22,7 +22,7 @@ def test_simple():
 
     orbit = SimpleTransitOrbit(period, t0, b, duration, r_star)
 
-    x, y, z = theano.function([], orbit.get_relative_position(t))()
+    x, y, z = theano.function([], orbit.get_planet_position(t))()
     b_val = np.sqrt(x ** 2 + y ** 2)
     m = (b_val <= r_star) & (z > 0)
 
