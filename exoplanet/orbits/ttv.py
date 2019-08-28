@@ -55,8 +55,12 @@ class TTVOrbit(KeplerianOrbit):
             expected for a regular periodic orbit.
         transit_times: A list (with on entry for each planet) of transit times
             for each transit of each planet in units of days. These times will
-            be used to compute the implied (least squares) ``period`` and
-            ``t0`` so these parameters cannot also be given.
+            be used to compute the implied (least squares) ``ttv_period`` and
+            ``t0``. It is possible to supply a separate ``period`` parameter
+            that will set the shape of the transits, but care should be taken
+            to make sure that ``period`` and ``ttv_period`` don't diverge
+            because things will break if the time between neighboring transits
+            is larger than ``2*period``.
 
     """
 
