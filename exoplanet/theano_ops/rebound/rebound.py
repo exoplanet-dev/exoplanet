@@ -13,6 +13,10 @@ class ReboundOp(gof.Op):
 
     __props__ = ()
 
+    def __init__(self, **rebound_args):
+        self.rebound_args = rebound_args
+        super(ReboundOp, self).__init__()
+
     def make_node(self, masses, initial_coords, times):
         in_args = [
             tt.as_tensor_variable(masses),
@@ -60,6 +64,10 @@ class ReboundOp(gof.Op):
 
         # Set up the simulation
         sim = rebound.Simulation()
+
+        for k, v in self.rebound_args.items():
+            setattr(sim, k, v)
+
         for i in range(num_bodies):
             sim.add(
                 m=masses[i],

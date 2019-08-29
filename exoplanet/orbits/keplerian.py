@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division, print_function
-
 __all__ = ["KeplerianOrbit", "get_true_anomaly"]
 
 import warnings
 
 import numpy as np
 
-import theano
 import theano.tensor as tt
 from theano.ifelse import ifelse
 
@@ -282,6 +279,50 @@ class KeplerianOrbit(object):
             return tt.sin(M), tt.cos(M)
         sinf, cosf = self.kepler_op(M, self.ecc + tt.zeros_like(M))
         return sinf, cosf
+
+    def _get_position_and_velocity(self, t, parallax=None):
+        sinf, cosf = self._get_true_anomaly(t)
+
+        if self.ecc is None:
+            r = 1.0
+            vx, vy, vz = self._rotate_vector(-self.K0 * sinf, self.K0 * cosf)
+        else:
+            r = (1.0 - self.ecc ** 2) / (1 + self.ecc * cosf)
+            vx, vy, vz = self._rotate_vector(
+                -self.K0 * sinf, self.K0 * (cosf + self.ecc)
+            )
+
+        x, y, z = self._rotate_vector(r * cosf, r * sinf)
+
+        pos = tt.stack((x, y, z), axis=-1)
+        pos = tt.concatenate(
+            (
+                tt.sum(
+                    tt.shape_padright(self.a_star) * pos, axis=0, keepdims=True
+                ),
+                tt.shape_padright(self.a_planet) * pos,
+            ),
+            axis=0,
+        )
+        vel = tt.stack((vx, vy, vz), axis=-1)
+        vel = tt.concatenate(
+            (
+                tt.sum(
+                    tt.shape_padright(self.m_planet) * vel,
+                    axis=0,
+                    keepdims=True,
+                ),
+                -tt.shape_padright(self.m_star) * vel,
+            ),
+            axis=0,
+        )
+
+        if parallax is not None:
+            # convert r into arcseconds
+            pos = pos * (parallax / au_to_R_sun)
+            vel = vel * (parallax / au_to_R_sun)
+
+        return pos, vel
 
     def _get_position(self, a, t, parallax=None):
         """Get the position of a body.
@@ -607,7 +648,7 @@ def get_true_anomaly(M, e, **kwargs):
 
 def _get_consistent_inputs(a, period, rho_star, r_star, m_star, m_planet):
     if m_planet is None:
-        m_planet = 0.0
+        m_planet = tt.zeros_like(period)
     else:
         m_planet = tt.as_tensor_variable(to_unit(m_planet, u.M_sun))
 
