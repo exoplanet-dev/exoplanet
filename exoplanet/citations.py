@@ -278,4 +278,10 @@ publisher={PeerJ Inc.}
 }
 """,
     ),
+    "rebound": (
+        ("exoplanet:rebound",),
+        r"""
+FIXME!!
+""",
+    ),
 }

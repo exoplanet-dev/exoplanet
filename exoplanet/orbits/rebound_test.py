@@ -4,7 +4,9 @@ import pytest
 import theano
 import numpy as np
 
+from .keplerian import KeplerianOrbit
 from .rebound import ReboundOrbit
+from ..light_curves import LimbDarkLightCurve
 
 
 @pytest.mark.parametrize(
@@ -97,3 +99,26 @@ def test_tensor_bug():
     assert np.allclose(x, x2)
     assert np.allclose(y, y2)
     assert np.allclose(z, z2)
+
+
+def test_keplerian_light_curve():
+    t = np.linspace(50, 1000, 1045)
+    r = np.array([0.04, 0.02])
+    args = dict(
+        period=[50.0, 87.5],
+        t0=[1.55, 10.6],
+        ecc=[0.28, 0.01],
+        omega=[-4.56, 1.5],
+        m_planet=[0.0, 0.0],
+        b=[0.51, 0.21],
+        m_star=1.51,
+        r_star=1.0,
+    )
+    orbit0 = KeplerianOrbit(**args)
+    orbit = ReboundOrbit(**args)
+
+    ld = LimbDarkLightCurve([0.2, 0.3])
+    lc0 = ld.get_light_curve(orbit=orbit0, r=r, t=t).eval()
+    lc = ld.get_light_curve(orbit=orbit, r=r, t=t).eval()
+
+    assert np.allclose(lc0, lc)

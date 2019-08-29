@@ -11,8 +11,10 @@ __all__ = [
     "get_theano_function_for_var",
 ]
 
+import sys
 import logging
 
+import tqdm
 import numpy as np
 
 import theano
@@ -132,17 +134,23 @@ def optimize(
     grad = theano.grad(nlp, vars, disconnected_inputs="ignore")
     func = get_theano_function_for_var([nlp] + grad, model=model)
 
+    if verbose:
+        sys.stderr.write(
+            "optimizing logp for variables: {0}\n".format(
+                [v.name for v in vars]
+            )
+        )
+        bar = tqdm.tqdm()
+
     # This returns the objective function and its derivatives
     def objective(vec):
         res = func(*get_args_for_theano_function(bij.rmap(vec), model=model))
         d = dict(zip((v.name for v in vars), res[1:]))
         g = bij.map(d)
+        if verbose:
+            bar.set_postfix(logp="{0:e}".format(-res[0]))
+            bar.update()
         return res[0], g
-
-    if verbose:
-        logger.info(
-            "optimizing logp for variables: {0}".format([v.name for v in vars])
-        )
 
     # Optimize using scipy.optimize
     x0 = bij.map(start)
@@ -161,8 +169,9 @@ def optimize(
     }
 
     if verbose:
-        logger.info("message: {0}".format(info.message))
-        logger.info("logp: {0} -> {1}".format(-initial, -info.fun))
+        bar.close()
+        sys.stderr.write("message: {0}\n".format(info.message))
+        sys.stderr.write("logp: {0} -> {1}\n".format(-initial, -info.fun))
         if not np.isfinite(info.fun):
             logger.warning("final logp not finite, returning initial point")
             logger.warning(
