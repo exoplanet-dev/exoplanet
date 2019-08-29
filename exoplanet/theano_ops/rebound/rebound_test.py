@@ -18,10 +18,10 @@ class TestRebound(utt.InferShapeTester):
     def get_args(self):
         m_val = np.array([1.3, 1e-3, 1e-5])
         x_val = np.zeros((3, 6))
-        x_val[1, 0] = 10.0
+        x_val[1, 0] = 15.0
         x_val[1, 4] = 0.4
         x_val[2, 0] = 100.0
-        x_val[2, 4] = 0.4
+        x_val[2, 4] = 0.2
         t = np.linspace(100, 1000, 12)
 
         m = tt.dvector()
@@ -44,4 +44,4 @@ class TestRebound(utt.InferShapeTester):
     def test_grad(self):
         t, _, _, in_args = self.get_args()
         func = lambda *args: self.op(*(list(args) + [t]))[0]  # NOQA
-        utt.verify_grad(func, in_args)
+        utt.verify_grad(func, in_args, n_tests=1)

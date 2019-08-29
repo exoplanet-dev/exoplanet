@@ -78,8 +78,8 @@ class ReboundOrbit(KeplerianOrbit):
             initial_coords,
             (t - self.rebound_initial_time) / day_per_yr_over_2pi,
         )
-        pos = coords[:, :, :3] / au_per_R_sun
-        vel = coords[:, :, 3:] / (day_per_yr_over_2pi * au_per_R_sun)
+        pos = coords[:3, :, :] / au_per_R_sun
+        vel = coords[3:, :, :] / (day_per_yr_over_2pi * au_per_R_sun)
         return pos, vel
 
     def get_planet_position(self, t):
@@ -95,8 +95,8 @@ class ReboundOrbit(KeplerianOrbit):
         """
         pos, _ = self._get_position_and_velocity(t)
         if self.period.ndim:
-            return pos[:, 1:, 0], pos[:, 1:, 1], pos[:, 1:, 2]
-        return pos[:, 1, 0], pos[:, 1, 1], pos[:, 1, 2]
+            return pos[0, :, 1:], pos[1, :, 1:], pos[2, :, 1:]
+        return pos[0, :, 1], pos[1, :, 1], pos[2, :, 1]
 
     def get_star_position(self, t):
         """The star's position in the barycentric frame
@@ -113,7 +113,7 @@ class ReboundOrbit(KeplerianOrbit):
 
         """
         pos, _ = self._get_position_and_velocity(t)
-        return pos[:, 0, 0], pos[:, 0, 1], pos[:, 0, 2]
+        return pos[0, :, 0], pos[1, :, 0], pos[2, :, 0]
 
     def get_relative_position(self, t):
         """The planets' positions relative to the star in the X,Y,Z frame.
@@ -128,10 +128,10 @@ class ReboundOrbit(KeplerianOrbit):
         """
         pos, _ = self._get_position_and_velocity(t)
         if self.period.ndim:
-            pos = pos[:, 1:] - pos[:, 0][:, None, :]
-            return pos[:, :, 0], pos[:, :, 1], pos[:, :, 2]
-        pos = pos[:, 1] - pos[:, 0]
-        return pos[:, 0], pos[:, 1], pos[:, 2]
+            pos = pos[:, :, 1:] - pos[:, :, 0][:, :, None]
+        else:
+            pos = pos[:, :, 1] - pos[:, :, 0]
+        return pos[0], pos[1], pos[2]
 
     def get_planet_velocity(self, t):
         """Get the planets' velocity vectors
@@ -146,8 +146,8 @@ class ReboundOrbit(KeplerianOrbit):
         """
         _, vel = self._get_position_and_velocity(t)
         if self.period.ndim:
-            return vel[:, 1:, 0], vel[:, 1:, 1], vel[:, 1:, 2]
-        return vel[:, 1, 0], vel[:, 1, 1], vel[:, 1, 2]
+            return vel[0, :, 1:], vel[1, :, 1:], vel[2, :, 1:]
+        return vel[0, :, 1], vel[1, :, 1], vel[2, :, 1]
 
     def get_star_velocity(self, t):
         """Get the star's velocity vector
@@ -164,7 +164,7 @@ class ReboundOrbit(KeplerianOrbit):
 
         """
         _, vel = self._get_position_and_velocity(t)
-        return vel[:, 0, 0], vel[:, 0, 1], vel[:, 0, 2]
+        return vel[0, :, 0], vel[1, :, 0], vel[2, :, 0]
 
     def get_relative_velocity(self, t):
         """The planets' velocity relative to the star
@@ -179,10 +179,10 @@ class ReboundOrbit(KeplerianOrbit):
         """
         _, vel = self._get_position_and_velocity(t)
         if self.period.ndim:
-            vel = vel[:, 1:] - vel[:, 0][:, None, :]
-            return vel[:, :, 0], vel[:, :, 1], vel[:, :, 2]
-        vel = vel[:, 1] - vel[:, 0]
-        return vel[:, 0], vel[:, 1], vel[:, 2]
+            vel = vel[:, :, 1:] - vel[:, :, 0][:, :, None]
+        else:
+            vel = vel[:, :, 1] - vel[:, :, 0]
+        return vel[0], vel[1], vel[2]
 
     def _get_acceleration(self, *args, **kwargs):
         raise NotImplementedError(
