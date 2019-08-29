@@ -391,7 +391,10 @@ class KeplerianOrbit(object):
 
         .. note:: This treats each planet independently and does not take the
             other planets into account when computing the position of the
-            star. This is fine as long as the planet masses are small.
+            star. This is fine as long as the planet masses are small. In
+            other words, the reflex motion of the star caused by the other
+            planets is neglected when computing the relative coordinates of
+            one of the planets.
 
         Args:
             t: The times where the position should be evaluated.
@@ -439,7 +442,7 @@ class KeplerianOrbit(object):
         return self._rotate_vector(-K * sinf, K * (cosf + self.ecc))
 
     def get_planet_velocity(self, t):
-        """Get the planets' velocity vector
+        """Get the planets' velocity vectors
 
         Args:
             t: The times where the velocity should be evaluated.
@@ -578,7 +581,6 @@ class KeplerianOrbit(object):
             The indices of the timestamps that are in transit.
 
         """
-
         z = tt.zeros_like(self.a)
         r = tt.as_tensor_variable(r) + z
         R = self.r_star + z
