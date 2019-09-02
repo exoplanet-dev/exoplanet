@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division, print_function
-
 __all__ = ["get_compile_args", "get_cache_version", "get_header_dirs"]
 
 import sys
