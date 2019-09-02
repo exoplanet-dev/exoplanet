@@ -2,19 +2,11 @@
 
 __all__ = ["ReboundOrbit"]
 
-import numpy as np
-import astropy.units as u
-import astropy.constants as c
 import theano.tensor as tt
 
 from .keplerian import KeplerianOrbit
 from ..theano_ops.rebound import ReboundOp
-
-day_per_yr_over_2pi = (
-    (1.0 * u.au) ** (3 / 2)
-    / (np.sqrt(c.G.to(u.au ** 3 / (u.M_sun * u.day ** 2)) * (1.0 * u.M_sun)))
-).value
-au_per_R_sun = u.R_sun.to(u.au)
+from .constants import day_per_yr_over_2pi, au_per_R_sun
 
 
 class ReboundOrbit(KeplerianOrbit):
