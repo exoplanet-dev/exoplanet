@@ -9,21 +9,16 @@ import numpy as np
 import theano.tensor as tt
 from theano.ifelse import ifelse
 
-from astropy import constants
 from astropy import units as u
 
 from ..units import to_unit, has_unit, with_unit
 from ..citations import add_citations_to_model
 from ..theano_ops.kepler import KeplerOp
 from ..theano_ops.contact import ContactPointsOp
-
-# Constants in the units that we'll use
-gcc_to_sun = (constants.M_sun / constants.R_sun ** 3).to(u.g / u.cm ** 3).value
-au_to_R_sun = (constants.au / constants.R_sun).value
-G_grav = constants.G.to(u.R_sun ** 3 / u.M_sun / u.day ** 2).value
+from .constants import G_grav, gcc_per_sun, au_per_R_sun
 
 
-class KeplerianOrbit(object):
+class KeplerianOrbit:
     """A system of bodies on Keplerian orbits around a common central
 
     Given the input parameters, the values of all other parameters will be
@@ -319,8 +314,8 @@ class KeplerianOrbit(object):
 
         if parallax is not None:
             # convert r into arcseconds
-            pos = pos * (parallax / au_to_R_sun)
-            vel = vel * (parallax / au_to_R_sun)
+            pos = pos * (parallax * au_per_R_sun)
+            vel = vel * (parallax * au_per_R_sun)
 
         return pos, vel
 
@@ -346,7 +341,7 @@ class KeplerianOrbit(object):
 
         if parallax is not None:
             # convert r into arcseconds
-            r = r * parallax / au_to_R_sun
+            r = r * parallax * au_per_R_sun
 
         return self._rotate_vector(r * cosf, r * sinf)
 
@@ -709,7 +704,7 @@ def _get_consistent_inputs(a, period, rho_star, r_star, m_star, m_planet):
                 to_unit(rho_star, u.M_sun / u.R_sun ** 3)
             )
         else:
-            rho_star = tt.as_tensor_variable(rho_star) / gcc_to_sun
+            rho_star = tt.as_tensor_variable(rho_star) / gcc_per_sun
     if r_star is not None:
         r_star = tt.as_tensor_variable(to_unit(r_star, u.R_sun))
     if m_star is not None:
@@ -733,4 +728,4 @@ def _get_consistent_inputs(a, period, rho_star, r_star, m_star, m_planet):
             2 * np.pi * a ** (3 / 2) / (tt.sqrt(G_grav * (m_star + m_planet)))
         )
 
-    return a, period, rho_star * gcc_to_sun, r_star, m_star, m_planet
+    return a, period, rho_star * gcc_per_sun, r_star, m_star, m_planet
