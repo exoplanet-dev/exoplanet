@@ -2,21 +2,16 @@
 
 __all__ = ["G_grav", "gcc_per_sun", "au_per_R_sun", "day_per_yr_over_2pi"]
 
-import warnings
-import numpy as np
+import os
 
-try:
-    import astropy  # NOQA
-
-except ImportError:
-    warnings.warn("astropy is required for constants")
+if os.environ.get("READTHEDOCS") == "True":
     G_grav = 2942.2062175044193
     gcc_per_sun = 5.905271918964842
     au_per_R_sun = 0.00465046726096215
     day_per_yr_over_2pi = 58.13244087623439
 
 else:
-
+    import numpy as np
     import astropy.units as u
     import astropy.constants as c
 
