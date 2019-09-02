@@ -649,20 +649,22 @@ def get_true_anomaly(M, e, **kwargs):
 
 
 def _get_consistent_inputs(a, period, rho_star, r_star, m_star, m_planet):
-    if m_planet is None:
-        m_planet = tt.zeros_like(period)
-    else:
-        m_planet = tt.as_tensor_variable(to_unit(m_planet, u.M_sun))
-
     if a is None and period is None:
         raise ValueError(
             "values must be provided for at least one of a " "and period"
         )
 
+    if m_planet is not None:
+        m_planet = tt.as_tensor_variable(to_unit(m_planet, u.M_sun))
+
     if a is not None:
         a = tt.as_tensor_variable(to_unit(a, u.R_sun))
+        if m_planet is None:
+            m_planet = tt.zeros_like(a)
     if period is not None:
         period = tt.as_tensor_variable(to_unit(period, u.day))
+        if m_planet is None:
+            m_planet = tt.zeros_like(period)
 
     # Compute the implied density if a and period are given
     implied_rho_star = False
