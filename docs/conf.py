@@ -23,7 +23,7 @@ extensions = [
     "sphinx.ext.mathjax",
 ]
 
-autodoc_mock_imports = ["numpy", "scipy", "astropy", "pymc3", "theano"]
+autodoc_mock_imports = ["numpy", "scipy", "astropy", "pymc3", "theano", "tqdm"]
 
 # Convert the tutorials
 for fn in chain(
