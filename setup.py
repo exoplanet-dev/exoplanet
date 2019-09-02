@@ -34,6 +34,7 @@ setup(
         "exoplanet.theano_ops.contact",
         "exoplanet.theano_ops.celerite",
         "exoplanet.theano_ops.interp",
+        "exoplanet.theano_ops.rebound",
     ],
     description="Fast & scalable MCMC for all your exoplanet needs",
     long_description=readme,
