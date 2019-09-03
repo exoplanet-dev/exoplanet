@@ -83,33 +83,40 @@ methods: statistical
 
 \section{Introduction}
 
-Datasets are getting larger and more precise and this leads to an interest in
-more ambitious questions about these systems.
-The existing inference methods are no longer up to the task when the datasets
-are large and when the number of parameters is large.
-Many probabilistic inferences in astronomy have been limited by the existing
-tools that can't scale e.g.\ emcee.
-However, in other fields such as ML, methods have been developed that can
-scale to datasets too large to fit into memory and millions of parameters.
-The key ingredient in all of these methods is that it must be possible to
-efficiently evaluate the derivative of the model with respect to the physical
-parameters.
-This can often be intractable for applications astrophysics because the models
-generally include a physically motivated component that can't be trivially
-differentiated.
-However, we can take advantage of the substantial development that has been
-invested in automating this process.
+The astronomical community has been investing in time domain survey astronomy and---thanks to this investment---large, homogeneous, public time-domain datasets are becoming common, and the questions that the community is asking are becoming more ambitious.
+One application of these surveys is the discovery and characterization of stellar systems including multiple exoplanets and stars.
+Sophisticated statistical methods have been developed for these applications and deployed at large scale, but the computational cost and scaling of these methods limit their application to restricted datasets or models with fewer data points or parameters.
+This paper describes a new class of methods that have not previously been developed for application to time series analysis in astrophysics.
+The key benefit of these methods is that they improve the computational scaling of robust probabilistic inference as a function of the number of parameters in the model; this improved efficiency can reduce runtime for inference in multi-planet systems by orders of magnitude.
 
-This paper presents an example of how these tools and methods can be
-exploited in the specific astronomical application of fitting exoplanet
-datasets.
-We go through the derivation and implementation of the custom functions and
-their gradients that are required for gradient-based characterization of
-exoplanets.
+The crucial difference between the methods discussed in this paper compared to previous work is that we derive computationally efficient first derivatives of the model with respect to its parameters.
+Some work has been done to derive some of the relevant derivatives for specific sub problems (CITE) often with the goal of Fisher Information analysis to predict the performance of future surveys, but there is not a general framework that can propagate derivatives for (the majority of) the applications that exoplanet astronomers require.
+To achieve this goal, we build on methods from applied mathematics and computer science, and work within a framework developed for machine learning.
+The key concept is \emph{automatic differentiation} that allows efficient and (as the name suggests) automatic propagation of derivatives through complicated computer code.
+Automatic differentiation has been widely applied across the sciences and it is the fundamental development that enabled the application of machine learning methods like deep learning.
+There have been some applications within astrophysics, but its general application has been somewhat limited for both historical and practical reasons.
+One reason for this is that models in astrophysics are often physically motivated and their calculation often involves special functions or numerical methods that have been developed and implemented in special purpose frameworks that can't be easily be differentiated or otherwise combined with existing automatic differentiation interfaces.
+There has been progress made towards general purpose differentiation of physical systems (CITE examples of ODE solvers with variation), but there is still a significant amount of overhead when applying these methods for astrophysics applications.
 
-These methods and their implementation are not an all-in-one package designed
-to do the fitting.
-Instead, it provided the framework needed to use these tools within pipelines.
+This paper doesn't solve this problem, but it does describe the derivation and implementation of a large number of the physical models used in exoplanet characterization.
+While the examples in this paper are (mostly) focused on the characterization of exoplanetary systems, it is also applicable to other time domain applications out of the box.
+Futhermore, a pedagogical introduction to the relevant ideas is included to help enable other applications in astrophysics.
+
+This paper is divided into three overarching ``chapters''.
+The first presents an introduction to the ideas and algorithms that enable automatic differentiation and gradient-based inference.
+Then the second chapter presents the derivation of the core models (and their derivatives) that are used by the \exoplanet\ project.
+Finally, in the third chapter, we demonstrate the application of these methods on several problems in exoplanet astrophysics.
+
+% This paper presents an example of how these tools and methods can be
+% exploited in the specific astronomical application of fitting exoplanet
+% datasets.
+% We go through the derivation and implementation of the custom functions and
+% their gradients that are required for gradient-based characterization of
+% exoplanets.
+
+% These methods and their implementation are not an all-in-one package designed
+% to do the fitting.
+% Instead, it provided the framework needed to use these tools within pipelines.
 
 \begin{figure}[htbp]
 \begin{centering}
