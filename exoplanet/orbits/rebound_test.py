@@ -9,6 +9,7 @@ from .rebound import ReboundOrbit
 from ..light_curves import LimbDarkLightCurve
 
 
+@pytest.mark.xfail(reason="rebound not working on travis")
 @pytest.mark.parametrize(
     "orbit",
     (
@@ -101,6 +102,7 @@ def test_tensor_bug():
     assert np.allclose(z, z2)
 
 
+@pytest.mark.xfail(reason="rebound not working on travis")
 def test_keplerian_light_curve():
     t = np.linspace(50, 1000, 1045)
     r = np.array([0.04, 0.02])
