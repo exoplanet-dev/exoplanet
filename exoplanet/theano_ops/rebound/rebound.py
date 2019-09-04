@@ -32,8 +32,8 @@ class ReboundOp(gof.Op):
 
     def infer_shape(self, node, shapes):
         return (
-            [6] + list(shapes[2]) + list(shapes[0]),
-            [6] + list(shapes[2]) + list(shapes[0]) + list(shapes[0]) + [7],
+            list(shapes[2]) + list(shapes[0]) + [6],
+            list(shapes[2]) + list(shapes[0]) + [6] + list(shapes[0]) + [7],
         )
 
     def perform(self, node, inputs, outputs):
@@ -108,12 +108,12 @@ class ReboundOp(gof.Op):
                             )
 
         # Save the results
-        # outputs[0][0] = np.ascontiguousarray(coords[time_inds])
-        # outputs[1][0] = np.ascontiguousarray(jac[time_inds])
-        outputs[0][0] = np.ascontiguousarray(
-            np.moveaxis(coords[time_inds], 2, 0)
-        )
-        outputs[1][0] = np.ascontiguousarray(np.moveaxis(jac[time_inds], 2, 0))
+        outputs[0][0] = np.ascontiguousarray(coords[time_inds])
+        outputs[1][0] = np.ascontiguousarray(jac[time_inds])
+        # outputs[0][0] = np.ascontiguousarray(
+        #     np.moveaxis(coords[time_inds], 2, 0)
+        # )
+        # outputs[1][0] = np.ascontiguousarray(np.moveaxis(jac[time_inds], 2, 0))
 
     def grad(self, inputs, gradients):
         masses, initial_coords, times = inputs

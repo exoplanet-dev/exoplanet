@@ -4,8 +4,9 @@ __all__ = ["ReboundOrbit"]
 
 import theano.tensor as tt
 
+from rebound_pymc3.integrate import IntegrateOp as ReboundOp
+
 from .keplerian import KeplerianOrbit
-from ..theano_ops.rebound import ReboundOp
 from .constants import day_per_yr_over_2pi, au_per_R_sun
 
 
@@ -70,6 +71,11 @@ class ReboundOrbit(KeplerianOrbit):
             initial_coords,
             (t - self.rebound_initial_time) / day_per_yr_over_2pi,
         )
+
+        # Deal with strange ordering and the need for things to be C contiguous
+        coords = coords.dimshuffle(2, 0, 1)
+        coords = coords + tt.zeros(coords.shape, dtype=coords.dtype)
+
         pos = coords[:3, :, :] / au_per_R_sun
         vel = coords[3:, :, :] / (day_per_yr_over_2pi * au_per_R_sun)
         return pos, vel
