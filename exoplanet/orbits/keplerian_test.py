@@ -6,9 +6,11 @@ import pytest
 import numpy as np
 
 import astropy.units as u
+from astropy.constants import c
 import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
+from scipy.optimize import minimize
 
 from ..units import with_unit
 from .keplerian import KeplerianOrbit, _get_consistent_inputs
@@ -410,3 +412,130 @@ def test_get_consistent_inputs():
 
     with pytest.raises(ValueError):
         _get_consistent_inputs(a3, None, rho_star3, r_star3, m_star3, None)
+
+
+def test_light_delay():
+
+    # Instantiate the orbit
+    m_star = tt.scalar()
+    period = tt.scalar()
+    ecc = tt.scalar()
+    omega = tt.scalar()
+    Omega = tt.scalar()
+    incl = tt.scalar()
+    m_planet = tt.scalar()
+    t = tt.scalar()
+    orbit = KeplerianOrbit(
+        m_star=m_star,
+        r_star=1.0,
+        t0=0.0,
+        period=period,
+        ecc=ecc,
+        omega=omega,
+        Omega=Omega,
+        incl=incl,
+        m_planet=m_planet,
+    )
+
+    # True position
+    get_position = theano.function(
+        [t, m_star, period, ecc, omega, Omega, incl, m_planet],
+        orbit.get_planet_position([t], light_delay=False),
+    )
+
+    # Retarded position
+    get_retarded_position = theano.function(
+        [t, m_star, period, ecc, omega, Omega, incl, m_planet],
+        orbit.get_planet_position([t], light_delay=True),
+    )
+
+    # Retarded position (numerical)
+    def get_exact_retarded_position(t, *args):
+        def loss(params):
+            ti, = params
+            xr, yr, zr = get_position(ti, *args)
+            delay = (zr * u.Rsun / c).to(u.day).value
+            return (ti - delay - t) ** 2
+
+        tr = minimize(loss, t).x[0]
+        return get_position(tr, *args)
+
+    # Compare for 100 different orbits
+    np.random.seed(13)
+    for i in range(100):
+        m_star = 0.1 + np.random.random() * 1.9
+        period = np.random.random() * 500
+        ecc = np.random.random()
+        omega = np.random.random() * 2 * np.pi
+        Omega = np.random.random() * 2 * np.pi
+        incl = np.random.random() * 0.5 * np.pi
+        m_planet = np.random.random()
+        t = np.random.random() * period
+        args = (m_star, period, ecc, omega, Omega, incl, m_planet)
+        assert np.allclose(
+            np.reshape(get_retarded_position(t, *args), (-1,)),
+            np.reshape(get_exact_retarded_position(t, *args), (-1,)),
+        )
+
+
+def test_light_delay_shape_two_planets_vector_t():
+    orbit = KeplerianOrbit(period=[1.0, 2.0])
+    x, y, z = orbit.get_planet_position([1.0, 2.0], light_delay=False)
+    xr, yr, zr = orbit.get_planet_position([1.0, 2.0], light_delay=True)
+    assert np.array_equal(x.shape.eval(), xr.shape.eval())
+
+
+@pytest.mark.xfail
+def test_light_delay_shape_scalar_t():
+    # TODO: Fix shapes
+    # `light_delay=True` only works if `t` is an array;
+    # throws `ValueError` if it is a scalar.
+    orbit = KeplerianOrbit(period=1.0)
+    x, y, z = orbit.get_planet_position(1.0, light_delay=False)
+    xr, yr, zr = orbit.get_planet_position(1.0, light_delay=True)
+    assert np.array_equal(x.shape.eval(), xr.shape.eval())
+
+
+@pytest.mark.xfail
+def test_light_delay_shape_single_t():
+    # TODO: Fix shapes
+    # `light_delay=False` returns a scalar
+    # `light_delay=True` returns a (1, 1) matrix
+    orbit = KeplerianOrbit(period=1.0)
+    x, y, z = orbit.get_planet_position([1.0], light_delay=False)
+    xr, yr, zr = orbit.get_planet_position([1.0], light_delay=True)
+    assert np.array_equal(x.shape.eval(), xr.shape.eval())
+
+
+@pytest.mark.xfail
+def test_light_delay_shape_vector_t():
+    # TODO: Fix shapes
+    # `light_delay=False` returns a vector
+    # `light_delay=True` returns a (1, 1) matrix
+    orbit = KeplerianOrbit(period=1.0)
+    x, y, z = orbit.get_planet_position([1.0, 2.0], light_delay=False)
+    xr, yr, zr = orbit.get_planet_position([1.0, 2.0], light_delay=True)
+    assert np.array_equal(x.shape.eval(), xr.shape.eval())
+
+
+@pytest.mark.xfail
+def test_light_delay_shape_two_planets_scalar_t():
+    # TODO: Fix shapes
+    # `light_delay=True` only works if `t` is an array;
+    # throws `ValueError` if it is a scalar.
+    orbit = KeplerianOrbit(period=[1.0, 2.0])
+    x, y, z = orbit.get_planet_position(1.0, light_delay=False)
+    xr, yr, zr = orbit.get_planet_position(1.0, light_delay=True)
+    assert np.array_equal(x.shape.eval(), xr.shape.eval())
+
+
+@pytest.mark.xfail
+def test_light_delay_shape_two_planets_single_t():
+    # TODO: Fix shapes
+    # `light_delay=False` returns a vector
+    # `light_delay=True` returns a (1, 2) matrix
+    orbit = KeplerianOrbit(period=[1.0, 2.0])
+    x, y, z = orbit.get_planet_position([1.0], light_delay=False)
+    xr, yr, zr = orbit.get_planet_position([1.0], light_delay=True)
+    assert np.array_equal(x.shape.eval(), xr.shape.eval())
+
