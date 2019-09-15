@@ -473,8 +473,7 @@ class KeplerianOrbit:
         """
         if light_delay is False:
             return tuple(
-                tt.squeeze(x)
-                for x in self._get_position(-self.a_planet, t, parallax)
+                tt.squeeze(x) for x in self._get_position(-self.a, t, parallax)
             )
         else:
             return tuple(
