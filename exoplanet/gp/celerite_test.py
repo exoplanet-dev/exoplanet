@@ -209,3 +209,33 @@ def test_integrated(kernel, seed=1234):
 
     kernel = terms.IntegratedTerm(kernel, dt)
     _check_model(kernel, x, diag, y)
+
+
+def test_sho_reparam(seed=6083):
+    S0 = 10.0
+    w0 = 0.5
+    Q = 3.2
+    kernel1 = terms.SHOTerm(S0=S0, w0=w0, Q=Q)
+    kernel2 = terms.SHOTerm(Sw4=S0 * w0 ** 4, w0=w0, Q=Q)
+    func1 = theano.function([], kernel1.coefficients)
+    func2 = theano.function([], kernel2.coefficients)
+    for a, b in zip(func1(), func2()):
+        assert np.allclose(a, b)
+
+    kernel2 = terms.SHOTerm(log_Sw4=np.log(S0) + 4 * np.log(w0), w0=w0, Q=Q)
+    func2 = theano.function([], kernel2.coefficients)
+    for a, b in zip(func1(), func2()):
+        assert np.allclose(a, b)
+
+    Q = 0.1
+    kernel1 = terms.SHOTerm(S0=S0, w0=w0, Q=Q)
+    kernel2 = terms.SHOTerm(Sw4=S0 * w0 ** 4, w0=w0, Q=Q)
+    func1 = theano.function([], kernel1.coefficients)
+    func2 = theano.function([], kernel2.coefficients)
+    for a, b in zip(func1(), func2()):
+        assert np.allclose(a, b)
+
+    kernel2 = terms.SHOTerm(log_Sw4=np.log(S0) + 4 * np.log(w0), w0=w0, Q=Q)
+    func2 = theano.function([], kernel2.coefficients)
+    for a, b in zip(func1(), func2()):
+        assert np.allclose(a, b)

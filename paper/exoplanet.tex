@@ -342,6 +342,68 @@ Simplifying the equations using the sum angle identities, we find
 \label{eqn:Z}
 \end{equation}
 
+\section{Parameterizing an orbit}
+
+At is heart, \exoplanet\ models Keplerian orbits.
+There is some support for relaxing this assumption (REFERENCE N-BODY W REBOUND), but it is important that we clearly present how to represent a Keplerian orbit before generalizing.
+In \exoplanet\ these orbits are specified specified with respect to a single central body (generally the most massive body) and then a system of non-interacting bodies orbiting the central.
+This is a good parameterization for exoplanetary systems and binary stars, but it is sometimes not sufficient for systems with multiple massive bodies where the interactions will be important to the dynamics.
+
+The central body is defined by any two of radius $R_\star$, mass $M_\star$, or density $\rho_\star$.
+The third physical parameter can always be computed using the other two so \exoplanet\ will throw an error if three are given (even if they are numerically self-consistent).
+
+The orbits are then defined by:
+\begin{itemize}
+  \item the period $P$ or semi-major axis $a$ of the orbit,
+  \item the time of conjunction $t_0$ or time of periastron passage $t_\mathrm{p}$,
+  \item the planet's radius $R_\mathrm{pl}$ and mass $M_\mathrm{pl}$,
+  \item the eccentricity $e$, argument of periastron $\omega$ and the longitude of ascending node $\Omega$, and
+  \item the inclination of the orbital plane $i$ or the impact parameter $b$.
+\end{itemize}
+
+A \texttt{KeplerianOrbit} object in \exoplanet\ will always be fully specified.
+For example, if the orbit is defined using the period $P$, the semi-major axis $a$ will be computed using Kepler's third law.
+
+\section{Parameterizing transiting planets}
+
+It is common practice to parameterize a transiting planet using period $P$, time of conjunction $t_0$, and impact parameter $b$.
+If parameters are well constrained then specific choices about priors won't be important, but the eccentricity and argument of periastron are rarely well constrained by the transit alone, so it can be important to consider the details of the parameterization.
+
+From geometry, we can derive that expected prior distribution for $\cos i$ is uniform from $-1$ to $1$.
+This doesn't directly translate to a uniform prior on $b$.
+Instead, if we want to sample in $b$ we need to take into account the Jacobian in the change of variables
+\begin{eqnarray}
+p(\cos i) &=& \left| \frac{\dd b}{\dd \cos i} \right|\,p(b) \quad.
+\end{eqnarray}
+Since,
+\begin{eqnarray}
+b = \frac{a}{R_\star}\,\cos i\,\left[\frac{1 - e^2}{1 + e\,\sin\omega}\right]\quad,
+\end{eqnarray}
+the relevant Jacobian is
+\begin{eqnarray}
+\frac{\mathrm{d}b}{\mathrm{d}\cos i} = \frac{R_\star}{a}\,\left[\frac{1 + e\,\sin\omega}{1 - e^2}\right] \quad.
+\end{eqnarray}
+
+Similarly, in order for a transit to occur, the impact parameter must satisfy
+\begin{eqnarray}
+  \left|b\right| < 1 + R_\mathrm{pl}/R_\star \quad.
+\end{eqnarray}
+In other words, the conditional prior probability for the impact parameter (conditioned on the assumption that the planet transits and the other orbital parameters) is
+\begin{eqnarray}
+p(b\,|\,a,\,e,\,\omega,\,R_\mathrm{pl},\,R_\star) =
+\frac{R_\star}{a}\,\left[\frac{1 + e\,\sin\omega}{1 - e^2}\right]\,
+\left\{\begin{array}{ll}
+  1 / [2\,(1 + R_\mathrm{pl}/R_\star)] & \mathrm{if}\,\left|b\right| < 1 + R_\mathrm{pl}/R_\star \\
+  0 & \mathrm{otherwise}
+\end{array}\right.
+\end{eqnarray}
+
+Similarly, the prior on the planet's radius should also depend on the detectability of the signal, but this will only be important for small planets with radius error bars that span the detection threshold which won't be common.
+
+As discussed by \dfmtodo{CITE exofast}, there is a strong degeneracy between $e$, $b$ and $\omega$ that is introduced by the fact that the duration is the main observable that constrains these three quantities.
+While it is possible to change variables to fit in duration instead of $e$ and analytically marginalize over the branches of the solution for $e$, both the bookkeeping and reparameterization is difficult to get right.
+In particular, NUTS requires that all parameters have infinite support, but the allowed range of the duration parameter depends on the branch and the other parameters.
+Furthermore, there is a funnel situation since at some values of $\omega$, all values of $e$ are identical.
 
 \section{The custom operations provided by exoplanet}
 

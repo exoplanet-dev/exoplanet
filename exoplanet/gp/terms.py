@@ -26,6 +26,26 @@ from theano.gof import MissingInputError
 from ..utils import eval_in_model
 
 
+def normalize_parameters(names, **kwargs):
+    results = dict()
+    results["dtype"] = dtype = kwargs.pop("dtype", theano.config.floatX)
+    for name in names:
+        if name not in kwargs and "log_" + name not in kwargs:
+            raise ValueError(
+                (
+                    "Missing required parameter {0}. " "Provide {0} or log_{0}"
+                ).format(name)
+            )
+        value = (
+            kwargs.pop(name)
+            if name in kwargs
+            else tt.exp(kwargs.pop("log_" + name))
+        )
+        results[name] = tt.cast(value, dtype)
+
+    return dict(results, **kwargs)
+
+
 class Term(object):
     """The abstract base "term" that is the superclass of all other terms
 
@@ -37,22 +57,10 @@ class Term(object):
     parameter_names = tuple()
 
     def __init__(self, **kwargs):
-        self.dtype = kwargs.pop("dtype", theano.config.floatX)
-        for name in self.parameter_names:
-            if name not in kwargs and "log_" + name not in kwargs:
-                raise ValueError(
-                    (
-                        "Missing required parameter {0}. "
-                        "Provide {0} or log_{0}"
-                    ).format(name)
-                )
-            value = (
-                kwargs[name]
-                if name in kwargs
-                else tt.exp(kwargs["log_" + name])
-            )
-            setattr(self, name, tt.cast(value, self.dtype))
-
+        results = normalize_parameters(self.parameter_names, **kwargs)
+        self.dtype = results.pop("dtype")
+        for k, v in results.items():
+            setattr(self, k, v)
         self.coefficients = self.get_coefficients()
 
     @property
@@ -524,6 +532,11 @@ class SHOTerm(Term):
         tensor S0 or log_S0: The parameter :math:`S_0`.
         tensor Q or log_Q: The parameter :math:`Q`.
         tensor w0 or log_w0: The parameter :math:`\omega_0`.
+        tensor Sw4 or log_Sw4: It can sometimes be more efficient to
+            parameterize the amplitude of a SHO kernel using
+            :math:`S_0\,{\omega_0}^4` instead of :math:`S_0` directly since
+            :math:`S_0` and :math:`\omega_0` are strongly correlated. If
+            provided, ``S0`` will be computed from ``Sw4`` and ``w0``.
 
     """
 
@@ -531,7 +544,18 @@ class SHOTerm(Term):
 
     def __init__(self, *args, **kwargs):
         self.eps = tt.as_tensor_variable(kwargs.pop("eps", 1e-5))
-        super(SHOTerm, self).__init__(*args, **kwargs)
+
+        results = normalize_parameters(("w0", "Q"), **kwargs)
+        if "Sw4" in results:
+            if "S0" in results or "log_S0" in results:
+                raise ValueError("Sw4 and S0 cannot both be specified")
+            results["S0"] = results["Sw4"] / results["w0"] ** 4
+        elif "log_Sw4" in results:
+            if "S0" in results or "log_S0" in results:
+                raise ValueError("Sw4 and S0 cannot both be specified")
+            results["log_S0"] = results["log_Sw4"] - 4 * tt.log(results["w0"])
+
+        super(SHOTerm, self).__init__(*args, **results)
 
     @property
     def J(self):
