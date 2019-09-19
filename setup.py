@@ -5,10 +5,9 @@ import sys
 
 from setuptools import setup
 
-from exoplanet_version import __version__  # NOQA
-
 dirname = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, os.path.join(dirname, "exoplanet"))
+from exoplanet_version import __version__  # NOQA
 
 
 with open(os.path.join(dirname, "requirements.txt"), "r") as f:
@@ -31,6 +30,7 @@ setup(
         "exoplanet.gp",
         "exoplanet.orbits",
         "exoplanet.theano_ops",
+        "exoplanet.distributions",
         "exoplanet.theano_ops.starry",
         "exoplanet.theano_ops.kepler",
         "exoplanet.theano_ops.contact",
