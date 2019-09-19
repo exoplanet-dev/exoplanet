@@ -17,6 +17,7 @@ from .distributions import (
     RadiusImpact,
     Periodic,
     get_joint_radius_impact,
+    ImpactParameter,
 )
 
 
@@ -251,3 +252,26 @@ class TestDistributions(object):
         # Make sure that the physical constraints are satisfied
         assert np.all((r <= max_radius) & (min_radius <= r))
         assert np.all((b >= 0) & (b <= 1 + r))
+
+    def test_impact(self):
+        lower = 0.1
+        upper = 1.0
+        with self._model():
+            ror = pm.Uniform("ror", lower=lower, upper=upper)
+            dist = ImpactParameter("b", ror=ror, shape=(5, 2))
+
+            # Test random sampling
+            samples = dist.random(size=100)
+            assert np.shape(samples) == (100, 5, 2)
+            assert np.all((0 <= samples) & (samples <= 1 + upper))
+
+            trace = self._sample()
+
+        u = trace["ror"]
+        u = np.reshape(u, (len(u), -1))
+        cdf = lambda x: np.clip((x - lower) / (upper - lower), 0, 1)  # NOQA
+        for i in range(u.shape[1]):
+            s, p = kstest(u[:, i], cdf)
+            assert s < 0.05
+
+        assert np.all(trace["b"] <= 1 + trace["ror"][:, None, None])
