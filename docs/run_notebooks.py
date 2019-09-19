@@ -51,7 +51,7 @@ def process_notebook(filename):
 
 
 with multiprocessing.Pool(num_jobs) as pool:
-    errors = list(pool.imap_unordered(process_notebook))
+    errors = list(pool.imap_unordered(process_notebook, filenames))
 
 errors = [e for e in errors if len(e.strip())]
 txt = "\n\n".join(errors)
