@@ -2,7 +2,13 @@
 
 from __future__ import division, print_function
 
-__all__ = ["unit_vector", "angle", "quad_limb_dark", "radius_impact"]
+__all__ = [
+    "unit_vector",
+    "angle",
+    "quad_limb_dark",
+    "radius_impact",
+    "impact_parameter",
+]
 
 import numpy as np
 
@@ -274,3 +280,40 @@ class RadiusImpactTransform(tr.Transform):
 
 
 radius_impact = RadiusImpactTransform
+
+
+class ImpactParameterTransform(tr.LogOdds):
+
+    name = "impact"
+
+    def __init__(self, ror):
+        self.one_plus_ror = 1 + tt.as_tensor_variable(ror)
+
+    def backward(self, x):
+        bhat = super(ImpactParameterTransform, self).backward(x)
+        return bhat * self.one_plus_ror
+
+    def backward_val(self, x):
+        raise NotImplementedError(
+            "backward_val isn't implemented for the impact parameter transform"
+        )
+
+    def forward(self, x):
+        return super(ImpactParameterTransform, self).forward(
+            x / self.one_plus_ror
+        )
+
+    def forward_val(self, x, point=None):
+        opror = draw_values(self.one_plus_ror - 0.0, point=point)
+        return super(ImpactParameterTransform, self).forward_val(
+            x / opror, point=point
+        )
+
+    def jacobian_det(self, y):
+        # This is y here, not y / (1 + ror) because the jacobian is computed
+        # using the 'backward' op *of this transform* not its super.
+        jac = super(ImpactParameterTransform, self).jacobian_det(y)
+        return jac - tt.log(self.one_plus_ror)
+
+
+impact_parameter = ImpactParameterTransform

@@ -175,6 +175,40 @@ class UnitUniform(pm.Flat):
         return tt.zeros_like(tt.as_tensor_variable(value))
 
 
+class ImpactParameter(pm.Flat):
+    def __init__(self, ror=None, **kwargs):
+        if ror is None:
+            raise ValueError("missing required parameter 'ror'")
+        self.ror = tt.as_tensor_variable(ror)
+        kwargs["transform"] = kwargs.pop(
+            "transform", tr.ImpactParameterTransform(self.ror)
+        )
+
+        shape = kwargs.get("shape", None)
+        if shape is None:
+            testval = 0.5
+        else:
+            testval = 0.5 + np.zeros(shape)
+        kwargs["testval"] = kwargs.pop("testval", testval)
+
+        super(ImpactParameter, self).__init__(**kwargs)
+
+    def _random(self, ror=0.0, size=None):
+        return np.random.uniform(0, 1 + ror, size)
+
+    def random(self, point=None, size=None):
+        ror, = draw_values([self.ror], point=point, size=size)
+        return generate_samples(
+            self._random,
+            dist_shape=self.shape,
+            broadcast_shape=self.shape,
+            size=size,
+        )
+
+    def logp(self, value):
+        return tt.zeros_like(tt.as_tensor_variable(value))
+
+
 class QuadLimbDark(pm.Flat):
     """An uninformative prior for quadratic limb darkening parameters
 
