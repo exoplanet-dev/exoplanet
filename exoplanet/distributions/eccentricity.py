@@ -135,7 +135,7 @@ def vaneylen19(name, fixed=False, multi=False, model=None, **kwargs):
                     "frac", mu=frac_mu, sd=frac_sd, testval=frac_mu
                 )
 
-            gauss = pm.Normal.dist(mu=0, sd=sigma_gauss)
+            gauss = pm.HalfNormal.dist(sigma=sigma_gauss)
             rayleigh = pm.Weibull.dist(
                 alpha=2, beta=np.sqrt(2) * sigma_rayleigh
             )

@@ -2,7 +2,7 @@
 
 import pytest
 import numpy as np
-from scipy.stats import kstest, beta
+from scipy.stats import kstest, beta, halfnorm, rayleigh
 
 from .base_test import _Base
 from .eccentricity import kipping13, vaneylen19
@@ -64,15 +64,7 @@ class TestEccentricity(_Base):
         s, p = kstest(ecc, cdf)
         assert s < 0.05
 
-    @pytest.mark.parametrize(
-        "kwargs",
-        [
-            dict(),
-            dict(fixed=True),
-            dict(multi=True),
-            dict(fixed=True, multi=True),
-        ],
-    )
+    @pytest.mark.parametrize("kwargs", [dict(), dict(multi=True)])
     def test_vaneylen19(self, kwargs):
         with self._model() as model:
             dist = vaneylen19("ecc", shape=(5, 2), **kwargs)
@@ -91,3 +83,35 @@ class TestEccentricity(_Base):
 
         ecc = trace["ecc"]
         assert np.all((0 <= ecc) & (ecc <= 1))
+
+    def test_vaneylen19_single(self):
+        with self._model():
+            vaneylen19("ecc", fixed=True, multi=False, shape=2)
+            trace = self._sample()
+
+        ecc = trace["ecc"].flatten()
+        assert np.all((0 <= ecc) & (ecc <= 1))
+
+        f = 0.76
+        cdf = lambda x: (  # NOQA
+            (1 - f) * halfnorm.cdf(x, scale=0.049)
+            + f * rayleigh.cdf(x, scale=0.26)
+        )
+        s, p = kstest(ecc, cdf)
+        assert s < 0.05
+
+    def test_vaneylen19_multi(self):
+        with self._model():
+            vaneylen19("ecc", fixed=True, multi=True, shape=3)
+            trace = self._sample()
+
+        ecc = trace["ecc"].flatten()
+        assert np.all((0 <= ecc) & (ecc <= 1))
+
+        f = 0.08
+        cdf = lambda x: (  # NOQA
+            (1 - f) * halfnorm.cdf(x, scale=0.049)
+            + f * rayleigh.cdf(x, scale=0.26)
+        )
+        s, p = kstest(ecc, cdf)
+        assert s < 0.05
