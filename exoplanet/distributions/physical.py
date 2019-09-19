@@ -68,6 +68,16 @@ class QuadLimbDark(pm.Flat):
 
 
 class ImpactParameter(pm.Flat):
+    """The impact parameter distribution for a transiting planet
+
+    Args:
+        ror: A scalar, tensor, or PyMC3 distribution representing the radius
+            ratio between the planet and star. Conditioned on a value of
+            ``ror``, this will be uniformly distributed between ``0`` and
+            ``1+ror``.
+
+    """
+
     def __init__(self, ror=None, **kwargs):
         if ror is None:
             raise ValueError("missing required parameter 'ror'")
@@ -76,11 +86,15 @@ class ImpactParameter(pm.Flat):
             "transform", tr.ImpactParameterTransform(self.ror)
         )
 
-        shape = kwargs.get("shape", None)
+        try:
+            shape = kwargs.get("shape", self.ror.distribution.shape)
+        except AttributeError:
+            shape = None
         if shape is None:
             testval = 0.5
         else:
             testval = 0.5 + np.zeros(shape)
+            kwargs["shape"] = shape
         kwargs["testval"] = kwargs.pop("testval", testval)
 
         super(ImpactParameter, self).__init__(**kwargs)

@@ -8,7 +8,7 @@ from .base_test import _Base
 from .physical import ImpactParameter, QuadLimbDark
 
 
-class TestPhyscial(_Base):
+class TestPhysical(_Base):
     random_seed = 19860925
 
     def test_quad_limb_dark(self):
@@ -46,8 +46,8 @@ class TestPhyscial(_Base):
         lower = 0.1
         upper = 1.0
         with self._model():
-            ror = pm.Uniform("ror", lower=lower, upper=upper)
-            dist = ImpactParameter("b", ror=ror, shape=(5, 2))
+            ror = pm.Uniform("ror", lower=lower, upper=upper, shape=(5, 2))
+            dist = ImpactParameter("b", ror=ror)
 
             # Test random sampling
             samples = dist.random(size=100)
@@ -63,4 +63,4 @@ class TestPhyscial(_Base):
             s, p = kstest(u[:, i], cdf)
             assert s < 0.05
 
-        assert np.all(trace["b"] <= 1 + trace["ror"][:, None, None])
+        assert np.all(trace["b"] <= 1 + trace["ror"])
