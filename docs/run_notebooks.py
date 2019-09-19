@@ -20,7 +20,7 @@ filenames = [fn for fn in glob.glob(pattern) if not fn.endswith("_exec.ipynb")]
 
 num_files = len(filenames)
 cpu_count = multiprocessing.cpu_count()
-num_jobs = min(1, cpu_count // 4)
+num_jobs = max(1, cpu_count // 4)
 print("Running on {0} CPUs".format(cpu_count))
 print("Running {0} jobs".format(num_jobs))
 
