@@ -26,7 +26,7 @@ def kipping13(name, fixed=False, long=None, model=None, **kwargs):
             used.
 
     Returns:
-        pm.Beta: The eccentricity distribution.
+        The eccentricity distribution.
 
     """
     model = pm.modelcontext(model)
@@ -89,7 +89,7 @@ def vaneylen19(name, fixed=False, multi=False, model=None, **kwargs):
             distribution for systems with only one detected transiting planet.
 
     Returns:
-        pm.Beta: The eccentricity distribution.
+        The eccentricity distribution.
 
     """
 
