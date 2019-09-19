@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division, print_function
-
 __all__ = ["TTVOrbit", "compute_expected_transit_times"]
 
 import numpy as np

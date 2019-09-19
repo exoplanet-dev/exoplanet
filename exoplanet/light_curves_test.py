@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division, print_function
-
 import numpy as np
-
 import theano
 import theano.tensor as tt
+from packaging import version
 from theano.tests import unittest_tools as utt
 
 import starry
-from packaging import version
 
-from .orbits import KeplerianOrbit
 from .light_curves import LimbDarkLightCurve
+from .orbits import KeplerianOrbit
 
 
 def test_light_curve():

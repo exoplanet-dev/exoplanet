@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division, print_function
-
-import pytest
-import numpy as np
-
 import astropy.units as u
+import numpy as np
+import pytest
 import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt

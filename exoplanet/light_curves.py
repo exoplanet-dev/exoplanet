@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division, print_function
-
 __all__ = [
     "LimbDarkLightCurve",
     "StarryLightCurve",
@@ -9,17 +7,17 @@ __all__ = [
 ]
 
 import warnings
-import numpy as np
 
+import numpy as np
 import theano
 import theano.tensor as tt
 from theano.gof import MissingInputError
 
-from .utils import eval_in_model
 from .citations import add_citations_to_model
 from .theano_ops.starry.get_cl import GetClOp
-from .theano_ops.starry.limbdark import LimbDarkOp
 from .theano_ops.starry.integrated_limbdark import IntegratedLimbDarkOp
+from .theano_ops.starry.limbdark import LimbDarkOp
+from .utils import eval_in_model
 
 get_cl = GetClOp()
 limbdark = LimbDarkOp()

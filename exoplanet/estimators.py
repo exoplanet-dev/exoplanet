@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division, print_function
-
 __all__ = [
     "estimate_semi_amplitude",
     "estimate_minimum_mass",
@@ -9,14 +7,13 @@ __all__ = [
     "autocorr_estimator",
 ]
 
+import astropy.units as u
 import numpy as np
 
 try:
     from scipy.ndimage import gaussian_filter
 except ImportError:
     gaussian_filter = None
-
-import astropy.units as u
 
 try:
     from astropy.timeseries import LombScargle

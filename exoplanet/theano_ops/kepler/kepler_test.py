@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division, print_function
-
 import numpy as np
-
 import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt

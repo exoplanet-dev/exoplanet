@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division, print_function
-
 __all__ = [
     "logger",
     "eval_in_model",
@@ -9,23 +7,23 @@ __all__ = [
     "optimize",
     "get_args_for_theano_function",
     "get_theano_function_for_var",
+    "deprecation_warning",
+    "deprecated",
 ]
 
-import sys
 import logging
+import sys
+import warnings
+from functools import wraps
 
-import tqdm
 import numpy as np
-
-import theano
-
 import pymc3 as pm
-
+import theano
+import tqdm
+from pymc3.blocking import ArrayOrdering, DictToArrayBijection
 from pymc3.model import Point
 from pymc3.theanof import inputvars
-from pymc3.util import update_start_vals, get_default_varnames
-from pymc3.blocking import DictToArrayBijection, ArrayOrdering
-
+from pymc3.util import get_default_varnames, update_start_vals
 
 logger = logging.getLogger("exoplanet")
 
@@ -188,3 +186,23 @@ def allinmodel(vars, model):
     notin = [v for v in vars if v not in model.vars]
     if notin:
         raise ValueError("Some variables not in the model: " + str(notin))
+
+
+def deprecation_warning(msg):
+    warnings.warn(msg, category=DeprecationWarning, stacklevel=2)
+
+
+def deprecated(alternate=None):
+    def wrapper(func, alternate=alternate):
+        msg = "'{0}' is deprecated.".format(func.__name__)
+        if alternate is not None:
+            msg += " Use '{0}' instead.".format(alternate)
+
+        @wraps(func)
+        def f(*args, **kwargs):
+            deprecation_warning(msg)
+            return func(*args, **kwargs)
+
+        return f
+
+    return wrapper

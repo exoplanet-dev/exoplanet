@@ -1,17 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division, print_function
-
 __all__ = ["duration_to_eccentricity"]
 
 from itertools import product
 
 import numpy as np
-
 import pymc3 as pm
 import theano.tensor as tt
 
-from .keplerian import _get_consistent_inputs, KeplerianOrbit
+from .keplerian import KeplerianOrbit, _get_consistent_inputs
 
 
 def duration_to_eccentricity(func, duration, ror, **kwargs):
