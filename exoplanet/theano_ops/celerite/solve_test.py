@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division, print_function
-
 import numpy as np
-
 import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
 from ...gp import terms
-from .solve import SolveOp
 from .factor import FactorOp
+from .solve import SolveOp
 
 
 class TestSolve(utt.InferShapeTester):

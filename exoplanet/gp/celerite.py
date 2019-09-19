@@ -1,17 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division, print_function
-
 __all__ = ["GP"]
 
 import numpy as np
 import theano.tensor as tt
 
 from ..citations import add_citations_to_model
-from ..theano_ops.celerite.solve import SolveOp
-from ..theano_ops.celerite.factor import FactorOp
 from ..theano_ops.celerite.diag_dot import DiagDotOp
-
+from ..theano_ops.celerite.factor import FactorOp
+from ..theano_ops.celerite.solve import SolveOp
 
 diag_dot = DiagDotOp()
 

@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division, print_function
-
 __all__ = ["CeleriteBaseOp"]
 
 from theano import gof
 
-from ..build_utils import get_compile_args, get_cache_version, get_header_dirs
+from ..build_utils import get_cache_version, get_compile_args, get_header_dirs
 
 
 class CeleriteBaseOp(gof.COp):

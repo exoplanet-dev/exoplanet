@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division, print_function
-
 __all__ = ["RegularGridInterpolator"]
 
 import theano
 import theano.tensor as tt
+
 from .theano_ops.interp import RegularGridOp
 
 

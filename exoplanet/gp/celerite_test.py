@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division, print_function
-
-import pytest
 import numpy as np
-from scipy.linalg import cholesky, cho_solve
-
+import pytest
 import theano
 import theano.tensor as tt
+from scipy.linalg import cho_solve, cholesky
 
 from . import terms
 from .celerite import GP

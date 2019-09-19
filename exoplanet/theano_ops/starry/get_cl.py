@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division, print_function
-
 __all__ = ["GetClOp"]
 
-from theano import gof
 import theano.tensor as tt
+from theano import gof
 
 from .base_op import StarryBaseOp
 from .get_cl_rev import GetClRevOp

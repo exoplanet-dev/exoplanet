@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division, print_function
-
 __all__ = [
     "Term",
     "TermSum",
@@ -15,13 +13,13 @@ __all__ = [
     "RotationTerm",
 ]
 
-import numpy as np
 from itertools import chain
 
+import numpy as np
 import theano
 import theano.tensor as tt
-from theano.ifelse import ifelse
 from theano.gof import MissingInputError
+from theano.ifelse import ifelse
 
 from ..utils import eval_in_model
 

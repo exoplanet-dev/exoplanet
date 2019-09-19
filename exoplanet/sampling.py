@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division, print_function
-
 __all__ = ["PyMC3Sampler"]
 
 import logging
 
 import numpy as np
-
 import pymc3 as pm
 from pymc3.step_methods.hmc import quadpotential as quad
 

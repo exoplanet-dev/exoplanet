@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division, print_function
-
 __all__ = ["add_citations_to_model", "CITATIONS"]
 
 import logging
 import textwrap
+
 import pymc3 as pm
 
 
@@ -227,6 +226,24 @@ publisher={PeerJ Inc.}
 }
 """,
     ),
+    "kipping13b": (
+        ("exoplanet:kipping13b",),
+        r"""
+@ARTICLE{exoplanet:kipping13b,
+       author = {{Kipping}, D.~M.},
+        title = "{Parametrizing the exoplanet eccentricity distribution with
+                  the beta  distribution.}",
+      journal = {\mnras},
+         year = "2013",
+        month = jul,
+       volume = 434,
+        pages = {L51-L55},
+          doi = {10.1093/mnrasl/slt075},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/2013MNRAS.434L..51K},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+""",
+    ),
     "starry": (
         ("exoplanet:luger18",),
         r"""
@@ -282,6 +299,27 @@ publisher={PeerJ Inc.}
         ("exoplanet:rebound",),
         r"""
 FIXME!!
+""",
+    ),
+    "vaneylen19": (
+        ("exoplanet:vaneylen19",),
+        r"""
+@article{exoplanet:vaneylen19,
+author = {{Van Eylen}, Vincent and {Albrecht}, Simon and {Huang}, Xu and
+         {MacDonald}, Mariah G. and {Dawson}, Rebekah I. and {Cai}, Maxwell X.
+         and {Foreman-Mackey}, Daniel and {Lundkvist}, Mia S. and
+         {Silva Aguirre}, Victor and {Snellen}, Ignas and {Winn}, Joshua N.},
+        title = "{The Orbital Eccentricity of Small Planet Systems}",
+      journal = {\aj},
+         year = 2019,
+        month = feb,
+       volume = 157,
+       number = 2,
+        pages = 61,
+          doi = {10.3847/1538-3881/aaf22f},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/2019AJ....157...61V},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
 """,
     ),
 }
