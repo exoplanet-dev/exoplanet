@@ -53,13 +53,25 @@ Estimators
 Distributions
 -------------
 
-.. autoclass:: exoplanet.distributions.UnitVector
+Base distributions
+~~~~~~~~~~~~~~~~~~
+
 .. autoclass:: exoplanet.distributions.UnitUniform
+.. autoclass:: exoplanet.distributions.UnitVector
 .. autoclass:: exoplanet.distributions.Angle
 .. autoclass:: exoplanet.distributions.Periodic
+
+Physical distributions
+~~~~~~~~~~~~~~~~~~~~~~
+
 .. autoclass:: exoplanet.distributions.QuadLimbDark
-.. autoclass:: exoplanet.distributions.RadiusImpact
-.. autofunction:: exoplanet.distributions.get_joint_radius_impact
+.. autoclass:: exoplanet.distributions.ImpactParameter
+
+Eccentricity distributions
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: exoplanet.distributions.eccentricity.kipping13
+.. autofunction:: exoplanet.distributions.eccentricity.vaneylen19
 
 
 Utilities
