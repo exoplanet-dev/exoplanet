@@ -13,6 +13,9 @@ from .base import UnitUniform
 def kipping13(name, fixed=False, long=None, model=None, **kwargs):
     """The beta eccentricity distribution fit by Kipping (2013)
 
+    The beta distribution parameters fit by `Kipping (2013)
+    <https://ui.adsabs.harvard.edu/abs/2013MNRAS.434L..51K/abstract>`_.
+
     Args:
         name (str): The name of the eccentricity variable.
         fixed (bool, optional): If ``True``, use the posterior median
@@ -24,10 +27,6 @@ def kipping13(name, fixed=False, long=None, model=None, **kwargs):
 
     Returns:
         pm.Beta: The eccentricity distribution.
-
-    References:
-        .. [Kipping13]
-            https://ui.adsabs.harvard.edu/abs/2013MNRAS.434L..51K/abstract
 
     """
     model = pm.modelcontext(model)
@@ -75,6 +74,25 @@ def kipping13(name, fixed=False, long=None, model=None, **kwargs):
 
 
 def vaneylen19(name, fixed=False, multi=False, model=None, **kwargs):
+    """The eccentricity distribution for small planets
+
+    The mixture distribution fit by `Van Eylen et al. (2019)
+    <https://ui.adsabs.harvard.edu/abs/2019AJ....157...61V>`_ to a population
+    of well-characterized small transiting planets observed by Kepler.
+
+    Args:
+        name (str): The name of the eccentricity variable.
+        fixed (bool, optional): If ``True``, use the posterior median
+            hyperparameters. Otherwise, marginalize over the parameters.
+        multi (bool, optional): If ``True``, use the distribution for systems
+            with multiple transiting planets. If ``False`` (default), use the
+            distribution for systems with only one detected transiting planet.
+
+    Returns:
+        pm.Beta: The eccentricity distribution.
+
+    """
+
     model = pm.modelcontext(model)
     add_citations_to_model(["vaneylen19"], model=model)
 
