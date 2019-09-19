@@ -245,7 +245,7 @@ publisher={PeerJ Inc.}
 """,
     ),
     "starry": (
-        ("exoplanet:luger18",),
+        ("exoplanet:luger18", "exoplanet:agol19"),
         r"""
 @article{exoplanet:luger18,
    author = {{Luger}, R. and {Agol}, E. and {Foreman-Mackey}, D. and {Fleming},
@@ -259,6 +259,17 @@ publisher={PeerJ Inc.}
       doi = {10.3847/1538-3881/aae8e5},
    adsurl = {http://adsabs.harvard.edu/abs/2019AJ....157...64L},
   adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@article{exoplanet:agol19,
+       author = {{Agol}, Eric and {Luger}, Rodrigo and {Foreman-Mackey}, Daniel},
+        title = "{Analytic Planetary Transit Light Curves and Derivatives
+                  for Stars with Polynomial Limb Darkening}",
+      journal = {arXiv e-prints},
+         year = 2019,
+        month = aug,
+       eprint = {1908.03222},
+          url = {http://arxiv.org/abs/1908.03222}
 }
 """,
     ),
