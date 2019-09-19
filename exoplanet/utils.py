@@ -23,7 +23,12 @@ import tqdm
 from pymc3.blocking import ArrayOrdering, DictToArrayBijection
 from pymc3.model import Point
 from pymc3.theanof import inputvars
-from pymc3.util import get_default_varnames, update_start_vals
+from pymc3.util import (
+    get_default_varnames,
+    update_start_vals,
+    get_untransformed_name,
+    is_transformed_name,
+)
 
 logger = logging.getLogger("exoplanet")
 
@@ -133,10 +138,14 @@ def optimize(
     func = get_theano_function_for_var([nlp] + grad, model=model)
 
     if verbose:
+        names = [
+            get_untransformed_name(v.name)
+            if is_transformed_name(v.name)
+            else v.name
+            for v in vars
+        ]
         sys.stderr.write(
-            "optimizing logp for variables: {0}\n".format(
-                [v.name for v in vars]
-            )
+            "optimizing logp for variables: [{0}]\n".format(",".join(names))
         )
         bar = tqdm.tqdm()
 
