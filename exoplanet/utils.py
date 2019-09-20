@@ -145,7 +145,7 @@ def optimize(
             for v in vars
         ]
         sys.stderr.write(
-            "optimizing logp for variables: [{0}]\n".format(",".join(names))
+            "optimizing logp for variables: [{0}]\n".format(", ".join(names))
         )
         bar = tqdm.tqdm()
 

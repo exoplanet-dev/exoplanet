@@ -26,6 +26,12 @@ print("Running {0} jobs".format(num_jobs))
 
 
 def process_notebook(filename):
+    path = os.path.join(
+        os.path.abspath("theano_cache"), "p{0}".format(os.getpid())
+    )
+    os.makedirs(path, exist_ok=True)
+    os.environ["THEANO_FLAGS"] = "base_compiledir={0}".format(path)
+
     errors = []
 
     with open(filename) as f:
@@ -35,16 +41,14 @@ def process_notebook(filename):
 
     print("running: {0}".format(filename))
     try:
-        ep.preprocess(notebook, {"metadata": {"path": "."}})
+        ep.preprocess(notebook, {"metadata": {"path": "notebooks/"}})
     except CellExecutionError as e:
         msg = "error while running: {0}\n\n".format(filename)
         msg += e.traceback
         print(msg)
         errors.append(msg)
     finally:
-        with open(
-            os.path.splitext(filename)[0] + "_exec.ipynb", mode="wt"
-        ) as f:
+        with open(os.path.join("_static", filename), mode="wt") as f:
             nbformat.write(notebook, f)
 
     return "\n\n".join(errors)
