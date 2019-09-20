@@ -17,6 +17,7 @@ else:
 
 
 filenames = [fn for fn in glob.glob(pattern) if not fn.endswith("_exec.ipynb")]
+filenames = list(sorted(filenames, reverse=True))
 
 num_files = len(filenames)
 cpu_count = multiprocessing.cpu_count()
