@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import glob
+import multiprocessing
 import os
 import re
 import sys
-import glob
-import multiprocessing
 
 import nbformat
-from nbconvert.preprocessors import ExecutePreprocessor, CellExecutionError
+from nbconvert.preprocessors import CellExecutionError, ExecutePreprocessor
 
 if len(sys.argv) >= 2:
     pattern = sys.argv[1]
