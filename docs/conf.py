@@ -8,9 +8,9 @@ import sys
 from itertools import chain
 
 import sphinx_typlog_theme
-from exoplanet_version import __version__  # NOQA
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from exoplanet_version import __version__  # NOQA isort:skip
 
 
 def setup(app):
