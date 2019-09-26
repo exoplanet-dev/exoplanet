@@ -3,13 +3,11 @@
 __all__ = ["QuadPotentialDenseAdapt", "get_dense_nuts_step"]
 
 import numpy as np
-from scipy.linalg import cholesky, solve_triangular, LinAlgError
-
-import theano
-
 import pymc3 as pm
-from pymc3.model import modelcontext, all_continuous
+import theano
+from pymc3.model import all_continuous, modelcontext
 from pymc3.step_methods.hmc.quadpotential import QuadPotential
+from scipy.linalg import LinAlgError, cholesky, solve_triangular
 
 
 class QuadPotentialDenseAdapt(QuadPotential):
@@ -163,7 +161,24 @@ class _WeightedCovariance:
         return np.array(self.mean, dtype=self._dtype)
 
 
-def get_dense_nuts_step(chains=1, model=None, start=None, **kwargs):
+def get_dense_nuts_step(
+    start=None, adaptation_window=101, doubling=True, model=None, **kwargs
+):
+    """Get a NUTS step function with a dense mass matrix
+
+    The entries in the mass matrix will be tuned based on the sample
+    covariances during tuning. All extra arguments are passed directly to
+    ``pymc3.NUTS``.
+
+    Args:
+        start (dict, optional): A starting point in parameter space. If not
+            provided, the model's ``test_point`` is used.
+        adaptation_window (int, optional): The (initial) size of the window
+            used for sample covariance estimation.
+        doubling (bool, optional): If ``True`` (default) the adaptation window
+            is doubled each time the matrix is updated.
+
+    """
     model = modelcontext(model)
 
     if not all_continuous(model.vars):
@@ -181,7 +196,8 @@ def get_dense_nuts_step(chains=1, model=None, start=None, **kwargs):
         mean,
         var,
         10,
-        adaptation_window=kwargs.pop("adaptation_window", 101),
+        adaptation_window=adaptation_window,
+        doubling=doubling,
     )
 
     return pm.NUTS(potential=potential, model=model, **kwargs)
