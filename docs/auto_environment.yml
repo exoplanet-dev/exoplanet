@@ -5,7 +5,7 @@ channels:
 dependencies:
   - _libgcc_mutex=0.1=main
   - asn1crypto=0.24.0=py37_0
-  - astropy=3.1.2=py37h7b6447c_0
+  - astropy=3.2.1=py37h7b6447c_0
   - astroquery=0.3.9=py_1000
   - atomicwrites=1.2.1=py37_0
   - attrs=18.2.0=py37h28b3542_0
@@ -15,8 +15,8 @@ dependencies:
   - binutils_linux-64=2.31.1=h6176602_6
   - blas=1.0=mkl
   - bleach=3.1.0=py37_0
-  - ca-certificates=2019.1.23=0
-  - certifi=2019.3.9=py37_0
+  - ca-certificates=2019.5.15=1
+  - certifi=2019.6.16=py37_1
   - cffi=1.11.5=py37he75722e_1
   - chardet=3.0.4=py37_1
   - cmarkgfm=0.4.2=py37h7b6447c_0
@@ -87,7 +87,7 @@ dependencies:
   - notebook=5.7.4=py37_0
   - numpy=1.15.4=py37h7e9f1db_0
   - numpy-base=1.15.4=py37hde5b4d6_0
-  - openssl=1.1.1b=h7b6447c_1
+  - openssl=1.1.1d=h7b6447c_1
   - pandas=0.24.0=py37he6710b0_0
   - pandoc=2.2.3.2=0
   - pandocfilters=1.4.2=py37_1
@@ -159,6 +159,8 @@ dependencies:
     - netcdf4==1.5.1.2
     - pymc3==3.7
     - pytest-cov==2.6.1
+    - rebound==3.10.1
+    - rebound-pymc3==0.0.3
     - theano==1.0.4
     - xarray==0.12.3
 prefix: /mnt/home/dforeman/miniconda3/envs/autoexoplanet
