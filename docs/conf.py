@@ -10,7 +10,6 @@ from itertools import chain
 import sphinx_typlog_theme
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from exoplanet_version import __version__  # NOQA isort:skip
 
 
 def setup(app):
@@ -73,6 +72,7 @@ sys.path.insert(
         "exoplanet",
     ),
 )
+from exoplanet_version import __version__  # NOQA isort:skip
 
 version = __version__
 release = __version__
