@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
-import sys
 import glob
+import os
 import subprocess
+import sys
 from itertools import chain
 
 import sphinx_typlog_theme
+from exoplanet_version import __version__  # NOQA
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -23,7 +24,15 @@ extensions = [
     "sphinx.ext.mathjax",
 ]
 
-autodoc_mock_imports = ["numpy", "scipy", "astropy", "pymc3", "theano", "tqdm"]
+autodoc_mock_imports = [
+    "numpy",
+    "scipy",
+    "astropy",
+    "pymc3",
+    "theano",
+    "tqdm",
+    "rebound_pymc3",
+]
 
 # Convert the tutorials
 for fn in chain(
@@ -64,7 +73,6 @@ sys.path.insert(
         "exoplanet",
     ),
 )
-from exoplanet_version import __version__  # NOQA
 
 version = __version__
 release = __version__
