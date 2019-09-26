@@ -12,6 +12,8 @@ import logging
 
 logger = logging.getLogger("theano.gof.compilelock")
 logger.setLevel(logging.ERROR)
+logger = logging.getLogger("exoplanet")
+logger.setLevel(logging.DEBUG)
 
 import theano
 
