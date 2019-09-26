@@ -80,8 +80,7 @@ Utilities
 .. autofunction:: exoplanet.optimize
 .. autofunction:: exoplanet.eval_in_model
 .. autofunction:: exoplanet.get_samples_from_trace
-.. autoclass:: exoplanet.PyMC3Sampler
-   :inherited-members:
+.. autofunction:: exoplanet.get_dense_nuts_step
 
 
 Citations
