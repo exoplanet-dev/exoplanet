@@ -1,3 +1,16 @@
+0.2.1 (2019-09-26)
+++++++++++++++++++
+
+- Adds a new interface for tuning dense mass matrices with less overhead
+- Adds support for photodynamics using `rebound <https://rebound.rtfd.io>`_
+- Adds a new interface for assigning units to Theano variables
+- Adds new physically-motivated distributions for impact parameter and
+  eccentricity
+- Improves test coverage
+- Fixes bug in diagonal elements of the ``IntegratedTerm`` model
+- Fixes bug in indexing for ``TTVOrbit`` models with large TTVs
+
+
 0.2.0 (2019-08-04)
 ++++++++++++++++++
 

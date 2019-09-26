@@ -83,6 +83,14 @@ Utilities
 .. autofunction:: exoplanet.get_dense_nuts_step
 
 
+Units
+-----
+
+.. autofunction:: exoplanet.units.with_unit
+.. autofunction:: exoplanet.units.has_unit
+.. autofunction:: exoplanet.units.to_unit
+
+
 Citations
 ---------
 
