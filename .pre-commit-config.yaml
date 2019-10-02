@@ -24,3 +24,8 @@ repos:
   hooks:
   - id: black
     language_version: python3.6
+
+- repo: https://github.com/dfm/black_nbconvert
+  rev: v0.1.1
+  hooks:
+  - id: black_nbconvert
