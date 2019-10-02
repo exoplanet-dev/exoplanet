@@ -5,17 +5,15 @@ __all__ = ["KeplerianOrbit", "get_true_anomaly"]
 import warnings
 
 import numpy as np
-
 import theano.tensor as tt
+from astropy import units as u
 from theano.ifelse import ifelse
 
-from astropy import units as u
-
-from ..units import to_unit, has_unit, with_unit
 from ..citations import add_citations_to_model
-from ..theano_ops.kepler import KeplerOp
 from ..theano_ops.contact import ContactPointsOp
-from .constants import G_grav, gcc_per_sun, au_per_R_sun
+from ..theano_ops.kepler import KeplerOp
+from ..units import has_unit, to_unit, with_unit
+from .constants import G_grav, au_per_R_sun, gcc_per_sun
 
 
 class KeplerianOrbit:
@@ -220,7 +218,7 @@ class KeplerianOrbit:
             self.t0 = tt.as_tensor_variable(t0)
             self.t_periastron = self.t0 - self.M0 / self.n
 
-        self.tref = self.t_periastron
+        self.tref = self.t_periastron - self.t0
 
         self.sin_incl = tt.sin(self.incl)
 
@@ -266,7 +264,7 @@ class KeplerianOrbit:
         return X, Y, Z
 
     def _warp_times(self, t):
-        return tt.shape_padright(t)
+        return tt.shape_padright(t) - self.t0
 
     def _get_true_anomaly(self, t):
         M = (self._warp_times(t) - self.tref) * self.n
@@ -582,7 +580,7 @@ class KeplerianOrbit:
 
         # Wrap the times into time since transit
         hp = 0.5 * self.period
-        dt = tt.mod(self._warp_times(t) - self.t0 + hp, self.period) - hp
+        dt = tt.mod(self._warp_times(t) + hp, self.period) - hp
 
         if self.ecc is None:
             # Equation 14 from Winn (2010)
