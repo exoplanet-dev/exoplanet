@@ -109,7 +109,6 @@ class TTVOrbit(KeplerianOrbit):
             kwargs["period"] = kwargs.get("period", self.ttv_period)
 
         super(TTVOrbit, self).__init__(*args, **kwargs)
-        self._base_time = 0.5 - self.t0 / self.period
 
         if ttvs is not None:
             self.ttv_period = self.period
@@ -130,7 +129,13 @@ class TTVOrbit(KeplerianOrbit):
             for i, tts in enumerate(self.transit_times)
         ]
         self._bin_values = [
-            tt.concatenate(([0], self.transit_times[i], [0]))
+            tt.concatenate(
+                (
+                    [self.transit_times[i][0]],
+                    self.transit_times[i],
+                    [self.transit_times[i][-1]],
+                )
+            )
             for i in range(len(self.transit_times))
         ]
 
