@@ -4,12 +4,15 @@
 import glob
 import os
 import subprocess
-import sys
 from itertools import chain
 
 import sphinx_typlog_theme
+from pkg_resources import DistributionNotFound, get_distribution
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+try:
+    __version__ = get_distribution("exoplanet").version
+except DistributionNotFound:
+    __version__ = "unknown version"
 
 
 def setup(app):
@@ -64,15 +67,6 @@ master_doc = "index"
 project = "exoplanet"
 author = "Dan Foreman-Mackey"
 copyright = "2018, 2019, " + author
-
-# sys.path.insert(
-#     0,
-#     os.path.join(
-#         os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-#         "exoplanet",
-#     ),
-# )
-from exoplanet import __version__  # NOQA isort:skip
 
 version = __version__
 release = __version__
