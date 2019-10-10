@@ -1,29 +1,21 @@
 # -*- coding: utf-8 -*-
 
-from .exoplanet_version import __version__  # NOQA
+__all__ = [
+    "__version__",
+    "distributions",
+    "gp",
+    "orbits",
+    "interp",
+    "get_dense_nuts_step",
+]
 
-try:
-    __EXOPLANET_SETUP__
-except NameError:
-    __EXOPLANET_SETUP__ = False
+from . import distributions, gp, interp, orbits
+from .citations import CITATIONS
+from .estimators import *  # NOQA
+from .exoplanet_version import __version__
+from .light_curves import *  # NOQA
+from .quadpotential import get_dense_nuts_step
+from .sampling import *  # NOQA
+from .utils import *  # NOQA
 
-if not __EXOPLANET_SETUP__:
-    __all__ = [
-        "distributions",
-        "gp",
-        "orbits",
-        "interp",
-        "get_dense_nuts_step",
-    ]
-
-    from .utils import *  # NOQA
-    from .sampling import *  # NOQA
-    from .estimators import *  # NOQA
-    from .light_curves import *  # NOQA
-    from .quadpotential import get_dense_nuts_step
-
-    from . import distributions, gp, orbits, interp
-
-    from .citations import CITATIONS
-
-    __bibtex__ = __citation__ = CITATIONS["exoplanet"][1]
+__bibtex__ = __citation__ = CITATIONS["exoplanet"][1]
