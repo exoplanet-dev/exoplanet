@@ -1,26 +1,28 @@
 #!/usr/bin/env python
 
 import os
-import sys
 
 from setuptools import setup
 
 dirname = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(dirname, "exoplanet"))
-from exoplanet_version import __version__  # NOQA
 
 
-with open(os.path.join(dirname, "requirements.txt"), "r") as f:
-    install_requires = f.read().splitlines()
+def get_requirements():
+    with open(os.path.join(dirname, "requirements.txt"), "r") as f:
+        return f.read().splitlines()
 
 
-with open(os.path.join(dirname, "README.md"), encoding="utf-8") as f:
-    readme = f.read()
+def get_long_description():
+    with open(os.path.join(dirname, "README.md"), encoding="utf-8") as f:
+        return f.read()
 
 
 setup(
     name="exoplanet",
-    version=__version__,
+    use_scm_version={
+        "write_to": "exoplanet/exoplanet_version.py",
+        "write_to_template": '__version__ = "{version}"\n',
+    },
     author="Daniel Foreman-Mackey",
     author_email="foreman.mackey@gmail.com",
     url="https://github.com/dfm/exoplanet",
@@ -39,9 +41,9 @@ setup(
         "exoplanet.theano_ops.rebound",
     ],
     description="Fast & scalable MCMC for all your exoplanet needs",
-    long_description=readme,
+    long_description=get_long_description(),
     long_description_content_type="text/markdown",
-    install_requires=install_requires,
+    install_requires=get_requirements(),
     package_data={"": ["README.md", "LICENSE"]},
     include_package_data=True,
     classifiers=[
