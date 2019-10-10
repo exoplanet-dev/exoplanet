@@ -65,14 +65,14 @@ project = "exoplanet"
 author = "Dan Foreman-Mackey"
 copyright = "2018, 2019, " + author
 
-sys.path.insert(
-    0,
-    os.path.join(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-        "exoplanet",
-    ),
-)
-from exoplanet_version import __version__  # NOQA isort:skip
+# sys.path.insert(
+#     0,
+#     os.path.join(
+#         os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+#         "exoplanet",
+#     ),
+# )
+from exoplanet import __version__  # NOQA isort:skip
 
 version = __version__
 release = __version__
