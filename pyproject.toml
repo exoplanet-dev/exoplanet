@@ -19,4 +19,4 @@ exclude = '''
 '''
 
 [tool.isort]
-known_third_party = ["astropy", "exoplanet_version", "matplotlib", "nbconvert", "nbformat", "numpy", "packaging", "pkg_resources", "pymc3", "pytest", "rebound_pymc3", "scipy", "setuptools", "sphinx_typlog_theme", "starry", "theano", "tqdm"]
+known_third_party = ["astropy", "matplotlib", "nbconvert", "nbformat", "numpy", "packaging", "pkg_resources", "pymc3", "pytest", "rebound_pymc3", "scipy", "setuptools", "sphinx_typlog_theme", "starry", "theano", "tqdm"]
