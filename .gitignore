@@ -16,4 +16,4 @@ backups
 .github_api_key
 htmlcov
 .eggs
-exoplanet/exoplanet_version.py
+exoplanet_version.py

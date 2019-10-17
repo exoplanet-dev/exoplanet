@@ -86,7 +86,7 @@ methods: statistical
 The astronomical community has been investing in time domain survey astronomy and---thanks to this investment---large, homogeneous, public time-domain datasets are becoming common, and the questions that the community is asking are becoming more ambitious.
 One application of these surveys is the discovery and characterization of stellar systems including multiple exoplanets and stars.
 Sophisticated statistical methods have been developed for these applications and deployed at large scale, but the computational cost and scaling of these methods limit their application to restricted datasets or models with fewer data points or parameters.
-This paper describes a new class of methods that have not previously been developed for application to time series analysis in astrophysics.
+This paper describes a new class of methods that have not previously been applied to time series analysis in astrophysics.
 The key benefit of these methods is that they improve the computational scaling of robust probabilistic inference as a function of the number of parameters in the model; this improved efficiency can reduce runtime for inference in multi-planet systems by orders of magnitude.
 
 The crucial difference between the methods discussed in this paper compared to previous work is that we derive computationally efficient first derivatives of the model with respect to its parameters.
@@ -138,9 +138,8 @@ tedious and error-prone.
 Instead, it is generally preferable to use a method (called automatic
 differentiation) that can automatically compute the exact gradients of the
 model \emph{to machine precision} at compile time.
-We would like to emphasize the fact that we are not talking \emph{numerical}
-derivatives like finite difference methods, and there is no approximation
-being made.
+We would like to emphasize that automatic differentiation does not compute numerical derivatives like finite difference methods, but it does not compute symbolic derivatives either.
+Instead, it efficiently evaluates the \emph{exact} derivative of a piece of code for some given inputs by implicitly applying the chain rule to each operation in the code.
 
 The basic idea behind automatic differentiation is that code is always written
 as the composition of basic functions and, if we know how to differentiate the

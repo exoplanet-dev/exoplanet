@@ -1,15 +1,7 @@
-include README.rst
-include LICENSE
-include requirements.txt
+include README.md LICENSE *.rst *.toml *.yml *.yaml
 
-graft exoplanet/theano_ops/lib/include
-graft exoplanet/theano_ops/lib/vendor/eigen_3.3.3
+graft src/exoplanet/theano_ops/lib/include
+graft src/exoplanet/theano_ops/lib/vendor/eigen_3.3.3
 
-include exoplanet/theano_ops/kepler/*.cc
-include exoplanet/theano_ops/contact/*.cc
-include exoplanet/theano_ops/celerite/*.cc
-
-include exoplanet/theano_ops/interp/*.cc
-include exoplanet/theano_ops/interp/include/*.h
-
-include exoplanet/theano_ops/starry/*.cc
+recursive-include src/exoplanet/theano_ops *.cc
+recursive-include src/exoplanet/theano_ops *.h
