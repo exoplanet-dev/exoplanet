@@ -25,7 +25,7 @@ install:
     - travis_retry python setup.py develop
 
 script:
-    - py.test -v -s exoplanet
+    - py.test -v -s src/exoplanet
 
 after_success:
     - coveralls
