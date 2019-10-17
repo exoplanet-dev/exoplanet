@@ -42,11 +42,6 @@ def read(*parts) -> str:
         return f.read()
 
 
-def get_long_description() -> str:
-    with open(os.path.join(HERE, "README.md"), encoding="utf-8") as f:
-        return f.read()
-
-
 def find_meta(meta: str, meta_file: str = read(META_PATH)) -> str:
     meta_match = re.search(
         r"^__{meta}__ = ['\"]([^'\"]*)['\"]".format(meta=meta), meta_file, re.M
@@ -58,10 +53,10 @@ def find_meta(meta: str, meta_file: str = read(META_PATH)) -> str:
 
 if __name__ == "__main__":
     setup(
-        name="exoplanet",
+        name=NAME,
         use_scm_version={
             "write_to": os.path.join(
-                "src", "exoplanet", "exoplanet_version.py"
+                "src", NAME, "{0}_version.py".format(NAME)
             ),
             "write_to_template": '__version__ = "{version}"\n',
         },
