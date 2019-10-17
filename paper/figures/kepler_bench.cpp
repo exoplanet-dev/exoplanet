@@ -1,7 +1,7 @@
 /*
 <%
 setup_pybind11(cfg)
-cfg['include_dirs'] = ['../../exoplanet/theano_ops/lib/include/exoplanet']
+cfg['include_dirs'] = ['../../src/exoplanet/theano_ops/lib/include/exoplanet']
 %>
 */
 #include <pybind11/pybind11.h>
