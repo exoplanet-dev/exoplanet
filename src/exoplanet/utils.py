@@ -27,7 +27,7 @@ from pymc3.util import (
     get_default_varnames,
     get_untransformed_name,
     is_transformed_name,
-    update_start_vals
+    update_start_vals,
 )
 
 logger = logging.getLogger("exoplanet")

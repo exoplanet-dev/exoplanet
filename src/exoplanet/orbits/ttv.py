@@ -59,6 +59,9 @@ class TTVOrbit(KeplerianOrbit):
             to make sure that ``period`` and ``ttv_period`` don't diverge
             because things will break if the time between neighboring transits
             is larger than ``2*period``.
+        delta_log_period: If using the ``transit_times`` argument, this
+            parameter specifies the difference (in natural log) between the
+            leqast squares period and the effective period of the transit.
 
     """
 
@@ -106,7 +109,14 @@ class TTVOrbit(KeplerianOrbit):
             # be the same. Users will probably want to put a prior relating the
             # two periods if they use separate values.
             self.ttv_period = tt.stack(period)
-            kwargs["period"] = kwargs.get("period", self.ttv_period)
+            if "period" not in kwargs:
+                if "delta_log_period" in kwargs:
+                    kwargs["period"] = tt.exp(
+                        tt.log(self.ttv_period)
+                        + kwargs.pop("delta_log_period")
+                    )
+                else:
+                    kwargs["period"] = self.ttv_period
 
         super(TTVOrbit, self).__init__(*args, **kwargs)
 
