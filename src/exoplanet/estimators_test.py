@@ -7,7 +7,7 @@ from .estimators import (
     autocorr_estimator,
     estimate_minimum_mass,
     estimate_semi_amplitude,
-    lomb_scargle_estimator
+    lomb_scargle_estimator,
 )
 from .orbits import KeplerianOrbit
 
