@@ -1,4 +1,4 @@
-name: Code style checks
+name: style
 
 on: [push, pull_request]
 
