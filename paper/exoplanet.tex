@@ -139,19 +139,15 @@ Instead, it is generally preferable to use a method (called automatic
 differentiation) that can automatically compute the exact gradients of the
 model \emph{to machine precision} at compile time.
 We would like to emphasize that automatic differentiation does not compute numerical derivatives like finite difference methods, but it does not compute symbolic derivatives either.
-Instead, it efficiently evaluates the \emph{exact} derivative of a piece of code for some given inputs by implicitly applying the chain rule to each operation in the code.
+Instead, it efficiently evaluates the numerical value of the derivative of a piece of code for some given inputs by implicitly applying the chain rule to each operation in the code.
 
 The basic idea behind automatic differentiation is that code is always written
 as the composition of basic functions and, if we know how to differentiate the
 subcomponents, then we can apply the chain rule to differentiate the larger
 function.
-This realization was one of the key discoveries that launched the field of
-machine learning called ``deep learning'', where automatic differentiation was
-given the name ``backpropagation'' (CITE).
-Since then, there has been a substantial research base that has made these
-methods general and computationally efficient, and from this, many open source
-libraries have been released that ease the use of these methods (e.g.\
-TensorFlow, PyTorch, Stan, ceres, Eigen, etc.\ CITATIONS).
+The realization that this method could be applied to neural network models was the key discoveries that launched the field of ``deep learning'', where a specific type of automatic differentiation is used and called ``backpropagation'' (CITE).
+In many ways, motivated by this application, there has been substantial research and investment into makeing these methods general and computationally efficient.
+Many open source libraries have been released that ease the use of these methods (e.g.\ TensorFlow, PyTorch, Stan, ceres, Eigen, etc.\ CITATIONS).
 Despite the existence of these projects, automatic differentiation has not
 been widely adopted in the astronomical literature because there is some
 learning curve associated with porting existing code bases to a new language
@@ -173,8 +169,25 @@ future paper.
 
 % https://alexey.radul.name/ideas/2013/introduction-to-automatic-differentiation/
 
-First of all, it's important to note that automatic differentiation is not numerical or symbolic differentiation.
-It is a method for evaluating the derivatives of a function \emph{exactly} for some set of inputs, without symbolically differentiating the function.
+First of all, we want to emphasize again that automatic differentiation is distinct from both numerical and symbolic differentiation.
+It is a method for computing the \emph{value} of the derivative of a piece of code, without symbolically differentiating the operations.
+
+\begin{deluxetable}{lll}
+  \tablehead{\colhead{Forward pass} & \colhead{Forward tangent pass} & \colhead{Reverse pass}}
+  \startdata
+  $u_1 = x = \mathbf{2}$ & $\dot{u_1} = \mathbf{1}$ & \\
+  $u_2 = y = \mathbf{-1}$ & $\dot{u_2} = \mathbf{0}$ & \\
+  $u_3 = {u_1}^2 = \mathbf{4}$ &  $\dot{u_3} = 2\,u_1\,\dot{u_1} = \mathbf{4}$ & \\
+  $u_4 = 2\,u_2 = \mathbf{-2}$ & $\dot{u_4} = 2\,\dot{u_2} = \mathbf{0}$ & \\
+  $u_5 = u_3 + u_4 = \mathbf{2}$ & $\dot{u_5} = \dot{u_3} + \dot{u_4} = \mathbf{4}$ & \\
+  $u_6 = \sqrt{u_5} = \mathbf{1.414}$ & $\dot{u_6} = \dot{u_5} / 2\,\sqrt{u_5} = \mathbf{1.414}$ & \\
+  $u_7 = \sin{u_1} = \mathbf{0.909}$ & $\dot{u_7} = \dot{u_1}\,\cos{u_1} = \mathbf{-0.416}$ & \\
+  $u_8 = u_1\,u_7 = \mathbf{1.819}$ & $\dot{u_8} = u_1\,\dot{u_7} + \dot{u_1}\,u_7 = \mathbf{0.077}$ & $\overline{u_1} = \overline{u_8}\,u_7 = \mathbf{-0.909}$, $\overline{u_7} = \overline{u_8}\,u_1 = \mathbf{-2}$ \\
+  $u_9 = u_6 - u_8 = \mathbf{-0.404}$ & $\dot{u_9} = \dot{u_6} - \dot{u_8} = \mathbf{1.337}$ & $\overline{u_6} = \overline{u_9} = \mathbf{1}$, $\overline{u_8} = -\overline{u_9} = \mathbf{-1}$ \\
+  & & $\overline{u_9} = \mathbf{1}$ \\
+  \enddata
+\end{deluxetable}
+
 
 Example:
 \begin{eqnarray}
