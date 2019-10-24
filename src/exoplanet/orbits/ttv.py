@@ -59,7 +59,10 @@ class TTVOrbit(KeplerianOrbit):
             to make sure that ``period`` and ``ttv_period`` don't diverge
             because things will break if the time between neighboring transits
             is larger than ``2*period``.
-        transit_inds: The transit indicies.
+        transit_inds: A list of integer value tensors giving the transit
+            number for each transit in ``transit_times'' or ``ttvs``. This is
+            useful when not all transits are observed. This should always be
+            zero indexed.
         delta_log_period: If using the ``transit_times`` argument, this
             parameter specifies the difference (in natural log) between the
             leqast squares period and the effective period of the transit.

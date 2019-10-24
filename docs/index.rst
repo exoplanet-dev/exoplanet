@@ -54,6 +54,7 @@ magnitude.
    tutorials/stellar-variability
    tutorials/together
    tutorials/tess
+   tutorials/ttv
 
 
 License & attribution
