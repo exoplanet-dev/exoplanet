@@ -59,6 +59,7 @@ class TTVOrbit(KeplerianOrbit):
             to make sure that ``period`` and ``ttv_period`` don't diverge
             because things will break if the time between neighboring transits
             is larger than ``2*period``.
+        transit_inds: The transit indicies.
         delta_log_period: If using the ``transit_times`` argument, this
             parameter specifies the difference (in natural log) between the
             leqast squares period and the effective period of the transit.
@@ -68,36 +69,54 @@ class TTVOrbit(KeplerianOrbit):
     def __init__(self, *args, **kwargs):
         ttvs = kwargs.pop("ttvs", None)
         transit_times = kwargs.pop("transit_times", None)
+        transit_inds = kwargs.pop("transit_inds", None)
         if ttvs is None and transit_times is None:
             raise ValueError(
                 "one of 'ttvs' or 'transit_times' must be " "defined"
             )
         if ttvs is not None:
-            self.ttvs = [tt.as_tensor_variable(ttv) for ttv in ttvs]
+            self.ttvs = [tt.as_tensor_variable(ttv, ndim=1) for ttv in ttvs]
+            if transit_inds is None:
+                self.transit_inds = [
+                    tt.arange(ttv.shape[0]) for ttv in self.ttvs
+                ]
+            else:
+                self.transit_inds = [
+                    tt.cast(tt.as_tensor_variable(inds, ndim=1), "int64")
+                    for inds in transit_inds
+                ]
 
         else:
             # If transit times are given, compute the least squares period and
             # t0 based on these times.
             self.transit_times = []
             self.ttvs = []
+            self.transit_inds = []
             period = []
             t0 = []
             for i, times in enumerate(transit_times):
-                times = tt.as_tensor_variable(times)
+                times = tt.as_tensor_variable(times, ndim=1)
+                if transit_inds is None:
+                    inds = tt.arange(times.shape[0])
+                else:
+                    inds = tt.cast(
+                        tt.as_tensor_variable(transit_inds[i]), "int64"
+                    )
+                self.transit_inds.append(inds)
 
+                # A convoluted version of linear regression; don't ask
                 N = times.shape[0]
-                AT = tt.stack(
-                    (tt.arange(N, dtype=times.dtype), tt.ones_like(times)),
-                    axis=0,
-                )
-                A = tt.transpose(AT)
-                ATA = tt.dot(AT, A)
-                ATy = tt.dot(AT, times)
-                w = tt.slinalg.solve_symmetric(ATA, ATy)
-                expect = tt.dot(w, AT)
+                sumx = tt.sum(inds)
+                sumx2 = tt.sum(inds ** 2)
+                sumy = tt.sum(times)
+                sumxy = tt.sum(inds * times)
+                denom = N * sumx2 - sumx ** 2
+                slope = (N * sumxy - sumx * sumy) / denom
+                intercept = (sumx2 * sumy - sumx * sumxy) / denom
+                expect = intercept + inds * slope
 
-                period.append(w[0])
-                t0.append(w[1])
+                period.append(slope)
+                t0.append(intercept)
                 self.ttvs.append(times - expect)
                 self.transit_times.append(times)
 
@@ -123,9 +142,17 @@ class TTVOrbit(KeplerianOrbit):
         if ttvs is not None:
             self.ttv_period = self.period
             self.transit_times = [
-                self.t0[i] + self.period[i] * tt.arange(ttv.shape[0]) + ttv
+                self.t0[i] + self.period[i] * self.transit_inds[i] + ttv
                 for i, ttv in enumerate(self.ttvs)
             ]
+
+        # Compute the full set of transit times
+        self.all_transit_times = []
+        for i, inds in enumerate(self.transit_inds):
+            expect = self.t0[i] + self.period[i] * tt.arange(inds.max() + 1)
+            self.all_transit_times.append(
+                tt.set_subtensor(expect[inds], self.transit_times[i])
+            )
 
         # Set up a histogram for identifying the transit offsets
         self._bin_edges = [
@@ -136,17 +163,11 @@ class TTVOrbit(KeplerianOrbit):
                     [tts[-1] + 0.5 * self.ttv_period[i]],
                 )
             )
-            for i, tts in enumerate(self.transit_times)
+            for i, tts in enumerate(self.all_transit_times)
         ]
         self._bin_values = [
-            tt.concatenate(
-                (
-                    [self.transit_times[i][0]],
-                    self.transit_times[i],
-                    [self.transit_times[i][-1]],
-                )
-            )
-            for i in range(len(self.transit_times))
+            tt.concatenate(([tts[0]], tts, [tts[-1]]))
+            for i, tts in enumerate(self.all_transit_times)
         ]
 
     def _get_model_dt(self, t):

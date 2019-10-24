@@ -14,6 +14,9 @@ Orbits
 .. autoclass:: exoplanet.orbits.TTVOrbit
    :inherited-members:
 
+.. autoclass:: exoplanet.orbits.ReboundOrbit
+   :inherited-members:
+
 .. autoclass:: exoplanet.orbits.SimpleTransitOrbit
    :inherited-members:
 
@@ -81,6 +84,8 @@ Utilities
 .. autofunction:: exoplanet.eval_in_model
 .. autofunction:: exoplanet.get_samples_from_trace
 .. autofunction:: exoplanet.get_dense_nuts_step
+
+.. autofunction:: exoplanet.orbits.ttv.compute_expected_transit_times
 
 
 Units
