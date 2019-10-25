@@ -15,8 +15,8 @@ dependencies:
   - binutils_linux-64=2.31.1=h6176602_6
   - blas=1.0=mkl
   - bleach=3.1.0=py37_0
-  - ca-certificates=2019.5.15=1
-  - certifi=2019.6.16=py37_1
+  - ca-certificates=2019.10.16=0
+  - certifi=2019.9.11=py37_0
   - cffi=1.11.5=py37he75722e_1
   - chardet=3.0.4=py37_1
   - cmarkgfm=0.4.2=py37h7b6447c_0
@@ -87,7 +87,7 @@ dependencies:
   - notebook=5.7.4=py37_0
   - numpy=1.15.4=py37h7e9f1db_0
   - numpy-base=1.15.4=py37hde5b4d6_0
-  - openssl=1.1.1d=h7b6447c_1
+  - openssl=1.1.1d=h7b6447c_3
   - pandas=0.24.0=py37he6710b0_0
   - pandoc=2.2.3.2=0
   - pandocfilters=1.4.2=py37_1
