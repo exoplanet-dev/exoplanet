@@ -1,3 +1,12 @@
+0.2.2 (2019-10-25)
+++++++++++++++++++
+
+- Adds ``TTVOrbit`` tutorial
+- Switches tutorials to `lightkurve <https://docs.lightkurve.org>`_ for data access
+- Improves packaging and code style features
+- Fixes bugs and improves interface to ``TTVOrbit``
+
+
 0.2.1 (2019-09-26)
 ++++++++++++++++++
 
