@@ -4,16 +4,15 @@
     "C_Cpp.intelliSenseEngine": "Default",
     "C_Cpp.default.includePath": [
         "${workspaceFolder}/exoplanet/theano_ops/lib/vendor/eigen_3.3.3",
-        "${HOME}/anaconda3/include/**",
-        "${HOME}/anaconda3/lib/**",
-        "${HOME}/miniconda3/include/**",
-        "${HOME}/miniconda3/lib/**",
-        "${HOME}/anaconda/include/**",
-        "${HOME}/anaconda/lib/**",
-        "${HOME}/miniconda/include/**",
-        "${HOME}/miniconda/lib/**"
+        // "${HOME}/anaconda3/include/**",
+        // "${HOME}/anaconda3/lib/**",
+        // "${HOME}/miniconda3/include/**",
+        // "${HOME}/miniconda3/lib/**",
+        // "${HOME}/anaconda/include/**",
+        // "${HOME}/anaconda/lib/**",
+        // "${HOME}/miniconda/include/**",
+        // "${HOME}/miniconda/lib/**"
     ],
-
     // Python testing
     "python.testing.pytestArgs": [
         "${workspaceFolder}/exoplanet"
@@ -21,21 +20,15 @@
     "python.testing.unittestEnabled": false,
     "python.testing.nosetestsEnabled": false,
     "python.testing.pytestEnabled": true,
-
     // Python formatting
     "python.formatting.provider": "black",
     "autoDocstring.docstringFormat": "google",
-
     // General formatting
-    "python.linting.flake8Args": ["--ignore=E203,W503", "--verbose"],
+    "python.linting.flake8Args": [
+        "--ignore=E203,W503",
+        "--verbose"
+    ],
     "files.trimTrailingWhitespace": true,
-    "[cpp]": {
-        "editor.formatOnPaste": false,
-        "editor.formatOnSave": true
-    },
-    "[python]": {
-        "editor.formatOnPaste": false,
-        "editor.formatOnSave": true
-    },
-    "C_Cpp.autoAddFileAssociations": false
+    "C_Cpp.autoAddFileAssociations": false,
+    "editor.formatOnSave": true
 }

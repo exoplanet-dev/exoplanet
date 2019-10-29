@@ -1,4 +1,6 @@
 pr: none
+trigger:
+- master
 variables:
 - group: exoplanet-variables
 

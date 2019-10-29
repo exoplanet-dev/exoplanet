@@ -1,0 +1,23 @@
+name: style
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -U black isort black_nbconvert
+    - name: Check import order using isort
+      run: isort -c -rc src
+    - name: Check code format using black
+      run: black --check src
+    - name: Check notebook format using black_nbconvert
+      run: black_nbconvert --check .

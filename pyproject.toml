@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=40.6.0", "wheel", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
 [tool.black]
 line-length = 79
 exclude = '''
@@ -14,3 +18,6 @@ exclude = '''
   | dist
 )/
 '''
+
+[tool.isort]
+known_third_party = ["astropy", "matplotlib", "nbconvert", "nbformat", "numpy", "packaging", "pkg_resources", "pymc3", "pytest", "rebound_pymc3", "scipy", "setuptools", "sphinx_typlog_theme", "starry", "theano", "tqdm"]

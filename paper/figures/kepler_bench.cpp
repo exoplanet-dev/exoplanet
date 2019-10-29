@@ -1,7 +1,7 @@
 /*
 <%
 setup_pybind11(cfg)
-cfg['include_dirs'] = ['../../exoplanet/theano_ops/lib/include/exoplanet']
+cfg['include_dirs'] = ['../../src/exoplanet/theano_ops/lib/include/exoplanet']
 %>
 */
 #include <pybind11/pybind11.h>
@@ -118,8 +118,7 @@ struct Batman {
 };
 
 template <typename Operator>
-std::tuple<double, double, double, double> do_benchmark(double ecc,
-                                                        const int N) {
+std::tuple<double, double, double, double> do_benchmark(double ecc, const int N) {
   std::vector<double> M(N), E(N);
   for (int n = 0; n < N; ++n) {
     E[n] = 2 * M_PI * n / (N - 1);
@@ -147,14 +146,13 @@ std::tuple<double, double, double, double> do_benchmark(double ecc,
   std::sort(error.begin(), error.end());
   double pct90 = error[(9 * N) / 10];
 
-  return std::make_tuple(log10(end - start) - log10(N), log10(max_err),
-                         log10(mean_err), log10(pct90));
+  return std::make_tuple(log10(end - start) - log10(N), log10(max_err), log10(mean_err),
+                         log10(pct90));
 }
 
 PYBIND11_MODULE(kepler_bench, m) {
   const int N = 1000000;
-  m.def("exoplanet", &do_benchmark<Exoplanet>, py::arg("ecc"),
-        py::arg("N") = N);
+  m.def("exoplanet", &do_benchmark<Exoplanet>, py::arg("ecc"), py::arg("N") = N);
   m.def("radvel", &do_benchmark<Radvel>, py::arg("ecc"), py::arg("N") = N);
   m.def("batman", &do_benchmark<Batman>, py::arg("ecc"), py::arg("N") = N);
 }
