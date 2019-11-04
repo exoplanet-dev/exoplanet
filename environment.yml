@@ -1,0 +1,11 @@
+name: exoplanet
+dependencies:
+- python=3.7
+- numpy
+- pandas
+- scipy
+- matplotlib
+- astropy
+- pip
+- pip:
+  - -r requirements-dev.txt

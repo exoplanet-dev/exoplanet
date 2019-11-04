@@ -22,7 +22,7 @@ or
 
 .. code-block:: bash
 
-    pip install numpy pymc3 astropy
+    python -m pip install -r requirements.txt
 
 
 Using pip
@@ -32,7 +32,7 @@ Using pip
 
 .. code-block:: bash
 
-    pip install exoplanet
+    python -m pip install -U exoplanet
 
 
 .. _source:
@@ -45,7 +45,7 @@ The source code for *exoplanet* can be downloaded and installed `from GitHub
 
 .. code-block:: bash
 
-    git clone --recursive https://github.com/dfm/exoplanet.git
+    git clone https://github.com/dfm/exoplanet.git
     cd exoplanet
     python setup.py install
 
@@ -53,19 +53,17 @@ The source code for *exoplanet* can be downloaded and installed `from GitHub
 Testing
 -------
 
-To run the unit tests, install the following dependencies using pip or conda
-(you'll need to use the ``conda-forge`` channel to get starry):
+To run the unit tests, install the development dependencies using pip:
 
 .. code-block:: bash
 
-    conda install -c conda-forge numpy scipy astropy pymc3 pytest starry pip
-    pip install batman-package parameterized nose
+    python -m pip install -r requirements-dev.txt
 
 and then execute:
 
 .. code-block:: bash
 
-    py.test -v
+    python -m pytest -vs src/exoplanet
 
 All of the tests should (of course) pass.
 If any of the tests don't pass and if you can't sort out why, `open an issue

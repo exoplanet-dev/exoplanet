@@ -17,3 +17,5 @@ backups
 htmlcov
 .eggs
 exoplanet_version.py
+env
+venv-test

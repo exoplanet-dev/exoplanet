@@ -40,6 +40,7 @@ magnitude.
    user/install
    tutorials/citation
    user/api
+   user/dev
 
 .. toctree::
    :maxdepth: 2

@@ -6,6 +6,7 @@ repos:
     exclude: src/exoplanet/theano_ops/lib/vendor
   - id: end-of-file-fixer
     exclude: src/exoplanet/theano_ops/lib/vendor
+    exclude_types: [json]
   - id: debug-statements
     exclude: src/exoplanet/theano_ops/lib/vendor
 
@@ -25,7 +26,6 @@ repos:
   rev: 19.3b0
   hooks:
   - id: black
-    language_version: python3.6
 
 - repo: https://github.com/dfm/black_nbconvert
   rev: stable
