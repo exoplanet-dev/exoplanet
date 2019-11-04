@@ -99,7 +99,7 @@ Code style
 
 We have a pretty strict (but easy to implement!) set of style guidelines for the codebase.
 For Python code, we use `isort <https://github.com/timothycrosley/isort>`_, `black <https://github.com/psf/black>`_, and `black_nbconvert <https://github.com/dfm/black_nbconvert>`_ (for Jupyter notebooks).
-The custom settings for these projects can be found in ``.isort.cfg`` and ``pyproject.toml``.
+The custom settings for these projects can be found in ``pyproject.toml``.
 Before opening a pull request, you can run the formatters as follows:
 
 .. code-block:: bash
