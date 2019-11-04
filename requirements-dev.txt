@@ -12,3 +12,7 @@ starry
 batman-package
 radvel
 rebound
+black
+isort
+flake8
+nbstripout

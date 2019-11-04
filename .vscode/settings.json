@@ -4,18 +4,10 @@
     "C_Cpp.intelliSenseEngine": "Default",
     "C_Cpp.default.includePath": [
         "${workspaceFolder}/exoplanet/theano_ops/lib/vendor/eigen_3.3.3",
-        // "${HOME}/anaconda3/include/**",
-        // "${HOME}/anaconda3/lib/**",
-        // "${HOME}/miniconda3/include/**",
-        // "${HOME}/miniconda3/lib/**",
-        // "${HOME}/anaconda/include/**",
-        // "${HOME}/anaconda/lib/**",
-        // "${HOME}/miniconda/include/**",
-        // "${HOME}/miniconda/lib/**"
     ],
     // Python testing
     "python.testing.pytestArgs": [
-        "${workspaceFolder}/exoplanet"
+        "${workspaceFolder}/src/exoplanet"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.nosetestsEnabled": false,
@@ -30,5 +22,6 @@
     ],
     "files.trimTrailingWhitespace": true,
     "C_Cpp.autoAddFileAssociations": false,
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "python.pythonPath": "${workspaceFolder}/env/bin/python"
 }

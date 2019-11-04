@@ -65,7 +65,7 @@ CITATIONS = {
   author = {Daniel Foreman-Mackey and Ian Czekala and Rodrigo Luger and
             Eric Agol and Geert Barentsen and Tom Barclay},
    title = {dfm/exoplanet},
-   month = sep,
+   month = oct,
     year = 2019,
      doi = {10.5281/zenodo.1998447},
      url = {https://doi.org/10.5281/zenodo.1998447}
