@@ -109,9 +109,14 @@ class KeplerianOrbit:
         inputs = _get_consistent_inputs(
             a, period, rho_star, r_star, m_star, m_planet
         )
-        self.a, self.period, self.rho_star, self.r_star, self.m_star, self.m_planet = (
-            inputs
-        )
+        (
+            self.a,
+            self.period,
+            self.rho_star,
+            self.r_star,
+            self.m_star,
+            self.m_planet,
+        ) = inputs
         self.m_total = self.m_star + self.m_planet
 
         self.n = 2 * np.pi / self.period
@@ -537,7 +542,7 @@ class KeplerianOrbit:
         sinf, cosf = self._get_true_anomaly(t)
         K = self.K0 * m
         if self.ecc is None:
-            factor = -K ** 2 / a
+            factor = -(K ** 2) / a
         else:
             factor = (
                 K ** 2 * (self.ecc * cosf + 1) ** 2 / (a * (self.ecc ** 2 - 1))
