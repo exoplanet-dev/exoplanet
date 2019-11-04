@@ -300,7 +300,7 @@ class ImpactParameterTransform(tr.LogOdds):
         )
 
     def forward_val(self, x, point=None):
-        opror, = draw_values([self.one_plus_ror - 0.0], point=point)
+        (opror,) = draw_values([self.one_plus_ror - 0.0], point=point)
         return super(ImpactParameterTransform, self).forward_val(
             x / opror, point=point
         )

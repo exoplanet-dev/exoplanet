@@ -347,7 +347,14 @@ def test_get_consistent_inputs():
     r_star0 = 1.235
     m_star0 = 0.986
     m_planet0 = with_unit(np.array([1.543, 2.354]), u.M_earth)
-    a1, period1, rho_star1, r_star1, m_star1, m_planet1 = _get_consistent_inputs(
+    (
+        a1,
+        period1,
+        rho_star1,
+        r_star1,
+        m_star1,
+        m_planet1,
+    ) = _get_consistent_inputs(
         None, period0, None, r_star0, m_star0, m_planet0
     )
 
@@ -358,34 +365,56 @@ def test_get_consistent_inputs():
         m_planet0.eval(), m_planet1.eval() * u.M_sun.to(u.M_earth)
     )
 
-    a2, period2, rho_star2, r_star2, m_star2, m_planet2 = _get_consistent_inputs(
-        a1, None, rho_star1, r_star0, None, m_planet1
-    )
+    (
+        a2,
+        period2,
+        rho_star2,
+        r_star2,
+        m_star2,
+        m_planet2,
+    ) = _get_consistent_inputs(a1, None, rho_star1, r_star0, None, m_planet1)
     assert np.allclose(period1.eval(), period2.eval())
     assert np.allclose(rho_star1.eval(), rho_star2.eval())
     assert np.allclose(r_star1.eval(), r_star2.eval())
     assert np.allclose(m_star1.eval(), m_star2.eval())
     assert np.allclose(m_planet1.eval(), m_planet2.eval())
 
-    a3, period3, rho_star3, r_star3, m_star3, m_planet3 = _get_consistent_inputs(
-        a2, None, rho_star2, None, m_star2, m_planet2
-    )
+    (
+        a3,
+        period3,
+        rho_star3,
+        r_star3,
+        m_star3,
+        m_planet3,
+    ) = _get_consistent_inputs(a2, None, rho_star2, None, m_star2, m_planet2)
     assert np.allclose(period1.eval(), period3.eval())
     assert np.allclose(rho_star1.eval(), rho_star3.eval())
     assert np.allclose(r_star1.eval(), r_star3.eval())
     assert np.allclose(m_star1.eval(), m_star3.eval())
     assert np.allclose(m_planet1.eval(), m_planet3.eval())
 
-    a4, period4, rho_star4, r_star4, m_star4, m_planet4 = _get_consistent_inputs(
-        a3, period3, None, r_star3, None, m_planet3
-    )
+    (
+        a4,
+        period4,
+        rho_star4,
+        r_star4,
+        m_star4,
+        m_planet4,
+    ) = _get_consistent_inputs(a3, period3, None, r_star3, None, m_planet3)
     assert np.allclose(period1.eval(), period4.eval())
     assert np.allclose(rho_star1.eval(), rho_star4.eval())
     assert np.allclose(r_star1.eval(), r_star4.eval())
     assert np.allclose(m_star1.eval(), m_star4.eval())
     assert np.allclose(m_planet1.eval(), m_planet4.eval())
 
-    a5, period5, rho_star5, r_star5, m_star5, m_planet5 = _get_consistent_inputs(
+    (
+        a5,
+        period5,
+        rho_star5,
+        r_star5,
+        m_star5,
+        m_planet5,
+    ) = _get_consistent_inputs(
         a3,
         None,
         with_unit(rho_star3, u.g / u.cm ** 3),
