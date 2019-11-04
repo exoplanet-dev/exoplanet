@@ -119,6 +119,8 @@ Or, you can use `pre-commit <https://pre-commit.com>`_ to automatically apply th
 Release management
 ------------------
 
+.. note:: Most of this build process is based on the October 2019 update to `this blog post <https://hynek.me/articles/sharing-your-labor-of-love-pypi-quick-and-dirty/>`_ so you should check that out if you want more info.
+
 This section is mainly internal, but these are the steps that should be executed to produce a new release.
 
 1. Run ``run_notebooks.sh`` to make sure that the tutorials all run and merge the updated notebooks on GitHub.
