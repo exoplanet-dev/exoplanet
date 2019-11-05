@@ -1,17 +1,4 @@
--r requirements.txt
-scipy
-nose
-parameterized
-pytest
-pytest-cov>=2.6.1
-pytest-env
-coveralls
-pybind11
-celerite>=0.3.1
-starry
-batman-package
-radvel
-rebound
+-r requirements-test.txt
 black
 isort
 flake8
