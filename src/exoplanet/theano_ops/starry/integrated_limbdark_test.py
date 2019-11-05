@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+import pytest
 import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
@@ -67,16 +68,19 @@ class TestIntegratedLimbDark(utt.InferShapeTester):
             ],
         )
 
+    @pytest.mark.skip(reason="Too slow")
     def test_basic(self):
         f, _, in_args = self.get_args()
         out = f(*in_args)
         utt.assert_allclose(0.0, out[0])
         utt.assert_allclose(0.0, out[-1])
 
+    @pytest.mark.skip(reason="Too slow")
     def test_infer_shape(self):
         f, args, arg_vals = self.get_args()
         self._compile_and_check(args, self.op(*args), arg_vals, self.op_class)
 
+    @pytest.mark.skip(reason="Too slow")
     def test_grad(self):
         _, args, in_args = self.get_args()
 
@@ -151,16 +155,19 @@ class TestCircIntegratedLimbDark(utt.InferShapeTester):
             ],
         )
 
+    @pytest.mark.skip(reason="Too slow")
     def test_basic(self):
         f, _, in_args = self.get_args()
         out = f(*in_args)
         utt.assert_allclose(0.0, out[0])
         utt.assert_allclose(0.0, out[-1])
 
+    @pytest.mark.skip(reason="Too slow")
     def test_infer_shape(self):
         f, args, arg_vals = self.get_args()
         self._compile_and_check(args, self.op(*args), arg_vals, self.op_class)
 
+    @pytest.mark.skip(reason="Too slow")
     def test_grad(self):
         _, args, in_args = self.get_args()
         func = lambda *args: self.op(  # NOQA
