@@ -531,7 +531,46 @@ Evaluating a GP model on these data using high-performance general linear algebr
 
 \section{Distributions}
 
-\section{Quadratic limb darkening parameters}
+\exoplanet\ also comes equipped with several custom ``distributions'' that can be used to simplify modeling for exoplanet specific applications, but some also have broader applicability.
+
+\subsection{General distributions}
+
+\paragraph{Angles}
+
+There are several angles that must be included in exoplanet applications.
+For example, the argument of periastron and the phase of the orbit.
+This can be difficult to sample using most MCMC algorithms because of the periodic boundary conditions of the parameter space.
+Therefore, for angles the argument of periastron $\omega$ that have a related amplitude (eccentricity $e$ in this case), it is common practice to fit for $e$ and $\omega$ together using
+\begin{eqnarray}
+h = \sqrt{e}\,\sin \omega & \quad \mathrm{and}\quad & k = \sqrt{e}\,\cos \omega
+\end{eqnarray}
+as the parameters with the constraint $h^2 + k^2 < 1$.
+It has been demonstrated (CITE) that this still imposes a uniform prior on both $e$ and $\omega$.
+This is not a good parameterization, however, when using gradient based inference schemes because these do not do a good job of handling hard constraints $0 \le e < 1$.
+Instead, for angular parameters, we sample in
+\begin{eqnarray}
+n_1 \sim \mathcal{N}(0,\,1) & \quad \mathrm{and}\quad & n_2 \sim \mathcal{N}(0,\,1)
+\end{eqnarray}
+where $\mathcal{N}(0,\,1)$ is the standard normal and compute the angle as $\omega = \mathrm{arctan2}(n_1,\,n_2)$.
+This also produces a uniform prior on $\omega$, but there are no longer any hard boundaries in the problem, at the cost of one extra parameter.
+
+One issue that arises with this parameterization is that the joint posterior in $n_1$ and $n_2$ can become ``funnel shaped'' when the angle is well constrained.
+This dynamic range can cause serious performance issues for gradient-based samplers (CITE)
+.
+To deal with this, we regularize the density as
+\begin{eqnarray}
+\log p (n_1,\,n_2) = -\frac{{n_1}^2 + {n_2}^2}{2} + \alpha\,\log({n_1}^2 + {n_2}^2) + \mathrm{const}
+\end{eqnarray}
+where $\alpha$ is a parameter that controls the strength of the regularization.
+We find that a default value of $\alpha = 10$ gives good performance in most cases.
+
+\paragraph{Unit vector}
+
+Another generally useful distribution is the distribution over unit vectors.
+We follow (CITE Stan) and include a custom distribution for \pymc\ that provides support for unit vectors by reparameterizing as $\bvec{n} \sim \mathcal{N}(\bvec{0},\,\bvec{1})$ and computing the unit vector as $\bvec{u} = \bvec{n} / || \bvec{n} ||_{2}$.
+
+
+\subsection{Quadratic limb darkening parameters}
 
 \exoplanet\ has support for limb darkening profiles of arbitrary order as described in LIMB DARK, but a commonly used model is the quadratic limb darkening model so exoplanet includes some features to make this easier.
 The algorithm for efficiently evaluating the light curve for a transit of a quadratically limb darkened star was first presented by \citet{Mandel:2002}, but the light curve model in \exoplanet\ is evaluated following Agol et al.\ including the performance and numerical stability improvements described in that paper.
@@ -569,7 +608,7 @@ For this change of variables, the correction is
 \log\left(\frac{\dd q}{\dd\tilde{q}}\right) &=& \log q + \log(1 - q) \quad.
 \end{eqnarray}
 
-\section{Radius and impact parameter}
+\subsection{Radius and impact parameter}
 
 A parameterization has been proposed to parameterize the radius ratio $r$ and impact parameter $b$ to be sampled uniformly within the trapezoid $r_\mathrm{min} < r < r_\mathrm{max}$ and $0 < b < 1 + r$ (CITE).
 This parameterization is included within \exoplanet, but implies a non-uniform marginal for radius ratio (\dfmtodo{make plot}).
@@ -603,12 +642,7 @@ r &\sim& \mathrm{LogUniform}(r_\mathrm{min},\,r_\mathrm{max}) \\
 b &\sim& \mathrm{Uniform}(0,\,1+r)
 \end{eqnarray}
 which will introduce less bias when inferring radius ratios.
-This can be efficiently sampled using \exoplanet\ and the parameters
-\begin{eqnarray}
-  r &\sim& \mathrm{LogUniform}(r_\mathrm{min},\,r_\mathrm{max}) \\
-  \hat{b} &\sim& \mathrm{Uniform}(0,\,1) \\
-  b &=& \hat{b}\,(1 + r)
-\end{eqnarray}
+This can be efficiently sampled using \exoplanet.
 
 \section{Examples}
 
