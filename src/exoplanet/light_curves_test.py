@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-import starry
+import pytest
 import theano
 import theano.tensor as tt
 from packaging import version
@@ -10,7 +10,13 @@ from theano.tests import unittest_tools as utt
 from .light_curves import LimbDarkLightCurve
 from .orbits import KeplerianOrbit
 
+try:
+    import starry
+except ImportError:
+    starry = None
 
+
+@pytest.mark.skipif(starry is None, reason="starry is not installed")
 def test_light_curve():
     u = tt.vector()
     b = tt.vector()
