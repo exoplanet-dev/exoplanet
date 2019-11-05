@@ -11,7 +11,7 @@ exoplanet
 <a href="https://docs.google.com/viewer?url=https://github.com/dfm/exoplanet/raw/master-pdf/paper/exoplanet.pdf">
 <img src="https://img.shields.io/badge/read-the_paper_draft-blue.svg?style=flat"></a>
 <br>
-<a href="https://travis-ci.org/dfm/exoplanet">
+<a href="https://travis-ci.com/dfm/exoplanet">
 <img src="https://img.shields.io/travis/dfm/exoplanet/master.svg?style=flat&label=tests"></a>
 <a href="https://dev.azure.com/foremanmackey/exoplanet/_build?definitionId=1">
 <img src="https://img.shields.io/azure-devops/build/foremanmackey/704922a0-a57f-4d16-bbea-e37f58c88ba5/1/master.svg?label=paper"></a>
