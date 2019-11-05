@@ -47,7 +47,7 @@ class PyMC3Sampler(object):
         model=None,
         regular_window=0,
         regular_variance=1e-3,
-        **kwargs
+        **kwargs,
     ):
         """Get a PyMC3 NUTS step tuned for a given burn-in trace
 
@@ -164,7 +164,7 @@ class PyMC3Sampler(object):
         step_kwargs=None,
         trace=None,
         step=None,
-        **kwargs
+        **kwargs,
     ):
         """Extend the tuning phase by a given number of steps
 
@@ -213,7 +213,7 @@ class PyMC3Sampler(object):
                 step_kwargs=step_kwargs,
                 steps=steps,
                 trace=trace,
-                **kwargs
+                **kwargs,
             )
             steps *= 2
             if self.count + steps + steps * 2 > tune:
@@ -225,7 +225,7 @@ class PyMC3Sampler(object):
             step_kwargs=step_kwargs,
             steps=self.finish,
             trace=trace,
-            **kwargs
+            **kwargs,
         )
 
         # Copy across the step size from the parallel runs

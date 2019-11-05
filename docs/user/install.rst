@@ -3,7 +3,7 @@
 Installation
 ============
 
-.. note:: ``exoplanet`` requires Python 3.6 or later.
+.. note:: ``exoplanet`` has been tested on Python 3.5 and later.
 
 *exoplanet* doesn't have a compiled components so it can be easily installed from source or by using pip.
 
