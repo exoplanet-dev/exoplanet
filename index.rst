@@ -77,4 +77,4 @@ built and hosted on `Read the Docs <https://readthedocs.org>`_.
 Changelog
 ---------
 
-.. include:: ../HISTORY.rst
+.. include:: ../exoplanet/HISTORY.rst
