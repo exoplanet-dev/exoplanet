@@ -123,9 +123,9 @@ Release management
 
 This section is mainly internal, but these are the steps that should be executed to produce a new release.
 
-1. Run ``run_notebooks.sh`` to make sure that the tutorials all run and merge the updated notebooks on GitHub.
-2. Update changelog date in ``HISTORY.rst``.
-3. Update citation date and version in ``src/exoplanet/citations.py``.
+1. Update citation date and version in ``src/exoplanet/citations.py``.
+2. Run ``run_notebooks.sh`` to make sure that the tutorials all run and merge the updated notebooks on GitHub.
+3. Update changelog date in ``HISTORY.rst``.
 4. Tag a GitHub release.
 
 After executing these steps, the release can be built as follows:
