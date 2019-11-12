@@ -24,5 +24,10 @@
     "C_Cpp.autoAddFileAssociations": false,
     "editor.formatOnSave": true,
     "python.pythonPath": "env/bin/python",
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "[restructuredtext]": {
+        "editor.wordWrap": "wordWrapColumn",
+        "editor.wordWrapColumn": 90
+    },
+    "restructuredtext.linter.run": "off"
 }
