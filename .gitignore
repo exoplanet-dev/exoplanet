@@ -20,3 +20,4 @@ exoplanet_version.py
 env
 venv-test
 .tox
+docs
