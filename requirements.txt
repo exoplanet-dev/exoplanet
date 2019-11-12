@@ -1,0 +1,6 @@
+sphinx>=1.7.5
+pandoc
+jupyter
+sphinx-typlog-theme
+setuptools>=40.6.0
+setuptools_scm
