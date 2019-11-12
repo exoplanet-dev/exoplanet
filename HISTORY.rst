@@ -1,3 +1,11 @@
+0.2.3 (2019-11-12)
+++++++++++++++++++
+
+- Adds ``ConditionalMeanOp`` and ``DotLOp`` for scalable conditional mean calculation
+  and prior sampling with celerite
+- Adds developer documentation
+
+
 0.2.2 (2019-10-25)
 ++++++++++++++++++
 
