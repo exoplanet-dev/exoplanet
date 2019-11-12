@@ -23,6 +23,6 @@
     "files.trimTrailingWhitespace": true,
     "C_Cpp.autoAddFileAssociations": false,
     "editor.formatOnSave": true,
-    "python.pythonPath": "${workspaceFolder}/env/bin/python",
+    "python.pythonPath": "env/bin/python",
     "git.ignoreLimitWarning": true
 }

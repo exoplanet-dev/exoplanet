@@ -2,6 +2,7 @@
 scipy
 nose
 parameterized
+arviz
 pytest
 pytest-cov>=2.6.1
 pytest-env

@@ -6,6 +6,7 @@ import numpy as np
 import theano.tensor as tt
 
 from ..citations import add_citations_to_model
+from ..theano_ops.celerite.conditional_mean import ConditionalMeanOp
 from ..theano_ops.celerite.diag_dot import DiagDotOp
 from ..theano_ops.celerite.factor import FactorOp
 from ..theano_ops.celerite.solve import SolveOp
@@ -56,6 +57,7 @@ class GP(object):
                 J = -1
         self.J = J
 
+        self.z = None
         self.x = tt.as_tensor_variable(x)
         self.diag = tt.as_tensor_variable(diag)
         self.a, self.U, self.V, self.P = self.kernel.get_celerite_matrices(
@@ -68,6 +70,8 @@ class GP(object):
 
         self.vector_solve_op = SolveOp(J=self.J, n_rhs=1)
         self.general_solve_op = SolveOp(J=self.J)
+
+        self.conditional_mean_op = ConditionalMeanOp(J=self.J)
 
     def log_likelihood(self, y):
         self.y = y
@@ -85,7 +89,17 @@ class GP(object):
     def apply_inverse(self, rhs):
         return self.general_solve_op(self.U, self.P, self.d, self.W, rhs)[0]
 
-    def predict(self, t=None, return_var=False, return_cov=False, kernel=None):
+    def predict(
+        self,
+        t=None,
+        return_var=False,
+        return_cov=False,
+        kernel=None,
+        fast_mean=True,
+    ):
+        if self.z is None:
+            raise RuntimeError("log_likelihood must be called before predict")
+
         mu = None
         if t is None and kernel is None:
             mu = self.y - self.diag * self.z[:, 0]
@@ -107,7 +121,15 @@ class GP(object):
             Kss = kernel.value(t[:, None] - t[None, :])
 
         if mu is None:
-            mu = tt.dot(Kxs, self.z)[:, 0]
+            if fast_mean:
+                U_star, V_star, inds = kernel.get_conditional_mean_matrices(
+                    self.x, t
+                )
+                mu = self.conditional_mean_op(
+                    self.U, self.V, self.P, self.z[:, 0], U_star, V_star, inds
+                )
+            else:
+                mu = tt.dot(Kxs, self.z)[:, 0]
 
         if not (return_var or return_cov):
             return mu
