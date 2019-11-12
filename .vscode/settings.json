@@ -29,5 +29,6 @@
         "editor.wordWrap": "wordWrapColumn",
         "editor.wordWrapColumn": 90
     },
-    "restructuredtext.linter.run": "off"
+    "restructuredtext.linter.run": "off",
+    "restructuredtext.confPath": ""
 }
