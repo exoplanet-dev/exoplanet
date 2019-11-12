@@ -6,7 +6,7 @@ then
   cd exoplanet-docs/exoplanet
   git checkout $TRAVIS_COMMIT
   cd ..
-  git add exoplanet-docs
+  git add exoplanet
   git -c user.name='travis' -c user.email='travis' commit -m "updating exoplanet [ci skip]"
 
   if [ -n "$TRAVIS_TAG" ]
