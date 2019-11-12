@@ -98,7 +98,6 @@ def _get_theano_kernel(celerite_kernel):
 @pytest.mark.parametrize(
     "celerite_kernel",
     [
-        "cterms.RealTerm(log_a=0.1, log_c=0.5)",
         "cterms.RealTerm(log_a=0.1, log_c=0.5) + "
         "cterms.RealTerm(log_a=-0.1, log_c=0.7)",
         "cterms.ComplexTerm(log_a=0.1, log_c=0.5, log_d=0.1)",
@@ -119,6 +118,7 @@ def test_gp(celerite_kernel, seed=1234):
     celerite_kernel = eval(celerite_kernel)
     np.random.seed(seed)
     x = np.sort(np.random.rand(100))
+    t = np.sort(np.random.rand(50))
     yerr = np.random.uniform(0.1, 0.5, len(x))
     y = np.sin(x)
     diag = yerr ** 2
@@ -128,6 +128,11 @@ def test_gp(celerite_kernel, seed=1234):
     celerite_loglike = celerite_gp.log_likelihood(y)
     celerite_mu, celerite_cov = celerite_gp.predict(y)
     _, celerite_var = celerite_gp.predict(y, return_cov=False, return_var=True)
+
+    celerite_mu_t, celerite_cov_t = celerite_gp.predict(y, t=t)
+    _, celerite_var_t = celerite_gp.predict(
+        y, t=t, return_cov=False, return_var=True
+    )
 
     kernel = _get_theano_kernel(celerite_kernel)
     gp = GP(kernel, x, diag)
@@ -141,6 +146,13 @@ def test_gp(celerite_kernel, seed=1234):
     assert np.allclose(mu.eval(), celerite_mu)
     assert np.allclose(var.eval(), celerite_var)
     assert np.allclose(cov.eval(), celerite_cov)
+
+    mu = gp.predict(t)
+    _, var = gp.predict(t, return_var=True)
+    _, cov = gp.predict(t, return_cov=True)
+    assert np.allclose(mu.eval(), celerite_mu_t)
+    assert np.allclose(var.eval(), celerite_var_t)
+    assert np.allclose(cov.eval(), celerite_cov_t)
 
 
 def test_integrated_diag(seed=1234):

@@ -137,16 +137,26 @@ class Term(object):
         )
 
         dx = x[1:] - x[:-1]
-        P = tt.concatenate(
-            (
-                tt.exp(-cr[None, :] * dx[:, None]),
-                tt.exp(-cc[None, :] * dx[:, None]),
-                tt.exp(-cc[None, :] * dx[:, None]),
-            ),
-            axis=1,
-        )
+        c = tt.concatenate((cr, cc, cc))
+        P = tt.exp(-c[None, :] * dx[:, None])
 
         return a, U, V, P
+
+    def get_conditional_mean_matrices(self, x, t):
+        ar, cr, ac, bc, cc, dc = self.coefficients
+        x = tt.as_tensor_variable(x)
+
+        inds = tt.extra_ops.searchsorted(x, t)
+        _, U_star, V_star, _ = self.get_celerite_matrices(t, t)
+
+        c = tt.concatenate((cr, cc, cc))
+        dx = t - x[tt.minimum(inds, x.size - 1)]
+        U_star *= tt.exp(-c[None, :] * dx[:, None])
+
+        dx = x[tt.maximum(inds - 1, 0)] - t
+        V_star *= tt.exp(-c[None, :] * dx[:, None])
+
+        return U_star, V_star, inds
 
     def to_dense(self, x, diag):
         K = self.value(x[:, None] - x[None, :])

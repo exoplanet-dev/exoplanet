@@ -1,5 +1,6 @@
 -r requirements-test.txt
 black
 isort
+toml
 flake8
 nbstripout
