@@ -75,6 +75,30 @@ void matmul(const Eigen::MatrixBase<T1>& a,  // (N)
   }
 }
 
+template <typename T1, typename T2, typename T3, typename T4>
+void dotL(const Eigen::MatrixBase<T1>& U,  // (N, J)
+          const Eigen::MatrixBase<T2>& P,  // (N-1, J)
+          const Eigen::MatrixBase<T3>& d,  // (N)
+          const Eigen::MatrixBase<T1>& W,  // (N, J)
+          Eigen::MatrixBase<T4>& Z         // (N, Nrhs); initially set to Y
+) {
+  int N = U.rows(), J = U.cols(), nrhs = Z.cols();
+
+  Eigen::Matrix<typename T3::Scalar, T3::RowsAtCompileTime, 1> sqrtd = sqrt(d.array());
+  Eigen::Matrix<typename T1::Scalar, T1::ColsAtCompileTime, T4::ColsAtCompileTime> F(J, nrhs);
+  Eigen::Matrix<typename T4::Scalar, 1, T4::ColsAtCompileTime> tmp(1, nrhs);
+
+  F.setZero();
+  Z.row(0) *= sqrtd(0);
+  tmp = Z.row(0);
+
+  for (int n = 1; n < N; ++n) {
+    F = P.row(n - 1).asDiagonal() * (F + W.row(n - 1).transpose() * tmp);
+    tmp = sqrtd(n) * Z.row(n);
+    Z.row(n) = tmp + U.row(n) * F;
+  }
+}
+
 template <typename T1, typename T2, typename T3, typename T4, typename T5>
 int factor(const Eigen::MatrixBase<T1>& U,  // (N, J)
            const Eigen::MatrixBase<T2>& P,  // (N-1, J)
