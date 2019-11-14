@@ -178,10 +178,14 @@ def test_integrated_diag(seed=1234):
 def _check_model(kernel, x, diag, y):
     gp = GP(kernel, x, diag)
     loglike = gp.log_likelihood(y).eval()
+    Ly = gp.dot_l(y[:, None]).eval()
 
     K = kernel.value(x[:, None] - x[None, :]).eval()
     K[np.diag_indices_from(K)] += diag
-    factor = (cholesky(K, overwrite_a=True, lower=False), False)
+    factor = (cholesky(K, overwrite_a=True, lower=True), True)
+
+    assert np.allclose(np.dot(factor[0], y[:, None]), Ly)
+
     loglike0 = -np.sum(np.log(np.diag(factor[0])))
     loglike0 -= 0.5 * len(x) * np.log(2 * np.pi)
     loglike0 -= 0.5 * np.dot(y, cho_solve(factor, y))

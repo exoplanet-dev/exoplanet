@@ -68,6 +68,8 @@ class GP:
         self.d, self.W, _, self.flag = self.factor_op(
             self.a, self.U, self.V, self.P
         )
+        self.log_det = tt.sum(tt.log(self.d))
+        self.norm = 0.5 * (self.log_det + self.x.size * np.log(2 * np.pi))
 
         self.vector_solve_op = SolveOp(J=self.J, n_rhs=1)
         self.general_solve_op = SolveOp(J=self.J)
@@ -75,18 +77,27 @@ class GP:
         self.conditional_mean_op = ConditionalMeanOp(J=self.J)
         self.dot_l_op = DotLOp(J=self.J)
 
-    def log_likelihood(self, y):
+    def condition(self, y):
         self.y = y
-        self.z, _, _ = self.vector_solve_op(
+        z, _, _ = self.vector_solve_op(
             self.U,
             self.P,
             self.d,
             self.W,
             tt.reshape(self.y, (self.y.size, 1)),
         )
-        loglike = -0.5 * tt.sum(self.y * self.z[:, 0] + tt.log(self.d))
-        loglike -= 0.5 * self.y.size * np.log(2 * np.pi)
-        return tt.switch(tt.eq(self.flag, 0), loglike, -np.inf)
+        self.z = tt.reshape(z, (self.y.size,))
+        self.loglike = tt.switch(
+            tt.eq(self.flag, 0),
+            -0.5 * tt.sum(self.y * self.z) - self.norm,
+            -np.inf,
+        )
+        return self.z
+
+    def log_likelihood(self, y=None):
+        if y is not None:
+            self.condition(y)
+        return self.loglike
 
     def dot_l(self, n):
         n = tt.as_tensor_variable(n)
@@ -101,19 +112,21 @@ class GP:
         return_var=False,
         return_cov=False,
         kernel=None,
-        fast_mean=True,
+        _fast_mean=True,
     ):
         if self.z is None:
-            raise RuntimeError("log_likelihood must be called before predict")
+            raise RuntimeError("'condition' must be called before 'predict'")
 
         mu = None
         if t is None and kernel is None:
-            mu = self.y - self.diag * self.z[:, 0]
+            mu = self.y - self.diag * self.z
             if not (return_var or return_cov):
                 return mu
 
         if kernel is None:
             kernel = self.kernel
+        else:
+            _fast_mean = False
 
         if t is None:
             t = self.x
@@ -127,15 +140,15 @@ class GP:
             Kss = kernel.value(t[:, None] - t[None, :])
 
         if mu is None:
-            if fast_mean:
+            if _fast_mean:
                 U_star, V_star, inds = kernel.get_conditional_mean_matrices(
                     self.x, t
                 )
                 mu = self.conditional_mean_op(
-                    self.U, self.V, self.P, self.z[:, 0], U_star, V_star, inds
+                    self.U, self.V, self.P, self.z, U_star, V_star, inds
                 )
             else:
-                mu = tt.dot(Kxs, self.z)[:, 0]
+                mu = tt.dot(Kxs, self.z)
 
         if not (return_var or return_cov):
             return mu
