@@ -1,31 +1,47 @@
 sudo: false
 dist: xenial
 language: python
-matrix:
-    fast_finish: true
 blocklist:
-    - *-pdf
+  - *-pdf
+
 env:
     global:
         - THEANO_FLAGS=floatX=float64,compute_test_value=off
 cache:
   directories:
   - "$HOME/.cache/pip"
+
+stages:
+  - name: Housekeeping
+  - name: Tests
+
 jobs:
   include:
-    - python: '3.6'
-    - python: '3.7'
+    - stage: Housekeeping
+      name: "Update docs"
+      install: skip
+      script: ./.ci/update_docs.sh
+      after_success: skip
+      if: type != pull_request
+    - name: "Style"
+      install: skip
+      script: ./.ci/check_style.sh
+      after_success: skip
+      python: "3.7"
+
+    - stage: "Tests"
+      python: "3.6"
+    - python: "3.7"
 
 install:
-    - bash ./.ci/update_docs.sh
-    - travis_retry python -m pip install -U pip
-    - travis_retry python -m pip install -U setuptools
-    - travis_retry python -m pip install -U numpy pybind11
-    - travis_retry python -m pip install -U -r requirements-test.txt
-    - travis_retry python setup.py develop
+  - travis_retry python -m pip install -U pip
+  - travis_retry python -m pip install -U setuptools
+  - travis_retry python -m pip install -U numpy pybind11
+  - travis_retry python -m pip install -U -r requirements-test.txt
+  - travis_retry python setup.py develop
 
 script:
-    - python -m pytest -vs --durations=0 src/exoplanet
+  - python -m pytest -vs --durations=0 src/exoplanet
 
 after_success:
-    - coveralls
+  - coveralls
