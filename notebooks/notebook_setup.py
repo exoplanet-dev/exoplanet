@@ -1,3 +1,5 @@
+"""isort:skip_file"""
+
 get_ipython().magic('config InlineBackend.figure_format = "retina"')
 
 import logging
