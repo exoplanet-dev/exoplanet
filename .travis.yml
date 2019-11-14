@@ -19,6 +19,7 @@ jobs:
   include:
     - stage: Housekeeping
       name: "Update docs"
+      language: generic
       install: skip
       script: ./.ci/travis/update_docs.sh
       after_success: skip

@@ -2,7 +2,7 @@
 
 set -e
 
-if [[ "$TRAVIS_PYTHON_VERSION" = "3.7" && -n "$GITHUB_API_KEY" && "$TRAVIS_PULL_REQUEST" = "false" ]]
+if [[ -n "$GITHUB_API_KEY" && "$TRAVIS_PULL_REQUEST" = "false" ]]
 then
   if [ -n "$TRAVIS_TAG" ]
   then
