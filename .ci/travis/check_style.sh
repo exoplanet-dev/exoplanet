@@ -2,9 +2,6 @@
 
 set -e
 
-python -m pip install -U pip
-python -m pip install -U black isort black_nbconvert
-
 echo "Checking order of imports..."
 isort -c -rc src
 
