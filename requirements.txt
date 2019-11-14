@@ -4,4 +4,4 @@ jupyter
 sphinx-typlog-theme
 setuptools>=40.6.0
 setuptools_scm
--e exoplanet
+-e ./exoplanet
