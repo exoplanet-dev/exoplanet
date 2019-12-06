@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import glob
-import multiprocessing
 import os
 import re
 import sys
@@ -20,10 +19,10 @@ filenames = [fn for fn in glob.glob(pattern) if not fn.endswith("_exec.ipynb")]
 filenames = list(sorted(filenames, reverse=True))
 
 num_files = len(filenames)
-cpu_count = multiprocessing.cpu_count()
-num_jobs = max(1, cpu_count // 4)
-print("Running on {0} CPUs".format(cpu_count))
-print("Running {0} jobs".format(num_jobs))
+# cpu_count = multiprocessing.cpu_count()
+# num_jobs = max(1, cpu_count // 4)
+# print("Running on {0} CPUs".format(cpu_count))
+# print("Running {0} jobs".format(num_jobs))
 
 
 def process_notebook(filename):
@@ -55,8 +54,8 @@ def process_notebook(filename):
     return "\n\n".join(errors)
 
 
-with multiprocessing.Pool(num_jobs) as pool:
-    errors = list(pool.imap_unordered(process_notebook, filenames))
+# with multiprocessing.Pool(num_jobs) as pool:
+errors = list(map(process_notebook, filenames))
 
 errors = [e for e in errors if len(e.strip())]
 txt = "\n\n".join(errors)
