@@ -28,8 +28,8 @@ INSTALL_REQUIRES = [
     "numpy>=1.13.0",
     "pymc3>=3.5",
     "astropy>=3.1",
-    "rebound_pymc3>=0.0.3",
 ]
+EXTRA_REQUIRE = {"nbody": ["rebound_pymc3>=0.0.3"]}
 
 # END PROJECT SPECIFIC
 
@@ -73,6 +73,7 @@ if __name__ == "__main__":
         package_dir={"": "src"},
         include_package_data=True,
         install_requires=INSTALL_REQUIRES,
+        extras_require=EXTRA_REQUIRE,
         classifiers=CLASSIFIERS,
         zip_safe=False,
         options={"bdist_wheel": {"universal": "1"}},

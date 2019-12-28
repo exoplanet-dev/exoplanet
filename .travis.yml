@@ -9,7 +9,8 @@ env:
         - THEANO_FLAGS=floatX=float64,compute_test_value=off
 cache:
   directories:
-  - "$HOME/.cache/pip"
+    - "$HOME/.theano"
+    - "$HOME/.cache/pip"
 
 stages:
   - name: Housekeeping
@@ -23,7 +24,7 @@ jobs:
       install: skip
       script: ./.ci/travis/update_docs.sh
       after_success: skip
-      if: type != pull_request
+      if: (branch = master) AND (type != pull_request)
     - name: "Style"
       install:
         - python -m pip install -U pip
