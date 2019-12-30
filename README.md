@@ -17,8 +17,6 @@ exoplanet
 <img src="https://img.shields.io/azure-devops/build/foremanmackey/704922a0-a57f-4d16-bbea-e37f58c88ba5/1/master.svg?label=paper"></a>
 <a href="https://exoplanet.dfm.io">
 <img src="https://img.shields.io/readthedocs/exoplanet.svg?style=flat"></a>
-<a href="https://github.com/dfm/exoplanet/actions">
-<img src="https://github.com/dfm/exoplanet/workflows/style/badge.svg?style=flat"></a>
 <br>
 <a href="https://rodluger.github.io/starry">
 <img src="https://img.shields.io/badge/powered_by-starry-EB5368.svg?style=flat"></a>
