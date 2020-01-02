@@ -3,6 +3,7 @@
 __all__ = ["GP"]
 
 import numpy as np
+import pymc3 as pm
 import theano.tensor as tt
 
 from ..citations import add_citations_to_model
@@ -98,6 +99,9 @@ class GP:
         if y is not None:
             self.condition(y)
         return self.loglike
+
+    def marginal(self, name, **kwargs):
+        return pm.DensityDist(name, self.log_likelihood, **kwargs)
 
     def dot_l(self, n):
         n = tt.as_tensor_variable(n)
