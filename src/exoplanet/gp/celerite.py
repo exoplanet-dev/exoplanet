@@ -12,6 +12,7 @@ from ..theano_ops.celerite.diag_dot import DiagDotOp
 from ..theano_ops.celerite.dot_l import DotLOp
 from ..theano_ops.celerite.factor import FactorOp
 from ..theano_ops.celerite.solve import SolveOp
+from .means import Constant, Zero
 
 diag_dot = DiagDotOp()
 
@@ -49,7 +50,7 @@ class GP:
 
     __citations__ = ("celerite",)
 
-    def __init__(self, kernel, x, diag, J=-1, model=None):
+    def __init__(self, kernel, x, diag=None, mean=Zero(), J=-1, model=None):
         add_citations_to_model(self.__citations__, model=model)
 
         self.kernel = kernel
@@ -61,7 +62,16 @@ class GP:
 
         self.z = None
         self.x = tt.as_tensor_variable(x)
-        self.diag = tt.as_tensor_variable(diag)
+        if diag is None:
+            self.diag = tt.zeros_like(x)
+        else:
+            self.diag = tt.as_tensor_variable(diag)
+        if callable(mean):
+            self.mean = mean
+        else:
+            self.mean = Constant(mean)
+        self.mean_val = self.mean(x)
+
         self.a, self.U, self.V, self.P = self.kernel.get_celerite_matrices(
             self.x, self.diag
         )
@@ -79,7 +89,7 @@ class GP:
         self.dot_l_op = DotLOp(J=self.J)
 
     def condition(self, y):
-        self.y = y
+        self.y = y - self.mean_val
         z, _, _ = self.vector_solve_op(
             self.U,
             self.P,
@@ -123,7 +133,7 @@ class GP:
 
         mu = None
         if t is None and kernel is None:
-            mu = self.y - self.diag * self.z
+            mu = self.mean_val + self.y - self.diag * self.z
             if not (return_var or return_cov):
                 return mu
 
@@ -153,6 +163,7 @@ class GP:
                 )
             else:
                 mu = tt.dot(Kxs, self.z)
+            mu = mu + self.mean(t)
 
         if not (return_var or return_cov):
             return mu
