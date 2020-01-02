@@ -44,7 +44,7 @@ def normalize_parameters(names, **kwargs):
     return dict(results, **kwargs)
 
 
-class Term(object):
+class Term:
     """The abstract base "term" that is the superclass of all other terms
 
     Subclasses should overload the :func:`terms.Term.get_real_coefficients`
