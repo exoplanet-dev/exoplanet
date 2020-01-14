@@ -20,5 +20,5 @@ jobs:
 
     - task: PublishPipelineArtifact@1
       inputs:
-        path: $(Build.SourcesDirectory)/docs/tutorials/*.ipynb
+        path: $(Build.SourcesDirectory)/docs/notebooks
         artifact: Tutorials
