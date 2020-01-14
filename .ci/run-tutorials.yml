@@ -22,3 +22,5 @@ jobs:
       inputs:
         path: $(Build.SourcesDirectory)/docs/notebooks
         artifact: Tutorials
+      displayName: 'Upload the results'
+      condition: always()

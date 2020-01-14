@@ -124,7 +124,7 @@ with pm.Model() as model:
 
     # This is how you will sample the model. Take a look at the
     # docs to see that other parameters that are available.
-    trace = pm.sample(draws=1000, tune=1000, chains=2)
+    trace = pm.sample(draws=1000, tune=1000, chains=2, cores=2)
 
 # %% [markdown]
 # Now since we now have samples, let's make some diagnostic plots.
@@ -134,7 +134,7 @@ with pm.Model() as model:
 # These are the results of different independent chains and if the results are substantially different in the different chains then there is probably something going wrong.
 
 # %%
-pm.traceplot(trace, varnames=["m", "b", "logs"]);
+pm.traceplot(trace, var_names=["m", "b", "logs"]);
 
 # %% [markdown]
 # It's also good to quantify that "looking substantially different" argument.
@@ -144,7 +144,7 @@ pm.traceplot(trace, varnames=["m", "b", "logs"]);
 # * `Rhat` shows the [Gelman–Rubin statistic](https://docs.pymc.io/api/diagnostics.html#pymc3.diagnostics.gelman_rubin) and it should be close to 1.
 
 # %%
-pm.summary(trace, varnames=["m", "b", "logs"])
+pm.summary(trace, var_names=["m", "b", "logs"])
 
 # %% [markdown]
 # The last diagnostic plot that we'll make here is the [corner plot made using corner.py](https://corner.readthedocs.io).
@@ -153,7 +153,7 @@ pm.summary(trace, varnames=["m", "b", "logs"])
 # %%
 import corner  # https://corner.readthedocs.io
 
-samples = pm.trace_to_dataframe(trace, varnames=["m", "b", "logs"])
+samples = pm.trace_to_dataframe(trace, var_names=["m", "b", "logs"])
 corner.corner(samples, truths=[true_m, true_b, true_logs]);
 
 # %% [markdown]
@@ -336,7 +336,7 @@ plt.tight_layout()
 
 # %%
 with model:
-    trace = pm.sample(draws=2000, tune=1000, start=map_params, chains=2)
+    trace = pm.sample(draws=2000, tune=1000, start=map_params, chains=2, cores=2)
 
 # %% [markdown]
 # As above, it's always a good idea to take a look at the summary statistics for the chain.
@@ -345,14 +345,14 @@ with model:
 
 # %%
 pm.summary(
-    trace, varnames=["logK", "logP", "phi", "e", "w", "logjitter", "rv0", "rvtrend"]
+    trace, var_names=["logK", "logP", "phi", "e", "w", "logjitter", "rv0", "rvtrend"]
 )
 
 # %% [markdown]
 # Similarly, we can make the corner plot again for this model.
 
 # %%
-samples = pm.trace_to_dataframe(trace, varnames=["K", "P", "e", "w"])
+samples = pm.trace_to_dataframe(trace, var_names=["K", "P", "e", "w"])
 corner.corner(samples);
 
 # %% [markdown]
