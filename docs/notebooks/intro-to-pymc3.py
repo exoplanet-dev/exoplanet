@@ -153,7 +153,7 @@ pm.summary(trace, var_names=["m", "b", "logs"])
 # %%
 import corner  # https://corner.readthedocs.io
 
-samples = pm.trace_to_dataframe(trace, var_names=["m", "b", "logs"])
+samples = pm.trace_to_dataframe(trace, varnames=["m", "b", "logs"])
 corner.corner(samples, truths=[true_m, true_b, true_logs]);
 
 # %% [markdown]
@@ -352,7 +352,7 @@ pm.summary(
 # Similarly, we can make the corner plot again for this model.
 
 # %%
-samples = pm.trace_to_dataframe(trace, var_names=["K", "P", "e", "w"])
+samples = pm.trace_to_dataframe(trace, varnames=["K", "P", "e", "w"])
 corner.corner(samples);
 
 # %% [markdown]
