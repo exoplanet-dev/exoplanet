@@ -4,3 +4,4 @@ isort
 toml
 flake8
 nbstripout
+jupytext

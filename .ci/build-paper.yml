@@ -8,10 +8,6 @@ pool:
 
 steps:
 - script: |
-    git submodule update --init
-  displayName: 'Fetch submodules'
-
-- script: |
     source .ci/azure/setup_conda.sh
   displayName: 'Setup conda'
 
