@@ -3,44 +3,32 @@ trigger:
 - master
 variables:
 - group: exoplanet-variables
-
 pool:
   vmImage: Ubuntu-16.04
 
 steps:
-
 - script: |
     git submodule update --init
   displayName: 'Fetch submodules'
 
 - script: |
-    sudo chown -R $USER $CONDA
-    . $CONDA/etc/profile.d/conda.sh
-    conda create --yes --quiet --name exoplanet python=3.7.3 pip
+    source .ci/azure/setup_conda.sh
   displayName: 'Setup conda'
 
 - script: |
-    . $CONDA/etc/profile.d/conda.sh
-    conda activate exoplanet
-    pip install -U pip
-    pip install -U setuptools
-    pip install -U -r requirements.txt
-    pip install -U -r paper/requirements.txt
+    source .ci/azure/activate_conda.sh
+    env/bin/python -m pip install -U -r paper/requirements.txt
     conda install -y -q -c conda-forge tectonic
-    theano-cache purge
-    python setup.py install
   displayName: 'Install dependencies'
 
 - script: |
-    . $CONDA/etc/profile.d/conda.sh
-    conda activate exoplanet
+    source .ci/azure/activate_conda.sh
     cd $(Build.SourcesDirectory)/paper/figures
     python run_notebooks.py
   displayName: 'Generate the figures'
 
 - script: |
-    . $CONDA/etc/profile.d/conda.sh
-    conda activate exoplanet
+    source .ci/azure/activate_conda.sh
     cd $(Build.SourcesDirectory)/paper
     make
   displayName: 'Build the paper'
