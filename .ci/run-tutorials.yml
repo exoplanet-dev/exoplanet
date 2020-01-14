@@ -1,21 +1,24 @@
 pr: none
-pool:
-  vmImage: Ubuntu-16.04
 
-timeoutInMinutes: 120
-steps:
-- bash: .ci/azure/setup_conda.sh
-  displayName: 'Setup conda'
+jobs:
+  - job: Default
+    pool:
+      vmImage: Ubuntu-16.04
+    timeoutInMinutes: 120
 
-- script: |
-    source .ci/azure/activate_conda.sh
-    env/bin/python -m pip install -U -r docs/requirements.txt
-  displayName: 'Install dependencies'
+    steps:
+    - bash: .ci/azure/setup_conda.sh
+      displayName: 'Setup conda'
 
-- bash: .ci/azure/run_tutorials.sh
-  displayName: 'Generate the tutorials'
+    - script: |
+        source .ci/azure/activate_conda.sh
+        env/bin/python -m pip install -U -r docs/requirements.txt
+      displayName: 'Install dependencies'
 
-- task: PublishPipelineArtifact@1
-  inputs:
-    path: $(Build.SourcesDirectory)/docs/tutorials/*.ipynb
-    artifact: Tutorials
+    - bash: .ci/azure/run_tutorials.sh
+      displayName: 'Generate the tutorials'
+
+    - task: PublishPipelineArtifact@1
+      inputs:
+        path: $(Build.SourcesDirectory)/docs/tutorials/*.ipynb
+        artifact: Tutorials
