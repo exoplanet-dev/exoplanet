@@ -11,4 +11,6 @@ sudo apt-get install libblas-dev liblapack-dev libatlas-base-dev gfortran
 export THEANO_FLAGS=blas.ldflags="-L/usr/lib/ -lblas"
 
 # Execute the tutorials
+mkdir -p docs/_static/notebooks
+cp docs/notebooks/notebook_setup.py docs/_static/notebooks
 env/bin/python .ci/azure/run_tutorials.py
