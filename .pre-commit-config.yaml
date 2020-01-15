@@ -32,10 +32,8 @@ repos:
   rev: 19.3b0
   hooks:
   - id: black
-    exclude: docs/notebooks
 
 - repo: https://github.com/dfm/black_nbconvert
   rev: stable
   hooks:
   - id: black_nbconvert
-    exclude: docs/notebooks

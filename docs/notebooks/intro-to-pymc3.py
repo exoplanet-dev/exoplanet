@@ -55,7 +55,7 @@ y = true_b + true_m * x + np.exp(true_logs) * np.random.randn(len(x))
 plt.plot(x, y, ".k")
 plt.ylim(-2, 2)
 plt.xlabel("x")
-plt.ylabel("y");
+plt.ylabel("y")
 
 # %% [markdown]
 # To fit a model to these data, our model will have 3 parameters: the slope $m$, the intercept $b$, and the log of the uncertainty $\log(\sigma)$.
@@ -134,7 +134,7 @@ with pm.Model() as model:
 # These are the results of different independent chains and if the results are substantially different in the different chains then there is probably something going wrong.
 
 # %%
-pm.traceplot(trace, var_names=["m", "b", "logs"]);
+_ = pm.traceplot(trace, var_names=["m", "b", "logs"])
 
 # %% [markdown]
 # It's also good to quantify that "looking substantially different" argument.
@@ -154,7 +154,7 @@ pm.summary(trace, var_names=["m", "b", "logs"])
 import corner  # https://corner.readthedocs.io
 
 samples = pm.trace_to_dataframe(trace, varnames=["m", "b", "logs"])
-corner.corner(samples, truths=[true_m, true_b, true_logs]);
+_ = corner.corner(samples, truths=[true_m, true_b, true_logs])
 
 # %% [markdown]
 # **Extra credit:** Here are a few suggestions for things to try out while getting more familiar with PyMC3:
@@ -206,7 +206,9 @@ t -= np.mean(t)
 # Plot the observations "folded" on the published period:
 # Butler et al. (2006) https://arxiv.org/abs/astro-ph/0607493
 lit_period = 4.230785
-plt.errorbar((t % lit_period) / lit_period, rv, yerr=rv_err, fmt=".k", capsize=0)
+plt.errorbar(
+    (t % lit_period) / lit_period, rv, yerr=rv_err, fmt=".k", capsize=0
+)
 plt.xlim(0, 1)
 plt.ylim(-110, 110)
 plt.annotate(
@@ -220,7 +222,7 @@ plt.annotate(
     fontsize=12,
 )
 plt.ylabel("radial velocity [m/s]")
-plt.xlabel("phase");
+_ = plt.xlabel("phase")
 
 # %% [markdown]
 # Now, here's the implementation of a radial velocity model in PyMC3.
@@ -249,7 +251,9 @@ with pm.Model() as model:
         upper=np.log(200),
         testval=np.log(0.5 * (np.max(rv) - np.min(rv))),
     )
-    logP = pm.Uniform("logP", lower=0, upper=np.log(10), testval=np.log(lit_period))
+    logP = pm.Uniform(
+        "logP", lower=0, upper=np.log(10), testval=np.log(lit_period)
+    )
     phi = pm.Uniform("phi", lower=0, upper=2 * np.pi, testval=0.1)
     e = pm.Uniform("e", lower=0, upper=1, testval=0.1)
     w = Angle("w")
@@ -305,7 +309,7 @@ with model:
 # %% [markdown]
 # Let's make a plot to check that this initialization looks reasonable.
 # In the top plot, we're looking at the RV observations as a function of time with the initial guess for the long-term trend overplotted in blue.
-# In the lower panel, we plot the "folded" curve where we have wrapped the observations onto the best-fit period and the prediction for a single overplotted in orange. 
+# In the lower panel, we plot the "folded" curve where we have wrapped the observations onto the best-fit period and the prediction for a single overplotted in orange.
 # If this doesn't look good, try adjusting the initial guesses for the parameters and see if you can get a better fit.
 #
 # **Exercise:** Try changing the initial guesses for the parameters (as specified by the `testval` argument) and see how sensitive the results are to these values. Are there some parameters that are less important? Why is this?
@@ -336,7 +340,9 @@ plt.tight_layout()
 
 # %%
 with model:
-    trace = pm.sample(draws=2000, tune=1000, start=map_params, chains=2, cores=2)
+    trace = pm.sample(
+        draws=2000, tune=1000, start=map_params, chains=2, cores=2
+    )
 
 # %% [markdown]
 # As above, it's always a good idea to take a look at the summary statistics for the chain.
@@ -345,7 +351,8 @@ with model:
 
 # %%
 pm.summary(
-    trace, var_names=["logK", "logP", "phi", "e", "w", "logjitter", "rv0", "rvtrend"]
+    trace,
+    var_names=["logK", "logP", "phi", "e", "w", "logjitter", "rv0", "rvtrend"],
 )
 
 # %% [markdown]
@@ -353,7 +360,7 @@ pm.summary(
 
 # %%
 samples = pm.trace_to_dataframe(trace, varnames=["K", "P", "e", "w"])
-corner.corner(samples);
+_ = corner.corner(samples)
 
 # %% [markdown]
 # Finally, the last plot that we'll make here is of the posterior predictive density.
@@ -379,7 +386,9 @@ ax.set_xlabel("phase [days]")
 
 for i in np.random.randint(len(trace) * trace.nchains, size=25):
     axes[0].plot(t, trace["bkg"][i], color="C0", lw=1, alpha=0.3)
-    axes[1].plot(phase * period, trace["rvphase"][i], color="C1", lw=1, alpha=0.3)
+    axes[1].plot(
+        phase * period, trace["rvphase"][i], color="C1", lw=1, alpha=0.3
+    )
 
 axes[0].set_ylim(-110, 110)
 axes[1].set_ylim(-110, 110)

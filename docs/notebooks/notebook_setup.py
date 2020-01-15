@@ -7,8 +7,12 @@ import warnings
 
 import matplotlib.pyplot as plt
 
+# Remove when Theano is updated
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
+
+# Remove when arviz is updated
+warnings.filterwarnings("ignore", category=UserWarning)
 
 
 logger = logging.getLogger("theano.gof.compilelock")
