@@ -2,8 +2,8 @@
 
 set -e
 
-. $CONDA/etc/profile.d/conda.sh
-conda activate ./env
+# . $CONDA/etc/profile.d/conda.sh
+# conda activate ./env
 
 # cd docs
 # make dirhtml
