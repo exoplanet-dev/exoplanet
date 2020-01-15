@@ -8,7 +8,7 @@ jobs:
       vmImage: Ubuntu-16.04
     timeoutInMinutes: 120
 
-    # steps:
+    steps:
     # - bash: .ci/azure/setup_conda.sh
     #   displayName: 'Setup conda'
 
