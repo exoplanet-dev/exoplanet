@@ -5,6 +5,9 @@ set -e
 . $CONDA/etc/profile.d/conda.sh
 conda activate ./env
 
+# We need pandoc to convert the notebooks
+conda install pandoc
+
 # Build the docs
 cd docs
 make dirhtml
