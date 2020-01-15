@@ -16,10 +16,16 @@ variables:
 jobs:
   - job: Default
     pool:
-      vmImage: Ubuntu-16.04
+      vmImage: ubuntu-latest
     timeoutInMinutes: 120
 
     steps:
+    - task: Cache@2
+      inputs:
+        key: condaEnvironment | $(Agent.OS)
+        path: env
+      displayName: 'Cache conda environment'
+
     - bash: .ci/azure/setup_conda.sh
       displayName: 'Setup conda'
 
