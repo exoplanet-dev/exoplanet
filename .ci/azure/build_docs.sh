@@ -5,6 +5,8 @@ set -e
 . $CONDA/etc/profile.d/conda.sh
 conda activate ./env
 
-cd docs
+# cd docs
+# make dirhtml
 
-make dirhtml
+echo $SOURCE_BRANCH
+echo $(basename $SOURCE_BRANCH)
