@@ -6,7 +6,7 @@ set -e
 conda activate ./env
 
 # We need pandoc to convert the notebooks
-conda install pandoc
+conda install -y -q pandoc
 
 # Build the docs
 cd docs
