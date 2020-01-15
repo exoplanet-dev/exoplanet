@@ -34,8 +34,6 @@ fi
 
 # Push back to Github
 git init
-touch .nojekyll
-git add .nojekyll
 git add -f *
 git -c user.name='exoplanet-doc-bot' -c user.email='exoplanet-doc-bot@azure' \
     commit -m "rebuild gh-pages for ${SOURCE_BRANCH_NAME}"
