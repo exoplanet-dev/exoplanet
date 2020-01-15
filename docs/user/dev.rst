@@ -70,17 +70,18 @@ Finding your way around the codebase
 ``exoplanet`` is mostly arranged as a typical Python project with the module root in the ``src/exoplanet`` directory.
 But there are a few directions that can be useful before diving in:
 
-1. **Documentation**: The documentation no longer lives in the main ``exoplanet`` repository.
-Instead, you can find it in the `exoplanet-docs <https://github.com/dfm/exoplanet-docs>`_ repository on GitHub.
-Changes to the documentation should be opened as a pull request against that repository, but the rest of this document still applies to these contributions.
+1. **Tutorials**: The tutorials are written using the `jupytext <https://github.com/mwouts/jupytext>`_ tool to keep the size of the repository from blowing up.
+The tutorial files are saved (using jupytext) in the ``docs/notebooks`` directory as ``.py`` files in the ``py:percent`` format.
+You can edit these files as if they are Jupyter notebooks by using the extension:
 
-2. **Tutorials**: It can be a bit confusing to see where the tutorials should be added or updated because there are several copies throughout the repository.
-As above, the tutorials live in the `exoplanet-docs <https://github.com/dfm/exoplanet-docs>`_ repository.
-If you want to make a change or add a new tutorial, the only directory you should need to touch is ``docs/notebooks`` and you **must strip the output before committing so that the repository doesn't get too huge** (I use `nbstripout <https://github.com/kynan/nbstripout>`_).
-These will then be automatically executed and saved to the ``docs/_static/notebooks`` before the next release.
+.. code-block:: bash
+
+    jupyter nbextension install --py jupytext
+    jupyter nbextension enable --py jupytext
+
 If you are contributing a new tutorial, you should copy one of the existing ones and try to follow roughly the same format.
 
-3. **Theano ops**: ``exoplanet`` comes bundled with a set of custom Theano ops that are implemented in ``src/exoplanet/theano_ops``.
+2. **Theano ops**: ``exoplanet`` comes bundled with a set of custom Theano ops that are implemented in ``src/exoplanet/theano_ops``.
 As a user, you'll rarely interact with these directly and we haven't put a lot of work into making them user friendly, but if you are interested in diving in, here are some tips.
 First, you should check out the Theano docs that describe how to develop new ops in `Python <http://deeplearning.net/software/theano/extending/extending_theano.html>`_ and `C/C++ <http://deeplearning.net/software/theano/extending/extending_theano_c.html>`_.
 Most of the ``exoplanet`` ops are implemented in C++ for speed and we've made the design decision to separate the "science" code (which implements the actual operation without any dependency on Theano) and "wrapper" code (which sets up the interface).
