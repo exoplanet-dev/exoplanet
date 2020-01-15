@@ -23,7 +23,7 @@ jobs:
     - task: Cache@2
       inputs:
         key: condaEnvironment | $(Agent.OS)
-        path: env
+        path: $(Build.SourcesDirectory)/env
       displayName: 'Cache conda environment'
 
     - bash: .ci/azure/setup_conda.sh
