@@ -1,9 +1,9 @@
 pr: none
+variables:
+- group: exoplanet-variables
 
 jobs:
   - job: Default
-    variables:
-    - group: exoplanet-variables
     pool:
       vmImage: Ubuntu-16.04
     timeoutInMinutes: 120
