@@ -2,6 +2,8 @@ pr: none
 
 jobs:
   - job: Default
+    variables:
+    - group: exoplanet-variables
     pool:
       vmImage: Ubuntu-16.04
     timeoutInMinutes: 120
@@ -18,9 +20,12 @@ jobs:
     - bash: .ci/azure/run_tutorials.sh
       displayName: 'Generate the tutorials'
 
-    - task: PublishPipelineArtifact@1
-      inputs:
-        path: $(Build.SourcesDirectory)/docs/notebooks
-        artifact: Tutorials
-      displayName: 'Upload the results'
-      condition: always()
+    - bash: .ci/azure/build_docs.sh
+      displayName: 'Build the docs'
+
+    # - task: PublishPipelineArtifact@1
+    #   inputs:
+    #     path: $(Build.SourcesDirectory)/docs/notebooks
+    #     artifact: Tutorials
+    #   displayName: 'Upload the results'
+    #   condition: always()

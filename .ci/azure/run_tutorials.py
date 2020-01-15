@@ -16,6 +16,7 @@ filenames = list(sorted(filenames, reverse=True))
 
 def process_notebook(filename):
     outfile = os.path.splitext(filename)[0] + ".ipynb"
+    outfile = os.path.join("docs/_static/notebooks", os.path.split(outfile)[1])
 
     # path = os.path.join(
     #     os.path.abspath("theano_cache"), "p{0}".format(os.getpid())
