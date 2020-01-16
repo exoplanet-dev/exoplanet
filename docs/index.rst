@@ -57,7 +57,7 @@ magnitude.
 License & attribution
 ---------------------
 
-Copyright 2018, 2019 Daniel Foreman-Mackey.
+Copyright 2018, 2019, 2020 Daniel Foreman-Mackey.
 
 The source code is made available under the terms of the MIT license.
 

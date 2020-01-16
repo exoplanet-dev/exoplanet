@@ -16,7 +16,7 @@ except DistributionNotFound:
 
 
 def setup(app):
-    app.add_stylesheet("css/exoplanet.css?v=2019-08-02")
+    app.add_stylesheet("css/exoplanet.css?v=2020-01-15")
 
 
 extensions = [
@@ -66,7 +66,7 @@ master_doc = "index"
 # General information about the project.
 project = "exoplanet"
 author = "Dan Foreman-Mackey"
-copyright = "2018, 2019, " + author
+copyright = "2018, 2019, 2020, " + author
 
 version = __version__
 release = __version__
