@@ -31,8 +31,10 @@ mv ../_build/dirhtml/* en/$SOURCE_BRANCH_NAME/
 # Deal with releases
 if [[ "$SOURCE_BRANCH_NAME" =~ ^v[0-9].*  ]]; then
     echo "This is a release: $SOURCE_BRANCH_NAME"
-    rm -rf en/stable
-    ln -s en/$SOURCE_BRANCH_NAME en/stable
+    cd en
+    rm -rf stable
+    ln -s $SOURCE_BRANCH_NAME stable
+    cd ..
 fi
 
 python ../../.ci/azure/update_versions.py
