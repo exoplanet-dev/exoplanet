@@ -27,6 +27,13 @@ jobs:
         path: $(Build.SourcesDirectory)/env
       displayName: 'Cache conda environment'
 
+    - task: Cache@2
+      timeoutInMinutes: 10
+      inputs:
+        key: theanoCompileDir | $(Agent.OS)
+        path: $(Agent.HomeDirectory)/.theano
+      displayName: 'Cache Theano compiledir'
+
     - bash: .ci/azure/setup_conda.sh
       displayName: 'Setup conda'
 

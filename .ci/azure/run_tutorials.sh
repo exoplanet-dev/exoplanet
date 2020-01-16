@@ -14,3 +14,5 @@ export THEANO_FLAGS=blas.ldflags="-L/usr/lib/ -lblas"
 mkdir -p docs/_static/notebooks
 cp docs/notebooks/notebook_setup.py docs/_static/notebooks
 env/bin/python .ci/azure/run_tutorials.py
+
+ls ~/.theano
