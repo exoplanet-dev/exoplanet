@@ -31,7 +31,7 @@ jobs:
       timeoutInMinutes: 10
       inputs:
         key: theanoCompileDir | $(Agent.OS)
-        path: $(Agent.HomeDirectory)/.theano
+        path: $(Build.SourcesDirectory)/theano
       displayName: 'Cache Theano compiledir'
 
     - bash: .ci/azure/setup_conda.sh
@@ -44,6 +44,8 @@ jobs:
 
     - bash: .ci/azure/run_tutorials.sh
       displayName: 'Generate the tutorials'
+      env:
+        THEANO_FLAGS: base_compiledir=$(Build.SourcesDirectory)/theano
 
     - bash: .ci/azure/build_docs.sh
       displayName: 'Build the docs'
