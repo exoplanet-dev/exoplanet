@@ -12,7 +12,6 @@ from nbconvert.preprocessors import CellExecutionError, ExecutePreprocessor
 pattern = "docs/notebooks/*.py"
 filenames = [fn for fn in glob.glob(pattern) if "notebook_setup" not in fn]
 filenames = list(sorted(filenames, reverse=True))
-filenames = [filenames[0]]
 
 
 def process_notebook(filename):
