@@ -35,6 +35,8 @@ if [[ "$SOURCE_BRANCH_NAME" =~ ^v[0-9].*  ]]; then
     ln -s en/$SOURCE_BRANCH_NAME en/stable
 fi
 
+python .ci/azure/update_versions.py
+
 # Push back to Github
 git init
 touch .nojekyll

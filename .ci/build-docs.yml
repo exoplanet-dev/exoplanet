@@ -43,3 +43,4 @@ jobs:
         GITHUB_USER: $(GITHUB_USER)
         GITHUB_API_KEY: $(GITHUB_API_KEY)
         SOURCE_BRANCH_NAME: $(Build.SourceBranchName)
+        SOURCE_VERSION: $(Build.SourceVersion)

@@ -85,7 +85,8 @@ html_sidebars = {
 html_static_path = ["_static"]
 
 # Get the git branch name
+branch_name = os.environ.get("SOURCE_BRANCH_NAME", "master")
 html_context = dict(
-    this_branch="master",
-    this_version=os.environ.get("READTHEDOCS_VERSION", "latest"),
+    this_branch=branch_name,
+    this_version="latest" if branch_name == "master" else branch_name,
 )
