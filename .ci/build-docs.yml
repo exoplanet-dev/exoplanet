@@ -20,12 +20,12 @@ jobs:
     timeoutInMinutes: 120
 
     steps:
-    - task: Cache@2
-      timeoutInMinutes: 10
-      inputs:
-        key: condaEnvironment | $(Agent.OS)
-        path: $(Build.SourcesDirectory)/env
-      displayName: 'Cache conda environment'
+    # - task: Cache@2
+    #   timeoutInMinutes: 10
+    #   inputs:
+    #     key: condaEnvironment | $(Agent.OS)
+    #     path: $(Build.SourcesDirectory)/env
+    #   displayName: 'Cache conda environment'
 
     - task: Cache@2
       timeoutInMinutes: 10
