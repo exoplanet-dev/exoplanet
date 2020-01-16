@@ -21,6 +21,7 @@ jobs:
 
     steps:
     - task: Cache@2
+      timeoutInMinutes: 10
       inputs:
         key: condaEnvironment | $(Agent.OS)
         path: $(Build.SourcesDirectory)/env
