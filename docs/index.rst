@@ -52,10 +52,6 @@ magnitude.
    tutorials/transit
    tutorials/astrometric
    tutorials/gp
-   tutorials/stellar-variability
-   tutorials/together
-   tutorials/tess
-   tutorials/ttv
 
 
 License & attribution
