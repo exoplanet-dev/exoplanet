@@ -8,12 +8,7 @@
 \title{%
 {\bf NOTE: this is a very rough draft of this manuscript --- read at your own risk!}
 \\
-\project{exoplanet}:
-A toolkit for scalable inference for exoplanetary systems using transits,
-radial velocities, \& astrometry
-%An efficient and robust toolkit for gradient-based
-%probabilistic characterization of exoplanets using transits and radial
-%velocities
+\exoplanet: A framework for gradient-based inference with time domain astronomical data sets
 }
 
 \author[0000-0002-9328-5652]{Daniel Foreman-Mackey}
@@ -31,15 +26,15 @@ radial velocities, \& astrometry
 \affil{Center for Computational Astrophysics, Flatiron Institute, 162 5th Ave, New York, NY 10010}
 
 \begin{abstract}
-
+\noindent
 As larger and more precise datasets continue to be collected for the discovery and characterization of exoplanets, we must also develop computationally efficient and rigorous methods for making inferences based on these data.
 The efficiency and robustness of numerical methods for probabilistic inference
 can be improved by using derivatives of the model with respect to the
 parameters.
-In this paper, I derive methods for exploiting these gradient-based methods
+We derive methods for exploiting these gradient-based methods
 when fitting exoplanet data based on radial velocity, astrometry, and
 transits.
-Alongside the paper, I release an open source, well-tested, and
+Alongside the paper, we release an open source, well-tested, and
 computationally efficient implementation of these methods.
 These methods can substantially reduce the computational cost of fitting large
 datasets and systems with more than one exoplanet.
@@ -125,6 +120,34 @@ Finally, in the third chapter, we demonstrate the application of these methods o
 This is a figure.}
 \end{centering}
 \end{figure}
+
+\section{\exoplanet\ in context}
+
+The \exoplanet\ project lives in a vibrant ecosystem of software developed for inference with time domain data sets.
+In particular, there are several open source packages that have been developed for fitting observations of exoplanets including, for example, \project{EXOFASTv2} \citep{Eastman:2019}, \project{juliet} \citep{Espinoza:2019}, \project{allesfitter} \citep{Gunther:2019}, \project{Exo-Striker} \citep{Trifonov:2019}, \project{pyaneti} \citep{Barragan:2019}, and \project{RadVel} \citep{Fulton:2018}.
+While many of the features of these packages overlap with \exoplanet\ and, in fact, the development and design of \exoplanet\ was deeply inspired by this ecosystem, both the scope and goals of the \exoplanet\ project are fundamentally different.
+First and foremost, \exoplanet\ does not---and won't ever---include a push button interface to fit any data set.
+Instead, \exoplanet\ is designed as a \emph{framework} that provides the functions that are necessary to build a pipeline.
+We imagine that future projects like those listed above---or, perhaps, future versions of those projects---will be built with \exoplanet\ (or something like it) as the computational backend.
+
+With this contrast in mind, it might make more sense to compare \exoplanet\ to projects like \project{batman} \citep{Kreidberg:2015}, \project{ellc} \citep{Maxted:2016}, \project{starry} \citep{Luger:2019}, or \project{celerite} \citep{Foreman-Mackey:2017}, that work behind-the-scenes with many of these .
+
+
+% - jdeast/EXOFASTv2
+% - nespinoza/juliet
+% - MNGuenther/allesfitter
+% - 3fon3fonov/exostriker
+% - oscaribv/pyaneti
+% - California-Planet-Search/radvel
+
+% - lkreidberg/batman
+% - rodluger/starry
+% - pmaxted/ellc
+
+% - dfm/celerite
+% - carma models
+% - gpstate
+
 
 \section{Automatic differentiation}
 
@@ -646,6 +669,33 @@ This can be efficiently sampled using \exoplanet.
 
 \section{Examples}
 
+\section{Discussion}
+
+\acknowledgements
+
+This research was partially conducted during the Exostar19 program at the Kavli Institute for Theoretical Physics at UC Santa Barbara, which was supported in part by the National Science Foundation under Grant No. NSF PHY-1748958.
+
+Conversations:
+% alphabetical by last name
+Astro data group,
+Ruth Angus,
+Tom Barclay,
+Megan Bedell,
+Jonathan (Yoni) Brande,
+Tim Brandt,
+Trevor David,
+Greg Gilbert,
+Ed Gillen,
+Tyler Gordon,
+Christina Hedges,
+Dan Hey,
+Vedad Hodzic,
+Pierre Maxted,
+Hugh Osborn,
+Erik Petigura,
+Rich Teague,
+Vincent Van Eylen, and
+Alexa Villaume.
 
 
 \appendix
@@ -962,11 +1012,6 @@ timescale. (Bottom) Corresponding power spectra.  The vertical dotted lines
 indicate the sampling frequency in all three time-integrated cases.}
 \end{centering}
 \end{figure}
-
-\newpage
-\acknowledgements
-
-This research was partially conducted during the Exostar19 program at the Kavli Institute for Theoretical Physics at UC Santa Barbara, which was supported in part by the National Science Foundation under Grant No. NSF PHY-1748958.
 
 \newpage
 \bibliography{exoplanet}
