@@ -19,13 +19,7 @@ stages:
 jobs:
   include:
     - stage: Housekeeping
-      name: "Update docs"
-      language: generic
-      install: skip
-      script: ./.ci/travis/update_docs.sh
-      after_success: skip
-      if: (branch = master) AND (type != pull_request)
-    - name: "Style"
+      name: "Style"
       install:
         - python -m pip install -U pip
         - python -m pip install -U black isort black_nbconvert
