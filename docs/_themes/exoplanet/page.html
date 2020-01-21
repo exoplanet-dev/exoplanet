@@ -7,7 +7,7 @@
 <script>
     $.ajax({
         dataType: "json",
-        url: "https://raw.githubusercontent.com/dfm/exoplanet/gh-pages/versions.json",
+        url: "https://raw.githubusercontent.com/exoplanet-dev/exoplanet/gh-pages/versions.json",
         success: function (data) {
             var versions = Object.keys(data).sort();
             $(function render() {

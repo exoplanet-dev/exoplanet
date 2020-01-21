@@ -2,18 +2,18 @@ exoplanet
 =========
 
 <p>
-  <a href="https://github.com/dfm/exoplanet">
+  <a href="https://github.com/exoplanet-dev/exoplanet">
     <img src="https://img.shields.io/badge/GitHub-dfm%2Fexoplanet-blue.svg?style=flat"></a>
-  <a href="https://github.com/dfm/exoplanet/blob/master/LICENSE">
+  <a href="https://github.com/exoplanet-dev/exoplanet/blob/master/LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat"></a>
   <a href="https://zenodo.org/badge/latestdoi/138077978">
     <img src="https://zenodo.org/badge/138077978.svg"></a>
   <a
-    href="https://docs.google.com/viewer?url=https://github.com/dfm/exoplanet/raw/master-pdf/paper/exoplanet.pdf">
+    href="https://docs.google.com/viewer?url=https://github.com/exoplanet-dev/exoplanet/raw/master-pdf/paper/exoplanet.pdf">
     <img src="https://img.shields.io/badge/read-the_paper_draft-blue.svg?style=flat"></a>
   <br>
-  <a href="https://travis-ci.com/dfm/exoplanet">
-    <img src="https://img.shields.io/travis/dfm/exoplanet/master.svg?style=flat&label=tests"></a>
+  <a href="https://travis-ci.com/exoplanet-dev/exoplanet">
+    <img src="https://img.shields.io/travis/exoplanet-dev/exoplanet/master.svg?style=flat&label=tests"></a>
   <a href="https://dev.azure.com/foremanmackey/exoplanet/_build?definitionId=10">
     <img
       src="https://img.shields.io/azure-devops/build/foremanmackey/exoplanet/10/master?label=paper&style=flat"></a>
@@ -67,5 +67,5 @@ exoplanet applications, *exoplanet* (the code) can improve the typical
 performance by orders of magnitude.
 
 *exoplanet* is being actively developed in [a public repository on
-GitHub](https://github.com/dfm/exoplanet) so if you have any trouble,
-[open an issue](https://github.com/dfm/exoplanet/issues) there.
+GitHub](https://github.com/exoplanet-dev/exoplanet) so if you have any trouble,
+[open an issue](https://github.com/exoplanet-dev/exoplanet/issues) there.

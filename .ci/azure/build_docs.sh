@@ -20,7 +20,7 @@ fi
 # Clone the existing snapshot of the docs
 mkdir _render
 cd _render
-git clone -b gh-pages --single-branch https://github.com/dfm/exoplanet.git .
+git clone -b gh-pages --single-branch https://github.com/exoplanet-dev/exoplanet.git .
 
 # Reset git and copy over the docs
 rm -rf .git
@@ -46,5 +46,5 @@ git add .nojekyll
 git add -f *
 git -c user.name='exoplanet-doc-bot' -c user.email='exoplanet-doc-bot@azure' \
     commit -m "rebuild gh-pages for ${SOURCE_BRANCH_NAME}"
-git push -f https://$GITHUB_USER:$GITHUB_API_KEY@github.com/dfm/exoplanet.git \
+git push -f https://$GITHUB_USER:$GITHUB_API_KEY@github.com/exoplanet-dev/exoplanet.git \
     HEAD:gh-pages >/dev/null 2>&1 -q

@@ -3,13 +3,13 @@
 Developer documentation
 =======================
 
-Development of ``exoplanet`` is actively happening `on GitHub <https://github.com/dfm/exoplanet>`_ and we would love your contributions.
+Development of ``exoplanet`` is actively happening `on GitHub <https://github.com/exoplanet-dev/exoplanet>`_ and we would love your contributions.
 There are a few different methods of contributing to ``exoplanet`` and the details are discussed below.
 
 Reporting an issue
 ------------------
 
-If you run into issues, bugs, or anything else, it is very useful if you can `post an issue on the GitHub repository <https://github.com/dfm/exoplanet/issues>`_.
+If you run into issues, bugs, or anything else, it is very useful if you can `post an issue on the GitHub repository <https://github.com/exoplanet-dev/exoplanet/issues>`_.
 When you post an issue, please provide the details to reproduce the issue.
 For example, if you find a bug, please provide a *standalone* and *executable* snippet of code that demonstrates the issue.
 It's also useful to include details about your platform and the versions of key packages that your using.
@@ -24,7 +24,7 @@ If you're not familiar with the workflow for contributing code to a GitHub repos
 Set up your development environment
 +++++++++++++++++++++++++++++++++++
 
-After getting some familiarity with the workflow, you should fork `the exoplanet repository <https://github.com/dfm/exoplanet>`_ and clone it to your local machine:
+After getting some familiarity with the workflow, you should fork `the exoplanet repository <https://github.com/exoplanet-dev/exoplanet>`_ and clone it to your local machine:
 
 .. code-block:: bash
 

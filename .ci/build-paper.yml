@@ -38,6 +38,6 @@ steps:
     git add -f paper/figures/*_exec.ipynb
     git add -f paper/figures/notebook_errors.log
     git -c user.name='azure' -c user.email='azure' commit -m "building the paper"
-    git push -q -f https://$(GITHUB_USER):$(GITHUB_API_KEY)@github.com/dfm/exoplanet $(Build.SourceBranchName)-pdf >/dev/null 2>&1
+    git push -q -f https://$(GITHUB_USER):$(GITHUB_API_KEY)@github.com/exoplanet-dev/exoplanet $(Build.SourceBranchName)-pdf >/dev/null 2>&1
   displayName: 'Upload the paper'
   condition: always()

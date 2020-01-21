@@ -3,7 +3,7 @@
 ### Reporting issues
 
 If you find a bug or other unexpected behavior while using `exoplanet`, open an issue
-on the [GitHub repository](https://github.com/dfm/exoplanet/issues) and we will try to
+on the [GitHub repository](https://github.com/exoplanet-dev/exoplanet/issues) and we will try to
 respond and (hopefully) solve the problem in a timely manner. Similarly, if you have a
 feature request or question about the library, the best place to post those is currently
 on GitHub as an issue, but that is likely change if the user community grows. If you

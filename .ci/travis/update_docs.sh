@@ -6,9 +6,9 @@ if [[ -n "$GITHUB_API_KEY" && "$TRAVIS_PULL_REQUEST" = "false" ]]
 then
   if [ -n "$TRAVIS_TAG" ]
   then
-    git clone --recursive --depth=50 https://github.com/dfm/exoplanet-docs.git
+    git clone --recursive --depth=50 https://github.com/exoplanet-dev/exoplanet-docs.git
   else
-    git clone --recursive --depth=50 --branch=$TRAVIS_BRANCH https://github.com/dfm/exoplanet-docs.git
+    git clone --recursive --depth=50 --branch=$TRAVIS_BRANCH https://github.com/exoplanet-dev/exoplanet-docs.git
   fi
 
   cd exoplanet-docs/exoplanet
@@ -22,5 +22,5 @@ then
     git tag -a $TRAVIS_TAG -m "exoplanet $TRAVIS_TAG"
   fi
 
-  git push -q -f https://$GITHUB_USER:$GITHUB_API_KEY@github.com/dfm/exoplanet-docs.git $TRAVIS_BRANCH
+  git push -q -f https://$GITHUB_USER:$GITHUB_API_KEY@github.com/exoplanet-dev/exoplanet-docs.git $TRAVIS_BRANCH
 fi

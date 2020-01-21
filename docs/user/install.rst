@@ -42,11 +42,11 @@ From Source
 -----------
 
 The source code for *exoplanet* can be downloaded and installed `from GitHub
-<https://github.com/dfm/exoplanet>`_ by running
+<https://github.com/exoplanet-dev/exoplanet>`_ by running
 
 .. code-block:: bash
 
-    git clone https://github.com/dfm/exoplanet.git
+    git clone https://github.com/exoplanet-dev/exoplanet.git
     cd exoplanet
     python setup.py install
 
@@ -68,4 +68,4 @@ and then execute:
 
 All of the tests should (of course) pass.
 If any of the tests don't pass and if you can't sort out why, `open an issue
-on GitHub <https://github.com/dfm/exoplanet/issues>`_.
+on GitHub <https://github.com/exoplanet-dev/exoplanet/issues>`_.

@@ -4,7 +4,7 @@ import subprocess
 hash = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("utf-8")[
     :-1
 ]
-slug = "dfm/exoplanet"
+slug = "exoplanet-dev/exoplanet"
 with open("gitlinks.tex", "w") as f:
     print(
         r"\newcommand{\codelink}[1]{\href{https://github.com/%s/blob/%s/paper/figures/#1.ipynb}{\codeicon}\,\,}"

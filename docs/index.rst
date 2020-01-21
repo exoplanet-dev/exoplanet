@@ -30,8 +30,8 @@ model has more than a few parameters. For many exoplanet applications,
 magnitude.
 
 *exoplanet* is being actively developed in `a public repository on GitHub
-<https://github.com/dfm/exoplanet>`_ so if you have any trouble, `open an issue
-<https://github.com/dfm/exoplanet/issues>`_ there.
+<https://github.com/exoplanet-dev/exoplanet>`_ so if you have any trouble, `open an issue
+<https://github.com/exoplanet-dev/exoplanet/issues>`_ there.
 
 .. toctree::
    :maxdepth: 2

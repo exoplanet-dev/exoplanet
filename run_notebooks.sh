@@ -4,10 +4,10 @@ __conda_setup="$('conda' 'shell.bash' 'hook' 2> /dev/null)"
 eval "$__conda_setup"
 unset __conda_setup
 
-cd /mnt/home/dforeman/research/projects/dfm/exoplanet_auto
+cd /mnt/home/dforeman/research/projects/exoplanet-dev/exoplanet_auto
 conda activate autoexoplanet
 
-CACHEDIR=/mnt/home/dforeman/research/projects/dfm/exoplanet_auto/theano_cache
+CACHEDIR=/mnt/home/dforeman/research/projects/exoplanet-dev/exoplanet_auto/theano_cache
 rm -rf $CACHEDIR
 export THEANO_FLAGS=base_compiledir=$CACHEDIR
 
@@ -28,7 +28,7 @@ git add _static/notebooks/notebook_setup.py
 git add _static/notebooks/*.ipynb
 
 git -c user.name='exoplanetbot' -c user.email='exoplanetbot' commit -am "updating notebooks [ci skip]"
-git push -q -f https://dfm:`cat .github_api_key`@github.com/dfm/exoplanet.git auto_notebooks
+git push -q -f https://dfm:`cat .github_api_key`@github.com/exoplanet-dev/exoplanet.git auto_notebooks
 
 cd ..
 git checkout master
