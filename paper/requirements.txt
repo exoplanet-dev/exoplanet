@@ -1,6 +1,0 @@
-jupyter
-emcee>=3.0rc2
-cppimport
-pybind11
-matplotlib
-daft
