@@ -9,9 +9,9 @@ exoplanet
   <a href="https://zenodo.org/badge/latestdoi/138077978">
     <img src="https://zenodo.org/badge/138077978.svg"></a>
   <a
-    href="https://docs.google.com/viewer?url=https://github.com/exoplanet-dev/exoplanet/raw/master-pdf/paper/exoplanet.pdf">
+    href="https://docs.google.com/viewer?url=https://github.com/exoplanet-dev/paper/raw/master-pdf/paper/exoplanet.pdf">
     <img src="https://img.shields.io/badge/read-the_paper_draft-blue.svg?style=flat"></a>
-  <a href="https://exoplanet.dfm.io/en/latest">
+  <a href="https://docs.exoplanet.codes/en/latest">
     <img src="https://img.shields.io/badge/read-the_docs-blue.svg?style=flat"></a>
   <br>
   <a href="https://travis-ci.com/exoplanet-dev/exoplanet">
