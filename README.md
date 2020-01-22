@@ -11,13 +11,15 @@ exoplanet
   <a
     href="https://docs.google.com/viewer?url=https://github.com/exoplanet-dev/exoplanet/raw/master-pdf/paper/exoplanet.pdf">
     <img src="https://img.shields.io/badge/read-the_paper_draft-blue.svg?style=flat"></a>
+  <a href="https://exoplanet.dfm.io/en/latest">
+    <img src="https://img.shields.io/badge/read-the_docs-blue.svg?style=flat"></a>
   <br>
   <a href="https://travis-ci.com/exoplanet-dev/exoplanet">
     <img src="https://img.shields.io/travis/exoplanet-dev/exoplanet/master.svg?style=flat&label=tests"></a>
-  <a href="https://dev.azure.com/foremanmackey/exoplanet/_build?definitionId=10">
+  <a href="https://dev.azure.com/foremanmackey/exoplanet/_build?definitionId=15">
     <img
-      src="https://img.shields.io/azure-devops/build/foremanmackey/exoplanet/10/master?label=paper&style=flat"></a>
-  <a href="https://exoplanet.dfm.io/en/latest">
+      src="https://img.shields.io/azure-devops/build/foremanmackey/exoplanet/15/master?label=paper&style=flat"></a>
+  <a href="https://dev.azure.com/foremanmackey/exoplanet/_build?definitionId=14">
     <img
       src="https://img.shields.io/azure-devops/build/foremanmackey/exoplanet/14/master?label=docs&style=flat"></a>
   <br>
