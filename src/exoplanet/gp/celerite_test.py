@@ -252,3 +252,19 @@ def test_sho_reparam(seed=6083):
     func2 = theano.function([], kernel2.coefficients)
     for a, b in zip(func1(), func2()):
         assert np.allclose(a, b)
+
+
+def test_fortran_order(seed=5091986):
+    np.random.seed(seed)
+
+    kernel = terms.SHOTerm(log_S0=0.1, log_Q=1.0, log_w0=0.5)
+
+    x = np.sort(np.random.uniform(0, 100, 100))
+    y = np.sin(x)
+    yerr = np.random.uniform(0.1, 0.5, len(x))
+    diag = yerr ** 2
+
+    gp = GP(kernel, x, diag)
+    loglike = gp.log_likelihood(y).eval()
+    loglike_f = gp.log_likelihood(np.asfortranarray(y)).eval()
+    assert np.allclose(loglike, loglike_f)
