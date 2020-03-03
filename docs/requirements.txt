@@ -6,3 +6,4 @@ nbformat
 nbconvert
 corner
 lightkurve
+jupytext
