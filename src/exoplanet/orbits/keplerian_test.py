@@ -191,6 +191,36 @@ def test_acceleration():
     utt.assert_allclose(acc, acc_expect)
 
 
+def test_flip():
+    t = np.linspace(0, 100, 1000)
+    m_planet = 0.1
+    m_star = 1.3
+    orbit1 = KeplerianOrbit(
+        m_star=m_star,
+        r_star=1.1,
+        t0=0.5,
+        period=100.0,
+        ecc=0.3,
+        omega=0.5,
+        Omega=1.0,
+        incl=0.25 * np.pi,
+        m_planet=m_planet,
+    )
+    orbit2 = orbit1._flip(0.7)
+
+    x1, y1, z1 = theano.function([], orbit1.get_star_position(t))()
+    x2, y2, z2 = theano.function([], orbit2.get_planet_position(t))()
+    utt.assert_allclose(x1, x2, atol=1e-5)
+    utt.assert_allclose(y1, y2, atol=1e-5)
+    utt.assert_allclose(z1, z2, atol=1e-5)
+
+    x1, y1, z1 = theano.function([], orbit1.get_planet_position(t))()
+    x2, y2, z2 = theano.function([], orbit2.get_star_position(t))()
+    utt.assert_allclose(x1, x2, atol=1e-5)
+    utt.assert_allclose(y1, y2, atol=1e-5)
+    utt.assert_allclose(z1, z2, atol=1e-5)
+
+
 def test_in_transit():
     t = np.linspace(-20, 20, 1000)
     m_planet = np.array([0.3, 0.5])

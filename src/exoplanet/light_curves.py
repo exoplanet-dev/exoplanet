@@ -2,6 +2,7 @@
 
 __all__ = [
     "LimbDarkLightCurve",
+    "EclipsingBinaryLightCurve",
     "StarryLightCurve",
     "IntegratedLimbDarkLightCurve",
 ]
@@ -23,7 +24,7 @@ get_cl = GetClOp()
 limbdark = LimbDarkOp()
 
 
-class LimbDarkLightCurve(object):
+class LimbDarkLightCurve:
     """A limb darkened light curve computed using starry
 
     Args:
@@ -193,7 +194,45 @@ class StarryLightCurve(LimbDarkLightCurve):  # pragma: no cover
         super(StarryLightCurve, self).__init__(*args, **kwargs)
 
 
-class IntegratedLimbDarkLightCurve(object):  # pragma: no cover
+class EclipsingBinaryLightCurve:
+    def __init__(self, u_primary, u_secondary, flux_ratio, model=None):
+        self.primary = LimbDarkLightCurve(u_primary, model=model)
+        self.secondary = LimbDarkLightCurve(u_secondary, model=model)
+        self.flux_ratio = tt.as_tensor_variable(flux_ratio)
+
+    def get_light_curve(
+        self,
+        orbit=None,
+        r=None,
+        t=None,
+        texp=None,
+        oversample=7,
+        order=0,
+        use_in_transit=True,
+    ):
+        orbit2 = orbit._flip(r)
+        lc1 = self.primary.get_light_curve(
+            orbit=orbit,
+            r=r,
+            t=t,
+            texp=texp,
+            oversample=oversample,
+            order=order,
+            use_in_transit=use_in_transit,
+        )
+        lc2 = self.secondary.get_light_curve(
+            orbit=orbit2,
+            r=orbit.r_star,
+            t=t,
+            texp=texp,
+            oversample=oversample,
+            order=order,
+            use_in_transit=use_in_transit,
+        )
+        return (lc1 + self.flux_ratio * lc2) / (1 + self.flux_ratio)
+
+
+class IntegratedLimbDarkLightCurve:  # pragma: no cover
 
     """A limb darkened light curve computed using starry
 
