@@ -137,6 +137,7 @@ class GP:
         t=None,
         return_var=False,
         return_cov=False,
+        predict_mean=False,
         kernel=None,
         _fast_mean=True,
     ):
@@ -145,7 +146,9 @@ class GP:
 
         mu = None
         if t is None and kernel is None:
-            mu = self.mean_val + self.y - self.diag * self.z
+            mu = self.y - self.diag * self.z
+            if predict_mean:
+                mu += self.mean_val
             if not (return_var or return_cov):
                 return mu
 
@@ -177,7 +180,8 @@ class GP:
                 )
             else:
                 mu = tt.dot(Kxs, self.z)
-            mu = mu + mean_val
+            if predict_mean:
+                mu += mean_val
 
         if not (return_var or return_cov):
             return mu
