@@ -23,7 +23,7 @@
 # In a situation like this, it can be easy to forget about the important infrastructure upon which our science is built.
 # In order to make sure that you can easily give credit where credit is due, we have tried to make it as painless as possible to work out which citations are expected for a model fit using *exoplanet* by including a :func:`exoplanet.citations.get_citations_for_model` function that introspects the current PyMC3 model and constructs a list of citations for the functions used in that model.
 #
-# For example, you might compute a quadratically limb darkened light curve using `starry` (via the :class:`exoplanet.light_curve.StarryLightCurve` class):
+# For example, you might compute a quadratically limb darkened light curve using `starry` (via the :class:`exoplanet.LimbDarkLightCurve` class):
 
 # %%
 import pymc3 as pm
