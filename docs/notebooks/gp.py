@@ -125,7 +125,9 @@ with model:
 
 # %%
 with model:
-    mu, var = xo.eval_in_model(gp.predict(true_t, return_var=True), map_soln)
+    mu, var = xo.eval_in_model(
+        gp.predict(true_t, return_var=True, predict_mean=True), map_soln
+    )
 
 # %%
 plt.errorbar(t, y, yerr=yerr, fmt=".k", capsize=0, label="data")
@@ -187,7 +189,7 @@ N_pred = 50
 pred_mu = np.empty((N_pred, len(true_t)))
 pred_var = np.empty((N_pred, len(true_t)))
 with model:
-    pred = gp.predict(true_t, return_var=True)
+    pred = gp.predict(true_t, return_var=True, predict_mean=True)
     for i, sample in enumerate(xo.get_samples_from_trace(trace, size=N_pred)):
         pred_mu[i], pred_var[i] = xo.eval_in_model(pred, sample)
 
