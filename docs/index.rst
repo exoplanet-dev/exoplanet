@@ -33,6 +33,8 @@ magnitude.
 <https://github.com/exoplanet-dev/exoplanet>`_ so if you have any trouble, `open an issue
 <https://github.com/exoplanet-dev/exoplanet/issues>`_ there.
 
+.. note:: Some tutorials have been moved to the `case studies <https://gallery.exoplanet.codes>`_ page.
+
 .. toctree::
    :maxdepth: 2
    :caption: User Guide

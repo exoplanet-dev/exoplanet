@@ -81,7 +81,10 @@ You can edit these files as if they are Jupyter notebooks by using the extension
 
 If you are contributing a new tutorial, you should copy one of the existing ones and try to follow roughly the same format.
 
-2. **Theano ops**: ``exoplanet`` comes bundled with a set of custom Theano ops that are implemented in ``src/exoplanet/theano_ops``.
+2. **Case studies**: These are more in depth tutorials that require more computational run time.
+These can be found in the `case studies <https://github.com/exoplanet-dev/case-studies>`_ repo and there is more information there about how to contribute.
+
+3. **Theano ops**: ``exoplanet`` comes bundled with a set of custom Theano ops that are implemented in ``src/exoplanet/theano_ops``.
 As a user, you'll rarely interact with these directly and we haven't put a lot of work into making them user friendly, but if you are interested in diving in, here are some tips.
 First, you should check out the Theano docs that describe how to develop new ops in `Python <http://deeplearning.net/software/theano/extending/extending_theano.html>`_ and `C/C++ <http://deeplearning.net/software/theano/extending/extending_theano_c.html>`_.
 Most of the ``exoplanet`` ops are implemented in C++ for speed and we've made the design decision to separate the "science" code (which implements the actual operation without any dependency on Theano) and "wrapper" code (which sets up the interface).
@@ -130,7 +133,7 @@ Release management
 This section is mainly internal, but these are the steps that should be executed to produce a new release.
 
 1. Update citation date and version in ``src/exoplanet/citations.py``.
-2. Run ``run_notebooks.sh`` to make sure that the tutorials all run and merge the updated notebooks on GitHub.
+2. Update the notebooks in the `case studies <https://github.com/exoplanet-dev/case-studies>`_ repo and run a release there.
 3. Update changelog date in ``HISTORY.rst``.
 4. Tag a GitHub release.
 

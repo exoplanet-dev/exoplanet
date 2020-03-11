@@ -3,7 +3,7 @@ exoplanet
 
 <p>
   <a href="https://github.com/exoplanet-dev/exoplanet">
-    <img src="https://img.shields.io/badge/GitHub-dfm%2Fexoplanet-blue.svg?style=flat"></a>
+    <img src="https://img.shields.io/badge/GitHub-exoplanet-dev%2Fexoplanet-blue.svg?style=flat"></a>
   <a href="https://github.com/exoplanet-dev/exoplanet/blob/master/LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat"></a>
   <a href="https://zenodo.org/badge/latestdoi/138077978">
