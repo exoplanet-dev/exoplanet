@@ -1,8 +1,9 @@
-sudo: false
+os: linux
 dist: xenial
 language: python
-blocklist:
-  - *-pdf
+branches:
+  except:
+  - /.*/-pdf
 
 env:
     global:
