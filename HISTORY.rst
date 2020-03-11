@@ -1,3 +1,11 @@
+0.2.5 (2020-03-11)
+++++++++++++++++++
+
+- Improves infrastructure for generating documentation
+- Adds an ``EclipsingBinaryLightCurve`` for building binary star models
+- Adds ``DensityDist`` implementation for celerite GP likelihoods
+
+
 0.2.4 (2019-12-30)
 ++++++++++++++++++
 
