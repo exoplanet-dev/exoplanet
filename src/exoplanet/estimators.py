@@ -3,8 +3,10 @@
 __all__ = [
     "estimate_semi_amplitude",
     "estimate_minimum_mass",
+    "find_peaks",
     "lomb_scargle_estimator",
     "autocorr_estimator",
+    "bls_estimator",
 ]
 
 import astropy.units as u
@@ -16,9 +18,9 @@ except ImportError:
     gaussian_filter = None
 
 try:
-    from astropy.timeseries import LombScargle
+    from astropy.timeseries import LombScargle, BoxLeastSquares
 except ImportError:
-    from astropy.stats import LombScargle
+    from astropy.stats import LombScargle, BoxLeastSquares
 
 
 def _get_design_matrix(periods, t0s, x):
@@ -116,6 +118,49 @@ def estimate_minimum_mass(periods, x, y, yerr=None, t0s=None, m_star=1):
     return m_J * u.M_jupiter
 
 
+def find_peaks(freq, power, max_peaks=0):
+    """Find peaks in a periodogram and estimate a statistical uncertainty
+
+    Args:
+        freq: The frequencies where the periodogram is measured
+        power: The power in the periodogram measured at ``freq``
+        max_peaks: The maximum number of peaks to find. By default, only one
+            peak will be found, but if ``max_peaks > 0`` this will return a
+            list of peaks with at most ``max_peaks`` entries.
+
+    Returns:
+        A dictionary with keys ``index``, ``log_power``, ``period``, and
+        ``period_uncert`` describing the peak. If ``max_peaks > 0`` this will
+        instead return a list of dictionaries with the same format.
+
+    Raises:
+        ValueError: if ``max_peaks == 0`` and no peaks are found
+
+    """
+    inds = (power[1:-1] > power[:-2]) & (power[1:-1] > power[2:])
+    inds = np.arange(1, len(power) - 1)[inds]
+    inds = inds[np.argsort(power[inds])][::-1]
+    peaks = []
+    for i in inds[: max(1, max_peaks)]:
+        A = np.vander(freq[i - 1 : i + 2], 3)
+        w = np.linalg.solve(A, np.log(power[i - 1 : i + 2]))
+        sigma2 = -0.5 / w[0]
+        freq0 = w[1] * sigma2
+        peaks.append(
+            dict(
+                index=i + 1,
+                log_power=w[2] + 0.5 * freq0 ** 2 / sigma2,
+                period=1.0 / freq0,
+                period_uncert=np.sqrt(sigma2 / freq0 ** 4),
+            )
+        )
+    if max_peaks:
+        return peaks
+    if not len(peaks):
+        raise ValueError("no peaks were found")
+    return peaks[0]
+
+
 def lomb_scargle_estimator(
     x,
     y,
@@ -124,7 +169,7 @@ def lomb_scargle_estimator(
     max_period=None,
     filter_period=None,
     max_peaks=2,
-    **kwargs
+    **kwargs,
 ):
     """Estimate period of a time series using the periodogram
 
@@ -162,22 +207,7 @@ def lomb_scargle_estimator(
         power *= filt
 
     # Find and fit peaks
-    peak_inds = (power[1:-1] > power[:-2]) & (power[1:-1] > power[2:])
-    peak_inds = np.arange(1, len(power) - 1)[peak_inds]
-    peak_inds = peak_inds[np.argsort(power[peak_inds])][::-1]
-    peaks = []
-    for i in peak_inds[:max_peaks]:
-        A = np.vander(freq[i - 1 : i + 2], 3)
-        w = np.linalg.solve(A, np.log(power[i - 1 : i + 2]))
-        sigma2 = -0.5 / w[0]
-        freq0 = w[1] * sigma2
-        peaks.append(
-            dict(
-                log_power=w[2] + 0.5 * freq0 ** 2 / sigma2,
-                period=1.0 / freq0,
-                period_uncert=np.sqrt(sigma2 / freq0 ** 4),
-            )
-        )
+    peaks = find_peaks(freq, power, max_peaks=max_peaks)
 
     return dict(periodogram=(freq, power_est), peaks=peaks)
 
@@ -296,3 +326,55 @@ def autocorr_estimator(
 
     result["peaks"] = [dict(period=tau[peak_inds[0]], period_uncert=np.nan)]
     return result
+
+
+def bls_estimator(
+    x,
+    y,
+    yerr=None,
+    duration=0.2,
+    min_period=None,
+    max_period=None,
+    objective=None,
+    method=None,
+    oversample=10,
+    **kwargs,
+):
+    kwargs["minimum_period"] = kwargs.get("minimim_period", min_period)
+    kwargs["maximum_period"] = kwargs.get("maximum_period", max_period)
+
+    x_ref = 0.5 * (np.min(x) + np.max(x))
+    bls = BoxLeastSquares(x - x_ref, y, yerr)
+
+    # Estimate the frequency factor to not be insanely slow
+    if "frequency_factor" not in kwargs:
+        kwargs["frequency_factor"] = 1.0
+        periods = bls.autoperiod(duration, **kwargs)
+        while len(periods) > len(x):
+            kwargs["frequency_factor"] *= 2
+            periods = bls.autoperiod(duration, **kwargs)
+
+    # Compute the periodogram
+    pg = bls.autopower(
+        duration,
+        objective=objective,
+        method=method,
+        oversample=oversample,
+        **kwargs,
+    )
+
+    # Correct for the reference time offset
+    pg.transit_time += x_ref
+
+    # Find the peak
+    peaks = find_peaks(1 / pg.period, pg.power, max_peaks=1)
+    results = dict(bls=pg, peaks=peaks, peak_info=None)
+    if not len(peaks):
+        return results
+
+    # Extract the relevant information at the peak
+    ind = peaks[0]["index"]
+    results["peak_info"] = dict(
+        (k, v[ind]) for k, v in pg.items() if k != "objective"
+    )
+    return results
