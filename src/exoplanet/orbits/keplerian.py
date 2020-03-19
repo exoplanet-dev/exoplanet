@@ -2,7 +2,6 @@
 
 __all__ = ["KeplerianOrbit", "get_true_anomaly"]
 
-import copy
 import warnings
 
 import numpy as np
