@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
-__all__ = ["KeplerianOrbit", "get_true_anomaly"]
+__all__ = [
+    "KeplerianOrbit",
+    "get_true_anomaly",
+    "get_aor_from_transit_duration",
+]
 
 import warnings
 
@@ -81,6 +85,7 @@ class KeplerianOrbit:
         m_star=None,
         r_star=None,
         rho_star=None,
+        ror=None,
         m_planet_units=None,
         rho_star_units=None,
         model=None,
@@ -90,6 +95,19 @@ class KeplerianOrbit:
         add_citations_to_model(self.__citations__, model=model)
 
         self.kepler_op = KeplerOp(**kwargs)
+
+        if ecc is None and duration is not None:
+            if r_star is None:
+                r_star = tt.as_tensor_variable(1.0)
+            if b is None:
+                raise ValueError(
+                    "'b' must be provided for a circular orbit with a "
+                    "'duration'"
+                )
+            a = r_star * get_aor_from_transit_duration(
+                duration, period, b, ror=ror
+            )
+            duration = None
 
         # Parameters
         if m_planet_units is not None:
@@ -661,6 +679,25 @@ def get_true_anomaly(M, e, **kwargs):
     """
     sinf, cosf = KeplerOp()(M, e)
     return tt.arctan2(sinf, cosf)
+
+
+def get_aor_from_transit_duration(duration, period, b, ror=None):
+    """Get the semimajor axis implied by a circular orbit and duration
+
+    Args:
+        duration: The transit duration
+        period: The orbital period
+        b: The impact parameter of the transit
+        ror: The radius ratio of the planet to the star
+
+    Returns:
+        The semimajor axis in units of the stellar radius
+
+    """
+    if ror is None:
+        ror = tt.as_tensor_variable(0.0)
+    sin2_phi = tt.sin(np.pi * duration / period) ** 2
+    return tt.sqrt(((1 + ror) ** 2 - b ** 2 * (1 - sin2_phi)) / sin2_phi)
 
 
 def _get_consistent_inputs(a, period, rho_star, r_star, m_star, m_planet):

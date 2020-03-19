@@ -23,7 +23,7 @@
     "files.trimTrailingWhitespace": true,
     "C_Cpp.autoAddFileAssociations": false,
     "editor.formatOnSave": true,
-    "python.pythonPath": "/Users/dforeman/research/projects/exoplanet-dev/exoplanet/env/bin/python3.7",
+    "python.pythonPath": "env/bin/python",
     "git.ignoreLimitWarning": true,
     "[restructuredtext]": {
         "editor.wordWrap": "wordWrapColumn",
