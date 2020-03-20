@@ -51,6 +51,7 @@ Estimators
 .. autofunction:: exoplanet.estimate_minimum_mass
 .. autofunction:: exoplanet.lomb_scargle_estimator
 .. autofunction:: exoplanet.autocorr_estimator
+.. autofunction:: exoplanet.bls_estimator
 
 
 Distributions

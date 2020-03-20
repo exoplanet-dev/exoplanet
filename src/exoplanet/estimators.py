@@ -340,6 +340,25 @@ def bls_estimator(
     oversample=10,
     **kwargs,
 ):
+    """Estimate the period of a time series using box least squares
+
+    All extra keyword arguments are passed directly to
+    :func:`astropy.timeseries.BoxLeastSquares.autopower`.
+
+    Args:
+        x (ndarray[N]): The times of the observations
+        y (ndarray[N]): The observations at times ``x``
+        yerr (Optional[ndarray[N]]): The uncertainties on ``y``
+        min_period (Optional[float]): The minimum period to consider
+        max_period (Optional[float]): The maximum period to consider
+
+    Returns:
+        A dictionary with the computed autocorrelation function and the
+        estimated period. For compatibility with the
+        :func:`lomb_scargle_estimator`, the period is returned as a list with
+        the key ``peaks``.
+
+    """
     kwargs["minimum_period"] = kwargs.get("minimim_period", min_period)
     kwargs["maximum_period"] = kwargs.get("maximum_period", max_period)
 
