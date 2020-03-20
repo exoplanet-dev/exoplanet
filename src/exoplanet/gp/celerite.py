@@ -115,6 +115,16 @@ class GP:
         return self.loglike
 
     def marginal(self, name, **kwargs):
+        """The marginal likelihood
+
+        Args:
+            name: The name of the node
+            observed: The observed data
+
+        Returns:
+            A :class:`pymc3.DensityDist` with the likelihood
+
+        """
         return pm.DensityDist(name, self.log_likelihood, **kwargs)
 
     def dot_l(self, n):
