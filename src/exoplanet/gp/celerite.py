@@ -151,6 +151,27 @@ class GP:
         kernel=None,
         _fast_mean=True,
     ):
+        """Compute the conditional distribution
+
+        Args:
+            t (optional): The independent coordinates where the prediction
+                should be evaluated. If not provided, this will be evaluated
+                at the observations.
+            return_var (bool, optional): Return the variance of the conditional
+                distribution.
+            return_cov (bool, optional): Return the full covariance matrix of
+                the conditional distribution.
+            predict_mean (bool, optional): Include the mean function in the
+                prediction.
+            kernel (optional): If provided, compute the conditional
+                distribution using a different kernel. This is generally used
+                to separate the contributions from different model components.
+
+        Raises:
+            RuntimeError: if :func:`GP.condition` or :func:`marginal` are not
+                called first.
+
+        """
         if self.z is None:
             raise RuntimeError("'condition' must be called before 'predict'")
 

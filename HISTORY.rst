@@ -1,3 +1,10 @@
+0.2.6 (2020-03.23)
+++++++++++++++++++
+
+- Adds support for fitting circular orbits with duration
+- Adds a ``bls_estimator`` for transit search using Astropy's ``BoxLeastSquares``
+
+
 0.2.5 (2020-03-11)
 ++++++++++++++++++
 
