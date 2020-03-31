@@ -13,22 +13,50 @@ jobs:
         py37:
           python.version: "3.7"
           tox.env: py37
+        py37:
+          python.version: "3.8"
+          tox.env: py38
 
     steps:
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: "$(python.version)"
+      - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
+        displayName: Add conda to PATH
 
-      - script: python -m pip install -U tox
-        displayName: Install Python-based tools.
+      - script: conda create --yes --quiet --name exoplanetTest python=$(python.version) pip
+        displayName: Create Anaconda environment
+
+      - script: |
+          call activate exoplanetTest
+          conda install --yes --quiet --name exoplanetTest numpy scipy mkl-service libpython m2w64-toolchain
+        displayName: Install Theano dependencies
+
+      - script: |
+          call activate exoplanetTest
+          conda install --yes --quiet --name exoplanetTest -c conda-forge pybind11 celerite
+          python -m pip install -U pip
+          python -m pip install -r requirements-test.txt
+          python -m pip install -e .
+        displayName: Install other dependencies
+
+      - script: |
+          call activate exoplanetTest
+          python -m pytest --durations=0 -vs src/exoplanet
+        displayName: Run tests
+
 
       # - task: UsePythonVersion@0
       #   inputs:
       #     versionSpec: "$(python.version)"
-      #     architecture: "x64"
-      #   displayName: Use cached Python $(python.version) for tests.
 
-      - script: tox -e $(tox.env)
-        env:
-          TOX_AP_TEST_EXTRAS: azure-pipelines
-        displayName: run tox -e $(tox.env)
+      # - script: python -m pip install -U tox
+      #   displayName: Install Python-based tools.
+
+      # # - task: UsePythonVersion@0
+      # #   inputs:
+      # #     versionSpec: "$(python.version)"
+      # #     architecture: "x64"
+      # #   displayName: Use cached Python $(python.version) for tests.
+
+      # - script: tox -e $(tox.env)
+      #   env:
+      #     TOX_AP_TEST_EXTRAS: azure-pipelines
+      #   displayName: run tox -e $(tox.env)
