@@ -8,3 +8,5 @@ jupytext
 radvel
 rebound
 rebound_pymc3>=0.0.3
+jupyterlab
+lightkurve
