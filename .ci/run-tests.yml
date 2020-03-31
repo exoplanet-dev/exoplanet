@@ -24,7 +24,7 @@ jobs:
       - script: conda create --yes --quiet --name exoplanetTest python=$(python.version) pip
         displayName: Create Anaconda environment
 
-      - script: conda install --yes --quiet --name exoplanetTest numpy "scipy<1.4.0" mkl-service libpython m2w64-toolchain astropy matplotlib
+      - script: conda install --yes --quiet --name exoplanetTest numpy "scipy<1.4.0" mkl-service libpython m2w64-toolchain astropy matplotlib theano
         displayName: Install dependencies from defaults channel
 
       - script: conda install --yes --quiet --name exoplanetTest -c conda-forge pybind11 celerite
