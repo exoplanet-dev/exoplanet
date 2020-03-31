@@ -32,10 +32,14 @@ jobs:
       - script: |
           call activate exoplanetTest
           conda install --yes --quiet --name exoplanetTest -c conda-forge pybind11 celerite
+        displayName: Install other conda dependencies
+
+      - script: |
+          call activate exoplanetTest
           python -m pip install -U pip
           python -m pip install -r requirements-test.txt
           python -m pip install -e .
-        displayName: Install other dependencies
+        displayName: Install pip dependencies
 
       - script: |
           call activate exoplanetTest
