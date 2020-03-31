@@ -13,7 +13,7 @@ jobs:
         py37:
           python.version: "3.7"
           tox.env: py37
-        py37:
+        py38:
           python.version: "3.8"
           tox.env: py38
 
@@ -41,21 +41,16 @@ jobs:
           call activate exoplanetTest
           python -m pytest --durations=0 -vs src/exoplanet
         displayName: Run tests
-
-
       # - task: UsePythonVersion@0
       #   inputs:
       #     versionSpec: "$(python.version)"
-
       # - script: python -m pip install -U tox
       #   displayName: Install Python-based tools.
-
       # # - task: UsePythonVersion@0
       # #   inputs:
       # #     versionSpec: "$(python.version)"
       # #     architecture: "x64"
       # #   displayName: Use cached Python $(python.version) for tests.
-
       # - script: tox -e $(tox.env)
       #   env:
       #     TOX_AP_TEST_EXTRAS: azure-pipelines
