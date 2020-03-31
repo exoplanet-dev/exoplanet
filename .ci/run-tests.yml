@@ -26,7 +26,7 @@ jobs:
 
       - script: |
           call activate exoplanetTest
-          conda install --yes --quiet --name exoplanetTest numpy scipy mkl-service libpython m2w64-toolchain
+          conda install --yes --quiet --name exoplanetTest numpy "scipy<1.4.0" mkl-service libpython m2w64-toolchain
         displayName: Install Theano dependencies
 
       - script: |
