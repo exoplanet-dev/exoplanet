@@ -13,6 +13,8 @@ def get_compile_args(compiler):
     opts = ["-std=c++11", "-O2", "-DNDEBUG"]
     if sys.platform == "darwin":
         opts += ["-stdlib=libc++", "-mmacosx-version-min=10.7"]
+    if sys.platform.startswith("win"):
+        opts += ["-D_USE_MATH_DEFINES"]
     return opts
 
 
