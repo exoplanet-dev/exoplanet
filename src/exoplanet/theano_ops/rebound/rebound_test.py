@@ -1,11 +1,17 @@
 # -*- coding: utf-8 -*-
 
+import sys
+
 import numpy as np
+import pytest
 import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
 from .rebound import ReboundOp
+
+if not sys.platform.startswith("win"):
+    pytest.skip("skipping windows-only tests", allow_module_level=True)
 
 
 class TestRebound(utt.InferShapeTester):

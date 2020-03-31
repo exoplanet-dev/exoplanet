@@ -2,33 +2,31 @@ trigger:
   - master
 
 jobs:
-  - job: 'Test'
+  - job: "Test"
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: "vs2017-win2016"
     strategy:
       matrix:
         py36:
-          python.version: '3.6'
+          python.version: "3.6"
           tox.env: py36
         py37:
-          python.version: '3.7'
+          python.version: "3.7"
           tox.env: py37
 
     steps:
       - task: UsePythonVersion@0
-        displayName: Get Python for Python tools.
         inputs:
-          versionSpec: '3.7'
+          versionSpec: "$(python.version)"
           addToPath: false
-        name: pyTools
 
       - script: $(pyTools.pythonLocation)/bin/python -m pip install -U tox
         displayName: Install Python-based tools.
 
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: '$(python.version)'
-          architecture: 'x64'
+          versionSpec: "$(python.version)"
+          architecture: "x64"
         displayName: Use cached Python $(python.version) for tests.
 
       - script: $(pyTools.pythonLocation)/bin/tox -e $(tox.env)
