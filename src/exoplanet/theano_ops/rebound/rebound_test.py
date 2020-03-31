@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import sys
-
 import numpy as np
 import pytest
 import theano
@@ -10,8 +8,12 @@ from theano.tests import unittest_tools as utt
 
 from .rebound import ReboundOp
 
-if not sys.platform.startswith("win"):
-    pytest.skip("skipping windows-only tests", allow_module_level=True)
+try:
+    import rebound  # NOQA
+except ImportError:
+    pytest.skip(
+        "skipping rebound tests when not installed", allow_module_level=True
+    )
 
 
 class TestRebound(utt.InferShapeTester):

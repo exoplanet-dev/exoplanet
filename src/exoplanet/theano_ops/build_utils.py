@@ -17,7 +17,7 @@ def get_compile_args(compiler):
         opts += [
             "-D_USE_MATH_DEFINES",
             "-fno-asynchronous-unwind-tables",
-            "-stdlib=libc++",
+            "/std:c++14",
         ]
     return opts
 

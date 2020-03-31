@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import sys
-
 import numpy as np
 import pytest
 import theano
@@ -10,8 +8,12 @@ from ..light_curves import LimbDarkLightCurve
 from .keplerian import KeplerianOrbit
 from .rebound import ReboundOrbit
 
-if not sys.platform.startswith("win"):
-    pytest.skip("skipping windows-only tests", allow_module_level=True)
+try:
+    import rebound  # NOQA
+except ImportError:
+    pytest.skip(
+        "skipping rebound tests when not installed", allow_module_level=True
+    )
 
 
 @pytest.mark.parametrize(
