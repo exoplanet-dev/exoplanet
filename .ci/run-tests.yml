@@ -18,18 +18,17 @@ jobs:
       - task: UsePythonVersion@0
         inputs:
           versionSpec: "$(python.version)"
-          addToPath: false
 
-      - script: $(pyTools.pythonLocation)/bin/python -m pip install -U tox
+      - script: python -m pip install -U tox
         displayName: Install Python-based tools.
 
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: "$(python.version)"
-          architecture: "x64"
-        displayName: Use cached Python $(python.version) for tests.
+      # - task: UsePythonVersion@0
+      #   inputs:
+      #     versionSpec: "$(python.version)"
+      #     architecture: "x64"
+      #   displayName: Use cached Python $(python.version) for tests.
 
-      - script: $(pyTools.pythonLocation)/bin/tox -e $(tox.env)
+      - script: tox -e $(tox.env)
         env:
           TOX_AP_TEST_EXTRAS: azure-pipelines
         displayName: run tox -e $(tox.env)
