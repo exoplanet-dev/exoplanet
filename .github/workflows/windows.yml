@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.7', '2.8']
+        python-version: ['3.7', '3.8']
     
     steps:
       - uses: actions/checkout@v2
@@ -23,16 +23,13 @@ jobs:
           conda list
       - name: Install conda environment
         run: |
-          conda create --yes --quiet --name exoplanetTest python=3.8 pip
-          conda install --yes --quiet --name exoplanetTest numpy "scipy<1.4.0" mkl-service libpython m2w64-toolchain astropy matplotlib theano
-          conda install --yes --quiet --name exoplanetTest -c conda-forge pybind11 celerite
-          conda activate exoplanetTest
+          conda install --yes --quiet numpy "scipy<1.4.0" mkl-service libpython m2w64-toolchain astropy matplotlib theano
+          conda install --yes --quiet -c conda-forge pybind11 celerite
           python -m pip install -U pip
           python -m pip install -r requirements-test.txt
           python -m pip install -e .
       - name: Test with pytest
         run: |
-          conda activate exoplanetTest
           python -m pytest -vs src/exoplanet
 
 #       - name: Set up Python 3.8
