@@ -1,0 +1,41 @@
+name: Windows Tests
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install conda environment
+        run: |
+          conda create --yes --quiet --name exoplanetTest python=3.8 pip
+          conda install --yes --quiet --name exoplanetTest numpy "scipy<1.4.0" mkl-service libpython m2w64-toolchain astropy matplotlib theano
+          conda install --yes --quiet --name exoplanetTest -c conda-forge pybind11 celerite
+          conda activate exoplanetTest
+          python -m pip install -U pip
+          python -m pip install -r requirements-test.txt
+          python -m pip install -e .
+      - name: Test with pytest
+        run: |
+          conda activate exoplanetTest
+          python -m pytest -vs src/exoplanet
+
+#       - name: Set up Python 3.8
+#         uses: actions/setup-python@v1
+#         with:
+#           python-version: 3.8
+#       - name: Install dependencies
+#         run: |
+#           python -m pip install --upgrade pip
+#           python -m pip install .
+#       - name: Lint with black and mypy
+#         run: |
+#           python -m pip install black mypy
+#           black --check src
+#           mypy --ignore-missing-imports src
+#       - name: Test with pytest
+#         run: |
+#           python -m pip install pytest pytest-aiohttp
+#           python -m pytest -vs tests
