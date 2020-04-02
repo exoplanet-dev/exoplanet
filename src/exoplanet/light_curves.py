@@ -41,6 +41,20 @@ class LimbDarkLightCurve:
         self.c = get_cl(u_ext)
         self.c_norm = self.c / (np.pi * (self.c[0] + 2 * self.c[1] / 3))
 
+    def get_ror_from_approx_transit_depth(self, b, delta):
+        b = tt.as_tensor_variable(b)
+        delta = tt.as_tensor_variable(delta)
+        n = 1 + tt.arange(self.u.size)
+        f0 = 1 - tt.sum(2 * self.u / (n ** 2 + 3 * n + 2))
+        arg = 1 - tt.sqrt(1 - b ** 2)
+        print(
+            b.eval().shape,
+            arg.eval().shape,
+            (self.u[:, None] * arg ** n[:, None]).eval().shape,
+        )
+        f = 1 - tt.sum(self.u[:, None] * arg ** n[:, None], axis=0)
+        return tt.reshape(tt.sqrt(delta * f0 / f), b.shape)
+
     def get_light_curve(
         self,
         orbit=None,

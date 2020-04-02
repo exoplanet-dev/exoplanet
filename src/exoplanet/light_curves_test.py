@@ -48,9 +48,9 @@ def test_light_curve_grad():
     b_val = np.linspace(-1.5, 1.5, 20)
     r_val = 0.1 + np.zeros_like(b_val)
 
-    lc = lambda u, b, r: LimbDarkLightCurve(u)._compute_light_curve(
+    lc = lambda u, b, r: LimbDarkLightCurve(u)._compute_light_curve(  # NOQA
         b, r
-    )  # NOQA
+    )
     utt.verify_grad(lc, [u_val, b_val, r_val])
 
 
@@ -228,3 +228,29 @@ def test_singular_points():
 
     # Test the b = 1 + r singular point
     compare(1.1, 0.1, 1e-8, 0.0)
+
+
+def _check_quad(u, b, depth, ror):
+    u1 = u[0]
+    u2 = u[1]
+    mu = np.sqrt(1 - b ** 2)
+    expect = np.sqrt(
+        depth
+        * (1 - u1 / 3 - u2 / 6)
+        / (1 - u1 * (1 - mu) - u2 * (1 - mu) ** 2)
+    )
+    assert np.shape(expect) == np.shape(ror)
+    assert np.allclose(expect, ror)
+
+
+def test_approx_transit_depth():
+    u = np.array([0.3, 0.2])
+    lc = LimbDarkLightCurve(u)
+
+    for b, delta in [
+        (np.float64(0.5), np.float64(0.01)),
+        (np.array([0.1, 0.9]), np.array([0.1, 0.5])),
+        (np.array([0.1, 0.9, 0.3]), np.array([0.1, 0.5, 0.0234])),
+    ]:
+        ror = lc.get_ror_from_approx_transit_depth(b, delta).eval()
+        _check_quad(u, b, delta, ror)
