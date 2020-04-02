@@ -14,7 +14,11 @@ def get_compile_args(compiler):
     if sys.platform == "darwin":
         opts += ["-stdlib=libc++", "-mmacosx-version-min=10.7"]
     if sys.platform.startswith("win"):
-        opts += ["-D_USE_MATH_DEFINES", "-D_hypot=hypot", "-O0"]
+        opts += [
+            "-D_USE_MATH_DEFINES",
+            "-D_hypot=hypot",
+            "-fno-asynchronous-unwind-tables",
+        ]
     else:
         opts += ["-O2"]
     return opts
