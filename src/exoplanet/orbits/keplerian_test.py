@@ -8,7 +8,11 @@ import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
 from ..units import with_unit
-from .keplerian import KeplerianOrbit, _get_consistent_inputs
+from .keplerian import (
+    KeplerianOrbit,
+    _get_consistent_inputs,
+    get_aor_from_transit_duration,
+)
 
 
 def test_sky_coords():
@@ -466,3 +470,38 @@ def test_get_consistent_inputs():
 
     with pytest.raises(ValueError):
         _get_consistent_inputs(a3, None, rho_star3, r_star3, m_star3, None)
+
+
+def test_get_aor_from_transit_duration():
+    duration = 0.12
+    period = 10.1235
+    b = 0.34
+    ror = 0.06
+    r_star = 0.7
+
+    dv = tt.as_tensor_variable(duration)
+    aor, jac = get_aor_from_transit_duration(dv, period, b, ror)
+
+    assert np.allclose(theano.grad(aor, dv).eval(), jac.eval())
+
+    for orbit in [
+        KeplerianOrbit(
+            period=period, t0=0.0, b=b, a=r_star * aor, r_star=r_star
+        ),
+        KeplerianOrbit(
+            period=period,
+            t0=0.0,
+            b=b,
+            duration=duration,
+            r_star=r_star,
+            ror=ror,
+        ),
+    ]:
+        x, y, z = orbit.get_planet_position(0.5 * duration)
+        assert np.allclose(tt.sqrt(x ** 2 + y ** 2).eval(), r_star * (1 + ror))
+
+        x, y, z = orbit.get_planet_position(-0.5 * duration)
+        assert np.allclose(tt.sqrt(x ** 2 + y ** 2).eval(), r_star * (1 + ror))
+
+        x, y, z = orbit.get_planet_position(period + 0.5 * duration)
+        assert np.allclose(tt.sqrt(x ** 2 + y ** 2).eval(), r_star * (1 + ror))

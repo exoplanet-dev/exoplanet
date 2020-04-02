@@ -104,9 +104,10 @@ class KeplerianOrbit:
                     "'b' must be provided for a circular orbit with a "
                     "'duration'"
                 )
-            a = r_star * get_aor_from_transit_duration(
+            aor, _ = get_aor_from_transit_duration(
                 duration, period, b, ror=ror
             )
+            a = r_star * aor
             duration = None
 
         # Parameters
@@ -691,13 +692,21 @@ def get_aor_from_transit_duration(duration, period, b, ror=None):
         ror: The radius ratio of the planet to the star
 
     Returns:
-        The semimajor axis in units of the stellar radius
+        The semimajor axis in units of the stellar radius and the Jacobian
+        ``d a / d duration``
 
     """
     if ror is None:
         ror = tt.as_tensor_variable(0.0)
-    sin2_phi = tt.sin(np.pi * duration / period) ** 2
-    return tt.sqrt(((1 + ror) ** 2 - b ** 2 * (1 - sin2_phi)) / sin2_phi)
+    b2 = b ** 2
+    opk2 = (1 + ror) ** 2
+    phi = np.pi * duration / period
+    sinp = tt.sin(phi)
+    cosp = tt.cos(phi)
+    num = tt.sqrt(opk2 - b2 * cosp ** 2)
+    aor = num / sinp
+    grad = np.pi * cosp * (b2 - opk2) / (num * period * sinp ** 2)
+    return aor, grad
 
 
 def _get_consistent_inputs(a, period, rho_star, r_star, m_star, m_planet):

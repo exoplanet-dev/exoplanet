@@ -252,5 +252,7 @@ def test_approx_transit_depth():
         (np.array([0.1, 0.9]), np.array([0.1, 0.5])),
         (np.array([0.1, 0.9, 0.3]), np.array([0.1, 0.5, 0.0234])),
     ]:
-        ror = lc.get_ror_from_approx_transit_depth(b, delta).eval()
-        _check_quad(u, b, delta, ror)
+        dv = tt.as_tensor_variable(delta)
+        ror, jac = lc.get_ror_from_approx_transit_depth(dv, b, jac=True)
+        _check_quad(u, b, delta, ror.eval())
+        assert np.allclose(theano.grad(tt.sum(ror), dv).eval(), jac.eval())

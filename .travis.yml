@@ -42,7 +42,7 @@ install:
   - travis_retry python setup.py develop
 
 script:
-  - python -m pytest -vs --durations=0 src/exoplanet
+  - python -m pytest -vs --cov=exoplanet src/exoplanet
 
 after_success:
   - coveralls

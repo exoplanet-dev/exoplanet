@@ -36,5 +36,5 @@ jobs:
 
       - script: |
           call activate exoplanetTest
-          python -m pytest --durations=0 -vs src/exoplanet
+          python -m pytest -vs src/exoplanet
         displayName: Run tests
