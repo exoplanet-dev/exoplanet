@@ -7,6 +7,7 @@ __all__ = [
 ]
 
 import warnings
+from collections import defaultdict
 
 import numpy as np
 import theano.tensor as tt
@@ -94,8 +95,11 @@ class KeplerianOrbit:
     ):
         add_citations_to_model(self.__citations__, model=model)
 
+        self.jacobians = defaultdict(lambda: defaultdict(None))
+
         self.kepler_op = KeplerOp(**kwargs)
 
+        daordtau = None
         if ecc is None and duration is not None:
             if r_star is None:
                 r_star = tt.as_tensor_variable(1.0)
@@ -104,7 +108,7 @@ class KeplerianOrbit:
                     "'b' must be provided for a circular orbit with a "
                     "'duration'"
                 )
-            aor, _ = get_aor_from_transit_duration(
+            aor, daordtau = get_aor_from_transit_duration(
                 duration, period, b, ror=ror
             )
             a = r_star * aor
@@ -141,6 +145,28 @@ class KeplerianOrbit:
         self.n = 2 * np.pi / self.period
         self.a_star = self.a * self.m_planet / self.m_total
         self.a_planet = -self.a * self.m_star / self.m_total
+
+        # Track the Jacobian between the duration and a
+        if daordtau is not None:
+            dadtau = self.r_star * daordtau
+            self.jacobians["duration"]["a"] = dadtau
+            self.jacobians["duration"]["a_star"] = (
+                dadtau * self.m_planet / self.m_total
+            )
+            self.jacobians["duration"]["a_planet"] = (
+                -dadtau * self.m_star / self.m_total
+            )
+
+            # rho = 3 * pi * (a/R)**3 / (G * P**2)
+            # -> drho / d(a/R) = 9 * pi * (a/R)**2 / (G * P**2)
+            self.jacobians["duration"]["rho_star"] = (
+                9
+                * np.pi
+                * (self.a / self.r_star) ** 2
+                * daordtau
+                * gcc_per_sun
+                / (G_grav * self.period ** 2)
+            )
 
         self.K0 = self.n * self.a / self.m_total
 
@@ -182,7 +208,9 @@ class KeplerianOrbit:
             incl_factor = (1 + self.ecc * self.sin_omega) / ome2
 
         # The Jacobian for the transform cos(i) -> b
-        self.dcosidb = incl_factor * self.r_star / self.a
+        self.dcosidb = self.jacobians["b"]["cos_incl"] = (
+            incl_factor * self.r_star / self.a
+        )
 
         if b is not None:
             if incl is not None or duration is not None:

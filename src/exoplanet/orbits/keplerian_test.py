@@ -505,3 +505,41 @@ def test_get_aor_from_transit_duration():
 
         x, y, z = orbit.get_planet_position(period + 0.5 * duration)
         assert np.allclose(tt.sqrt(x ** 2 + y ** 2).eval(), r_star * (1 + ror))
+
+
+def test_jacobians():
+    duration = 0.12
+    period = 10.1235
+    b = 0.34
+    ror = 0.06
+    r_star = 0.7
+
+    dv = tt.as_tensor_variable(duration)
+    orbit = KeplerianOrbit(
+        period=period, t0=0.0, b=b, duration=dv, r_star=r_star, ror=ror
+    )
+    assert np.allclose(
+        orbit.jacobians["duration"]["a"].eval(),
+        theano.grad(orbit.a, dv).eval(),
+    )
+    assert np.allclose(
+        orbit.jacobians["duration"]["a_planet"].eval(),
+        theano.grad(orbit.a_planet, dv).eval(),
+    )
+    assert np.allclose(
+        orbit.jacobians["duration"]["a_star"].eval(),
+        theano.grad(orbit.a_star, dv).eval(),
+    )
+    assert np.allclose(
+        orbit.jacobians["duration"]["rho_star"].eval(),
+        theano.grad(orbit.rho_star, dv).eval(),
+    )
+
+    bv = tt.as_tensor_variable(b)
+    orbit = KeplerianOrbit(
+        period=period, t0=0.0, b=bv, a=orbit.a, r_star=r_star, ror=ror
+    )
+    assert np.allclose(
+        orbit.jacobians["b"]["cos_incl"].eval(),
+        theano.grad(orbit.cos_incl, bv).eval(),
+    )
