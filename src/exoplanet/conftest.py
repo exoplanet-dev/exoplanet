@@ -8,10 +8,6 @@ import theano
 @pytest.fixture(scope="package", autouse=True)
 def theano_config():
     flags = dict(compute_test_value="off")
-    # import platform
-    # if platform.system() == "Windows":
-    #     print("windows")
-    #     flags["mode"] = "FAST_COMPILE"
     config = theano.configparser.change_flags(**flags)
     with config:
         yield

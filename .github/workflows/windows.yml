@@ -1,4 +1,4 @@
-name: Windows Tests
+name: Windows
 
 on: [push, pull_request]
 
@@ -9,15 +9,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.7', '3.8']
-    
+        python-version: ["3.7", "3.8"]
+
     steps:
       - uses: actions/checkout@v2
       - uses: goanpeca/setup-miniconda@v1
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
-      - name: Show conda info 
+      - name: Show conda info
         run: |
           conda info
           conda list
