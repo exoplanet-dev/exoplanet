@@ -7,7 +7,12 @@ import pymc3 as pm
 import pytest
 from scipy.stats import kstest
 
-from .base import Angle, Periodic, UnitUniform, UnitVector
+from exoplanet.distributions.base import (
+    Angle,
+    Periodic,
+    UnitUniform,
+    UnitVector,
+)
 
 
 class _Base:

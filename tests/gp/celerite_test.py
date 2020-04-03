@@ -6,8 +6,8 @@ import theano
 import theano.tensor as tt
 from scipy.linalg import cho_solve, cholesky
 
-from . import terms
-from .celerite import GP
+from exoplanet.gp import terms
+from exoplanet.gp.celerite import GP
 
 
 def test_broadcast_dim():

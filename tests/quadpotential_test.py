@@ -2,7 +2,10 @@
 
 import numpy as np
 
-from .quadpotential import QuadPotentialDenseAdapt, _WeightedCovariance
+from exoplanet.quadpotential import (
+    QuadPotentialDenseAdapt,
+    _WeightedCovariance,
+)
 
 
 def get_cov(ndim):

@@ -5,16 +5,15 @@ import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
-from ...gp import terms
-from .factor import FactorOp
-from .solve import SolveOp
+from exoplanet.gp import terms
+from exoplanet.theano_ops.celerite.factor import FactorOp
 
 
-class TestSolve(utt.InferShapeTester):
+class TestFactor(utt.InferShapeTester):
     def setUp(self):
-        super(TestSolve, self).setUp()
-        self.op_class = SolveOp
-        self.op = SolveOp()
+        super(TestFactor, self).setUp()
+        self.op_class = FactorOp
+        self.op = FactorOp()
 
     def get_celerite_matrices(self):
         ar = tt.vector()
@@ -29,12 +28,10 @@ class TestSolve(utt.InferShapeTester):
 
         x = tt.vector()
         diag = tt.vector()
-        Y = tt.matrix()
-        a, U, V, P = kernel.get_celerite_matrices(x, diag)
-        d, W, S, flag = FactorOp()(a, U, V, P)
-
-        args = [ar, cr, ac, bc, cc, dc, x, diag, Y]
-        M = theano.function(args, [U, P, d, W, Y])
+        matrices = kernel.get_celerite_matrices(x, diag)
+        args = [ar, cr, ac, bc, cc, dc, x, diag]
+        M = theano.function(args, matrices)
+        K = theano.function(args, kernel.to_dense(x, diag))
 
         np.random.seed(42)
         N = 15
@@ -47,26 +44,19 @@ class TestSolve(utt.InferShapeTester):
             np.array([1.0, 1.0]),
             np.sort(np.random.rand(N)),
             np.random.uniform(0.1, 0.5, N),
-            np.random.uniform(0.1, 0.5, (N, 1)),
         ]
 
-        return M(*vals)
+        return M(*vals), K(*vals)
 
     def get_args(self):
-        args = [
-            tt.matrix(),
-            tt.matrix(),
-            tt.vector(),
-            tt.matrix(),
-            tt.matrix(),
-        ]
+        args = [tt.vector(), tt.matrix(), tt.matrix(), tt.matrix()]
         f = theano.function(args, self.op(*args))
-        vals = self.get_celerite_matrices()
-        return f, args, vals
+        vals, K = self.get_celerite_matrices()
+        return f, args, vals, K
 
     def test_grad(self):
-        eps = 1e-7
-        f, args, vals = self.get_args()
+        eps = 1e-5
+        f, args, vals, _ = self.get_args()
         output0 = f(*vals)
 
         # Go through and backpropagate all of the gradients from the outputs
@@ -97,6 +87,4 @@ class TestSolve(utt.InferShapeTester):
                         ind = np.unravel_index(j, output0[i].shape)
                         delta = 0.5 * (plus[i][ind] - minus[i][ind]) / eps
                         ref = grad0[i][j][k][inner]
-                        assert np.abs(delta - ref) < 2 * eps, "{0}".format(
-                            (k, l, i, j, delta, ref, delta - ref)
-                        )
+                        assert np.abs(delta - ref) < 2 * eps
