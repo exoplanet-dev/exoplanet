@@ -4,9 +4,9 @@ import numpy as np
 import pytest
 import theano
 
-from ..light_curves import LimbDarkLightCurve
-from .keplerian import KeplerianOrbit
-from .rebound import ReboundOrbit
+from exoplanet.light_curves import LimbDarkLightCurve
+from exoplanet.orbits.keplerian import KeplerianOrbit
+from exoplanet.orbits.rebound import ReboundOrbit
 
 try:
     import rebound  # NOQA

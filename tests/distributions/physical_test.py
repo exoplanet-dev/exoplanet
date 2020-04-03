@@ -4,8 +4,9 @@ import numpy as np
 import pymc3 as pm
 from scipy.stats import kstest
 
+from exoplanet.distributions.physical import ImpactParameter, QuadLimbDark
+
 from .base_test import _Base
-from .physical import ImpactParameter, QuadLimbDark
 
 
 class TestPhysical(_Base):

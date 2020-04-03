@@ -4,8 +4,8 @@ __all__ = ["test_basic"]
 
 import pymc3 as pm
 
-from .citations import CITATIONS, get_citations_for_model
-from .light_curves import LimbDarkLightCurve
+from exoplanet.citations import CITATIONS, get_citations_for_model
+from exoplanet.light_curves import LimbDarkLightCurve
 
 
 def test_basic():

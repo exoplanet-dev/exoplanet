@@ -3,13 +3,13 @@
 import astropy.units as u
 import numpy as np
 
-from .estimators import (
+from exoplanet.estimators import (
     autocorr_estimator,
     estimate_minimum_mass,
     estimate_semi_amplitude,
     lomb_scargle_estimator,
 )
-from .orbits import KeplerianOrbit
+from exoplanet.orbits import KeplerianOrbit
 
 
 def test_estimate_semi_amplitude(seed=9502):

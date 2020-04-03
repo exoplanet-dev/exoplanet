@@ -3,8 +3,12 @@
 import numpy as np
 import pytest
 
+from exoplanet.distributions.deprecated import (
+    RadiusImpact,
+    get_joint_radius_impact,
+)
+
 from .base_test import _Base
-from .deprecated import RadiusImpact, get_joint_radius_impact
 
 
 class TestPhyscial(_Base):

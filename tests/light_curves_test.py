@@ -7,8 +7,8 @@ import theano.tensor as tt
 from packaging import version
 from theano.tests import unittest_tools as utt
 
-from .light_curves import LimbDarkLightCurve
-from .orbits import KeplerianOrbit
+from exoplanet.light_curves import LimbDarkLightCurve
+from exoplanet.orbits import KeplerianOrbit
 
 try:
     import starry

@@ -6,7 +6,9 @@ import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
-from .integrated_limbdark import IntegratedLimbDarkOp
+from exoplanet.theano_ops.starry.integrated_limbdark import (
+    IntegratedLimbDarkOp,
+)
 
 
 class TestIntegratedLimbDark(utt.InferShapeTester):

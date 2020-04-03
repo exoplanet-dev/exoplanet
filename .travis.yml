@@ -39,10 +39,10 @@ install:
   - travis_retry python -m pip install -U numpy pybind11
   - travis_retry python -m pip install -U -r requirements-test.txt
   - travis_retry python -m pip install -U rebound
-  - travis_retry python setup.py develop
+  - travis_retry python -m pip install .
 
 script:
-  - python -m pytest -vs --cov=exoplanet src/exoplanet
+  - python -m pytest -vs --cov=exoplanet tests
 
 after_success:
   - coveralls

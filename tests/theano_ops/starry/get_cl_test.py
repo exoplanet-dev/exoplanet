@@ -5,8 +5,8 @@ import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
-from .get_cl import GetClOp
-from .get_cl_rev import GetClRevOp
+from exoplanet.theano_ops.starry.get_cl import GetClOp
+from exoplanet.theano_ops.starry.get_cl_rev import GetClRevOp
 
 
 class TestGetCl(utt.InferShapeTester):
