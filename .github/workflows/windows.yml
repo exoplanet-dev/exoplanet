@@ -23,7 +23,7 @@ jobs:
           conda list
       - name: Install dependencies
         run: |
-          conda install --yes --quiet numpy "scipy<1.4.0" mkl-service libpython m2w64-toolchain astropy matplotlib theano
+          conda install --yes --quiet numpy scipy mkl-service libpython m2w64-toolchain astropy matplotlib theano
           conda install --yes --quiet -c conda-forge pybind11 celerite
           python -m pip install -U pip pytest-astropy
           python -m pip install -r requirements-test.txt
