@@ -27,7 +27,7 @@ def test_optimize(seed=1234):
     x_val = np.random.randn(5, 3)
     with pm.Model():
         pm.Normal("x", shape=x_val.shape, testval=x_val)
-        soln1 = optimize()
+        soln1 = optimize(verbose=False)
         soln2, info = optimize(soln1, return_info=True, verbose=False)
 
     assert np.allclose(soln1["x"], 0.0)
