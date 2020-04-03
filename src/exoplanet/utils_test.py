@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import sys
-
 import numpy as np
 import pymc3 as pm
-import pytest
 
 from .utils import eval_in_model, optimize
 
@@ -19,9 +16,6 @@ def test_eval_in_model(seed=123409):
         assert np.allclose(eval_in_model(x, {"x": x_val2}), x_val2)
 
 
-# @pytest.mark.skipif(
-#     sys.platform.startswith("win"), reason="Unknown crash on Windows"
-# )
 def test_optimize(seed=1234):
     np.random.seed(seed)
     x_val = np.random.randn(5, 3)

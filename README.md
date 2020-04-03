@@ -1,5 +1,4 @@
-exoplanet
-=========
+# exoplanet
 
 <p>
   <a href="https://github.com/exoplanet-dev/exoplanet">
@@ -16,6 +15,8 @@ exoplanet
   <br>
   <a href="https://travis-ci.com/exoplanet-dev/exoplanet">
     <img src="https://img.shields.io/travis/exoplanet-dev/exoplanet/master.svg?style=flat&label=tests"></a>
+  <a href="https://github.com/exoplanet-dev/exoplanet/actions">
+    <img src="https://img.shields.io/github/workflow/status/exoplanet-dev/exoplanet/Windows?style=flat&label=windows"></a>
   <a href="https://dev.azure.com/foremanmackey/exoplanet/_build?definitionId=15">
     <img
       src="https://img.shields.io/azure-devops/build/foremanmackey/exoplanet/15/master?label=paper&style=flat"></a>
@@ -35,13 +36,13 @@ exoplanet
     <img src="https://img.shields.io/badge/powered_by-corTeX-EB5368.svg?style=flat"></a>
 </p>
 
-*exoplanet* is a toolkit for probabilistic modeling of transit and/or
+_exoplanet_ is a toolkit for probabilistic modeling of transit and/or
 radial velocity observations of
 [exoplanets](https://en.wikipedia.org/wiki/Exoplanet) and other
-astronomical time series using [PyMC3](https://docs.pymc.io). *PyMC3* is
+astronomical time series using [PyMC3](https://docs.pymc.io). _PyMC3_ is
 a flexible and high-performance model building language and inference
 engine that scales well to problems with a large number of parameters.
-*exoplanet* extends *PyMC3*'s language to support many of the custom
+_exoplanet_ extends _PyMC3_'s language to support many of the custom
 functions and distributions required when fitting exoplanet datasets.
 These features include:
 
@@ -56,7 +57,7 @@ These features include:
 - And many others!
 
 All of these functions and distributions include methods for efficiently
-calculating their *gradients* so that they can be used with
+calculating their _gradients_ so that they can be used with
 gradient-based inference methods like [Hamiltonian Monte
 Carlo](https://arxiv.org/abs/1206.1901), [No U-Turns
 Sampling](https://arxiv.org/abs/1111.4246), and [variational
@@ -65,9 +66,9 @@ more robust than the methods more commonly used in astronomy (like
 [ensemble samplers](https://emcee.readthedocs.io) and [nested
 sampling](https://ccpforge.cse.rl.ac.uk/gf/project/multinest/))
 especially when the model has more than a few parameters. For many
-exoplanet applications, *exoplanet* (the code) can improve the typical
+exoplanet applications, _exoplanet_ (the code) can improve the typical
 performance by orders of magnitude.
 
-*exoplanet* is being actively developed in [a public repository on
+_exoplanet_ is being actively developed in [a public repository on
 GitHub](https://github.com/exoplanet-dev/exoplanet) so if you have any trouble,
 [open an issue](https://github.com/exoplanet-dev/exoplanet/issues) there.
