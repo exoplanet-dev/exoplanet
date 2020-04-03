@@ -1,4 +1,11 @@
-0.2.6 (2020-03.23)
+0.3.0 (2020-04-03)
+++++++++++++++++++
+
+- Adds tests and support for Windows
+- Adds a "Jacobian" interface to the orbit objects for reparameterization
+
+
+0.2.6 (2020-03-23)
 ++++++++++++++++++
 
 - Adds support for fitting circular orbits with duration
