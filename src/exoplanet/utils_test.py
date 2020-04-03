@@ -19,16 +19,16 @@ def test_eval_in_model(seed=123409):
         assert np.allclose(eval_in_model(x, {"x": x_val2}), x_val2)
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Unknown crash on Windows"
-)
+# @pytest.mark.skipif(
+#     sys.platform.startswith("win"), reason="Unknown crash on Windows"
+# )
 def test_optimize(seed=1234):
     np.random.seed(seed)
     x_val = np.random.randn(5, 3)
     with pm.Model():
         pm.Normal("x", shape=x_val.shape, testval=x_val)
         soln1 = optimize()
-        soln2, info = optimize(soln1, return_info=True)
+        soln2, info = optimize(soln1, return_info=True, verbose=False)
 
     assert np.allclose(soln1["x"], 0.0)
     assert np.allclose(soln2["x"], 0.0)
