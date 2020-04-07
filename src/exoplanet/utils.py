@@ -9,6 +9,7 @@ __all__ = [
     "get_theano_function_for_var",
     "deprecation_warning",
     "deprecated",
+    "estimate_inverse_gamma_parameters",
 ]
 
 import logging
@@ -29,11 +30,25 @@ from pymc3.util import (
     is_transformed_name,
     update_start_vals,
 )
+from scipy.optimize import root
+from scipy.special import gammaincc
 
 logger = logging.getLogger("exoplanet")
 
 
 def get_args_for_theano_function(point=None, model=None):
+    """Get the arguments required to evaluate a PyMC3 model component
+
+    Use the result as the arguments for the callable returned by the
+    :func:`get_theano_function_for_var` function.
+
+    Args:
+        point (dict, optional): The point in parameter space where the model
+            componenet should be evaluated
+        model (optional): The PyMC3 model object. By default, the current
+            context will be used.
+
+    """
     model = pm.modelcontext(model)
     if point is None:
         point = model.test_point
@@ -41,6 +56,18 @@ def get_args_for_theano_function(point=None, model=None):
 
 
 def get_theano_function_for_var(var, model=None, **kwargs):
+    """Get a callable function to evaluate a component of a PyMC3 model
+
+    This should then be called using the arguments returned by the
+    :func:`get_args_for_theano_function` function.
+
+    Args:
+        var: The model component to evaluate. This can be a Theano tensor, a
+            PyMC3 variable, or a list of these
+        model (optional): The PyMC3 model object. By default, the current
+            context will be used.
+
+    """
     model = pm.modelcontext(model)
     kwargs["on_unused_input"] = kwargs.get("on_unused_input", "ignore")
     return theano.function(model.vars, var, **kwargs)
@@ -215,3 +242,52 @@ def deprecated(alternate=None):
         return f
 
     return wrapper
+
+
+def estimate_inverse_gamma_parameters(
+    lower, upper, target=0.01, initial=None, **kwargs
+):
+    r"""Estimate an inverse Gamma with desired tail probabilities
+
+    This method numerically solves for the parameters of an inverse Gamma
+    distribution where the tails have a given probability. In other words
+    :math:`P(x < \mathrm{lower}) = \mathrm{target}` and similarly for the
+    upper bound. More information can be found in `part 4 of this blog post
+    `https://betanalpha.github.io/assets/case_studies/gp_part3/part3.html>`_.
+
+    Args:
+        lower (float): The location of the lower tail
+        upper (float): The location of the upper tail
+        target (float, optional): The desired tail probability
+        initial (ndarray, optional): An initial guess for the parameters
+            ``alpha`` and ``beta``
+
+    Raises:
+        RuntimeError: If the solver does not converge.
+
+    Returns:
+        dict: A dictionary with the keys ``alpha`` and ``beta`` for the
+        parameters of the distribution.
+
+    """
+    lower, upper = np.sort([lower, upper])
+    if initial is None:
+        initial = np.array([2.0, 0.5 * (lower + upper)])
+    if np.shape(initial) != (2,) or np.any(np.asarray(initial) <= 0.0):
+        raise ValueError("invalid initial guess")
+
+    def obj(x):
+        a, b = np.exp(x)
+        return np.array(
+            [
+                gammaincc(a, b / lower) - target,
+                1 - gammaincc(a, b / upper) - target,
+            ]
+        )
+
+    result = root(obj, np.log(initial), method="hybr", **kwargs)
+    if not result.success:
+        raise RuntimeError(
+            "failed to find parameter estimates: \n{0}".format(result.message)
+        )
+    return dict(zip(("alpha", "beta"), np.exp(result.x)))

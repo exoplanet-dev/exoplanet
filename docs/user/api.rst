@@ -83,9 +83,12 @@ Utilities
 
 .. autofunction:: exoplanet.optimize
 .. autofunction:: exoplanet.eval_in_model
+.. autofunction:: exoplanet.get_theano_function_for_var
+.. autofunction:: exoplanet.get_args_for_theano_function
 .. autofunction:: exoplanet.get_samples_from_trace
 .. autofunction:: exoplanet.get_dense_nuts_step
 
+.. autofunction:: exoplanet.estimate_inverse_gamma_parameters
 .. autofunction:: exoplanet.orbits.ttv.compute_expected_transit_times
 
 

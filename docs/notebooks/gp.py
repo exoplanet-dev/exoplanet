@@ -78,27 +78,36 @@ _ = plt.ylim(-2.5, 2.5)
 # $$
 #
 # The first term is :class:`exoplanet.gp.terms.SHOterm` with $Q=1/\sqrt{2}$ and the second is regular :class:`exoplanet.gp.terms.SHOterm`.
-# This model has 5 free parameters ($S_1$, $\omega_1$, $S_2$, $\omega_2$, and $Q$) and they must all be positive so we'll fit for the log of each parameter.
-# Using *exoplanet*, this is how you would build this model,
-# choosing more or less arbitrary initial values for the parameters.
+# This model has g free parameters: $S_1$, $\omega_1$, $S_2$, $\omega_2$, $Q$, and a constant mean value.
+# Most of the parameters will have weakly informative inverse Gamma priors (see [this blog post](https://betanalpha.github.io/assets/case_studies/gp_part3/part3.html#4_adding_an_informative_prior_for_the_length_scale) for a discussion of these priors) where the parameters are chosen to have reasonable tail probabilities.
+# Using *exoplanet*, this is how you would build this model:
 
 # %%
 import pymc3 as pm
 import theano.tensor as tt
 from exoplanet.gp import terms, GP
+from exoplanet import estimate_inverse_gamma_parameters
 
 with pm.Model() as model:
 
     mean = pm.Normal("mean", mu=0.0, sigma=1.0)
-    logS1 = pm.Normal("logS1", mu=0.0, sigma=15.0, testval=np.log(np.var(y)))
-    logw1 = pm.Normal("logw1", mu=0.0, sigma=15.0, testval=np.log(3.0))
-    logS2 = pm.Normal("logS2", mu=0.0, sigma=15.0, testval=np.log(np.var(y)))
-    logw2 = pm.Normal("logw2", mu=0.0, sigma=15.0, testval=np.log(3.0))
-    logQ = pm.Normal("logQ", mu=0.0, sigma=15.0, testval=0)
+    S1 = pm.InverseGamma(
+        "S1", **estimate_inverse_gamma_parameters(0.5 ** 2, 10.0 ** 2)
+    )
+    S2 = pm.InverseGamma(
+        "S2", **estimate_inverse_gamma_parameters(0.25 ** 2, 1.0 ** 2)
+    )
+    w1 = pm.InverseGamma(
+        "w1", **estimate_inverse_gamma_parameters(2 * np.pi / 10.0, np.pi)
+    )
+    w2 = pm.InverseGamma(
+        "w2", **estimate_inverse_gamma_parameters(0.5 * np.pi, 2 * np.pi)
+    )
+    log_Q = pm.Uniform("log_Q", lower=np.log(2), upper=np.log(10))
 
     # Set up the kernel an GP
-    kernel = terms.SHOTerm(log_S0=logS1, log_w0=logw1, Q=1.0 / np.sqrt(2))
-    kernel += terms.SHOTerm(log_S0=logS2, log_w0=logw2, log_Q=logQ)
+    kernel = terms.SHOTerm(S_tot=S1, w0=w1, Q=1.0 / np.sqrt(2))
+    kernel += terms.SHOTerm(S_tot=S2, w0=w2, log_Q=log_Q)
     gp = GP(kernel, t, yerr ** 2, mean=mean)
 
     # Condition the GP on the observations and add the marginal likelihood
@@ -108,9 +117,8 @@ with pm.Model() as model:
 # %% [markdown]
 # A few comments here:
 #
-# 1. The `term` interface in *exoplanet* only accepts keyword arguments with names given by the `parameter_names` property of the term. But it will also interpret keyword arguments with the name prefaced by `log_` to be the log of the parameter. For example, in this case, we used `log_S0` as the parameter for each term, but `S0=tt.exp(log_S0)` would have been equivalent. This is useful because many of the parameters are required to be positive so fitting the log of those parameters is often best.
+# 1. The `term` interface in *exoplanet* only accepts keyword arguments with names given by the `parameter_names` property of the term. But it will also interpret keyword arguments with the name prefaced by `log_` to be the log of the parameter. For example, in this case, we used `log_Q` as a parameter, but `Q=tt.exp(log_Q)` would have been equivalent. This is useful because many of the parameters are required to be positive so fitting the log of those parameters is often best.
 # 2. The third argument to the :class:`exoplanet.gp.GP` constructor should be the *variance* to add along the diagonal, not the standard deviation as in the original [celerite implementation](https://celerite.readthedocs.io).
-# 3. Finally, the :class:`exoplanet.gp.GP` constructor takes an optional argument `J` which specifies the width of the problem if it is known at compile time. Just to be confusing, this is actually two times the `J` from [the celerite paper](https://arxiv.org/abs/1703.09710). There are various technical reasons why this is difficult to work out in general and this code will always work if you don't provide a value for `J`, but you can get much better performance (especially for small `J`) if you know what it will be for your problem. In general, most terms cost `J=2` with the exception of a :class:`exoplanet.gp.terms.RealTerm` (which costs `J=1`) and a :class:`exoplanet.gp.terms.RotationTerm` (which costs `J=4`).
 #
 # To start, let's fit for the maximum a posteriori (MAP) parameters and look the the predictions that those make.
 
@@ -175,7 +183,9 @@ pm.summary(trace)
 # %%
 import corner
 
-samples = pm.trace_to_dataframe(trace)
+samples = pm.trace_to_dataframe(
+    trace, varnames=["S1", "S2", "w1", "w2", "log_Q"]
+)
 _ = corner.corner(samples)
 
 # %% [markdown]

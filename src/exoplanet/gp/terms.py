@@ -545,6 +545,8 @@ class SHOTerm(Term):
             :math:`S_0\,{\omega_0}^4` instead of :math:`S_0` directly since
             :math:`S_0` and :math:`\omega_0` are strongly correlated. If
             provided, ``S0`` will be computed from ``Sw4`` and ``w0``.
+        tensor S_tot or log_S_tot: Another useful parameterization is
+            :math:`S_tot = S_0\,\omega_0\,Q`.
 
     """
 
@@ -554,14 +556,27 @@ class SHOTerm(Term):
         self.eps = tt.as_tensor_variable(kwargs.pop("eps", 1e-5))
 
         results = normalize_parameters(("w0", "Q"), **kwargs)
+
+        count = sum(
+            (k in results) + ("log_" + k in results)
+            for k in ("S0", "Sw4", "S_tot")
+        )
+        if count != 1:
+            raise ValueError(
+                "exactly one of 'S0', 'Sw4', or 'S_tot' must be given"
+            )
         if "Sw4" in results:
-            if "S0" in results or "log_S0" in results:
-                raise ValueError("Sw4 and S0 cannot both be specified")
             results["S0"] = results["Sw4"] / results["w0"] ** 4
         elif "log_Sw4" in results:
-            if "S0" in results or "log_S0" in results:
-                raise ValueError("Sw4 and S0 cannot both be specified")
             results["log_S0"] = results["log_Sw4"] - 4 * tt.log(results["w0"])
+        elif "S_tot" in results:
+            results["S0"] = results["S_tot"] / (results["w0"] * results["Q"])
+        elif "log_S_tot" in results:
+            results["log_S0"] = (
+                results["log_S_tot"]
+                - tt.log(results["w0"])
+                - tt.log(results["Q"])
+            )
 
         super(SHOTerm, self).__init__(*args, **results)
 
