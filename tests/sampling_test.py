@@ -3,7 +3,7 @@
 import numpy as np
 import pymc3 as pm
 
-from .sampling import PyMC3Sampler
+from exoplanet.sampling import PyMC3Sampler
 
 
 def test_tuning():

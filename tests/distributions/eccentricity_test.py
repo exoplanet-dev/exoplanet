@@ -4,8 +4,9 @@ import numpy as np
 import pytest
 from scipy.stats import beta, halfnorm, kstest, rayleigh
 
+from exoplanet.distributions.eccentricity import kipping13, vaneylen19
+
 from .base_test import _Base
-from .eccentricity import kipping13, vaneylen19
 
 
 class TestEccentricity(_Base):

@@ -3,7 +3,7 @@
 import numpy as np
 import pymc3 as pm
 
-from .utils import eval_in_model, optimize
+from exoplanet.utils import eval_in_model, optimize
 
 
 def test_eval_in_model(seed=123409):

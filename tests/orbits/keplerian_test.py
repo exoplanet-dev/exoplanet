@@ -7,12 +7,12 @@ import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
-from ..units import with_unit
-from .keplerian import (
+from exoplanet.orbits.keplerian import (
     KeplerianOrbit,
     _get_consistent_inputs,
     get_aor_from_transit_duration,
 )
+from exoplanet.units import with_unit
 
 
 def test_sky_coords():

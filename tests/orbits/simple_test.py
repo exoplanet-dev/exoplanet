@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 import theano
 
-from ..light_curves import LimbDarkLightCurve
-from .simple import SimpleTransitOrbit
+from exoplanet.light_curves import LimbDarkLightCurve
+from exoplanet.orbits.simple import SimpleTransitOrbit
 
 
 def test_simple():

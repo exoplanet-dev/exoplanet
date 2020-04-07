@@ -5,7 +5,7 @@ import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
-from .limbdark import LimbDarkOp
+from exoplanet.theano_ops.starry.limbdark import LimbDarkOp
 
 
 class TestLimbDark(utt.InferShapeTester):

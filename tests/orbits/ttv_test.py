@@ -3,8 +3,8 @@
 import numpy as np
 import theano
 
-from .keplerian import KeplerianOrbit
-from .ttv import TTVOrbit, compute_expected_transit_times
+from exoplanet.orbits.keplerian import KeplerianOrbit
+from exoplanet.orbits.ttv import TTVOrbit, compute_expected_transit_times
 
 
 def test_compute_expected_transit_times():
