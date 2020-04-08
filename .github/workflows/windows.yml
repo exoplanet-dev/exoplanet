@@ -43,4 +43,4 @@ jobs:
           OMP_NUM_THREADS: 1
         run: |
           python -c 'import theano; print(theano.config.__str__(print_doc=False))'
-          python -m pytest -vs tests
+          python -m pytest -v tests
