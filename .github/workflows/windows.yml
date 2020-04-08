@@ -38,5 +38,9 @@ jobs:
       - name: Run tests
         env:
           THEANO_FLAGS: mode=FAST_COMPILE
+          MKL_THREADING_LAYER: GNU
+          MKL_NUM_THREADS: 1
+          OMP_NUM_THREADS: 1
         run: |
+          python -c 'import theano; print(theano.config.__str__(print_doc=False))'
           python -m pytest -vs tests

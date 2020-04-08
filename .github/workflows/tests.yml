@@ -33,6 +33,7 @@ jobs:
           python -m pip install -U pip setuptools numpy pybind11 wheel
           python -m pip wheel --wheel-dir=~/.cache/pip/exoplanet --find-links=~/.cache/pip/exoplanet .[test]
           python -m pip install -U --find-links=~/.cache/pip/exoplanet -e .[test]
+          python -c 'import theano; print(theano.config.__str__(print_doc=False))'
 
       - name: Run tests
         run: python -m pytest --cov=exoplanet -vs tests
