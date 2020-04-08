@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.7", "3.8"]
-        os: ["ubuntu-latest", "windows-latest"]
+        os: ["ubuntu-latest"]
 
     steps:
       - uses: actions/checkout@v2
@@ -27,13 +27,13 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-      - uses: actions/cache@v1
-        if: startsWith(runner.os, 'Windows')
-        with:
-          path: ~\AppData\Local\pip\Cache
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+      # - uses: actions/cache@v1
+      #   if: startsWith(runner.os, 'Windows')
+      #   with:
+      #     path: ~\AppData\Local\pip\Cache
+      #     key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-pip-
 
       # Setup
       - name: Install dependencies
@@ -42,13 +42,13 @@ jobs:
           python -m pip install -U -r requirements-test.txt
           python -m pip install -e .
 
-      # Running tests
-      - name: Test on Windows
-        if: startsWith(runner.os, 'Windows')
-        env:
-          THEANO_FLAGS: mode=FAST_COMPILE
-        run: |
-          python -m pytest -vs tests/gp
+      # # Running tests
+      # - name: Test on Windows
+      #   if: startsWith(runner.os, 'Windows')
+      #   env:
+      #     THEANO_FLAGS: mode=FAST_COMPILE
+      #   run: |
+      #     python -m pytest -vs tests/gp
 
       - name: Test on Linux
         if: startsWith(runner.os, 'Linux')
