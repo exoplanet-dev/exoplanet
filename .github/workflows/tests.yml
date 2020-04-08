@@ -26,15 +26,15 @@ jobs:
 
       # Rebound doesn't work on windows
       - name: Install optional dependencies
-        if: matrix.os == "ubuntu-latest"
+        if: matrix.os == 'ubuntu-latest'
         run: python -m pip install -U rebound
 
       - name: Test without coverage
-        if: matrix.os != "ubuntu-latest" || matrix.python-version != "3.8"
+        if: matrix.os != 'ubuntu-latest' || matrix.python-version != '3.8'
         run: python -m pytest -vs tests/gp
 
       - name: Test with coverage
-        if: matrix.os == "ubuntu-latest" && matrix.python-version == "3.8"
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.8'
         run: python -m pytest --cov=exoplanet -vs tests/gp
       - name: Upload coverage
         if: success()
