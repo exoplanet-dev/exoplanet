@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   build:
-    name: "py${{ matrix.python-version }} on ${{ runner.os }}"
+    name: "py${{ matrix.python-version }} on ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -23,9 +23,9 @@ jobs:
       - uses: actions/cache@v1
         with:
           path: ~\AppData\Local\pip\Cache
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          key: ${{ matrix.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
-            ${{ runner.os }}-pip-
+            ${{ matrix.os }}-pip-
 
       # Setup
       - name: Install dependencies
