@@ -53,15 +53,13 @@ If you're using a ``pip`` based environment, you can install the developer depen
 .. code-block:: bash
 
     python -m pip install -U pip
-    python -m pip install -U -r requirements-dev.txt
+    python -m pip install -U .[dev]
 
 After your environment is set up, you can install the current development version of ``exoplanet``:
 
 .. code-block:: bash
 
-    python -m pip install -U setuptools setuptools_scm pep517
-    python -m pip uninstall -y exoplanet
-    python setup.py develop
+    python -m pip install -e .
 
 
 Finding your way around the codebase
@@ -100,7 +98,7 @@ Then, you should run all of the unit tests before submitting a pull request usin
 
 .. code-block:: bash
 
-    python -m pytest -sv src/exoplanet
+    python -m pytest -v tests
 
 
 Code style

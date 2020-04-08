@@ -70,6 +70,7 @@ EXTRA_REQUIRE["dev"] = (
     + [
         "pre-commit",
         "black",
+        "black_nbconvert",
         "isort",
         "toml",
         "flake8",
@@ -78,6 +79,8 @@ EXTRA_REQUIRE["dev"] = (
         "radvel",
         "jupyterlab",
         "lightkurve",
+        "pep517",
+        "twine",
     ]
 )
 

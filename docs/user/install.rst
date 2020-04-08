@@ -7,23 +7,14 @@ Installation
 
 *exoplanet* doesn't have a compiled components so it can be easily installed from source or by using pip.
 
-Dependencies
-------------
+Using conda
+-----------
 
-The only required dependencies for *exoplanet* are `NumPy
-<http://www.numpy.org/>`_, `PyMC3 <https://docs.pymc.io/>`_ and `AstroPy
-<http://www.astropy.org/>`_.
-These can be installed using conda or pip:
+*exoplanet* can be installed using `conda <https://docs.conda.io>`_ from ``conda-forge``:
 
 .. code-block:: bash
 
-    conda install numpy pymc3 astropy
-
-or
-
-.. code-block:: bash
-
-    python -m pip install -r requirements.txt
+    conda install -c conda-forge exoplanet
 
 
 Using pip
@@ -48,7 +39,7 @@ The source code for *exoplanet* can be downloaded and installed `from GitHub
 
     git clone https://github.com/exoplanet-dev/exoplanet.git
     cd exoplanet
-    python setup.py install
+    python -m pip install -e .
 
 
 .. _windows:
@@ -65,8 +56,7 @@ The following (based on the tips from `the Theano docs <http://deeplearning.net/
     conda create --name exoplanetTest python=3.8 pip
     conda install --name exoplanetTest numpy scipy mkl-service libpython m2w64-toolchain astropy matplotlib theano
     conda install --name exoplanetTest -c conda-forge pybind11 celerite
-    python -m pip install -r requirements-test.txt
-    python -m pip install -e .
+    python -m pip install -e .[test]
 
 
 Testing
@@ -76,13 +66,13 @@ To run the unit tests, install the development dependencies using pip:
 
 .. code-block:: bash
 
-    python -m pip install -r requirements-dev.txt
+    python -m pip install .[test]
 
 and then execute:
 
 .. code-block:: bash
 
-    python -m pytest -vs src/exoplanet
+    python -m pytest -v tests
 
 All of the tests should (of course) pass.
 If any of the tests don't pass and if you can't sort out why, `open an issue
