@@ -32,17 +32,16 @@ jobs:
       python: "3.6"
     - python: "3.7"
     - python: "3.8"
+# install:
+#   - travis_retry python -m pip install -U pip
+#   - travis_retry python -m pip install -U setuptools
+#   - travis_retry python -m pip install -U numpy pybind11
+#   - travis_retry python -m pip install -U -r requirements-test.txt
+#   - travis_retry python -m pip install -U rebound
+#   - travis_retry python -m pip install .
 
-install:
-  - travis_retry python -m pip install -U pip
-  - travis_retry python -m pip install -U setuptools
-  - travis_retry python -m pip install -U numpy pybind11
-  - travis_retry python -m pip install -U -r requirements-test.txt
-  - travis_retry python -m pip install -U rebound
-  - travis_retry python -m pip install .
+# script:
+#   - python -m pytest -vs --cov=exoplanet tests
 
-script:
-  - python -m pytest -vs --cov=exoplanet tests
-
-after_success:
-  - coveralls
+# after_success:
+#   - coveralls
