@@ -28,8 +28,58 @@ INSTALL_REQUIRES = [
     "numpy>=1.13.0",
     "pymc3>=3.5",
     "astropy>=3.1",
+    "setuptools>=40.6.0",
+    "setuptools_scm",
 ]
-EXTRA_REQUIRE = {"nbody": ["rebound_pymc3>=0.0.3"]}
+EXTRA_REQUIRE = {
+    "test": [
+        "scipy",
+        "nose",
+        "parameterized",
+        "arviz",
+        "pytest",
+        "pytest-cov>=2.6.1",
+        "pytest-env",
+        "coveralls",
+        "pybind11",
+        "celerite>=0.3.1",
+        "batman-package",
+        "rebound; sys_platform != 'win32'",
+        "starry; sys_platform != 'win32'",
+    ],
+    "docs": [
+        "sphinx>=1.7.5",
+        "pandoc",
+        "jupyter",
+        "sphinx-typlog-theme",
+        "nbformat",
+        "nbconvert",
+        "corner",
+        "lightkurve",
+        "jupytext",
+    ],
+    "nbody": [
+        "rebound; sys_platform != 'win32'",
+        "rebound_pymc3>=0.0.3; sys_platform != 'win32'",
+    ],
+}
+EXTRA_REQUIRE["dev"] = (
+    EXTRA_REQUIRE["test"]
+    + EXTRA_REQUIRE["docs"]
+    + EXTRA_REQUIRE["nbody"]
+    + [
+        "pre-commit",
+        "black",
+        "isort",
+        "toml",
+        "flake8",
+        "nbstripout",
+        "jupytext",
+        "radvel",
+        "jupyterlab",
+        "lightkurve",
+    ]
+)
 
 # END PROJECT SPECIFIC
 
