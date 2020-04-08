@@ -5,11 +5,12 @@ on: [push, pull_request]
 jobs:
   build:
     name: ${{ matrix.python-version }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.7", "3.8"]
+        os: ["ubuntu-latest", "windows-latest"]
 
     steps:
       - uses: actions/checkout@v2
@@ -21,12 +22,24 @@ jobs:
         run: |
           python -m pip install -U pip setuptools numpy pybind11
           python -m pip install -U -r requirements-test.txt
-          python -m pip install -U rebound
           python -m pip install .
-      - name: Test with pytest
-        run: |
-          python -m pytest -vs --cov=exoplanet tests
+
+      # Rebound doesn't work on windows
+      - name: Install optional dependencies
+        if: ${{ matrix.os == "ubuntu-latest" }}
+        run: python -m pip install -U rebound
+
+      # Run without coverage in general
+      - name: Test with pytest without coverage
+        if: ${{ matrix.os != "ubuntu-latest" || matrix.python-version != "3.7" }}
+        run: python -m pytest -vs tests
+
+      # Run with coverage only on one system
+      - name: Test with pytest and coverage
+        if: ${{ matrix.os == "ubuntu-latest" && matrix.python-version == "3.7" }}
+        run: python -m pytest -vs --cov=exoplanet tests
       - name: Upload coverage
+        if: ${{ matrix.os == "ubuntu-latest" && success() }}
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         run: coveralls
