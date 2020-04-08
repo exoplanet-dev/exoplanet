@@ -26,13 +26,6 @@ jobs:
           key: ${{ matrix.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ matrix.os }}-pip-
-      # - uses: actions/cache@v1
-      #   if: startsWith(runner.os, 'Windows')
-      #   with:
-      #     path: ~\AppData\Local\pip\Cache
-      #     key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-pip-
 
       # Setup
       - name: Install dependencies
@@ -43,7 +36,7 @@ jobs:
           python -m pip install -e .
 
       - name: Run tests
-        run: python -m pytest --cov=exoplanet -vs tests/gp
+        run: python -m pytest --cov=exoplanet -vs tests
 
       # Uploading coverage report
       - name: Upload coverage

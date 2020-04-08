@@ -39,38 +39,4 @@ jobs:
         env:
           THEANO_FLAGS: mode=FAST_COMPILE
         run: |
-          python -m pytest -vs tests/gp
-
-# name: Windows
-
-# on: [push, pull_request]
-
-# jobs:
-#   build:
-#     name: ${{ matrix.python-version }}
-#     runs-on: windows-latest
-#     strategy:
-#       fail-fast: false
-#       matrix:
-#         python-version: ["3.7"]
-
-#     steps:
-#       - uses: actions/checkout@v2
-#       # - uses: goanpeca/setup-miniconda@v1
-#       #   with:
-#       #     auto-update-conda: true
-#       #     python-version: ${{ matrix.python-version }}
-#       # - name: Show conda info
-#       #   run: |
-#       #     conda info
-#       #     conda list
-#       # - name: Install dependencies
-#       #   run: |
-#       #     conda install --yes --quiet numpy scipy mkl-service libpython m2w64-toolchain astropy matplotlib theano
-#       #     conda install --yes --quiet -c conda-forge pybind11 celerite
-#       #     python -m pip install -U pip pytest-astropy
-#       #     python -m pip install -r requirements-test.txt
-#       #     python -m pip install -e .
-#       # - name: Test with pytest
-#       #   run: |
-#       #     python -m pytest -vs tests
+          python -m pytest -vs tests
