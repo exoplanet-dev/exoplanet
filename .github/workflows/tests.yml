@@ -42,20 +42,23 @@ jobs:
           python -m pip install -U -r requirements-test.txt
           python -m pip install -e .
 
+      # Running tests
       - name: Test on Windows
-        if: matrix.os == 'windows-latest'
+        if: startsWith(runner.os, 'Windows')
         env:
           THEANO_FLAGS: mode=FAST_COMPILE
         run: |
           python -m pytest -vs tests/gp
 
       - name: Test on Linux
-        if: matrix.os == 'ubuntu-latest'
+        if: startsWith(runner.os, 'Linux')
         run: |
           python -m pip install -U rebound
           python -m pytest --cov=exoplanet -vs tests/gp
+
+      # Uploading coverage report
       - name: Upload coverage
-        if: matrix.os == 'ubuntu-latest' && success()
+        if: startsWith(runner.os, 'Linux') && success()
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         run: coveralls
