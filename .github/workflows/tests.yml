@@ -29,11 +29,15 @@ jobs:
         if: matrix.os == "ubuntu-latest"
         run: python -m pip install -U rebound
 
-      - name: Test with pytest
-        run: python -m pytest -vs ${{ if(matrix.os == "ubuntu-latest", "--cov=exoplanet", "") }} tests/gp
+      - name: Test without coverage
+        if: matrix.os != "ubuntu-latest" || matrix.python-version != "3.8"
+        run: python -m pytest -vs tests/gp
 
+      - name: Test with coverage
+        if: matrix.os == "ubuntu-latest" && matrix.python-version == "3.8"
+        run: python -m pytest --cov=exoplanet -vs tests/gp
       - name: Upload coverage
-        if: matrix.os == "ubuntu-latest" && success()
+        if: success()
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         run: coveralls
