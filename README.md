@@ -13,8 +13,8 @@
   <a href="https://docs.exoplanet.codes/en/latest">
     <img src="https://img.shields.io/badge/read-the_docs-blue.svg?style=flat"></a>
   <br>
-  <a href="https://travis-ci.com/exoplanet-dev/exoplanet">
-    <img src="https://img.shields.io/travis/exoplanet-dev/exoplanet/master.svg?style=flat&label=tests"></a>
+  <a href="https://github.com/exoplanet-dev/exoplanet/actions">
+    <img src="https://img.shields.io/github/workflow/status/exoplanet-dev/exoplanet/Tests?style=flat&label=tests"></a>
   <a href="https://github.com/exoplanet-dev/exoplanet/actions">
     <img src="https://img.shields.io/github/workflow/status/exoplanet-dev/exoplanet/Windows?style=flat&label=windows"></a>
   <a href="https://dev.azure.com/foremanmackey/exoplanet/_build?definitionId=15">

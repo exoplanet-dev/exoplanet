@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 import numpy as np
 import pytest
 import theano
@@ -34,16 +36,16 @@ def test_light_curve():
         m[:] = u_val
         expect = m.flux(xo=b_val, ro=r_val) - 1
     else:
-        m = starry.Map(udeg=len(u_val), lazy=False)
+        m = starry.Map(udeg=len(u_val))
         m[1:] = u_val
-        expect = m.flux(xo=b_val, ro=r_val[0]) - 1
+        expect = m.flux(xo=b_val, ro=r_val[0]).eval() - 1
 
     evaluated = func(u_val, b_val, r_val)
 
     utt.assert_allclose(expect, evaluated)
 
 
-def test_light_curve_grad():
+def test_light_curve_grad(caplog):
     u_val = np.array([0.2, 0.3, 0.1, 0.5])
     b_val = np.linspace(-1.5, 1.5, 20)
     r_val = 0.1 + np.zeros_like(b_val)
@@ -51,7 +53,9 @@ def test_light_curve_grad():
     lc = lambda u, b, r: LimbDarkLightCurve(u)._compute_light_curve(  # NOQA
         b, r
     )
-    utt.verify_grad(lc, [u_val, b_val, r_val])
+
+    with caplog.at_level(logging.DEBUG, logger="theano.gof.cmodule"):
+        utt.verify_grad(lc, [u_val, b_val, r_val])
 
 
 def test_in_transit():
