@@ -315,11 +315,13 @@ class KeplerianOrbit:
         Y = self.sin_Omega * x2 + self.cos_Omega * y2
         return X, Y, Z
 
-    def _warp_times(self, t):
-        return tt.shape_padright(t) - self.t0
+    def _warp_times(self, t, _pad=True):
+        if _pad:
+            return tt.shape_padright(t) - self.t0
+        return t - self.t0
 
-    def _get_true_anomaly(self, t):
-        M = (self._warp_times(t) - self.tref) * self.n
+    def _get_true_anomaly(self, t, _pad=True):
+        M = (self._warp_times(t, _pad=_pad) - self.tref) * self.n
         if self.ecc is None:
             return tt.sin(M), tt.cos(M)
         sinf, cosf = self.kepler_op(M, self.ecc + tt.zeros_like(M))
@@ -369,7 +371,7 @@ class KeplerianOrbit:
 
         return pos, vel
 
-    def _get_position(self, a, t, parallax=None, light_delay=False):
+    def _get_position(self, a, t, parallax=None, light_delay=False, _pad=True):
         """Get the position of a body.
 
         Args:
@@ -386,9 +388,9 @@ class KeplerianOrbit:
 
         """
         if light_delay:
-            return self._get_retarded_position(a, t, parallax=None)
+            return self._get_retarded_position(a, t, parallax=None, _pad=_pad)
 
-        sinf, cosf = self._get_true_anomaly(t)
+        sinf, cosf = self._get_true_anomaly(t, _pad=_pad)
         if self.ecc is None:
             r = a
         else:
@@ -400,7 +402,7 @@ class KeplerianOrbit:
 
         return self._rotate_vector(r * cosf, r * sinf)
 
-    def _get_retarded_position(self, a, t, parallax=None, z0=0.0):
+    def _get_retarded_position(self, a, t, parallax=None, z0=0.0, _pad=True):
         """Get the retarded position of a body, accounting for light delay.
 
         Args:
@@ -416,7 +418,7 @@ class KeplerianOrbit:
             of R_sun, but if parallax is provided, then in units of arcseconds.
 
         """
-        sinf, cosf = self._get_true_anomaly(t)
+        sinf, cosf = self._get_true_anomaly(t, _pad=_pad)
 
         # Compute the orbital radius and the component of the velocity
         # in the z direction
@@ -453,13 +455,13 @@ class KeplerianOrbit:
             ),
         )
 
+        if _pad:
+            new_t = tt.shape_padright(t) - delay
+        else:
+            new_t = t - delay
+
         # Re-compute Kepler's equation, this time at the **retarded** position
-        return tuple(
-            tt.squeeze(tt.diag(x.dimshuffle(1, 2, 0)))
-            for x in self._get_position(
-                a, tt.shape_padright(t) - delay, parallax
-            )
-        )
+        return self._get_position(a, new_t, parallax, _pad=False)
 
     def get_planet_position(self, t, parallax=None, light_delay=False):
         """The planets' positions in the barycentric frame

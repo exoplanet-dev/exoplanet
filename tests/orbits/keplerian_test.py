@@ -545,55 +545,35 @@ def test_light_delay_shape_two_planets_vector_t():
     assert np.array_equal(x.shape.eval(), xr.shape.eval())
 
 
-@pytest.mark.xfail
 def test_light_delay_shape_scalar_t():
-    # TODO: Fix shapes
-    # `light_delay=True` only works if `t` is an array;
-    # throws `ValueError` if it is a scalar.
     orbit = KeplerianOrbit(period=1.0)
     x, y, z = orbit.get_planet_position(1.0, light_delay=False)
     xr, yr, zr = orbit.get_planet_position(1.0, light_delay=True)
     assert np.array_equal(x.shape.eval(), xr.shape.eval())
 
 
-@pytest.mark.xfail
 def test_light_delay_shape_single_t():
-    # TODO: Fix shapes
-    # `light_delay=False` returns a scalar
-    # `light_delay=True` returns a (1, 1) matrix
     orbit = KeplerianOrbit(period=1.0)
     x, y, z = orbit.get_planet_position([1.0], light_delay=False)
     xr, yr, zr = orbit.get_planet_position([1.0], light_delay=True)
     assert np.array_equal(x.shape.eval(), xr.shape.eval())
 
 
-@pytest.mark.xfail
 def test_light_delay_shape_vector_t():
-    # TODO: Fix shapes
-    # `light_delay=False` returns a vector
-    # `light_delay=True` returns a (1, 1) matrix
     orbit = KeplerianOrbit(period=1.0)
     x, y, z = orbit.get_planet_position([1.0, 2.0], light_delay=False)
     xr, yr, zr = orbit.get_planet_position([1.0, 2.0], light_delay=True)
     assert np.array_equal(x.shape.eval(), xr.shape.eval())
 
 
-@pytest.mark.xfail
 def test_light_delay_shape_two_planets_scalar_t():
-    # TODO: Fix shapes
-    # `light_delay=True` only works if `t` is an array;
-    # throws `ValueError` if it is a scalar.
     orbit = KeplerianOrbit(period=[1.0, 2.0])
     x, y, z = orbit.get_planet_position(1.0, light_delay=False)
     xr, yr, zr = orbit.get_planet_position(1.0, light_delay=True)
     assert np.array_equal(x.shape.eval(), xr.shape.eval())
 
 
-@pytest.mark.xfail
 def test_light_delay_shape_two_planets_single_t():
-    # TODO: Fix shapes
-    # `light_delay=False` returns a vector
-    # `light_delay=True` returns a (1, 2) matrix
     orbit = KeplerianOrbit(period=[1.0, 2.0])
     x, y, z = orbit.get_planet_position([1.0], light_delay=False)
     xr, yr, zr = orbit.get_planet_position([1.0], light_delay=True)
