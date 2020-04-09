@@ -18,4 +18,6 @@ jobs:
           python -m pip install -U black isort black_nbconvert
       - name: Check the style
         run: |
-          ./.ci/travis/check_style.sh
+          isort -c -rc src
+          black --check src
+          black_nbconvert --check .

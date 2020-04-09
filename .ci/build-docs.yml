@@ -39,7 +39,7 @@ jobs:
 
       - script: |
           source .ci/azure/activate_conda.sh
-          env/bin/python -m pip install -U -r docs/requirements.txt
+          env/bin/python -m pip install -U .[docs]
         displayName: "Install dependencies"
 
       - bash: .ci/azure/run_tutorials.sh
