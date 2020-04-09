@@ -429,11 +429,7 @@ class KeplerianOrbit:
             r = a * (1.0 - self.ecc ** 2) / (1 + self.ecc * cosf)
             vamp = angvel * a / tt.sqrt(1 - self.ecc ** 2)
             cwf = self.cos_omega * cosf - self.sin_omega * sinf
-            vz = (
-                vamp
-                * tt.sin(self.incl)
-                * (self.ecc * tt.cos(self.omega) + cwf)
-            )
+            vz = vamp * self.sin_incl * (self.ecc * self.cos_omega + cwf)
 
         # True position of the body
         x, y, z = self._rotate_vector(r * cosf, r * sinf)
