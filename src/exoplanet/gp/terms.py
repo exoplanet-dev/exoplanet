@@ -44,7 +44,7 @@ def normalize_parameters(names, **kwargs):
     return dict(results, **kwargs)
 
 
-class Term(object):
+class Term:
     """The abstract base "term" that is the superclass of all other terms
 
     Subclasses should overload the :func:`terms.Term.get_real_coefficients`
@@ -137,16 +137,26 @@ class Term(object):
         )
 
         dx = x[1:] - x[:-1]
-        P = tt.concatenate(
-            (
-                tt.exp(-cr[None, :] * dx[:, None]),
-                tt.exp(-cc[None, :] * dx[:, None]),
-                tt.exp(-cc[None, :] * dx[:, None]),
-            ),
-            axis=1,
-        )
+        c = tt.concatenate((cr, cc, cc))
+        P = tt.exp(-c[None, :] * dx[:, None])
 
         return a, U, V, P
+
+    def get_conditional_mean_matrices(self, x, t):
+        ar, cr, ac, bc, cc, dc = self.coefficients
+        x = tt.as_tensor_variable(x)
+
+        inds = tt.extra_ops.searchsorted(x, t)
+        _, U_star, V_star, _ = self.get_celerite_matrices(t, t)
+
+        c = tt.concatenate((cr, cc, cc))
+        dx = t - x[tt.minimum(inds, x.size - 1)]
+        U_star *= tt.exp(-c[None, :] * dx[:, None])
+
+        dx = x[tt.maximum(inds - 1, 0)] - t
+        V_star *= tt.exp(-c[None, :] * dx[:, None])
+
+        return U_star, V_star, inds
 
     def to_dense(self, x, diag):
         K = self.value(x[:, None] - x[None, :])
@@ -535,6 +545,8 @@ class SHOTerm(Term):
             :math:`S_0\,{\omega_0}^4` instead of :math:`S_0` directly since
             :math:`S_0` and :math:`\omega_0` are strongly correlated. If
             provided, ``S0`` will be computed from ``Sw4`` and ``w0``.
+        tensor S_tot or log_S_tot: Another useful parameterization is
+            :math:`S_tot = S_0\,\omega_0\,Q`.
 
     """
 
@@ -544,14 +556,27 @@ class SHOTerm(Term):
         self.eps = tt.as_tensor_variable(kwargs.pop("eps", 1e-5))
 
         results = normalize_parameters(("w0", "Q"), **kwargs)
+
+        count = sum(
+            (k in results) + ("log_" + k in results)
+            for k in ("S0", "Sw4", "S_tot")
+        )
+        if count != 1:
+            raise ValueError(
+                "exactly one of 'S0', 'Sw4', or 'S_tot' must be given"
+            )
         if "Sw4" in results:
-            if "S0" in results or "log_S0" in results:
-                raise ValueError("Sw4 and S0 cannot both be specified")
             results["S0"] = results["Sw4"] / results["w0"] ** 4
         elif "log_Sw4" in results:
-            if "S0" in results or "log_S0" in results:
-                raise ValueError("Sw4 and S0 cannot both be specified")
             results["log_S0"] = results["log_Sw4"] - 4 * tt.log(results["w0"])
+        elif "S_tot" in results:
+            results["S0"] = results["S_tot"] / (results["w0"] * results["Q"])
+        elif "log_S_tot" in results:
+            results["log_S0"] = (
+                results["log_S_tot"]
+                - tt.log(results["w0"])
+                - tt.log(results["Q"])
+            )
 
         super(SHOTerm, self).__init__(*args, **results)
 

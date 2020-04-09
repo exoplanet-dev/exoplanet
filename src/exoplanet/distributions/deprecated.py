@@ -117,7 +117,7 @@ def get_joint_radius_impact(
     max_radius=1,
     testval_r=None,
     testval_b=None,
-    **kwargs
+    **kwargs,
 ):
     """Get the joint distribution over radius and impact parameter
 
@@ -174,7 +174,7 @@ def get_joint_radius_impact(
         max_radius=max_radius,
         shape=(2, N_planets),
         testval=rb_test,
-        **kwargs
+        **kwargs,
     )
 
     # Extract the individual components

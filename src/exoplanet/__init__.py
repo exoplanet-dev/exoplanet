@@ -11,6 +11,7 @@ __all__ = [
 
 from . import distributions, gp, interp, orbits
 from .citations import CITATIONS
+from .distributions import *  # NOQA
 from .estimators import *  # NOQA
 from .exoplanet_version import __version__
 from .light_curves import *  # NOQA
@@ -19,7 +20,7 @@ from .sampling import *  # NOQA
 from .utils import *  # NOQA
 
 __bibtex__ = __citation__ = CITATIONS["exoplanet"][1]
-__uri__ = "https://exoplanet.dfm.io"
+__uri__ = "https://docs.exoplanet.codes"
 __author__ = "Daniel Foreman-Mackey"
 __email__ = "foreman.mackey@gmail.com"
 __license__ = "MIT"

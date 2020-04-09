@@ -1,0 +1,9 @@
+sphinx>=1.7.5
+pandoc
+jupyter
+sphinx-typlog-theme
+nbformat
+nbconvert
+corner
+lightkurve
+jupytext

@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 
-__all__ = ["KeplerianOrbit", "get_true_anomaly"]
+__all__ = [
+    "KeplerianOrbit",
+    "get_true_anomaly",
+    "get_aor_from_transit_duration",
+]
 
 import warnings
+from collections import defaultdict
 
 import numpy as np
 import theano.tensor as tt
@@ -13,7 +18,7 @@ from ..citations import add_citations_to_model
 from ..theano_ops.contact import ContactPointsOp
 from ..theano_ops.kepler import KeplerOp
 from ..units import has_unit, to_unit, with_unit
-from .constants import G_grav, au_per_R_sun, gcc_per_sun, c_light
+from .constants import G_grav, au_per_R_sun, c_light, gcc_per_sun
 
 
 class KeplerianOrbit:
@@ -81,6 +86,7 @@ class KeplerianOrbit:
         m_star=None,
         r_star=None,
         rho_star=None,
+        ror=None,
         m_planet_units=None,
         rho_star_units=None,
         model=None,
@@ -89,7 +95,24 @@ class KeplerianOrbit:
     ):
         add_citations_to_model(self.__citations__, model=model)
 
+        self.jacobians = defaultdict(lambda: defaultdict(None))
+
         self.kepler_op = KeplerOp(**kwargs)
+
+        daordtau = None
+        if ecc is None and duration is not None:
+            if r_star is None:
+                r_star = tt.as_tensor_variable(1.0)
+            if b is None:
+                raise ValueError(
+                    "'b' must be provided for a circular orbit with a "
+                    "'duration'"
+                )
+            aor, daordtau = get_aor_from_transit_duration(
+                duration, period, b, ror=ror
+            )
+            a = r_star * aor
+            duration = None
 
         # Parameters
         if m_planet_units is not None:
@@ -109,14 +132,41 @@ class KeplerianOrbit:
         inputs = _get_consistent_inputs(
             a, period, rho_star, r_star, m_star, m_planet
         )
-        self.a, self.period, self.rho_star, self.r_star, self.m_star, self.m_planet = (
-            inputs
-        )
+        (
+            self.a,
+            self.period,
+            self.rho_star,
+            self.r_star,
+            self.m_star,
+            self.m_planet,
+        ) = inputs
         self.m_total = self.m_star + self.m_planet
 
         self.n = 2 * np.pi / self.period
         self.a_star = self.a * self.m_planet / self.m_total
         self.a_planet = -self.a * self.m_star / self.m_total
+
+        # Track the Jacobian between the duration and a
+        if daordtau is not None:
+            dadtau = self.r_star * daordtau
+            self.jacobians["duration"]["a"] = dadtau
+            self.jacobians["duration"]["a_star"] = (
+                dadtau * self.m_planet / self.m_total
+            )
+            self.jacobians["duration"]["a_planet"] = (
+                -dadtau * self.m_star / self.m_total
+            )
+
+            # rho = 3 * pi * (a/R)**3 / (G * P**2)
+            # -> drho / d(a/R) = 9 * pi * (a/R)**2 / (G * P**2)
+            self.jacobians["duration"]["rho_star"] = (
+                9
+                * np.pi
+                * (self.a / self.r_star) ** 2
+                * daordtau
+                * gcc_per_sun
+                / (G_grav * self.period ** 2)
+            )
 
         self.K0 = self.n * self.a / self.m_total
 
@@ -158,7 +208,9 @@ class KeplerianOrbit:
             incl_factor = (1 + self.ecc * self.sin_omega) / ome2
 
         # The Jacobian for the transform cos(i) -> b
-        self.dcosidb = incl_factor * self.r_star / self.a
+        self.dcosidb = self.jacobians["b"]["cos_incl"] = (
+            incl_factor * self.r_star / self.a
+        )
 
         if b is not None:
             if incl is not None or duration is not None:
@@ -632,7 +684,7 @@ class KeplerianOrbit:
         sinf, cosf = self._get_true_anomaly(t)
         K = self.K0 * m
         if self.ecc is None:
-            factor = -K ** 2 / a
+            factor = -(K ** 2) / a
         else:
             factor = (
                 K ** 2 * (self.ecc * cosf + 1) ** 2 / (a * (self.ecc ** 2 - 1))
@@ -720,6 +772,23 @@ class KeplerianOrbit:
 
         return result
 
+    def _flip(self, r_planet, model=None):
+        orbit = type(self)(
+            period=self.period,
+            t_periastron=self.t_periastron,
+            incl=self.incl,
+            ecc=self.ecc,
+            omega=self.omega - np.pi,
+            Omega=self.Omega,
+            m_star=self.m_planet,
+            m_planet=self.m_star,
+            r_star=r_planet,
+            model=model,
+        )
+        orbit.kepler_op = self.kepler_op
+        orbit.contact_points_op = self.contact_points_op
+        return orbit
+
 
 def get_true_anomaly(M, e, **kwargs):
     """Get the true anomaly for a tensor of mean anomalies and eccentricities
@@ -734,6 +803,33 @@ def get_true_anomaly(M, e, **kwargs):
     """
     sinf, cosf = KeplerOp()(M, e)
     return tt.arctan2(sinf, cosf)
+
+
+def get_aor_from_transit_duration(duration, period, b, ror=None):
+    """Get the semimajor axis implied by a circular orbit and duration
+
+    Args:
+        duration: The transit duration
+        period: The orbital period
+        b: The impact parameter of the transit
+        ror: The radius ratio of the planet to the star
+
+    Returns:
+        The semimajor axis in units of the stellar radius and the Jacobian
+        ``d a / d duration``
+
+    """
+    if ror is None:
+        ror = tt.as_tensor_variable(0.0)
+    b2 = b ** 2
+    opk2 = (1 + ror) ** 2
+    phi = np.pi * duration / period
+    sinp = tt.sin(phi)
+    cosp = tt.cos(phi)
+    num = tt.sqrt(opk2 - b2 * cosp ** 2)
+    aor = num / sinp
+    grad = np.pi * cosp * (b2 - opk2) / (num * period * sinp ** 2)
+    return aor, grad
 
 
 def _get_consistent_inputs(a, period, rho_star, r_star, m_star, m_planet):

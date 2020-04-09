@@ -1,44 +1,48 @@
-exoplanet
-=========
+# exoplanet
 
 <p>
-<a href="https://github.com/dfm/exoplanet">
-<img src="https://img.shields.io/badge/GitHub-dfm%2Fexoplanet-blue.svg?style=flat"></a>
-<a href="https://github.com/dfm/exoplanet/blob/master/LICENSE">
-<img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat"></a>
-<a href="https://zenodo.org/badge/latestdoi/138077978">
-<img src="https://zenodo.org/badge/138077978.svg"></a>
-<a href="https://docs.google.com/viewer?url=https://github.com/dfm/exoplanet/raw/master-pdf/paper/exoplanet.pdf">
-<img src="https://img.shields.io/badge/read-the_paper_draft-blue.svg?style=flat"></a>
-<br>
-<a href="https://travis-ci.org/dfm/exoplanet">
-<img src="https://img.shields.io/travis/dfm/exoplanet/master.svg?style=flat&label=tests"></a>
-<a href="https://dev.azure.com/foremanmackey/exoplanet/_build?definitionId=1">
-<img src="https://img.shields.io/azure-devops/build/foremanmackey/704922a0-a57f-4d16-bbea-e37f58c88ba5/1/master.svg?label=paper"></a>
-<a href="https://exoplanet.dfm.io">
-<img src="https://img.shields.io/readthedocs/exoplanet.svg?style=flat"></a>
-<a href="https://github.com/dfm/exoplanet/actions">
-<img src="https://github.com/dfm/exoplanet/workflows/style/badge.svg?style=flat"></a>
-<br>
-<a href="https://rodluger.github.io/starry">
-<img src="https://img.shields.io/badge/powered_by-starry-EB5368.svg?style=flat"></a>
-<a href="https://celerite.readthedocs.io">
-<img src="https://img.shields.io/badge/powered_by-celerite-EB5368.svg?style=flat"></a>
-<a href="https://docs.pymc.io">
-<img src="https://img.shields.io/badge/powered_by-PyMC3-EB5368.svg?style=flat"></a>
-<a href="http://www.astropy.org">
-<img src="https://img.shields.io/badge/powered_by-AstroPy-EB5368.svg?style=flat"></a>
-<a href="https://github.com/rodluger/corTeX">
-<img src="https://img.shields.io/badge/powered_by-corTeX-EB5368.svg?style=flat"></a>
+  <a href="https://github.com/exoplanet-dev/exoplanet">
+    <img src="https://img.shields.io/badge/GitHub-exoplanet--dev%2Fexoplanet-blue.svg?style=flat"></a>
+  <a href="https://github.com/exoplanet-dev/exoplanet/blob/master/LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat"></a>
+  <a href="https://zenodo.org/badge/latestdoi/138077978">
+    <img src="https://zenodo.org/badge/138077978.svg"></a>
+  <a
+    href="https://docs.google.com/viewer?url=https://github.com/exoplanet-dev/paper/raw/master-pdf/paper/exoplanet.pdf">
+    <img src="https://img.shields.io/badge/read-the_paper_draft-blue.svg?style=flat"></a>
+  <a href="https://docs.exoplanet.codes/en/latest">
+    <img src="https://img.shields.io/badge/read-the_docs-blue.svg?style=flat"></a>
+  <br>
+  <a href="https://github.com/exoplanet-dev/exoplanet/actions">
+    <img src="https://img.shields.io/github/workflow/status/exoplanet-dev/exoplanet/Tests?style=flat&label=tests"></a>
+  <a href="https://github.com/exoplanet-dev/exoplanet/actions">
+    <img src="https://img.shields.io/github/workflow/status/exoplanet-dev/exoplanet/Windows?style=flat&label=windows"></a>
+  <a href="https://dev.azure.com/foremanmackey/exoplanet/_build?definitionId=15">
+    <img
+      src="https://img.shields.io/azure-devops/build/foremanmackey/exoplanet/15/master?label=paper&style=flat"></a>
+  <a href="https://dev.azure.com/foremanmackey/exoplanet/_build?definitionId=14">
+    <img
+      src="https://img.shields.io/azure-devops/build/foremanmackey/exoplanet/14/master?label=docs&style=flat"></a>
+  <br>
+  <a href="https://rodluger.github.io/starry">
+    <img src="https://img.shields.io/badge/powered_by-starry-EB5368.svg?style=flat"></a>
+  <a href="https://celerite.readthedocs.io">
+    <img src="https://img.shields.io/badge/powered_by-celerite-EB5368.svg?style=flat"></a>
+  <a href="https://docs.pymc.io">
+    <img src="https://img.shields.io/badge/powered_by-PyMC3-EB5368.svg?style=flat"></a>
+  <a href="http://www.astropy.org">
+    <img src="https://img.shields.io/badge/powered_by-AstroPy-EB5368.svg?style=flat"></a>
+  <a href="https://github.com/rodluger/corTeX">
+    <img src="https://img.shields.io/badge/powered_by-corTeX-EB5368.svg?style=flat"></a>
 </p>
 
-*exoplanet* is a toolkit for probabilistic modeling of transit and/or
+_exoplanet_ is a toolkit for probabilistic modeling of transit and/or
 radial velocity observations of
 [exoplanets](https://en.wikipedia.org/wiki/Exoplanet) and other
-astronomical time series using [PyMC3](https://docs.pymc.io). *PyMC3* is
+astronomical time series using [PyMC3](https://docs.pymc.io). _PyMC3_ is
 a flexible and high-performance model building language and inference
 engine that scales well to problems with a large number of parameters.
-*exoplanet* extends *PyMC3*'s language to support many of the custom
+_exoplanet_ extends _PyMC3_'s language to support many of the custom
 functions and distributions required when fitting exoplanet datasets.
 These features include:
 
@@ -53,7 +57,7 @@ These features include:
 - And many others!
 
 All of these functions and distributions include methods for efficiently
-calculating their *gradients* so that they can be used with
+calculating their _gradients_ so that they can be used with
 gradient-based inference methods like [Hamiltonian Monte
 Carlo](https://arxiv.org/abs/1206.1901), [No U-Turns
 Sampling](https://arxiv.org/abs/1111.4246), and [variational
@@ -62,9 +66,9 @@ more robust than the methods more commonly used in astronomy (like
 [ensemble samplers](https://emcee.readthedocs.io) and [nested
 sampling](https://ccpforge.cse.rl.ac.uk/gf/project/multinest/))
 especially when the model has more than a few parameters. For many
-exoplanet applications, *exoplanet* (the code) can improve the typical
+exoplanet applications, _exoplanet_ (the code) can improve the typical
 performance by orders of magnitude.
 
-*exoplanet* is being actively developed in [a public repository on
-GitHub](https://github.com/dfm/exoplanet) so if you have any trouble,
-[open an issue](https://github.com/dfm/exoplanet/issues) there.
+_exoplanet_ is being actively developed in [a public repository on
+GitHub](https://github.com/exoplanet-dev/exoplanet) so if you have any trouble,
+[open an issue](https://github.com/exoplanet-dev/exoplanet/issues) there.

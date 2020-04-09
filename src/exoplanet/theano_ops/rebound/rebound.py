@@ -2,6 +2,8 @@
 
 __all__ = ["ReboundOp"]
 
+import warnings
+
 import numpy as np
 import theano
 import theano.tensor as tt
@@ -13,6 +15,7 @@ class ReboundOp(gof.Op):
     __props__ = ()
 
     def __init__(self, **rebound_args):
+        warnings.warn("For better performance, install 'rebound_pymc3'")
         self.rebound_args = rebound_args
         super(ReboundOp, self).__init__()
 

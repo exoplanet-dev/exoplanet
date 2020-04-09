@@ -1,3 +1,40 @@
+0.3.0 (2020-04-03)
+++++++++++++++++++
+
+- Adds tests and support for Windows
+- Adds a "Jacobian" interface to the orbit objects for reparameterization
+
+
+0.2.6 (2020-03-23)
+++++++++++++++++++
+
+- Adds support for fitting circular orbits with duration
+- Adds a ``bls_estimator`` for transit search using Astropy's ``BoxLeastSquares``
+
+
+0.2.5 (2020-03-11)
+++++++++++++++++++
+
+- Improves infrastructure for generating documentation
+- Adds an ``EclipsingBinaryLightCurve`` for building binary star models
+- Adds ``DensityDist`` implementation for celerite GP likelihoods
+
+
+0.2.4 (2019-12-30)
+++++++++++++++++++
+
+- Makes ``rebound`` an optional dependency
+
+
+0.2.3 (2019-11-12)
+++++++++++++++++++
+
+- Adds ``ConditionalMeanOp`` and ``DotLOp`` for scalable conditional mean calculation
+  and prior sampling with celerite
+- Adds developer documentation
+- Moves documentation to a separate repository
+
+
 0.2.2 (2019-10-25)
 ++++++++++++++++++
 

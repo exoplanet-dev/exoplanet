@@ -103,7 +103,7 @@ class ImpactParameter(pm.Flat):
         return np.random.uniform(0, 1 + ror, size)
 
     def random(self, point=None, size=None):
-        ror, = draw_values([self.ror], point=point, size=size)
+        (ror,) = draw_values([self.ror], point=point, size=size)
         return generate_samples(
             self._random,
             dist_shape=self.shape,

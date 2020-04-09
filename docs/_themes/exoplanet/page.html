@@ -1,0 +1,58 @@
+{% extends "sphinx_typlog_theme/page.html" %}
+
+{% block extrahead %}
+{{ super() }}
+<script src="https://kit.fontawesome.com/12d959964a.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/mustache@latest"></script>
+<script>
+    $.ajax({
+        dataType: "json",
+        url: "https://raw.githubusercontent.com/exoplanet-dev/exoplanet/gh-pages/versions.json",
+        success: function (data) {
+            var versions = Object.keys(data).sort();
+            $(function render() {
+                var template = document.getElementById('versions-template').innerHTML;
+                var rendered = Mustache.render(template, { versions: versions });
+                document.body.innerHTML += rendered;
+                $(".current-version").click(function () {
+                    $(".versions-dropdown").toggle();
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}
+
+{%- block htmltitle -%}
+{% if pagename == 'index' %}
+<title>exoplanet &mdash; Fast and scalable MCMC for all your exoplanet needs!</title>
+{% else %}
+{{ super() }}
+{% endif %}
+{% endblock %}
+
+{% block body %}
+{% if pagename == 'index' %}
+<h1>{{ project }}</h1>
+{% include 'badges.html' %}
+{% endif %}
+{{ super() }}
+{% endblock %}
+
+{% block footer %}
+{{ super() }}
+
+<script id="versions-template" type="x-tmpl-mustache">
+<div class="versions">
+    <div class="current-version">
+        {{this_version}}
+        <span class="fas fa-caret-down"></span>
+    </div>
+    <dl class="versions-dropdown">
+        {{'{{'}}#versions{{'}}'}}
+        <dd><a href="https://docs.exoplanet.codes/en/{{'{{'}}.{{'}}'}}/{%- if pagename != 'index' -%}{{pagename}}{%- endif -%}">{{'{{'}}.{{'}}'}}</a></dd>
+        {{'{{'}}/versions{{'}}'}}
+    </dl>
+</div>
+</script>
+{% endblock %}

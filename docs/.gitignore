@@ -1,0 +1,4 @@
+_build
+xml
+notebooks/*.ipynb
+notebooks/*.log

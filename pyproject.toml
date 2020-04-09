@@ -16,8 +16,15 @@ exclude = '''
   | buck-out
   | build
   | dist
+  | docs/tutorials
 )/
 '''
 
 [tool.isort]
-known_third_party = ["astropy", "matplotlib", "nbconvert", "nbformat", "numpy", "packaging", "pkg_resources", "pymc3", "pytest", "rebound_pymc3", "scipy", "setuptools", "sphinx_typlog_theme", "starry", "theano", "tqdm"]
+skip_glob = ["docs/tutorials/*.py"]
+line_length = 79
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+known_third_party = ["astropy", "corner", "jupytext", "matplotlib", "nbconvert", "nbformat", "numpy", "packaging", "pandas", "pkg_resources", "pymc3", "pytest", "requests", "scipy", "setuptools", "sphinx_typlog_theme", "theano", "tqdm"]

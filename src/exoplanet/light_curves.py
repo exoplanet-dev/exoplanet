@@ -2,6 +2,7 @@
 
 __all__ = [
     "LimbDarkLightCurve",
+    "EclipsingBinaryLightCurve",
     "StarryLightCurve",
     "IntegratedLimbDarkLightCurve",
 ]
@@ -23,7 +24,7 @@ get_cl = GetClOp()
 limbdark = LimbDarkOp()
 
 
-class LimbDarkLightCurve(object):
+class LimbDarkLightCurve:
     """A limb darkened light curve computed using starry
 
     Args:
@@ -39,6 +40,36 @@ class LimbDarkLightCurve(object):
         u_ext = tt.concatenate([-1 + tt.zeros(1, dtype=self.u.dtype), self.u])
         self.c = get_cl(u_ext)
         self.c_norm = self.c / (np.pi * (self.c[0] + 2 * self.c[1] / 3))
+
+    def get_ror_from_approx_transit_depth(self, delta, b, jac=False):
+        """Get the radius ratio corresponding to a particular transit depth
+
+        This result will be approximate and it requires ``|b| < 1`` because it
+        relies on the small planet approximation.
+
+        Args:
+            delta (tensor): The approximate transit depth in relative units
+            b (tensor): The impact parameter
+            jac (bool): If true, the Jacobian ``d ror / d delta`` is also
+                returned
+
+        Returns:
+            ror: The radius ratio that approximately corresponds to the depth
+            ``delta`` at impact parameter ``b``.
+
+        """
+        b = tt.as_tensor_variable(b)
+        delta = tt.as_tensor_variable(delta)
+        n = 1 + tt.arange(self.u.size)
+        f0 = 1 - tt.sum(2 * self.u / (n ** 2 + 3 * n + 2))
+        arg = 1 - tt.sqrt(1 - b ** 2)
+        f = 1 - tt.sum(self.u[:, None] * arg ** n[:, None], axis=0)
+        factor = f0 / f
+        ror = tt.sqrt(delta * factor)
+        if not jac:
+            return tt.reshape(ror, b.shape)
+        drorddelta = 0.5 * factor / ror
+        return tt.reshape(ror, b.shape), tt.reshape(drorddelta, b.shape)
 
     def get_light_curve(
         self,
@@ -193,7 +224,45 @@ class StarryLightCurve(LimbDarkLightCurve):  # pragma: no cover
         super(StarryLightCurve, self).__init__(*args, **kwargs)
 
 
-class IntegratedLimbDarkLightCurve(object):  # pragma: no cover
+class EclipsingBinaryLightCurve:
+    def __init__(self, u_primary, u_secondary, flux_ratio, model=None):
+        self.primary = LimbDarkLightCurve(u_primary, model=model)
+        self.secondary = LimbDarkLightCurve(u_secondary, model=model)
+        self.flux_ratio = tt.as_tensor_variable(flux_ratio)
+
+    def get_light_curve(
+        self,
+        orbit=None,
+        r=None,
+        t=None,
+        texp=None,
+        oversample=7,
+        order=0,
+        use_in_transit=True,
+    ):
+        orbit2 = orbit._flip(r)
+        lc1 = self.primary.get_light_curve(
+            orbit=orbit,
+            r=r,
+            t=t,
+            texp=texp,
+            oversample=oversample,
+            order=order,
+            use_in_transit=use_in_transit,
+        )
+        lc2 = self.secondary.get_light_curve(
+            orbit=orbit2,
+            r=orbit.r_star,
+            t=t,
+            texp=texp,
+            oversample=oversample,
+            order=order,
+            use_in_transit=use_in_transit,
+        )
+        return (lc1 + self.flux_ratio * lc2) / (1 + self.flux_ratio)
+
+
+class IntegratedLimbDarkLightCurve:  # pragma: no cover
 
     """A limb darkened light curve computed using starry
 

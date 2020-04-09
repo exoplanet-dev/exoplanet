@@ -1,0 +1,56 @@
+trigger:
+  tags:
+    include:
+      - v*
+  branches:
+    include:
+      - master
+    exclude:
+      - "*-pdf"
+      - gh-pages
+
+pr: none
+variables:
+  - group: exoplanet-variables
+
+jobs:
+  - job: Default
+    pool:
+      vmImage: ubuntu-latest
+    timeoutInMinutes: 120
+
+    steps:
+      # - task: Cache@2
+      #   timeoutInMinutes: 10
+      #   inputs:
+      #     key: condaEnvironment | $(Agent.OS)
+      #     path: $(Build.SourcesDirectory)/env
+      #   displayName: 'Cache conda environment'
+
+      - task: Cache@2
+        timeoutInMinutes: 10
+        inputs:
+          key: theanoCompileDir | $(Agent.OS)
+          path: $(Build.SourcesDirectory)/theano
+        displayName: "Cache Theano compiledir"
+
+      - bash: .ci/azure/setup_conda.sh
+        displayName: "Setup conda"
+
+      - script: |
+          source .ci/azure/activate_conda.sh
+          env/bin/python -m pip install -U .[docs]
+        displayName: "Install dependencies"
+
+      - bash: .ci/azure/run_tutorials.sh
+        displayName: "Generate the tutorials"
+        env:
+          THEANO_FLAGS: base_compiledir=$(Build.SourcesDirectory)/theano
+
+      - bash: .ci/azure/build_docs.sh
+        displayName: "Build the docs"
+        env:
+          GITHUB_USER: $(GITHUB_USER)
+          GITHUB_API_KEY: $(GITHUB_API_KEY)
+          SOURCE_BRANCH_NAME: $(Build.SourceBranchName)
+          SOURCE_VERSION: $(Build.SourceVersion)

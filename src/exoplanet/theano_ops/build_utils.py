@@ -10,9 +10,13 @@ from ..exoplanet_version import __version__
 
 
 def get_compile_args(compiler):
-    opts = ["-std=c++11", "-O2", "-DNDEBUG"]
+    opts = ["-std=c++11", "-DNDEBUG"]
     if sys.platform == "darwin":
         opts += ["-stdlib=libc++", "-mmacosx-version-min=10.7"]
+    if sys.platform.startswith("win"):
+        opts += ["-D_USE_MATH_DEFINES", "-D_hypot=hypot"]
+    else:
+        opts += ["-O2"]
     return opts
 
 
@@ -26,6 +30,6 @@ def get_header_dirs(eigen=True):
     dirs = [pkg_resources.resource_filename(__name__, "lib/include")]
     if eigen:
         dirs += [
-            pkg_resources.resource_filename(__name__, "lib/vendor/eigen_3.3.3")
+            pkg_resources.resource_filename(__name__, "lib/vendor/eigen-3.3.7")
         ]
     return dirs

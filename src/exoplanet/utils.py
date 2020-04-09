@@ -34,6 +34,18 @@ logger = logging.getLogger("exoplanet")
 
 
 def get_args_for_theano_function(point=None, model=None):
+    """Get the arguments required to evaluate a PyMC3 model component
+
+    Use the result as the arguments for the callable returned by the
+    :func:`get_theano_function_for_var` function.
+
+    Args:
+        point (dict, optional): The point in parameter space where the model
+            componenet should be evaluated
+        model (optional): The PyMC3 model object. By default, the current
+            context will be used.
+
+    """
     model = pm.modelcontext(model)
     if point is None:
         point = model.test_point
@@ -41,6 +53,18 @@ def get_args_for_theano_function(point=None, model=None):
 
 
 def get_theano_function_for_var(var, model=None, **kwargs):
+    """Get a callable function to evaluate a component of a PyMC3 model
+
+    This should then be called using the arguments returned by the
+    :func:`get_args_for_theano_function` function.
+
+    Args:
+        var: The model component to evaluate. This can be a Theano tensor, a
+            PyMC3 variable, or a list of these
+        model (optional): The PyMC3 model object. By default, the current
+            context will be used.
+
+    """
     model = pm.modelcontext(model)
     kwargs["on_unused_input"] = kwargs.get("on_unused_input", "ignore")
     return theano.function(model.vars, var, **kwargs)

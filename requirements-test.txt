@@ -1,0 +1,13 @@
+-r requirements.txt
+scipy
+nose
+parameterized
+arviz
+pytest
+pytest-cov>=2.6.1
+pytest-env
+coveralls
+pybind11
+celerite>=0.3.1
+# starry
+batman-package
