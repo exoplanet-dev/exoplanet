@@ -369,20 +369,25 @@ class KeplerianOrbit:
 
         return pos, vel
 
-    def _get_position(self, a, t, parallax=None):
+    def _get_position(self, a, t, parallax=None, light_delay=False):
         """Get the position of a body.
 
         Args:
             a: the semi-major axis of the orbit.
             t: the time (or tensor of times) to calculate the position.
             parallax: (arcseconds) if provided, return the position in
-            units of arcseconds.
+                units of arcseconds.
+            light_delay: account for the light travel time delay? Default is
+                False.
 
         Returns:
             The position of the body in the observer frame. Default is in units
             of R_sun, but if parallax is provided, then in units of arcseconds.
 
         """
+        if light_delay:
+            return self._get_retarded_position(a, t, parallax=None)
+
         sinf, cosf = self._get_true_anomaly(t)
         if self.ecc is None:
             r = a
@@ -405,6 +410,7 @@ class KeplerianOrbit:
                 units of arcseconds.
             z0: the reference point along the z axis whose light travel time
                 delay is taken to be zero. Default is the origin.
+
         Returns:
             The position of the body in the observer frame. Default is in units
             of R_sun, but if parallax is provided, then in units of arcseconds.
@@ -418,11 +424,11 @@ class KeplerianOrbit:
         if self.ecc is None:
             r = a
             vamp = angvel * a
-            vz = vamp * tt.sin(self.incl) * cosf
+            vz = vamp * self.sin_incl * cosf
         else:
             r = a * (1.0 - self.ecc ** 2) / (1 + self.ecc * cosf)
             vamp = angvel * a / tt.sqrt(1 - self.ecc ** 2)
-            cwf = tt.cos(self.omega) * cosf - tt.sin(self.omega) * sinf
+            cwf = self.cos_omega * cosf - self.sin_omega * sinf
             vz = (
                 vamp
                 * tt.sin(self.incl)
@@ -433,7 +439,7 @@ class KeplerianOrbit:
         x, y, z = self._rotate_vector(r * cosf, r * sinf)
 
         # Component of the acceleration in the z direction
-        az = -angvel ** 2 * (a / r) ** 3 * z
+        az = -(angvel ** 2) * (a / r) ** 3 * z
 
         # Compute the time delay at the **retarded** position, accounting
         # for the instantaneous velocity and acceleration of the body.
@@ -472,18 +478,12 @@ class KeplerianOrbit:
             ``R_sun``.
 
         """
-        if light_delay is False:
-            return tuple(
-                tt.squeeze(x)
-                for x in self._get_position(self.a_planet, t, parallax)
+        return tuple(
+            tt.squeeze(x)
+            for x in self._get_position(
+                self.a_planet, t, parallax, light_delay=light_delay
             )
-        else:
-            return tuple(
-                tt.squeeze(x)
-                for x in self._get_retarded_position(
-                    self.a_planet, t, parallax
-                )
-            )
+        )
 
     def get_star_position(self, t, parallax=None, light_delay=False):
         """The star's position in the barycentric frame
@@ -503,16 +503,12 @@ class KeplerianOrbit:
             ``R_sun``.
 
         """
-        if light_delay is False:
-            return tuple(
-                tt.squeeze(x)
-                for x in self._get_position(self.a_star, t, parallax)
+        return tuple(
+            tt.squeeze(x)
+            for x in self._get_position(
+                self.a_star, t, parallax, light_delay=light_delay
             )
-        else:
-            return tuple(
-                tt.squeeze(x)
-                for x in self._get_retarded_position(self.a_star, t, parallax)
-            )
+        )
 
     def get_relative_position(self, t, parallax=None, light_delay=False):
         """The planets' positions relative to the star in the X,Y,Z frame.
@@ -534,15 +530,12 @@ class KeplerianOrbit:
             ``R_sun``.
 
         """
-        if light_delay is False:
-            return tuple(
-                tt.squeeze(x) for x in self._get_position(-self.a, t, parallax)
+        return tuple(
+            tt.squeeze(x)
+            for x in self._get_position(
+                -self.a, t, parallax, light_delay=light_delay
             )
-        else:
-            return tuple(
-                tt.squeeze(x)
-                for x in self._get_retarded_position(-self.a, t, parallax)
-            )
+        )
 
     def get_relative_angles(self, t, parallax=None, light_delay=False):
         """The planets' relative position to the star in the sky plane, in
@@ -562,10 +555,9 @@ class KeplerianOrbit:
             measured east of north) of the planet relative to the star.
 
         """
-        if light_delay is False:
-            X, Y, Z = self._get_position(-self.a, t, parallax)
-        else:
-            X, Y, Z = self._get_retarded_position(-self.a, t, parallax)
+        X, Y, Z = self._get_position(
+            -self.a, t, parallax, light_delay=light_delay
+        )
 
         # calculate rho and theta
         rho = tt.squeeze(tt.sqrt(X ** 2 + Y ** 2))  # arcsec

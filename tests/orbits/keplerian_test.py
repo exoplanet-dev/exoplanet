@@ -539,8 +539,9 @@ def test_light_delay():
 
 def test_light_delay_shape_two_planets_vector_t():
     orbit = KeplerianOrbit(period=[1.0, 2.0])
-    x, y, z = orbit.get_planet_position([1.0, 2.0], light_delay=False)
-    xr, yr, zr = orbit.get_planet_position([1.0, 2.0], light_delay=True)
+    t = np.linspace(0, 10, 50)
+    x, y, z = orbit.get_planet_position(t, light_delay=False)
+    xr, yr, zr = orbit.get_planet_position(t, light_delay=True)
     assert np.array_equal(x.shape.eval(), xr.shape.eval())
 
 
