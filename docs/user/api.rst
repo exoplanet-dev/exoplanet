@@ -57,6 +57,10 @@ Estimators
 Distributions
 -------------
 
+.. autofunction:: exoplanet.distributions.get_log_abs_det_jacobian
+.. autofunction:: exoplanet.distributions.estimate_inverse_gamma_parameters
+
+
 Base distributions
 ~~~~~~~~~~~~~~~~~~
 
@@ -88,7 +92,6 @@ Utilities
 .. autofunction:: exoplanet.get_samples_from_trace
 .. autofunction:: exoplanet.get_dense_nuts_step
 
-.. autofunction:: exoplanet.estimate_inverse_gamma_parameters
 .. autofunction:: exoplanet.orbits.ttv.compute_expected_transit_times
 
 

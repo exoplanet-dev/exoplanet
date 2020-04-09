@@ -9,7 +9,6 @@ __all__ = [
     "get_theano_function_for_var",
     "deprecation_warning",
     "deprecated",
-    "estimate_inverse_gamma_parameters",
 ]
 
 import logging
@@ -30,8 +29,6 @@ from pymc3.util import (
     is_transformed_name,
     update_start_vals,
 )
-from scipy.optimize import root
-from scipy.special import gammaincc
 
 logger = logging.getLogger("exoplanet")
 
@@ -242,52 +239,3 @@ def deprecated(alternate=None):
         return f
 
     return wrapper
-
-
-def estimate_inverse_gamma_parameters(
-    lower, upper, target=0.01, initial=None, **kwargs
-):
-    r"""Estimate an inverse Gamma with desired tail probabilities
-
-    This method numerically solves for the parameters of an inverse Gamma
-    distribution where the tails have a given probability. In other words
-    :math:`P(x < \mathrm{lower}) = \mathrm{target}` and similarly for the
-    upper bound. More information can be found in `part 4 of this blog post
-    `https://betanalpha.github.io/assets/case_studies/gp_part3/part3.html>`_.
-
-    Args:
-        lower (float): The location of the lower tail
-        upper (float): The location of the upper tail
-        target (float, optional): The desired tail probability
-        initial (ndarray, optional): An initial guess for the parameters
-            ``alpha`` and ``beta``
-
-    Raises:
-        RuntimeError: If the solver does not converge.
-
-    Returns:
-        dict: A dictionary with the keys ``alpha`` and ``beta`` for the
-        parameters of the distribution.
-
-    """
-    lower, upper = np.sort([lower, upper])
-    if initial is None:
-        initial = np.array([2.0, 0.5 * (lower + upper)])
-    if np.shape(initial) != (2,) or np.any(np.asarray(initial) <= 0.0):
-        raise ValueError("invalid initial guess")
-
-    def obj(x):
-        a, b = np.exp(x)
-        return np.array(
-            [
-                gammaincc(a, b / lower) - target,
-                1 - gammaincc(a, b / upper) - target,
-            ]
-        )
-
-    result = root(obj, np.log(initial), method="hybr", **kwargs)
-    if not result.success:
-        raise RuntimeError(
-            "failed to find parameter estimates: \n{0}".format(result.message)
-        )
-    return dict(zip(("alpha", "beta"), np.exp(result.x)))

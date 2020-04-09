@@ -11,6 +11,7 @@ __all__ = [
 
 from . import distributions, gp, interp, orbits
 from .citations import CITATIONS
+from .distributions import *  # NOQA
 from .estimators import *  # NOQA
 from .exoplanet_version import __version__
 from .light_curves import *  # NOQA

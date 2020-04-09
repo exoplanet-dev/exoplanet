@@ -7,7 +7,7 @@
     ],
     // Python testing
     "python.testing.pytestArgs": [
-        "${workspaceFolder}/src/exoplanet"
+        "${workspaceFolder}/tests"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.nosetestsEnabled": false,
