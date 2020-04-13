@@ -699,7 +699,7 @@ class KeplerianOrbit:
             for x in self._get_acceleration(-self.a, -self.m_total, t)
         )
 
-    def in_transit(self, t, r=0.0, texp=None):
+    def in_transit(self, t, r=0.0, texp=None, light_delay=False):
         """Get a list of timestamps that are in transit
 
         Args:
@@ -711,6 +711,12 @@ class KeplerianOrbit:
             The indices of the timestamps that are in transit.
 
         """
+        if light_delay:
+            raise NotImplementedError(
+                "Light travel time delay not yet implemented "
+                "in the routine `in_transit`."
+            )
+
         z = tt.zeros_like(self.a)
         r = tt.as_tensor_variable(r) + z
         R = self.r_star + z
