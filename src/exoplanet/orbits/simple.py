@@ -63,13 +63,13 @@ class SimpleTransitOrbit(object):
         z = tt.squeeze(m * 1.0 - (~m) * 1.0)
         return x, y, z
 
-    def get_planet_velocity(self, t, light_delay=False):
+    def get_planet_velocity(self, t):
         raise NotImplementedError("a SimpleTransitOrbit has no velocity")
 
-    def get_star_velocity(self, t, light_delay=False):
+    def get_star_velocity(self, t):
         raise NotImplementedError("a SimpleTransitOrbit has no velocity")
 
-    def get_radial_velocity(self, t, output_units=None, light_delay=False):
+    def get_radial_velocity(self, t, output_units=None):
         raise NotImplementedError("a SimpleTransitOrbit has no velocity")
 
     def in_transit(self, t, r=None, texp=None, light_delay=False):
