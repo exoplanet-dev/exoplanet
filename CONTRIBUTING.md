@@ -18,4 +18,4 @@ We welcome contributions to the codebase of all scales from typo fixes to new fe
 but if you would like to add a substantial feature, it would be a good idea to first
 open an issue that describes your plan so that we can discuss in advance. More details
 about the process for contributing can be found in the developer docs at:
-https://docs.exoplanet.codes/en/stable/dev.
+https://docs.exoplanet.codes/en/stable/user/dev/.
