@@ -713,8 +713,7 @@ class KeplerianOrbit:
         """
         if light_delay:
             raise NotImplementedError(
-                "Light travel time delay not yet implemented "
-                "in the routine `in_transit`."
+                "Light travel time delay not yet implemented for `in_transit`"
             )
 
         z = tt.zeros_like(self.a)
