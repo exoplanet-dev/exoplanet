@@ -79,7 +79,7 @@ class LimbDarkLightCurve:
         texp=None,
         oversample=7,
         order=0,
-        use_in_transit=True,
+        use_in_transit=None,
         light_delay=False,
     ):
         """Get the light curve for an orbit at a set of times
@@ -124,6 +124,10 @@ class LimbDarkLightCurve:
             raise ValueError("missing required argument 'r'")
         if t is None:
             raise ValueError("missing required argument 't'")
+
+        use_in_transit = (
+            not light_delay if use_in_transit is None else use_in_transit
+        )
 
         r = tt.as_tensor_variable(r)
         r = tt.reshape(r, (r.size,))
