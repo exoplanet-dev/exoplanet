@@ -2,7 +2,7 @@
 
 __all__ = [
     "LimbDarkLightCurve",
-    "EclipsingBinaryLightCurve",
+    "SecondaryEclipseLightCurve",
     "StarryLightCurve",
     "IntegratedLimbDarkLightCurve",
 ]
@@ -224,7 +224,7 @@ class StarryLightCurve(LimbDarkLightCurve):  # pragma: no cover
         super(StarryLightCurve, self).__init__(*args, **kwargs)
 
 
-class EclipsingBinaryLightCurve:
+class SecondaryEclipseLightCurve:
     def __init__(self, u_primary, u_secondary, flux_ratio, model=None):
         self.primary = LimbDarkLightCurve(u_primary, model=model)
         self.secondary = LimbDarkLightCurve(u_secondary, model=model)

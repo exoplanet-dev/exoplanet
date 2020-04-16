@@ -678,18 +678,30 @@ class KeplerianOrbit:
         return result
 
     def _flip(self, r_planet, model=None):
-        orbit = type(self)(
-            period=self.period,
-            t_periastron=self.t_periastron,
-            incl=self.incl,
-            ecc=self.ecc,
-            omega=self.omega - np.pi,
-            Omega=self.Omega,
-            m_star=self.m_planet,
-            m_planet=self.m_star,
-            r_star=r_planet,
-            model=model,
-        )
+        if self.ecc is None:
+            orbit = type(self)(
+                period=self.period,
+                t_periastron=self.t_periastron + 0.5 * self.period,
+                incl=self.incl,
+                Omega=self.Omega,
+                m_star=self.m_planet,
+                m_planet=self.m_star,
+                r_star=r_planet,
+                model=model,
+            )
+        else:
+            orbit = type(self)(
+                period=self.period,
+                t_periastron=self.t_periastron,
+                incl=self.incl,
+                ecc=self.ecc,
+                omega=self.omega - np.pi,
+                Omega=self.Omega,
+                m_star=self.m_planet,
+                m_planet=self.m_star,
+                r_star=r_planet,
+                model=model,
+            )
         orbit.kepler_op = self.kepler_op
         orbit.contact_points_op = self.contact_points_op
         return orbit
