@@ -19,7 +19,6 @@ from functools import wraps
 import numpy as np
 import pymc3 as pm
 import theano
-import tqdm
 from pymc3.blocking import ArrayOrdering, DictToArrayBijection
 from pymc3.model import Point
 from pymc3.theanof import inputvars
@@ -120,6 +119,7 @@ def optimize(
     model=None,
     return_info=False,
     verbose=True,
+    progressbar=True,
     **kwargs
 ):
     """Maximize the log prob of a PyMC3 model using scipy
@@ -134,6 +134,8 @@ def optimize(
         return_info: Return both the coordinate dictionary and the result of
             ``scipy.optimize.minimize``
         verbose: Print the success flag and log probability to the screen
+        progressbar: A ``tqdm`` progress bar instance. Set to ``True``
+            (default) to use ``tqdm.auto.tqdm()``. Set to ``False`` to disable.
 
     """
     from scipy.optimize import minimize
@@ -171,16 +173,20 @@ def optimize(
         sys.stderr.write(
             "optimizing logp for variables: [{0}]\n".format(", ".join(names))
         )
-        bar = tqdm.tqdm()
+
+        if progressbar is True:
+            from tqdm.auto import tqdm
+
+            progressbar = tqdm()
 
     # This returns the objective function and its derivatives
     def objective(vec):
         res = func(*get_args_for_theano_function(bij.rmap(vec), model=model))
         d = dict(zip((v.name for v in vars), res[1:]))
         g = bij.map(d)
-        if verbose:
-            bar.set_postfix(logp="{0:e}".format(-res[0]))
-            bar.update()
+        if verbose and progressbar is not False:
+            progressbar.set_postfix(logp="{0:e}".format(-res[0]))
+            progressbar.update()
         return res[0], g
 
     # Optimize using scipy.optimize
@@ -200,7 +206,8 @@ def optimize(
     }
 
     if verbose:
-        bar.close()
+        if progressbar is not False:
+            progressbar.close()
         sys.stderr.write("message: {0}\n".format(info.message))
         sys.stderr.write("logp: {0} -> {1}\n".format(-initial, -info.fun))
         if not np.isfinite(info.fun):
