@@ -214,7 +214,7 @@ def optimize(
 
     if verbose:
         if has_progress_bar:
-            has_progress_bar.close()
+            progress_bar.close()
 
         sys.stderr.write("message: {0}\n".format(info.message))
         sys.stderr.write("logp: {0} -> {1}\n".format(-initial, -info.fun))
