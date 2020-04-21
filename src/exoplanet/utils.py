@@ -175,7 +175,18 @@ def optimize(
 
     # This returns the objective function and its derivatives
     def objective(vec):
-        res = func(*get_args_for_theano_function(bij.rmap(vec), model=model))
+        try:
+            res = func(
+                *get_args_for_theano_function(bij.rmap(vec), model=model)
+            )
+        except Exception:
+            import traceback
+
+            print("array:", vec)
+            print("point:", bij.rmap(vec))
+            traceback.print_exc()
+            raise
+
         d = dict(zip((v.name for v in vars), res[1:]))
         g = bij.map(d)
         if verbose:

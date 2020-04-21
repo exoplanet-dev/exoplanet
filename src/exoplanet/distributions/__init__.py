@@ -3,6 +3,7 @@
 __all__ = [
     "UnitUniform",
     "UnitVector",
+    "UnitDisk",
     "Angle",
     "Periodic",
     "QuadLimbDark",
@@ -13,7 +14,7 @@ __all__ = [
 ]
 
 from . import eccentricity
-from .base import Angle, Periodic, UnitUniform, UnitVector
+from .base import Angle, Periodic, UnitDisk, UnitUniform, UnitVector
 from .deprecated import RadiusImpact, get_joint_radius_impact  # NOQA
 from .helpers import (
     estimate_inverse_gamma_parameters,
