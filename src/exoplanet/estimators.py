@@ -209,7 +209,7 @@ def lomb_scargle_estimator(
     # Find and fit peaks
     peaks = find_peaks(freq, power, max_peaks=max_peaks)
 
-    return dict(periodogram=(freq, power_est), peaks=peaks)
+    return dict(periodogram=(freq, power_est), peaks=peaks, model=model)
 
 
 def next_pow_two(n):
