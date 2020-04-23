@@ -43,7 +43,7 @@ def estimate_inverse_gamma_parameters(
     distribution where the tails have a given probability. In other words
     :math:`P(x < \mathrm{lower}) = \mathrm{target}` and similarly for the
     upper bound. More information can be found in `part 4 of this blog post
-    `https://betanalpha.github.io/assets/case_studies/gp_part3/part3.html>`_.
+    <https://betanalpha.github.io/assets/case_studies/gp_part3/part3.html>`_.
 
     Args:
         lower (float): The location of the lower tail

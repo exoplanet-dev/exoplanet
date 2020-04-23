@@ -78,7 +78,7 @@ pygments_style = "sphinx"
 html_favicon = "_static/logo.png"
 html_theme = "exoplanet"
 html_theme_path = ["_themes", sphinx_typlog_theme.get_path()]
-html_theme_options = {"logo": "logo.png"}
+html_theme_options = {"logo": "logo.png", "color": "#F55826"}
 html_sidebars = {
     "**": ["logo.html", "globaltoc.html", "relations.html", "searchbox.html"]
 }

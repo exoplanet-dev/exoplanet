@@ -13,8 +13,8 @@ from .base import UnitUniform
 def kipping13(name, fixed=False, long=None, model=None, **kwargs):
     """The beta eccentricity distribution fit by Kipping (2013)
 
-    The beta distribution parameters fit by `Kipping (2013)
-    <https://ui.adsabs.harvard.edu/abs/2013MNRAS.434L..51K/abstract>`_.
+    The beta distribution parameters fit by `Kipping (2013b)
+    <https://arxiv.org/abs/1306.4982>`_.
 
     Args:
         name (str): The name of the eccentricity variable.
@@ -77,8 +77,8 @@ def vaneylen19(name, fixed=False, multi=False, model=None, **kwargs):
     """The eccentricity distribution for small planets
 
     The mixture distribution fit by `Van Eylen et al. (2019)
-    <https://ui.adsabs.harvard.edu/abs/2019AJ....157...61V>`_ to a population
-    of well-characterized small transiting planets observed by Kepler.
+    <https://arxiv.org/abs/1807.00549>`_ to a population of well-characterized
+    small transiting planets observed by Kepler.
 
     Args:
         name (str): The name of the eccentricity variable.
