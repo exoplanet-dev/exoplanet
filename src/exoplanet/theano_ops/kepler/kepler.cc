@@ -1,7 +1,7 @@
 #section support_code_apply
 
-int APPLY_SPECIFIC(kepler)(PyArrayObject *input0, PyArrayObject *input1,
-                           PyArrayObject **output0, PyArrayObject **output1) {
+int APPLY_SPECIFIC(kepler)(PyArrayObject *input0, PyArrayObject *input1, PyArrayObject **output0,
+                           PyArrayObject **output1) {
   using namespace exoplanet;
 
   typedef DTYPE_OUTPUT_0 T;
@@ -13,10 +13,10 @@ int APPLY_SPECIFIC(kepler)(PyArrayObject *input0, PyArrayObject *input1,
   auto e_in = get_input<DTYPE_INPUT_1>(&ndim, &shape, input1, &success);
   if (success) return 1;
 
-  auto sinf_out = allocate_output<DTYPE_OUTPUT_0>(ndim, shape, TYPENUM_OUTPUT_0,
-                                                  output0, &success);
-  auto cosf_out = allocate_output<DTYPE_OUTPUT_1>(ndim, shape, TYPENUM_OUTPUT_1,
-                                                  output1, &success);
+  auto sinf_out =
+      allocate_output<DTYPE_OUTPUT_0>(ndim, shape, TYPENUM_OUTPUT_0, output0, &success);
+  auto cosf_out =
+      allocate_output<DTYPE_OUTPUT_1>(ndim, shape, TYPENUM_OUTPUT_1, output1, &success);
   if (success) return 1;
 
   npy_intp N = 1;
@@ -29,7 +29,8 @@ int APPLY_SPECIFIC(kepler)(PyArrayObject *input0, PyArrayObject *input1,
     e = e_in[n];
 
     if (e > 1) {
-      PyErr_Format(PyExc_ValueError, "eccentricity must be 0 <= e < 1");
+      PyErr_Format(PyExc_ValueError, "eccentricity must be 0 <= e < 1; got %S",
+                   PyObject_Str(PyFloat_FromDouble(e)));
       return 1;
     }
 

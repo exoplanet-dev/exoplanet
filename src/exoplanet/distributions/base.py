@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__all__ = ["UnitUniform", "UnitVector", "Angle", "Periodic"]
+__all__ = ["UnitUniform", "UnitVector", "UnitDisk", "Angle", "Periodic"]
 
 import numpy as np
 import pymc3 as pm
@@ -69,6 +69,44 @@ class UnitVector(pm.Normal):
             broadcast_shape=self.shape,
             size=size,
         )
+
+
+class UnitDisk(pm.Flat):
+    def __init__(self, *args, **kwargs):
+        kwargs["transform"] = kwargs.pop("transform", tr.unit_disk)
+
+        # Make sure that the shape is compatible
+        shape = kwargs["shape"] = kwargs.get("shape", 2)
+        try:
+            if list(shape)[0] != 2:
+                raise ValueError("the first dimension should be exactly 2")
+        except TypeError:
+            if shape != 2:
+                raise ValueError("the first dimension should be exactly 2")
+
+        super(UnitDisk, self).__init__(*args, **kwargs)
+
+        # Work out some reasonable starting values for the parameters
+        self._default = np.zeros(shape)
+        self._default[0] = 0.5
+
+    def _random(self, size=None):
+        r = np.sqrt(np.random.uniform(0, 1, size))
+        theta = np.random.uniform(-np.pi, np.pi, size)
+        return np.moveaxis(
+            np.vstack((r * np.cos(theta), r * np.sin(theta))), 0, -1
+        )
+
+    def random(self, point=None, size=None):
+        return generate_samples(
+            self._random,
+            dist_shape=self.shape[1:],
+            broadcast_shape=self.shape[1:],
+            size=size,
+        )
+
+    def logp(self, value):
+        return tt.zeros_like(tt.as_tensor_variable(value))
 
 
 class Angle(pm.Continuous):

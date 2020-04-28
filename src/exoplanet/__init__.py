@@ -7,6 +7,7 @@ __all__ = [
     "orbits",
     "interp",
     "get_dense_nuts_step",
+    "sample",
 ]
 
 from . import distributions, gp, interp, orbits
@@ -15,7 +16,7 @@ from .distributions import *  # NOQA
 from .estimators import *  # NOQA
 from .exoplanet_version import __version__
 from .light_curves import *  # NOQA
-from .quadpotential import get_dense_nuts_step
+from .quadpotential import get_dense_nuts_step, sample
 from .sampling import *  # NOQA
 from .utils import *  # NOQA
 

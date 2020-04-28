@@ -81,6 +81,8 @@ class KeplerianOrbit:
         duration=None,
         ecc=None,
         omega=None,
+        sin_omega=None,
+        cos_omega=None,
         Omega=None,
         m_planet=0.0,
         m_star=None,
@@ -189,12 +191,22 @@ class KeplerianOrbit:
             incl_factor = 1
         else:
             self.ecc = tt.as_tensor_variable(ecc)
-            if omega is None:
-                raise ValueError("both e and omega must be provided")
-            self.omega = tt.as_tensor_variable(omega)
+            if omega is not None:
+                if sin_omega is not None and cos_omega is not None:
+                    raise ValueError(
+                        "either 'omega' or 'sin_omega' and 'cos_omega' can be "
+                        "provided"
+                    )
+                self.omega = tt.as_tensor_variable(omega)
+                self.cos_omega = tt.cos(self.omega)
+                self.sin_omega = tt.sin(self.omega)
+            elif sin_omega is not None and cos_omega is not None:
+                self.cos_omega = tt.as_tensor_variable(cos_omega)
+                self.sin_omega = tt.as_tensor_variable(sin_omega)
+                self.omega = tt.arctan2(self.sin_omega, self.cos_omega)
 
-            self.cos_omega = tt.cos(self.omega)
-            self.sin_omega = tt.sin(self.omega)
+            else:
+                raise ValueError("both e and omega must be provided")
 
             opsw = 1 + self.sin_omega
             E0 = 2 * tt.arctan2(
@@ -768,18 +780,30 @@ class KeplerianOrbit:
         return result
 
     def _flip(self, r_planet, model=None):
-        orbit = type(self)(
-            period=self.period,
-            t_periastron=self.t_periastron,
-            incl=self.incl,
-            ecc=self.ecc,
-            omega=self.omega - np.pi,
-            Omega=self.Omega,
-            m_star=self.m_planet,
-            m_planet=self.m_star,
-            r_star=r_planet,
-            model=model,
-        )
+        if self.ecc is None:
+            orbit = type(self)(
+                period=self.period,
+                t_periastron=self.t_periastron + 0.5 * self.period,
+                incl=self.incl,
+                Omega=self.Omega,
+                m_star=self.m_planet,
+                m_planet=self.m_star,
+                r_star=r_planet,
+                model=model,
+            )
+        else:
+            orbit = type(self)(
+                period=self.period,
+                t_periastron=self.t_periastron,
+                incl=self.incl,
+                ecc=self.ecc,
+                omega=self.omega - np.pi,
+                Omega=self.Omega,
+                m_star=self.m_planet,
+                m_planet=self.m_star,
+                r_star=r_planet,
+                model=model,
+            )
         orbit.kepler_op = self.kepler_op
         orbit.contact_points_op = self.contact_points_op
         return orbit

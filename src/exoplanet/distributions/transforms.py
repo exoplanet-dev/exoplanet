@@ -2,6 +2,7 @@
 
 __all__ = [
     "unit_vector",
+    "unit_disk",
     "angle",
     "quad_limb_dark",
     "radius_impact",
@@ -12,6 +13,8 @@ import numpy as np
 import pymc3.distributions.transforms as tr
 import theano.tensor as tt
 from pymc3.distributions import draw_values
+
+from ..theano_ops import tanhc
 
 
 class AbsoluteValueTransform(tr.Transform):
@@ -63,6 +66,61 @@ class UnitVectorTransform(tr.Transform):
 
 
 unit_vector = UnitVectorTransform()
+
+
+class UnitDiskTransform(tr.Transform):
+    """FIXME: Add summary!!
+
+    .. code-block:: python
+
+        import sympy as sm
+
+        u, v = sm.symbols("u, v", real=True)
+        norm = sm.sqrt(u ** 2 + v ** 2)
+        factor = sm.tanh(norm) / norm
+
+        x = factor * u
+        y = factor * v
+
+        print(
+            repr(
+                sm.simplify(
+                    sm.log(
+                        sm.Abs(
+                            sm.Matrix([x, y]).jacobian(
+                                sm.Matrix([u, v])
+                            ).det()
+                        )
+                    )
+                )
+            )
+        )
+
+    """
+
+    name = "unitdisk"
+
+    def backward(self, w):
+        norm = tt.sqrt(tt.sum(w ** 2, axis=0))
+        factor = tanhc.tanhc(norm)  # tt.tanh(norm) / norm
+        return factor * w
+
+    def forward(self, z):
+        r = tt.sqrt(tt.sum(z ** 2, axis=0))
+        factor = tanhc.atanhc(r)  # tt.arctanh(r) / r
+        return factor * z
+
+    def forward_val(self, z, point=None):
+        r = np.sqrt(np.sum(z ** 2, axis=0))
+        factor = np.arctanh(r) / r
+        return factor * z
+
+    def jacobian_det(self, w):
+        r = tt.sqrt(tt.sum(w ** 2, axis=0))
+        return tt.log(tanhc.tanhc(r)) - 2 * tt.log(tt.cosh(r))
+
+
+unit_disk = UnitDiskTransform()
 
 
 class AngleTransform(tr.Transform):
