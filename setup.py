@@ -51,6 +51,7 @@ EXTRA_REQUIRE = {
         "sphinx>=1.7.5",
         "pandoc",
         "jupyter",
+        "ipywidgets",
         "sphinx-typlog-theme",
         "nbformat",
         "nbconvert",

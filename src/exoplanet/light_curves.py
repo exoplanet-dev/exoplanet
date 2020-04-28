@@ -243,7 +243,7 @@ class SecondaryEclipseLightCurve:
         texp=None,
         oversample=7,
         order=0,
-        use_in_transit=True,
+        use_in_transit=None,
         light_delay=False,
     ):
         orbit2 = orbit._flip(r)
