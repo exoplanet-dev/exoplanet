@@ -79,7 +79,8 @@ class LimbDarkLightCurve:
         texp=None,
         oversample=7,
         order=0,
-        use_in_transit=True,
+        use_in_transit=None,
+        light_delay=False,
     ):
         """Get the light curve for an orbit at a set of times
 
@@ -124,6 +125,10 @@ class LimbDarkLightCurve:
         if t is None:
             raise ValueError("missing required argument 't'")
 
+        use_in_transit = (
+            not light_delay if use_in_transit is None else use_in_transit
+        )
+
         r = tt.as_tensor_variable(r)
         r = tt.reshape(r, (r.size,))
         t = tt.as_tensor_variable(t)
@@ -132,7 +137,7 @@ class LimbDarkLightCurve:
             transit_model = tt.shape_padleft(
                 tt.zeros_like(r), t.ndim
             ) + tt.shape_padright(tt.zeros_like(t), r.ndim)
-            inds = orbit.in_transit(t, r=r, texp=texp)
+            inds = orbit.in_transit(t, r=r, texp=texp, light_delay=light_delay)
             t = t[inds]
 
         if texp is None:
@@ -175,7 +180,7 @@ class LimbDarkLightCurve:
                 tt.zeros_like(tgrid), 1
             )
 
-        coords = orbit.get_relative_position(tgrid)
+        coords = orbit.get_relative_position(tgrid, light_delay=light_delay)
         b = tt.sqrt(coords[0] ** 2 + coords[1] ** 2)
         b = tt.reshape(b, rgrid.shape)
         los = tt.reshape(coords[2], rgrid.shape)
@@ -239,6 +244,7 @@ class EclipsingBinaryLightCurve:
         oversample=7,
         order=0,
         use_in_transit=True,
+        light_delay=False,
     ):
         orbit2 = orbit._flip(r)
         lc1 = self.primary.get_light_curve(
@@ -249,6 +255,7 @@ class EclipsingBinaryLightCurve:
             oversample=oversample,
             order=order,
             use_in_transit=use_in_transit,
+            light_delay=light_delay,
         )
         lc2 = self.secondary.get_light_curve(
             orbit=orbit2,
@@ -258,6 +265,7 @@ class EclipsingBinaryLightCurve:
             oversample=oversample,
             order=order,
             use_in_transit=use_in_transit,
+            light_delay=light_delay,
         )
         return (lc1 + self.flux_ratio * lc2) / (1 + self.flux_ratio)
 
@@ -300,6 +308,7 @@ class IntegratedLimbDarkLightCurve:  # pragma: no cover
         t=None,
         texp=None,
         return_num_eval=False,
+        light_delay=False,
         **kwargs
     ):
         """Get the light curve for an orbit at a set of times
@@ -347,7 +356,7 @@ class IntegratedLimbDarkLightCurve:  # pragma: no cover
 
         rgrid = pad(r)
         if texp is None:
-            coords = orbit.get_relative_position(t)
+            coords = orbit.get_relative_position(t, light_delay=light_delay)
             b = tt.sqrt(coords[0] ** 2 + coords[1] ** 2)
             b = tt.reshape(b, rgrid.shape)
             los = tt.reshape(coords[2], rgrid.shape)

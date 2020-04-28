@@ -33,14 +33,14 @@ class SimpleTransitOrbit(object):
         self._half_period = 0.5 * self.period
         self._ref_time = self.t0 - self._half_period
 
-    def get_star_position(self, t):
+    def get_star_position(self, t, light_delay=False):
         nothing = tt.zeros_like(tt.as_tensor_variable(t))
         return nothing, nothing, nothing
 
-    def get_planet_position(self, t):
-        return self.get_relative_position(t)
+    def get_planet_position(self, t, light_delay=False):
+        return self.get_relative_position(t, light_delay=False)
 
-    def get_relative_position(self, t):
+    def get_relative_position(self, t, light_delay=False):
         """The planets' positions relative to the star
 
         Args:
@@ -51,6 +51,10 @@ class SimpleTransitOrbit(object):
             ``R_sun``.
 
         """
+        if light_delay:
+            raise NotImplementedError(
+                "Light travel time delay is not implemented for simple orbits"
+            )
         dt = tt.mod(tt.shape_padright(t) - self._ref_time, self.period)
         dt -= self._half_period
         x = tt.squeeze(self.speed * dt)
@@ -68,7 +72,7 @@ class SimpleTransitOrbit(object):
     def get_radial_velocity(self, t, output_units=None):
         raise NotImplementedError("a SimpleTransitOrbit has no velocity")
 
-    def in_transit(self, t, r=None, texp=None):
+    def in_transit(self, t, r=None, texp=None, light_delay=False):
         """Get a list of timestamps that are in transit
 
         Args:
@@ -80,6 +84,10 @@ class SimpleTransitOrbit(object):
             The indices of the timestamps that are in transit.
 
         """
+        if light_delay:
+            raise NotImplementedError(
+                "Light travel time delay is not implemented for simple orbits"
+            )
         dt = tt.mod(tt.shape_padright(t) - self._ref_time, self.period)
         dt -= self._half_period
         if r is None:

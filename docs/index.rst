@@ -54,6 +54,7 @@ magnitude.
    tutorials/transit
    tutorials/astrometric
    tutorials/gp
+   tutorials/light-delay
 
 
 License & attribution

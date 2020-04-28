@@ -83,7 +83,7 @@ class ReboundOrbit(KeplerianOrbit):
         vel = coords[3:, :, :] / (day_per_yr_over_2pi * au_per_R_sun)
         return pos, vel
 
-    def get_planet_position(self, t):
+    def get_planet_position(self, t, light_delay=False):
         """The planets' positions in the barycentric frame
 
         Args:
@@ -94,12 +94,16 @@ class ReboundOrbit(KeplerianOrbit):
             ``R_sun``.
 
         """
+        if light_delay:
+            raise NotImplementedError(
+                "Light travel time delay is not implemented for rebound orbits"
+            )
         pos, _ = self._get_position_and_velocity(t)
         if self.period.ndim:
             return pos[0, :, 1:], pos[1, :, 1:], pos[2, :, 1:]
         return pos[0, :, 1], pos[1, :, 1], pos[2, :, 1]
 
-    def get_star_position(self, t):
+    def get_star_position(self, t, light_delay=False):
         """The star's position in the barycentric frame
 
         .. note:: Unlike the :class:`KeplerianOrbit`, this will not return
@@ -113,10 +117,14 @@ class ReboundOrbit(KeplerianOrbit):
             ``R_sun``.
 
         """
+        if light_delay:
+            raise NotImplementedError(
+                "Light travel time delay is not implemented for rebound orbits"
+            )
         pos, _ = self._get_position_and_velocity(t)
         return pos[0, :, 0], pos[1, :, 0], pos[2, :, 0]
 
-    def get_relative_position(self, t):
+    def get_relative_position(self, t, light_delay=False):
         """The planets' positions relative to the star in the X,Y,Z frame.
 
         Args:
@@ -127,6 +135,10 @@ class ReboundOrbit(KeplerianOrbit):
             ``R_sun``.
 
         """
+        if light_delay:
+            raise NotImplementedError(
+                "Light travel time delay is not implemented for rebound orbits"
+            )
         pos, _ = self._get_position_and_velocity(t)
         if self.period.ndim:
             pos = pos[:, :, 1:] - pos[:, :, 0][:, :, None]
@@ -218,6 +230,6 @@ class ReboundOrbit(KeplerianOrbit):
             t, K=None, output_units=output_units
         )
 
-    def in_transit(self, t, r=0.0, texp=None):
+    def in_transit(self, t, r=0.0, texp=None, light_delay=False):
         """This is a no-op and all points are assumed to be in transit"""
         return tt.arange(t.size)

@@ -180,7 +180,9 @@ class TTVOrbit(KeplerianOrbit):
             vals.append(self._bin_values[i][inds])
         return tt.stack(vals, -1)
 
-    def _warp_times(self, t):
+    def _warp_times(self, t, _pad=True):
         # This is the key function that takes the TTVs into account by
         # stretching the time axis around each transit
-        return tt.shape_padright(t) - self._get_model_dt(t)
+        if _pad:
+            return tt.shape_padright(t) - self._get_model_dt(t)
+        return t - self._get_model_dt(t)
