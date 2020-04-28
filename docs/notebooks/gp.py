@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.4.2
+#       jupytext_version: 1.3.2
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -159,7 +159,14 @@ _ = plt.ylim(-2.5, 2.5)
 
 # %%
 with model:
-    trace = xo.sample(tune=2000, draws=2000, start=map_soln, cores=2, chains=2)
+    trace = pm.sample(
+        tune=2000,
+        draws=2000,
+        start=map_soln,
+        cores=2,
+        chains=2,
+        step=xo.get_dense_nuts_step(target_accept=0.9),
+    )
 
 # %% [markdown]
 # Now we can compute the standard PyMC3 convergence statistics (using `pymc3.summary`) and make a trace plot (using `pymc3.traceplot`).
