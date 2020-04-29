@@ -774,14 +774,6 @@ class KeplerianOrbit:
 
         mask = tt.any(tt.and_(dt >= t_start, dt <= t_end), axis=-1)
 
-        from ..utils import eval_in_model
-
-        print(eval_in_model(t.shape))
-        print(eval_in_model(dt.shape))
-        print(eval_in_model(dt.shape))
-        print(eval_in_model(mask.shape))
-        print(eval_in_model(tt.arange(t.shape[0])))
-
         result = ifelse(
             tt.all(tt.eq(flag, 0)),
             tt.arange(t.shape[0])[mask],
