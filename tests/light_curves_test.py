@@ -9,7 +9,10 @@ import theano.tensor as tt
 from packaging import version
 from theano.tests import unittest_tools as utt
 
-from exoplanet.light_curves import LimbDarkLightCurve
+from exoplanet.light_curves import (
+    LimbDarkLightCurve,
+    SecondaryEclipseLightCurve,
+)
 from exoplanet.orbits import KeplerianOrbit
 
 try:
@@ -260,3 +263,32 @@ def test_approx_transit_depth():
         ror, jac = lc.get_ror_from_approx_transit_depth(dv, b, jac=True)
         _check_quad(u, b, delta, ror.eval())
         assert np.allclose(theano.grad(tt.sum(ror), dv).eval(), jac.eval())
+
+
+def test_secondary_eclipse():
+    u1 = np.array([0.3, 0.2])
+    lc1 = LimbDarkLightCurve(u1)
+
+    u2 = np.array([0.4, 0.1])
+    lc2 = LimbDarkLightCurve(u1)
+
+    s = 0.3
+    ror = 0.08
+    f = ror ** 2 * s
+    lc = SecondaryEclipseLightCurve(u1, u2, s)
+
+    t = np.linspace(-6.435, 10.4934, 5000)
+    orbit1 = KeplerianOrbit(period=1.543, t0=-0.123)
+    orbit2 = KeplerianOrbit(
+        period=orbit1.period,
+        t0=orbit1.t0 + 0.5 * orbit1.period,
+        r_star=ror,
+        m_star=1.0,
+    )
+
+    y1 = lc1.get_light_curve(orbit=orbit1, r=ror, t=t).eval()
+    y2 = lc2.get_light_curve(orbit=orbit2, r=1.0, t=t).eval()
+    y = lc.get_light_curve(orbit=orbit1, r=ror, t=t).eval()
+    y_expect = (y1 + f * y2) / (1 + f)
+
+    assert np.allclose(y_expect, y, atol=5e-6)
