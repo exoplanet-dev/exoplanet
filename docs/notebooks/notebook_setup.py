@@ -9,7 +9,7 @@ import warnings
 import matplotlib.pyplot as plt
 
 # Don't use the schmantzy progress bar
-os.environ["EXOPLANET_NO_AUTO_PBAR"] = True
+os.environ["EXOPLANET_NO_AUTO_PBAR"] = "true"
 
 # Remove when Theano is updated
 warnings.filterwarnings("ignore", category=DeprecationWarning)
