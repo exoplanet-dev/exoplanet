@@ -22,7 +22,6 @@ def interp(n, x, xmin, xmax, dx, func):
     a2 = 0.5 * (y0 + y2) - y1
     a3 = 0.5 * ((y1 - y2) + (y3 - y0) / 3.0)
 
-    # inds = tt.extra_ops.searchsorted(xp, x, side="right")
     inds = tt.cast(tt.floor((x - xmin) / dx), "int64")
     x0 = (x - xp[inds + 1]) / dx
     return a0[inds] + a1[inds] * x0 + a2[inds] * x0 ** 2 + a3[inds] * x0 ** 3

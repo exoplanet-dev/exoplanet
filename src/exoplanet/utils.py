@@ -12,6 +12,7 @@ __all__ = [
 ]
 
 import logging
+import os
 import sys
 import warnings
 from functools import wraps
@@ -175,7 +176,10 @@ def optimize(
         )
 
         if progress_bar is True:
-            from tqdm.auto import tqdm
+            if "EXOPLANET_NO_AUTO_PBAR" in os.environ:
+                from tqdm import tqdm
+            else:
+                from tqdm.auto import tqdm
 
             progress_bar = tqdm()
 
