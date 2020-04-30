@@ -10,6 +10,7 @@ from scipy.stats import kstest
 from exoplanet.distributions.base import (
     Angle,
     Periodic,
+    UnitDisk,
     UnitUniform,
     UnitVector,
 )
@@ -105,6 +106,40 @@ class TestBase(_Base):
         cdf = lambda x: np.clip((x + 1) / 2, 0, 1)  # NOQA
         for i in range(z.shape[1]):
             s, p = kstest(z[:, i], cdf)
+            assert s < 0.05
+
+    def test_unit_disk(self):
+        with self._model():
+            dist = UnitDisk("x", shape=(2, 3), testval=0.01 * np.ones((2, 3)))
+
+            # Test random sampling
+            samples = dist.random(size=100)
+            assert np.shape(samples) == (100, 2, 3)
+            assert np.all(np.sum(samples ** 2, axis=1) <= 1.0)
+
+            logp = np.sum(
+                UnitDisk.dist(shape=(2, 3)).logp(samples).eval(), axis=-1
+            ).flatten()
+            assert np.all(np.isfinite(logp))
+
+            trace = self._sample()
+
+        theta = np.arctan2(trace["x"][:, 1], trace["x"][:, 0])
+        radius = np.sum(trace["x"] ** 2, axis=1)
+
+        # Make sure that the unit constraint is satisfied
+        assert np.all(radius <= 1.0)
+
+        # The angle should be uniformly distributed
+        cdf = lambda x: np.clip((x + np.pi) / (2 * np.pi), 0, 1)  # NOQA
+        for i in range(theta.shape[1]):
+            s, p = kstest(theta[:, i], cdf)
+            assert s < 0.05
+
+        # As should the radius component
+        cdf = lambda x: np.clip(x, 0, 1)  # NOQA
+        for i in range(radius.shape[1]):
+            s, p = kstest(radius[:, i], cdf)
             assert s < 0.05
 
     @pytest.mark.parametrize("regularized", [None, 10.0])

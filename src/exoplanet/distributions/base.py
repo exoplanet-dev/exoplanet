@@ -91,10 +91,10 @@ class UnitDisk(pm.Flat):
         self._default[0] = 0.5
 
     def _random(self, size=None):
-        r = np.sqrt(np.random.uniform(0, 1, size))
+        sr = np.sqrt(np.random.uniform(0, 1, size))
         theta = np.random.uniform(-np.pi, np.pi, size)
         return np.moveaxis(
-            np.vstack((r * np.cos(theta), r * np.sin(theta))), 0, -1
+            np.stack((sr * np.cos(theta), sr * np.sin(theta))), 0, 1
         )
 
     def random(self, point=None, size=None):
@@ -106,7 +106,7 @@ class UnitDisk(pm.Flat):
         )
 
     def logp(self, value):
-        return tt.zeros_like(tt.as_tensor_variable(value))
+        return tt.zeros_like(tt.sum(value, axis=0))
 
 
 class Angle(pm.Continuous):
