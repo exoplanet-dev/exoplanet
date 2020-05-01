@@ -14,8 +14,6 @@ import pymc3.distributions.transforms as tr
 import theano.tensor as tt
 from pymc3.distributions import draw_values
 
-from ..theano_ops import tanhc
-
 
 class AbsoluteValueTransform(tr.Transform):
     """"""
@@ -100,27 +98,20 @@ class UnitDiskTransform(tr.Transform):
 
     name = "unitdisk"
 
-    def backward(self, w):
-        norm = tt.sqrt(tt.sum(w ** 2, axis=0))
-        factor = tanhc.tanhc(norm)  # tt.tanh(norm) / norm
-        return factor * w
+    def backward(self, y):
+        return tt.stack([y[0], y[1] * tt.sqrt(1 - y[0] ** 2)])
 
-    def forward(self, z):
-        r = tt.sqrt(tt.sum(z ** 2, axis=0))
-        factor = tanhc.atanhc(r)  # tt.arctanh(r) / r
-        return factor * z
+    def forward(self, x):
+        return tt.stack([x[0], x[1] / tt.sqrt(1 - x[0] ** 2)])
 
-    def forward_val(self, z, point=None):
-        r = np.sqrt(np.sum(z ** 2, axis=0))
-        factor = np.arctanh(r) / r
-        return factor * z
+    def forward_val(self, x, point=None):
+        return np.array([x[0], x[1] / np.sqrt(1 - x[0] ** 2)])
 
-    def jacobian_det(self, w):
-        r = tt.sqrt(tt.sum(w ** 2, axis=0))
-        return tt.log(tanhc.tanhc(r)) - 2 * tt.log(tt.cosh(r))
+    def jacobian_det(self, y):
+        return 0.5 * tt.log(1 - y[0] ** 2)
 
 
-unit_disk = UnitDiskTransform()
+unit_disk = tr.Chain([UnitDiskTransform(), tr.Interval(-1, 1)])
 
 
 class AngleTransform(tr.Transform):

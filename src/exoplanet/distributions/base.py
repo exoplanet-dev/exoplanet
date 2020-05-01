@@ -88,7 +88,6 @@ class UnitDisk(pm.Flat):
 
         # Work out some reasonable starting values for the parameters
         self._default = np.zeros(shape)
-        self._default[0] = 0.5
 
     def _random(self, size=None):
         sr = np.sqrt(np.random.uniform(0, 1, size))
