@@ -1,8 +1,7 @@
 #section support_code_apply
 
-int APPLY_SPECIFIC(contact)(PyArrayObject* input0, PyArrayObject* input1,
-                            PyArrayObject* input2, PyArrayObject* input3,
-                            PyArrayObject* input4, PyArrayObject* input5,
+int APPLY_SPECIFIC(contact)(PyArrayObject* input0, PyArrayObject* input1, PyArrayObject* input2,
+                            PyArrayObject* input3, PyArrayObject* input4, PyArrayObject* input5,
                             PyArrayObject* input6, PyArrayObject** output0,
                             PyArrayObject** output1, PyArrayObject** output2,
                             PARAMS_TYPE* params) {
@@ -27,17 +26,14 @@ int APPLY_SPECIFIC(contact)(PyArrayObject* input0, PyArrayObject* input1,
   auto L = get_input<DTYPE_INPUT_6>(&N, input6, &success);
   if (success) return 1;
 
-  auto M_left = allocate_output<DTYPE_OUTPUT_0>(ndim, shape, TYPENUM_OUTPUT_0,
-                                                output0, &success);
-  auto M_right = allocate_output<DTYPE_OUTPUT_1>(ndim, shape, TYPENUM_OUTPUT_1,
-                                                 output1, &success);
-  auto flag = allocate_output<DTYPE_OUTPUT_2>(ndim, shape, TYPENUM_OUTPUT_2,
-                                              output2, &success);
+  auto M_left = allocate_output<DTYPE_OUTPUT_0>(ndim, shape, TYPENUM_OUTPUT_0, output0, &success);
+  auto M_right = allocate_output<DTYPE_OUTPUT_1>(ndim, shape, TYPENUM_OUTPUT_1, output1, &success);
+  auto flag = allocate_output<DTYPE_OUTPUT_2>(ndim, shape, TYPENUM_OUTPUT_2, output2, &success);
   if (success) return 1;
 
   for (npy_intp n = 0; n < N; ++n) {
-    auto const solver = contact_points::ContactPointSolver<T>(
-        a[n], e[n], cosw[n], sinw[n], cosi[n], sini[n]);
+    auto const solver =
+        contact_points::ContactPointSolver<T>(a[n], e[n], cosw[n], sinw[n], cosi[n], sini[n]);
     auto const roots = solver.find_roots(L[n], tol);
     flag[n] = std::get<0>(roots);
     M_left[n] = std::get<1>(roots);

@@ -775,9 +775,7 @@ class KeplerianOrbit:
         mask = tt.any(tt.and_(dt >= t_start, dt <= t_end), axis=-1)
 
         result = ifelse(
-            tt.all(tt.eq(flag, 0)),
-            tt.arange(t.shape[0])[mask],
-            tt.arange(t.shape[0]),
+            tt.all(tt.eq(flag, 0)), tt.arange(t.size)[mask], tt.arange(t.size)
         )
 
         return result

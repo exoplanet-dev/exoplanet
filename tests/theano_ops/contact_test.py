@@ -108,3 +108,18 @@ def test_contact_point_impl(a, L):
         for ei, e in enumerate(es):
             for wi, w in enumerate(ws):
                 solver.compute(L, a, b, e, w)
+
+
+def test_shape_segfault():
+    args = [
+        np.array(16.38049484),
+        np.array([0.0002, 0.0002]),
+        np.array([0.70710678, 0.70710678]),
+        np.array([0.70710678, 0.70710678]),
+        np.array([0.04579264, 0.04579264]),
+        np.array([0.99895097, 0.99895097]),
+        np.array([1.51741758]),
+    ]
+
+    with pytest.raises(ValueError):
+        theano.function([], ContactPointsOp()(*args))()
