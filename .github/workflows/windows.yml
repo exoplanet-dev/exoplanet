@@ -40,6 +40,16 @@ jobs:
           python -m pip wheel --wheel-dir=~\AppData\Local\pip\Cache\exoplanet --find-links=~\AppData\Local\pip\Cache\exoplanet .[test]
           python -m pip install -U --find-links=~\AppData\Local\pip\Cache\exoplanet -e .[test]
 
+      # Run a first quick test to make sure that compiling works
+      - name: Initial test
+        env:
+          THEANO_FLAGS: mode=FAST_COMPILE
+          MKL_THREADING_LAYER: GNU
+          MKL_NUM_THREADS: 1
+          OMP_NUM_THREADS: 1
+        run: |
+          python -m pytest -vs tests/citations_test.py::test_basic
+
       # Running tests
       - name: Run tests
         env:
