@@ -108,7 +108,7 @@ class UnitDiskTransform(tr.Transform):
         return np.array([x[0], x[1] / np.sqrt(1 - x[0] ** 2)])
 
     def jacobian_det(self, y):
-        return 0.5 * tt.log(1 - y[0] ** 2)
+        return tt.stack((tt.zeros_like(y[0]), 0.5 * tt.log(1 - y[0] ** 2)))
 
 
 unit_disk = tr.Chain([UnitDiskTransform(), tr.Interval(-1, 1)])
