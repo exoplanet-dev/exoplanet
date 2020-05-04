@@ -39,3 +39,5 @@ except TypeError:
     gcc_per_sun = 5.905271918964842
     au_per_R_sun = 0.00465046726096215
     day_per_yr_over_2pi = 58.13244087623439
+    c_light = 37231.66360672704
+    day_per_yr_over_2pi = 58.13244087623438
