@@ -28,8 +28,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          conda install theano numpy pymc3 astropy scipy
-          conda install -c conda-forge celerite
+          conda install -c conda-forge --override-channels celerite theano numpy pymc3 astropy scipy
           python -m pip install -U pip setuptools wheel pytest-filter-subpackage
           python -m pip install -e .[test]
 
