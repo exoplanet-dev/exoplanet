@@ -1,4 +1,4 @@
-name: cenv
+name: exoplanet
 channels:
   - defaults
 dependencies:
