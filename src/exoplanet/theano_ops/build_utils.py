@@ -16,7 +16,8 @@ def get_compile_args(compiler):
     if sys.platform.startswith("win"):
         opts += [
             "-D_USE_MATH_DEFINES",
-            "-D_hypot=hypot" "-ffixed-xmm16",
+            "-D_hypot=hypot",
+            "-ffixed-xmm16",
             "-ffixed-xmm17",
             "-ffixed-xmm18",
             "-ffixed-xmm19",
