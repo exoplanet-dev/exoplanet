@@ -1,3 +1,11 @@
+0.3.1 (2020-05-04)
+++++++++++++++++++
+
+- Adds support for light travel time when computing positions in Keplerian orbits
+- Adds ``SecondaryEclipseLightCurve`` for modeling eclipsing binaries
+- Adds ``UnitDisk`` distribution for fitting eccentricity vectors
+
+
 0.3.0 (2020-04-03)
 ++++++++++++++++++
 
