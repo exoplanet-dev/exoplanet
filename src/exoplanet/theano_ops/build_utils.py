@@ -14,26 +14,7 @@ def get_compile_args(compiler):
     if sys.platform == "darwin":
         opts += ["-stdlib=libc++", "-mmacosx-version-min=10.7"]
     if sys.platform.startswith("win"):
-        opts += [
-            "-D_USE_MATH_DEFINES",
-            "-D_hypot=hypot",
-            "-ffixed-xmm16",
-            "-ffixed-xmm17",
-            "-ffixed-xmm18",
-            "-ffixed-xmm19",
-            "-ffixed-xmm20",
-            "-ffixed-xmm21",
-            "-ffixed-xmm22",
-            "-ffixed-xmm23",
-            "-ffixed-xmm24",
-            "-ffixed-xmm25",
-            "-ffixed-xmm26",
-            "-ffixed-xmm27",
-            "-ffixed-xmm28",
-            "-ffixed-xmm29",
-            "-ffixed-xmm30",
-            "-ffixed-xmm31",
-        ]
+        opts += ["-D_USE_MATH_DEFINES", "-D_hypot=hypot"]
     else:
         opts += ["-O2"]
     return opts
