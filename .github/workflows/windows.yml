@@ -63,7 +63,8 @@ jobs:
           # CFLAGS: -ffixed-xmm16 -ffixed-xmm17 -ffixed-xmm18 -ffixed-xmm19 -ffixed-xmm20 -ffixed-xmm21 -ffixed-xmm22 -ffixed-xmm23 -ffixed-xmm24 -ffixed-xmm25 -ffixed-xmm26 -ffixed-xmm27 -ffixed-xmm28 -ffixed-xmm29 -ffixed-xmm30 -ffixed-xmm31
         run: |
           python -m sysconfig
-          python -c 'import theano; print(theano.config.__str__(print_doc=False))'
+          python -c 'import theano; print(theano.__version__)'
+          # python -c 'import theano; print(theano.config.__str__(print_doc=False))'
           python -m pytest -vs tests/citations_test.py::test_basic
 
       # Running tests
