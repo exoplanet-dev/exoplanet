@@ -8,6 +8,18 @@ from .limb_dark import LimbDarkLightCurve
 
 
 class SecondaryEclipseLightCurve:
+    """The light curve for a secondary eclipse model computed using starry
+
+    Args:
+        u_primary (vector): A vector of limb darkening coefficients for the
+            primary body.
+        u_secondary (vector): A vector of limb darkening coefficients for the
+            secondary body.
+        surface_brightness_ratio (scalar): The surface brightness ratio of the
+            secondary with respect to the primary.
+
+    """
+
     def __init__(
         self, u_primary, u_secondary, surface_brightness_ratio, model=None
     ):

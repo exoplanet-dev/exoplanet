@@ -27,6 +27,9 @@ Light curve models
 .. autoclass:: exoplanet.LimbDarkLightCurve
    :inherited-members:
 
+.. autoclass:: exoplanet.SecondaryEclipseLightCurve
+   :inherited-members:
+
 
 Scalable Gaussian processes
 ---------------------------
