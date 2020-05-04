@@ -72,6 +72,23 @@ class UnitVector(pm.Normal):
 
 
 class UnitDisk(pm.Flat):
+    """Two dimensional parameters constrianed to live within the unit disk
+
+    This distribution is constrained such that the sum of squares along the
+    zeroth axis will always be less than one. For example, in this code block:
+
+    .. code-block:: python
+
+        import theano.tensor as tt
+        disk = UnitDisk("disk")
+        radius = tt.sum(disk ** 2, axis=0)
+
+    the tensor ``radius`` will always have a value in the range ``[0, 1)``.
+
+    Note that the shape of this distribution must be two in the zeroth axis.
+
+    """
+
     def __init__(self, *args, **kwargs):
         kwargs["transform"] = kwargs.pop("transform", tr.unit_disk)
 

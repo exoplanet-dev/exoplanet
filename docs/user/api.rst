@@ -66,6 +66,7 @@ Base distributions
 
 .. autoclass:: exoplanet.distributions.UnitUniform
 .. autoclass:: exoplanet.distributions.UnitVector
+.. autoclass:: exoplanet.distributions.UnitDisk
 .. autoclass:: exoplanet.distributions.Angle
 .. autoclass:: exoplanet.distributions.Periodic
 

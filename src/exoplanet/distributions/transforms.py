@@ -67,32 +67,10 @@ unit_vector = UnitVectorTransform()
 
 
 class UnitDiskTransform(tr.Transform):
-    """FIXME: Add summary!!
+    """Transform the 2D real plane into a unit disk
 
-    .. code-block:: python
-
-        import sympy as sm
-
-        u, v = sm.symbols("u, v", real=True)
-        norm = sm.sqrt(u ** 2 + v ** 2)
-        factor = sm.tanh(norm) / norm
-
-        x = factor * u
-        y = factor * v
-
-        print(
-            repr(
-                sm.simplify(
-                    sm.log(
-                        sm.Abs(
-                            sm.Matrix([x, y]).jacobian(
-                                sm.Matrix([u, v])
-                            ).det()
-                        )
-                    )
-                )
-            )
-        )
+    This will be especially useful for things like sampling in eccentricity
+    vectors like ``e sin(w), e cos(w)``.
 
     """
 
