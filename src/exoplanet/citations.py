@@ -64,7 +64,7 @@ CITATIONS = {
 @misc{exoplanet:exoplanet,
   author = {Daniel Foreman-Mackey and Rodrigo Luger and Ian Czekala and
             Eric Agol and Adrian Price-Whelan and Tom Barclay},
-   title = {exoplanet-dev/exoplanet v0.3.1},
+   title = {exoplanet-dev/exoplanet v0.3.2},
    month = may,
     year = 2020,
      doi = {10.5281/zenodo.1998447},
