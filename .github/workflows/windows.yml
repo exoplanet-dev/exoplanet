@@ -30,7 +30,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          conda create -n exoplanet -q python=3.7 -c conda-forge numpy theano
+          conda create -n exoplanet python=3.7 -c conda-forge -q numpy theano
           conda activate exoplanet
           python -c "import numpy; print(numpy.__version__)"
           python -c "import theano; print(theano.__version__)"
