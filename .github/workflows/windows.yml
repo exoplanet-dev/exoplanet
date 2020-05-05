@@ -66,6 +66,7 @@ jobs:
           python -m sysconfig
           python -c 'import theano; print(theano.__version__)'
 
+
         # python -m pytest -vs tests/citations_test.py::test_basic
       # Running tests
       - name: Run tests
