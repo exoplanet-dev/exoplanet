@@ -29,9 +29,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          conda install -c conda-forge -q numpy astropy celerite
-          python -m pip install -U pip setuptools wheel pytest-filter-subpackage
+          conda install -c conda-forge -q numpy
+          python -m pip install -U pip
+          python -m pip install -U theano
 
+        # conda install -c conda-forge -q numpy astropy celerite
+        # python -m pip install -U pip setuptools wheel pytest-filter-subpackage
       #    python -m pip install -e .[test]
 
       # - name: Set up Python ${{ matrix.python-version }}
@@ -65,7 +68,6 @@ jobs:
         run: |
           python -m sysconfig
           python -c 'import theano; print(theano.__version__)'
-
 
         # python -m pytest -vs tests/citations_test.py::test_basic
       # Running tests
