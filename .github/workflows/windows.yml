@@ -33,7 +33,6 @@ jobs:
           conda install -c conda-forge -q numpy theano astropy celerite
           python -m pip install -e .[test]
           python -c "import theano; print(theano.__version__)"
-          theano-cache purge
 
       - name: Run tests
         run: |
