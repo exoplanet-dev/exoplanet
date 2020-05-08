@@ -5,6 +5,7 @@ import numpy as np
 
 from exoplanet.estimators import (
     autocorr_estimator,
+    bls_estimator,
     estimate_minimum_mass,
     estimate_semi_amplitude,
     lomb_scargle_estimator,
@@ -62,4 +63,20 @@ def test_autocorr_estimator(seed=9502):
     results = autocorr_estimator(
         t, y, min_period=0.01, max_period=10, smooth=0.0
     )
+    assert np.abs(period - results["peaks"][0]["period"]) / period < 0.01
+
+
+def test_bls_estimator(seed=721):
+    np.random.seed(seed)
+    t = np.sort(np.random.uniform(0, 27, 5000))
+    y = 1e-3 * np.random.randn(len(t))
+    period = 2.345
+    t0 = 1.0
+    depth = 0.1
+    duration = 0.2
+    y[
+        np.abs((t - t0 + 0.5 * period) % period - 0.5 * period)
+        < 0.5 * duration
+    ] -= depth
+    results = bls_estimator(t, y)
     assert np.abs(period - results["peaks"][0]["period"]) / period < 0.01
