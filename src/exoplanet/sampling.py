@@ -1,270 +1,396 @@
 # -*- coding: utf-8 -*-
 
-__all__ = ["PyMC3Sampler"]
-
-import logging
+__all__ = ["QuadPotentialDenseAdapt", "get_dense_nuts_step", "sample"]
 
 import numpy as np
 import pymc3 as pm
-from pymc3.step_methods.hmc import quadpotential as quad
+import theano
+from pymc3.model import all_continuous, modelcontext
+from pymc3.step_methods.hmc.quadpotential import QuadPotential
+from pymc3.step_methods.step_sizes import DualAverageAdaptation
+from scipy.linalg import LinAlgError, cholesky, solve_triangular
+
+from .utils import logger
 
 
-class PyMC3Sampler(object):
-    """A sampling wrapper for PyMC3 with support for dense mass matrices
+class QuadPotentialDenseAdapt(QuadPotential):
+    """Adapt a dense mass matrix from the sample covariances."""
 
-    This schedule is based on the method used by as described in Section 34.2
-    of the `Stan Manual <http://mc-stan.org/users/documentation/>`_.
+    def __init__(
+        self,
+        n,
+        initial_mean=None,
+        initial_cov=None,
+        initial_weight=0,
+        adaptation_window=101,
+        doubling=True,
+        update_steps=None,
+        dtype="float64",
+    ):
+        if initial_mean is None:
+            initial_mean = np.zeros(n, dtype=dtype)
+        if initial_cov is None:
+            initial_cov = np.eye(n, dtype=dtype)
+            initial_weight = 1
 
-    All extra keyword arguments are passed to the ``pymc3.sample`` function.
+        if initial_cov is not None and initial_cov.ndim != 2:
+            raise ValueError("Initial covariance must be two-dimensional.")
+        if initial_mean is not None and initial_mean.ndim != 1:
+            raise ValueError("Initial mean must be one-dimensional.")
+        if initial_cov is not None and initial_cov.shape != (n, n):
+            raise ValueError(
+                "Wrong shape for initial_cov: expected %s got %s"
+                % (n, initial_cov.shape)
+            )
+        if len(initial_mean) != n:
+            raise ValueError(
+                "Wrong shape for initial_mean: expected %s got %s"
+                % (n, len(initial_mean))
+            )
+
+        self.dtype = dtype
+        self._n = n
+        self._cov = np.array(initial_cov, dtype=self.dtype, copy=True)
+        self._cov_theano = theano.shared(self._cov)
+        self._chol = cholesky(self._cov, lower=True)
+        self._chol_error = None
+        self._foreground_cov = _WeightedCovariance(
+            self._n, initial_mean, initial_cov, initial_weight, self.dtype
+        )
+        self._background_cov = _WeightedCovariance(self._n, dtype=self.dtype)
+        self._n_samples = 0
+
+        # For backwards compatibility
+        self._doubling = doubling
+        self._adaptation_window = int(adaptation_window)
+        self._previous_update = 0
+
+        # New interface
+        if update_steps is None:
+            self._update_steps = None
+        else:
+            self._update_steps = np.atleast_1d(update_steps).astype(int)
+
+    def velocity(self, x, out=None):
+        return np.dot(self._cov, x, out=out)
+
+    def energy(self, x, velocity=None):
+        if velocity is None:
+            velocity = self.velocity(x)
+        return 0.5 * np.dot(x, velocity)
+
+    def velocity_energy(self, x, v_out):
+        self.velocity(x, out=v_out)
+        return self.energy(x, v_out)
+
+    def random(self):
+        vals = np.random.normal(size=self._n).astype(self.dtype)
+        return solve_triangular(self._chol.T, vals, overwrite_b=True)
+
+    def _update_from_weightvar(self, weightvar):
+        weightvar.current_covariance(out=self._cov)
+        try:
+            self._chol = cholesky(self._cov, lower=True)
+        except (LinAlgError, ValueError) as error:
+            self._chol_error = error
+        self._cov_theano.set_value(self._cov)
+
+    def update(self, sample, grad, tune):
+        if not tune:
+            return
+
+        self._foreground_cov.add_sample(sample, weight=1)
+        self._background_cov.add_sample(sample, weight=1)
+        self._update_from_weightvar(self._foreground_cov)
+
+        # Support the two methods for updating the mass matrix
+        delta = self._n_samples - self._previous_update
+        do_update = (
+            self._update_steps is not None
+            and self._n_samples in self._update_steps
+        ) or (self._update_steps is None and delta >= self._adaptation_window)
+        if do_update:
+            self._foreground_cov = self._background_cov
+            self._background_cov = _WeightedCovariance(
+                self._n, dtype=self.dtype
+            )
+
+            if self._update_steps is None:
+                self._previous_update = self._n_samples
+                if self._doubling:
+                    self._adaptation_window *= 2
+
+        self._n_samples += 1
+
+    def raise_ok(self, vmap):
+        if self._chol_error is not None:
+            raise ValueError("{0}".format(self._chol_error))
+
+
+class _WeightedCovariance:
+    """Online algorithm for computing mean and covariance."""
+
+    def __init__(
+        self,
+        nelem,
+        initial_mean=None,
+        initial_covariance=None,
+        initial_weight=0,
+        dtype="float64",
+    ):
+        self._dtype = dtype
+        self.n_samples = float(initial_weight)
+        if initial_mean is None:
+            self.mean = np.zeros(nelem, dtype=dtype)
+        else:
+            self.mean = np.array(initial_mean, dtype=dtype, copy=True)
+        if initial_covariance is None:
+            self.raw_cov = np.eye(nelem, dtype=dtype)
+        else:
+            self.raw_cov = np.array(initial_covariance, dtype=dtype, copy=True)
+
+        self.raw_cov[:] *= self.n_samples
+
+        if self.raw_cov.shape != (nelem, nelem):
+            raise ValueError("Invalid shape for initial covariance.")
+        if self.mean.shape != (nelem,):
+            raise ValueError("Invalid shape for initial mean.")
+
+    def add_sample(self, x, weight):
+        x = np.asarray(x)
+        self.n_samples += 1
+        old_diff = x - self.mean
+        self.mean[:] += old_diff / self.n_samples
+        new_diff = x - self.mean
+        self.raw_cov[:] += weight * new_diff[:, None] * old_diff[None, :]
+
+    def current_covariance(self, out=None):
+        if self.n_samples == 0:
+            raise ValueError("Can not compute covariance without samples.")
+        if out is not None:
+            return np.divide(self.raw_cov, self.n_samples - 1, out=out)
+        else:
+            return (self.raw_cov / (self.n_samples - 1)).astype(self._dtype)
+
+    def current_mean(self):
+        return np.array(self.mean, dtype=self._dtype)
+
+
+class WindowedDualAverageAdaptation(DualAverageAdaptation):
+    def __init__(self, update_steps, initial_step, target, *args, **kwargs):
+        self.update_steps = np.atleast_1d(update_steps).astype(int)
+        self.targets = np.atleast_1d(target) + np.zeros_like(self.update_steps)
+        super(WindowedDualAverageAdaptation, self).__init__(
+            initial_step, self.targets[0], *args, **kwargs
+        )
+        self._initial_step = initial_step
+        self._n_samples = 0
+
+    def reset(self):
+        self._hbar = 0.0
+        self._log_step = np.log(self._initial_step)
+        self._log_bar = self._log_step
+        self._count = 1
+
+    def update(self, accept_stat, tune):
+        if self._n_samples in self.update_steps:
+            self._target = float(
+                self.targets[np.where(self.update_steps == self._n_samples)]
+            )
+            self._n_samples += 1
+            self.reset()
+            return
+
+        self._n_samples += 1
+        super(WindowedDualAverageAdaptation, self).update(accept_stat, tune)
+
+
+def build_schedule(
+    tune, warmup_window=50, adapt_window=50, cooldown_window=50
+):
+    if warmup_window + adapt_window + cooldown_window > tune:
+        logger.warn(
+            "there are not enough tuning steps to accomodate the tuning "
+            "schedule; assigning automatically as 20%/70%/10%"
+        )
+        warmup_window = np.ceil(0.2 * tune).astype(int)
+        cooldown_window = np.ceil(0.1 * tune).astype(int)
+        adapt_window = tune - warmup_window - cooldown_window
+
+    t = warmup_window
+    delta = adapt_window
+    update_steps = []
+    while t < tune - cooldown_window:
+        t += delta
+        delta = 2 * delta
+        if t + delta > tune - cooldown_window:
+            update_steps.append(tune - cooldown_window)
+            break
+        update_steps.append(t)
+
+    update_steps = np.array(update_steps, dtype=int)
+    if np.any(update_steps) <= 0:
+        raise ValueError("invalid tuning schedule")
+
+    return np.append(warmup_window, update_steps)
+
+
+def sample(
+    *,
+    draws=1000,
+    tune=1000,
+    model=None,
+    step_kwargs=None,
+    warmup_window=50,
+    adapt_window=50,
+    cooldown_window=100,
+    initial_accept=None,
+    target_accept=0.9,
+    gamma=0.05,
+    k=0.75,
+    t0=10,
+    **kwargs,
+):
+    # Check that we're in a model context and that all the variables are
+    # continuous
+    model = modelcontext(model)
+    if not all_continuous(model.vars):
+        raise ValueError(
+            "NUTS can only be used for models with only "
+            "continuous variables."
+        )
+    start = kwargs.get("start", None)
+    if start is None:
+        start = model.test_point
+    mean = model.dict_to_array(start)
+
+    update_steps = build_schedule(
+        tune,
+        warmup_window=warmup_window,
+        adapt_window=adapt_window,
+        cooldown_window=cooldown_window,
+    )
+
+    potential = QuadPotentialDenseAdapt(
+        model.ndim,
+        initial_mean=mean,
+        initial_weight=10,
+        update_steps=update_steps,
+    )
+
+    if "step" in kwargs:
+        step = kwargs["step"]
+    else:
+        if step_kwargs is None:
+            step_kwargs = {}
+        step = pm.NUTS(
+            potential=potential,
+            model=model,
+            target_accept=target_accept,
+            **step_kwargs,
+        )
+
+    if "target_accept" in step_kwargs and target_accept is not None:
+        raise ValueError(
+            "'target_accept' cannot be given as a keyword argument and in "
+            "'step_kwargs'"
+        )
+    target_accept = step_kwargs.pop("target_accept", target_accept)
+    if initial_accept is None:
+        target = target_accept
+    else:
+        if initial_accept > target_accept:
+            raise ValueError(
+                "initial_accept must be less than or equal to target_accept"
+            )
+        target = initial_accept + (target_accept - initial_accept) * np.sqrt(
+            np.arange(len(update_steps)) / (len(update_steps) - 1)
+        )
+    step.step_adapt = WindowedDualAverageAdaptation(
+        update_steps, step.step_size, target, gamma, k, t0
+    )
+
+    kwargs["step"] = step
+    return pm.sample(draws=draws, tune=tune, model=model, **kwargs)
+
+
+def get_dense_nuts_step(
+    start=None,
+    adaptation_window=101,
+    doubling=True,
+    initial_weight=10,
+    use_hessian=False,
+    use_hessian_diag=False,
+    hessian_regularization=1e-8,
+    model=None,
+    **kwargs,
+):
+    """Get a NUTS step function with a dense mass matrix
+
+    The entries in the mass matrix will be tuned based on the sample
+    covariances during tuning. All extra arguments are passed directly to
+    ``pymc3.NUTS``.
 
     Args:
-        start (int): The number of steps to run as an initial burn-in to find
-            the typical set.
-        window (int): The length of the first mass matrix tuning phase.
-            Subsequent tuning windows will be powers of two times this size.
-        finish (int): The number of tuning steps to run to learn the step size
-            after tuning the mass matrix.
-        dense (bool): Fit for the off-diagonal elements of the mass matrix.
+        start (dict, optional): A starting point in parameter space. If not
+            provided, the model's ``test_point`` is used.
+        adaptation_window (int, optional): The (initial) size of the window
+            used for sample covariance estimation.
+        doubling (bool, optional): If ``True`` (default) the adaptation window
+            is doubled each time the matrix is updated.
 
     """
+    model = modelcontext(model)
 
-    # Ref: src/stan/mcmc/windowed_adaptation.hpp in stan repo
+    if not all_continuous(model.vars):
+        raise ValueError(
+            "NUTS can only be used for models with only "
+            "continuous variables."
+        )
 
-    def __init__(self, start=75, finish=50, window=25, dense=True, **kwargs):
-        self.dense = dense
+    if start is None:
+        start = model.test_point
+    mean = model.dict_to_array(start)
 
-        self.start = int(start)
-        self.finish = int(finish)
-        self.window = int(window)
-        self.count = 0
-        self._current_step = None
-        self._current_trace = None
-        self.kwargs = kwargs
+    if use_hessian or use_hessian_diag:
+        try:
+            import numdifftools as nd
+        except ImportError:
+            raise ImportError(
+                "The 'numdifftools' package is required for Hessian "
+                "computations"
+            )
 
-    def get_step_for_trace(
-        self,
-        trace=None,
-        model=None,
-        regular_window=0,
-        regular_variance=1e-3,
-        **kwargs,
-    ):
-        """Get a PyMC3 NUTS step tuned for a given burn-in trace
-
-        Args:
-            trace: The ``MultiTrace`` output from a previous run of
-                ``pymc3.sample``.
-            regular_window: The weight (in units of number of steps) to use
-                when regularizing the mass matrix estimate.
-            regular_variance: The amplitude of the regularization for the mass
-                matrix. This will be added to the diagonal of the covariance
-                matrix with weight given by ``regular_window``.
-
-        """
-        model = pm.modelcontext(model)
-
-        # If not given, use the trivial metric
-        if trace is None or model.ndim == 1:
-            potential = quad.QuadPotentialDiag(np.ones(model.ndim))
-
+        logger.info("Numerically estimating Hessian matrix")
+        if use_hessian_diag:
+            hess = nd.Hessdiag(model.logp_array)(mean)
+            var = np.diag(-1.0 / hess)
         else:
-            # Loop over samples and convert to the relevant parameter space;
-            # I'm sure that there's an easier way to do this, but I don't know
-            # how to make something work in general...
-            N = len(trace) * trace.nchains
-            samples = np.empty((N, model.ndim))
-            i = 0
-            for chain in trace._straces.values():
-                for p in chain:
-                    samples[i] = model.bijection.map(p)
-                    i += 1
+            hess = nd.Hessian(model.logp_array)(mean)
+            var = -np.linalg.inv(hess)
 
-            if self.dense:
-                # Compute the regularized sample covariance
-                cov = np.cov(samples, rowvar=0)
-                if regular_window > 0:
-                    cov = cov * N / (N + regular_window)
-                    cov[np.diag_indices_from(cov)] += (
-                        regular_variance
-                        * regular_window
-                        / (N + regular_window)
-                    )
-                potential = quad.QuadPotentialFull(cov)
+        factor = 1
+        success = False
+        while not success:
+            var[np.diag_indices_from(var)] += factor * hessian_regularization
+
+            try:
+                np.linalg.cholesky(var)
+            except np.linalg.LinAlgError:
+                factor *= 2
             else:
-                var = np.var(samples, axis=0)
-                if regular_window > 0:
-                    var = var * N / (N + regular_window)
-                    var += (
-                        regular_variance
-                        * regular_window
-                        / (N + regular_window)
-                    )
-                potential = quad.QuadPotentialDiag(var)
+                success = True
 
-        return pm.NUTS(potential=potential, **kwargs)
+    else:
+        var = np.eye(len(mean))
 
-    def _get_sample_kwargs(self, kwargs):
-        new_kwargs = dict(kwargs)
-        for k, v in self.kwargs.items():
-            if k not in new_kwargs:
-                new_kwargs[k] = v
-        return new_kwargs
+    potential = QuadPotentialDenseAdapt(
+        model.ndim,
+        initial_mean=mean,
+        initial_cov=var,
+        initial_weight=initial_weight,
+        adaptation_window=adaptation_window,
+        doubling=doubling,
+    )
 
-    def _extend(self, steps, start=None, step=None, **kwargs):
-
-        kwargs["compute_convergence_checks"] = False
-        kwargs["discard_tuned_samples"] = False
-        kwargs["draws"] = 2
-        kwargs = self._get_sample_kwargs(kwargs)
-
-        # Hide some of the PyMC3 logging
-        logger = logging.getLogger("pymc3")
-        propagate = logger.propagate
-        level = logger.getEffectiveLevel()
-        logger.propagate = False
-        logger.setLevel(logging.ERROR)
-
-        self._current_trace = pm.sample(
-            start=start, tune=steps, step=step, **kwargs
-        )
-        self.count += steps
-
-        logger.propagate = propagate
-        logger.setLevel(level)
-
-    def warmup(self, start=None, step_kwargs=None, **kwargs):
-        """Run an initial warmup phase to find the typical set"""
-        if step_kwargs is None:
-            step_kwargs = {}
-        step = self.get_step_for_trace(**step_kwargs)
-        self._extend(self.start, start=start, step=step, **kwargs)
-        return self._current_trace
-
-    def _get_start_and_step(
-        self, start=None, step_kwargs=None, trace=None, step=None
-    ):
-        if step_kwargs is None:
-            step_kwargs = {}
-        if trace is not None:
-            step = self.get_step_for_trace(trace, **step_kwargs)
-        else:
-            if trace is None:
-                trace = self._current_trace
-            if step is None:
-                step = self._current_step
-        if start is None:
-            if trace is not None:
-                start = [t[-1] for t in trace._straces.values()]
-        return start, step
-
-    def extend_tune(
-        self,
-        steps,
-        start=None,
-        step_kwargs=None,
-        trace=None,
-        step=None,
-        **kwargs,
-    ):
-        """Extend the tuning phase by a given number of steps
-
-        After running the sampling, the mass matrix is re-estimated based on
-        this run.
-
-        Args:
-            steps (int): The number of steps to run.
-
-        """
-        if step_kwargs is None:
-            step_kwargs = {}
-        start, step = self._get_start_and_step(
-            start=start, step_kwargs=step_kwargs, trace=trace, step=step
-        )
-        self._extend(steps, start=start, step=step, **kwargs)
-        self._current_step = step
-        return self._current_trace
-
-    def tune(self, tune=1000, start=None, step_kwargs=None, **kwargs):
-        """Run the full tuning run for the mass matrix
-
-        This will run ``start`` steps of warmup followed by chains with
-        exponentially increasing chains to tune the mass matrix.
-
-        Args:
-            tune (int): The total number of steps to run.
-
-        """
-        model = pm.modelcontext(kwargs.get("model", None))
-
-        ntot = self.start + self.window + self.finish
-        if tune < ntot:
-            raise ValueError(
-                "'tune' must be at least {0}".format(ntot)
-                + "(start + window + finish)"
-            )
-
-        self.count = 0
-        self.warmup(start=start, step_kwargs=step_kwargs, **kwargs)
-        steps = self.window
-        trace = None
-        while self.count < tune:
-            trace = self.extend_tune(
-                start=start,
-                step_kwargs=step_kwargs,
-                steps=steps,
-                trace=trace,
-                **kwargs,
-            )
-            steps *= 2
-            if self.count + steps + steps * 2 > tune:
-                steps = tune - self.count
-
-        # Final tuning stage for step size
-        self.extend_tune(
-            start=start,
-            step_kwargs=step_kwargs,
-            steps=self.finish,
-            trace=trace,
-            **kwargs,
-        )
-
-        # Copy across the step size from the parallel runs
-        self._current_step.stop_tuning()
-        expected = []
-        for chain in self._current_trace._straces.values():
-            expected.append(chain.get_sampler_stats("step_size")[-1])
-
-        step = self._current_step
-        if step_kwargs is None:
-            step_kwargs = dict()
-        else:
-            step_kwargs = dict(step_kwargs)
-            step_kwargs.pop("regular_window", None)
-            step_kwargs.pop("regular_variance", None)
-        step_kwargs["model"] = model
-        step_kwargs["step_scale"] = np.mean(expected) * model.ndim ** 0.25
-        step_kwargs["adapt_step_size"] = False
-        step_kwargs["potential"] = step.potential
-        self._current_step = pm.NUTS(**step_kwargs)
-        return self._current_trace
-
-    def sample(
-        self, trace=None, step=None, start=None, step_kwargs=None, **kwargs
-    ):
-        """Run the production sampling using the tuned mass matrix
-
-        This is a light wrapper around ``pymc3.sample`` and any arguments used
-        there (for example ``draws``) can be used as input to this method too.
-
-        """
-        start, step = self._get_start_and_step(
-            start=start, step_kwargs=step_kwargs, step=step
-        )
-        if trace is not None:
-            start = None
-        kwargs["tune"] = kwargs.get("tune", 0)
-        kwargs = self._get_sample_kwargs(kwargs)
-        self._current_trace = pm.sample(
-            start=start, step=step, trace=trace, **kwargs
-        )
-        return self._current_trace
+    return pm.NUTS(potential=potential, model=model, **kwargs)
