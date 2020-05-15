@@ -6,6 +6,7 @@ omit =
     src/exoplanet/theano_ops/interp/*
     src/exoplanet/orbits/dur_to_ecc.py
     src/exoplanet/distributions/celerite.py
+    src/exoplanet/orbits/constants.py
 
 [report]
 exclude_lines =
@@ -13,3 +14,4 @@ exclude_lines =
     except ImportError
     pragma: no cover
     def R_op
+    if verbose
