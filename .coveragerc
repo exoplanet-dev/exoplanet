@@ -14,3 +14,4 @@ exclude_lines =
     except ImportError
     pragma: no cover
     def R_op
+    if verbose
