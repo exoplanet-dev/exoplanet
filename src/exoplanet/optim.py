@@ -93,7 +93,7 @@ def optimize(
 
     wrapper = ModelWrapper(start=start, vars=vars, model=model)
     has_progress_bar, progress_bar = start_optimizer(
-        vars, verbose=verbose, progress_bar=progress_bar
+        wrapper.vars, verbose=verbose, progress_bar=progress_bar
     )
 
     # This returns the objective function and its derivatives

@@ -46,6 +46,8 @@ EXTRA_REQUIRE = {
         "batman-package",
         "rebound; sys_platform != 'win32'",
         "starry; sys_platform != 'win32'",
+        "torch",
+        "torchvision",
     ],
     "docs": [
         "sphinx>=1.7.5",
