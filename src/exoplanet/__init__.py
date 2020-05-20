@@ -8,6 +8,7 @@ __all__ = [
     "interp",
     "get_dense_nuts_step",
     "sample",
+    "optimize",
 ]
 
 from . import distributions, gp, interp, orbits
@@ -16,6 +17,7 @@ from .distributions import *  # NOQA
 from .estimators import *  # NOQA
 from .exoplanet_version import __version__
 from .light_curves import *  # NOQA
+from .optim import optimize
 from .sampling import get_dense_nuts_step, sample
 from .utils import *  # NOQA
 

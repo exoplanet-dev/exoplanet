@@ -26,6 +26,10 @@ def kipping13(
             period fit. If ``False``, use the parameters for the short period
             fit. If not given, the parameters fit using the full dataset are
             used.
+        lower (float, optional): Restrict the eccentricity to be larger than
+            this value.
+        upper (float, optional): Restrict the eccentricity to be smaller than
+            this value.
 
     Returns:
         The eccentricity distribution.
@@ -105,6 +109,10 @@ def vaneylen19(
         multi (bool, optional): If ``True``, use the distribution for systems
             with multiple transiting planets. If ``False`` (default), use the
             distribution for systems with only one detected transiting planet.
+        lower (float, optional): Restrict the eccentricity to be larger than
+            this value.
+        upper (float, optional): Restrict the eccentricity to be smaller than
+            this value.
 
     Returns:
         The eccentricity distribution.

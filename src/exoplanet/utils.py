@@ -4,7 +4,6 @@ __all__ = [
     "logger",
     "eval_in_model",
     "get_samples_from_trace",
-    "optimize",
     "get_args_for_theano_function",
     "get_theano_function_for_var",
     "deprecation_warning",
@@ -12,23 +11,12 @@ __all__ = [
 ]
 
 import logging
-import os
-import sys
 import warnings
 from functools import wraps
 
 import numpy as np
 import pymc3 as pm
 import theano
-from pymc3.blocking import ArrayOrdering, DictToArrayBijection
-from pymc3.model import Point
-from pymc3.theanof import inputvars
-from pymc3.util import (
-    get_default_varnames,
-    get_untransformed_name,
-    is_transformed_name,
-    update_start_vals,
-)
 
 logger = logging.getLogger("exoplanet")
 
@@ -112,143 +100,6 @@ def get_samples_from_trace(trace, size=1):
         chain_idx = np.random.randint(len(trace.chains))
         sample_idx = np.random.randint(len(trace))
         yield trace._straces[chain_idx][sample_idx]
-
-
-def optimize(
-    start=None,
-    vars=None,
-    model=None,
-    return_info=False,
-    verbose=True,
-    progress_bar=True,
-    **kwargs
-):
-    """Maximize the log prob of a PyMC3 model using scipy
-
-    All extra arguments are passed directly to the ``scipy.optimize.minimize``
-    function.
-
-    Args:
-        start: The PyMC3 coordinate dictionary of the starting position
-        vars: The variables to optimize
-        model: The PyMC3 model
-        return_info: Return both the coordinate dictionary and the result of
-            ``scipy.optimize.minimize``
-        verbose: Print the success flag and log probability to the screen
-        progress_bar: A ``tqdm`` progress bar instance. Set to ``True``
-            (default) to use ``tqdm.auto.tqdm()``. Set to ``False`` to disable.
-
-    """
-    from scipy.optimize import minimize
-
-    model = pm.modelcontext(model)
-
-    # Work out the full starting coordinates
-    if start is None:
-        start = model.test_point
-    else:
-        update_start_vals(start, model.test_point, model)
-
-    # Fit all the parameters by default
-    if vars is None:
-        vars = model.cont_vars
-    vars = inputvars(vars)
-    allinmodel(vars, model)
-
-    # Work out the relevant bijection map
-    start = Point(start, model=model)
-    bij = DictToArrayBijection(ArrayOrdering(vars), start)
-
-    # Pre-compile the theano model and gradient
-    nlp = -model.logpt
-    grad = theano.grad(nlp, vars, disconnected_inputs="ignore")
-    func = get_theano_function_for_var([nlp] + grad, model=model)
-
-    if verbose:
-        names = [
-            get_untransformed_name(v.name)
-            if is_transformed_name(v.name)
-            else v.name
-            for v in vars
-        ]
-        sys.stderr.write(
-            "optimizing logp for variables: [{0}]\n".format(", ".join(names))
-        )
-
-        if progress_bar is True:
-            if "EXOPLANET_NO_AUTO_PBAR" in os.environ:
-                from tqdm import tqdm
-            else:
-                from tqdm.auto import tqdm
-
-            progress_bar = tqdm()
-
-    # Check whether the input progress bar has the expected methods
-    has_progress_bar = (
-        hasattr(progress_bar, "set_postfix")
-        and hasattr(progress_bar, "update")
-        and hasattr(progress_bar, "close")
-    )
-
-    # This returns the objective function and its derivatives
-    def objective(vec):
-        try:
-            res = func(
-                *get_args_for_theano_function(bij.rmap(vec), model=model)
-            )
-        except Exception:
-            import traceback
-
-            print("array:", vec)
-            print("point:", bij.rmap(vec))
-            traceback.print_exc()
-            raise
-
-        d = dict(zip((v.name for v in vars), res[1:]))
-        g = bij.map(d)
-        if verbose and has_progress_bar:
-            progress_bar.set_postfix(logp="{0:e}".format(-res[0]))
-            progress_bar.update()
-        return res[0], g
-
-    # Optimize using scipy.optimize
-    x0 = bij.map(start)
-    initial = objective(x0)[0]
-    kwargs["jac"] = True
-    info = minimize(objective, x0, **kwargs)
-
-    # Only accept the output if it is better than it was
-    x = info.x if (np.isfinite(info.fun) and info.fun < initial) else x0
-
-    # Coerce the output into the right format
-    vars = get_default_varnames(model.unobserved_RVs, True)
-    point = {
-        var.name: value
-        for var, value in zip(vars, model.fastfn(vars)(bij.rmap(x)))
-    }
-
-    if verbose:
-        if has_progress_bar:
-            progress_bar.close()
-
-        sys.stderr.write("message: {0}\n".format(info.message))
-        sys.stderr.write("logp: {0} -> {1}\n".format(-initial, -info.fun))
-        if not np.isfinite(info.fun):
-            logger.warning("final logp not finite, returning initial point")
-            logger.warning(
-                "this suggests that something is wrong with the model"
-            )
-            logger.debug("{0}".format(info))
-
-    if return_info:
-        return point, info
-    return point
-
-
-def allinmodel(vars, model):
-    notin = [v for v in vars if v not in model.vars]
-    if notin:
-        raise ValueError("Some variables not in the model: " + str(notin))
 
 
 def deprecation_warning(msg):
