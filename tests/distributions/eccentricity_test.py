@@ -65,6 +65,21 @@ class TestEccentricity(_Base):
         s, p = kstest(ecc, cdf)
         assert s < 0.05
 
+    @pytest.mark.parametrize(
+        "kwargs",
+        [dict(lower=0.1), dict(upper=0.5), dict(lower=0.3, upper=0.4)],
+    )
+    def test_kipping13_bounds(self, kwargs):
+        with self._model():
+            kipping13("ecc", **kwargs)
+            trace = self._sample()
+
+        ecc = trace["ecc"].flatten()
+        assert np.all(
+            (kwargs.get("lower", 0.0) <= ecc)
+            & (ecc <= kwargs.get("upper", 1.0))
+        )
+
     @pytest.mark.parametrize("kwargs", [dict(), dict(multi=True)])
     def test_vaneylen19(self, kwargs):
         with self._model() as model:
@@ -116,3 +131,18 @@ class TestEccentricity(_Base):
         )
         s, p = kstest(ecc, cdf)
         assert s < 0.05
+
+    @pytest.mark.parametrize(
+        "kwargs",
+        [dict(lower=0.1), dict(upper=0.5), dict(lower=0.3, upper=0.4)],
+    )
+    def test_vaneylen19_bounds(self, kwargs):
+        with self._model():
+            vaneylen19("ecc", **kwargs)
+            trace = self._sample()
+
+        ecc = trace["ecc"].flatten()
+        assert np.all(
+            (kwargs.get("lower", 0.0) <= ecc)
+            & (ecc <= kwargs.get("upper", 1.0))
+        )
