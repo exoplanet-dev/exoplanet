@@ -249,7 +249,7 @@ class Adam:
             )
         self.lr = lr
         self.betas = betas
-        self.eps = (eps,)
+        self.eps = eps
         self.weight_decay = weight_decay
         self.amsgrad = amsgrad
         self.reset()
