@@ -30,7 +30,7 @@ jobs:
         run: |
           conda create -n exoplanet python=3.7 -q -c conda-forge
           conda activate exoplanet
-          conda install -c conda-forge -q numpy scipy mkl-service libpython m2w64-toolchain theano astropy celerite
+          conda install -c conda-forge -q "numpy<1.17" scipy mkl-service libpython m2w64-toolchain theano astropy celerite
           python -m pip install -e .[test]
           python -c "import theano; print(theano.__version__)"
 
