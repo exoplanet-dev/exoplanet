@@ -333,4 +333,19 @@ author = {{Van Eylen}, Vincent and {Albrecht}, Simon and {Huang}, Xu and
 }
 """,
     ),
+    "reboundx": (
+        ("exoplanet:reboundx",),
+        r"""
+@article{tamayo2020reboundx,
+  title={REBOUNDx: a library for adding conservative and dissipative forces to otherwise symplectic N-body integrations},
+  author={Tamayo, Daniel and Rein, Hanno and Shi, Pengshuai and Hernandez, David M},
+  journal={Monthly Notices of the Royal Astronomical Society},
+  volume={491},
+  number={2},
+  pages={2885--2901},
+  year={2020},
+  publisher={Oxford University Press}
+}
+""",
+    )
 }
