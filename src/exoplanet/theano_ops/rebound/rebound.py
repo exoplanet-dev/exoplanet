@@ -8,6 +8,8 @@ import numpy as np
 import theano
 import theano.tensor as tt
 from theano import gof
+import reboundx
+from reboundx import constants
 
 
 class ReboundOp(gof.Op):
@@ -66,8 +68,11 @@ class ReboundOp(gof.Op):
 
         # Set up the simulation
         sim = rebound.Simulation()
-
+        gr_sources = []
         for k, v in self.rebound_args.items():
+            if 'gr' in k:
+                gr_sources += [v]
+                continue
             setattr(sim, k, v)
 
         for i in range(num_bodies):
@@ -80,7 +85,14 @@ class ReboundOp(gof.Op):
                 vy=initial_coords[i, 4],
                 vz=initial_coords[i, 5],
             )
-
+        rebx = reboundx.Extras(sim)
+        ps = sim.particles
+        gr = rebx.load_force('gr')
+        gr.params["c"] = constants.C
+        if len(gr_sources) != 0:  # if gr_sources have been added
+            for i, particle in enumerate(ps):
+                particle.params["gr_source"] = gr_sources[i]
+        rebx.add_force(gr)
         # Add the variational particles to track the derivatives
         var_systems = np.empty((num_bodies, 7), dtype=object)
         for i in range(num_bodies):
