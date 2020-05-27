@@ -51,7 +51,10 @@ class ReboundOrbit(KeplerianOrbit):
         # rebound_args["G"] = rebound_G  # Consistent units
         rebound_args["t"] = rebound_args.get("t", 0.0) / day_per_yr_over_2pi
         self.rebound_initial_time = rebound_args["t"]
-        self.rebound_op = ReboundOp(**rebound_args)
+        if "ReboundOp" in kwargs:
+            self.rebound_op = kwargs["ReboundOp"](**rebound_args)
+        else:
+            self.rebound_op = ReboundOp(**rebound_args)
         super(ReboundOrbit, self).__init__(*args, **kwargs)
 
         if self.period.ndim:
