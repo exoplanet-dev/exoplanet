@@ -70,10 +70,15 @@ class ReboundOp(gof.Op):
         sim = rebound.Simulation()
         gr_sources = []
         for k, v in self.rebound_args.items():
-            if "gr" in k:
+            if "gr" in k and "force" not in k:
                 gr_sources += [v]
                 continue
             setattr(sim, k, v)
+
+        if "gr_force" in self.rebound_args.keys():
+            force = self.rebound_args["gr_force"]
+        else:
+            force = "gr"  # default to the gr force
 
         for i in range(num_bodies):
             sim.add(
@@ -87,7 +92,7 @@ class ReboundOp(gof.Op):
             )
         rebx = reboundx.Extras(sim)
         ps = sim.particles
-        gr = rebx.load_force("gr")
+        gr = rebx.load_force(force)
         gr.params["c"] = constants.C
         if len(gr_sources) != 0:  # if gr_sources have been added
             for i, particle in enumerate(ps):
