@@ -5,10 +5,8 @@ __all__ = ["ReboundOp"]
 import warnings
 
 import numpy as np
-import reboundx
 import theano
 import theano.tensor as tt
-from reboundx import constants
 from theano import gof
 
 
@@ -43,6 +41,8 @@ class ReboundOp(gof.Op):
     def perform(self, node, inputs, outputs):
         # NOTE: Units should be AU, M_sun, year/2pi
         import rebound
+        import reboundx
+        from reboundx import constants
 
         masses, initial_coords, times = inputs
         masses = np.atleast_1d(masses)
