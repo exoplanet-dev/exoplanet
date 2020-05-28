@@ -5,11 +5,11 @@ __all__ = ["ReboundOp"]
 import warnings
 
 import numpy as np
+import reboundx
 import theano
 import theano.tensor as tt
-from theano import gof
-import reboundx
 from reboundx import constants
+from theano import gof
 
 
 class ReboundOp(gof.Op):
@@ -70,7 +70,7 @@ class ReboundOp(gof.Op):
         sim = rebound.Simulation()
         gr_sources = []
         for k, v in self.rebound_args.items():
-            if 'gr' in k:
+            if "gr" in k:
                 gr_sources += [v]
                 continue
             setattr(sim, k, v)
@@ -87,7 +87,7 @@ class ReboundOp(gof.Op):
             )
         rebx = reboundx.Extras(sim)
         ps = sim.particles
-        gr = rebx.load_force('gr')
+        gr = rebx.load_force("gr")
         gr.params["c"] = constants.C
         if len(gr_sources) != 0:  # if gr_sources have been added
             for i, particle in enumerate(ps):

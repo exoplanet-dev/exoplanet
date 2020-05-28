@@ -347,5 +347,5 @@ author = {{Van Eylen}, Vincent and {Albrecht}, Simon and {Huang}, Xu and
   publisher={Oxford University Press}
 }
 """,
-    )
+    ),
 }
