@@ -262,18 +262,18 @@ publisher={PeerJ Inc.}
 }
 
 @article{exoplanet:agol20,
-    author = {{Agol}, Eric and {Luger}, Rodrigo and {Foreman-Mackey}, Daniel},
+   author = {{Agol}, Eric and {Luger}, Rodrigo and {Foreman-Mackey}, Daniel},
     title = "{Analytic Planetary Transit Light Curves and Derivatives for
-    Stars with Polynomial Limb Darkening}",
-    journal = {\aj},
+              Stars with Polynomial Limb Darkening}",
+  journal = {\aj},
      year = 2020,
     month = mar,
-    volume = {159},
-    number = {3},
+   volume = {159},
+   number = {3},
     pages = {123},
       doi = {10.3847/1538-3881/ab4fee},
-    adsurl = {https://ui.adsabs.harvard.edu/abs/2020AJ....159..123A},
-    adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+   adsurl = {https://ui.adsabs.harvard.edu/abs/2020AJ....159..123A},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
 """,
     ),
