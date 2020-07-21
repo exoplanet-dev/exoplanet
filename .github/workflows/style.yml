@@ -24,6 +24,6 @@ jobs:
           python -m pip install -U black isort black_nbconvert
       - name: Check the style
         run: |
-          isort -c -rc src
+          isort -c src
           black --check src
           black_nbconvert --check .

@@ -18,9 +18,9 @@ except ImportError:
     gaussian_filter = None
 
 try:
-    from astropy.timeseries import LombScargle, BoxLeastSquares
+    from astropy.timeseries import BoxLeastSquares, LombScargle
 except ImportError:
-    from astropy.stats import LombScargle, BoxLeastSquares
+    from astropy.stats import BoxLeastSquares, LombScargle
 
 
 def _get_design_matrix(periods, t0s, x):
