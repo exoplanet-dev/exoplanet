@@ -34,7 +34,9 @@ class StarryBaseOp(gof.COp):
         ]
 
     def c_header_dirs(self, compiler):
-        return get_header_dirs(eigen=True)
+        dirs = get_header_dirs(eigen=True)
+        print(dirs)
+        return dirs
 
     def c_compile_args(self, compiler):
         return get_compile_args(compiler)
