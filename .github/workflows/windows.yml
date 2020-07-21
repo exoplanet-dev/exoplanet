@@ -40,6 +40,7 @@ jobs:
           DISTUTILS_USE_SDK: 1
           MSSdk: 1
           CFLAGS: -fno-asynchronous-unwind-tables
+          THEANO_FLAGS: mode=FAST_RUN
 
       - name: Run the unit tests
         run: python -m pytest -v tests
