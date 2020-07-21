@@ -120,6 +120,7 @@ def test_full_adapt_not_invertible():
         pot.raise_ok(None)
 
 
+@pytest.mark.filterwarnings("ignore:The number of samples")
 def test_full_adapt_sampling(seed=289586):
     np.random.seed(seed)
 

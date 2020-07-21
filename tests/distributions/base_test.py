@@ -156,7 +156,7 @@ class TestBase(_Base):
             assert np.all(np.isfinite(logp))
             assert np.allclose(logp[0], logp)
 
-            trace = self._sample()
+            trace = self._sample(draws=2000)
 
         # The angle should be uniformly distributed
         theta = trace["theta"]
@@ -193,7 +193,7 @@ class TestBase(_Base):
             assert np.all(np.isfinite(logp))
             assert np.allclose(logp[0], logp)
 
-            trace = self._sample()
+            trace = self._sample(draws=2000)
 
         p = trace["p"]
         p = np.reshape(p, (len(p), -1))
