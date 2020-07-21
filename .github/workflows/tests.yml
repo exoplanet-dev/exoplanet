@@ -3,21 +3,23 @@ name: Tests
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   build:
-    name: "py${{ matrix.python-version }} on ${{ matrix.os }} / pymc v${{ matrix.pymc-version }}"
-    runs-on: ${{ matrix.os }}
+    name: "${{ matrix.pymc-version }} on py${{ matrix.python-version }}"
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.7", "3.8"]
-        pymc-version: ["3.8", "3.9"]
-        os: ["ubuntu-latest"]
+        pymc-version: ["pymc3==3.8", "pymc3==3.9"]
+        include:
+          - python-version: "3.8"
+            pymc-version: "https://github.com/pymc-devs/pymc3/archive/master.zip"
 
     steps:
       - uses: actions/checkout@v2
@@ -40,7 +42,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip setuptools numpy pybind11 wheel
-          python -m pip install "pymc3==${{ matrix.pymc-version }}"
+          python -m pip install "${{ matrix.pymc-version }}"
           python -m pip wheel --wheel-dir=~/.cache/pip/exoplanet --find-links=~/.cache/pip/exoplanet .[test]
           python -m pip install -U --find-links=~/.cache/pip/exoplanet -e .[test]
           python -c 'import theano; print(theano.config.__str__(print_doc=False))'
