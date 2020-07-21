@@ -16,15 +16,15 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.7", "3.8"]
-        pymc-version: ["pymc3==3.8", "pymc3==3.9"]
+        pymc-version: ["pymc3==3.8", "pymc3>=3.9,<3.10"]
         include:
           - python-version: "3.8"
             pymc-version: "https://github.com/pymc-devs/pymc3/archive/master.zip"
 
     steps:
       - uses: actions/checkout@v2
-      - name: Fetch tags
-        run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+        with:
+          fetch-depth: 0
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
@@ -34,9 +34,9 @@ jobs:
       - uses: actions/cache@v1
         with:
           path: ~/.cache/pip
-          key: ${{ matrix.os }}-pip-${{ hashFiles('setup.py') }}
+          key: pip-${{ hashFiles('setup.py') }}
           restore-keys: |
-            ${{ matrix.os }}-pip-
+            pip-
 
       # Setup
       - name: Install dependencies
