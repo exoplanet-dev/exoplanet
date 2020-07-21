@@ -22,20 +22,37 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - uses: goanpeca/setup-miniconda@v1
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
         with:
-          auto-update-conda: true
           python-version: ${{ matrix.python-version }}
+
+      - uses: ilammy/msvc-dev-cmd@v1
 
       - name: Install dependencies
         run: |
-          conda create -n exoplanet python=3.7 -q -c conda-forge
-          conda activate exoplanet
-          conda install -c conda-forge -q "numpy=1.16.5" scipy mkl-service libpython m2w64-toolchain theano astropy celerite
-          python -m pip install -e .[test]
+          python -m pip install -U pip
+          python -m pip install ".[test]"
           python -c "import theano; print(theano.__version__)"
+        env:
+          DISTUTILS_USE_SDK: 1
+          MSSdk: 1
 
-      - name: Run tests
-        run: |
-          conda activate exoplanet
-          python -m pytest -v tests
+      - name: Run the unit tests
+        run: python -m pytest -v tests
+      # - uses: goanpeca/setup-miniconda@v1
+      #   with:
+      #     auto-update-conda: true
+      #     python-version: ${{ matrix.python-version }}
+      # - name: Install dependencies
+      #   run: |
+      #     conda create -n exoplanet python=3.7 -q -c conda-forge
+      #     conda activate exoplanet
+      #     conda install -c conda-forge -q numpy scipy mkl-service libpython m2w64-toolchain theano astropy celerite
+      #     python -m pip install -e .[test]
+      #     python -c "import theano; print(theano.__version__)"
+      # - name: Run tests
+      #   run: |
+      #     conda activate exoplanet
+      #     python -m pytest -v tests
