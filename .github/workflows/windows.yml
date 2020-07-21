@@ -39,6 +39,7 @@ jobs:
         env:
           DISTUTILS_USE_SDK: 1
           MSSdk: 1
+          CFLAGS: -fno-asynchronous-unwind-tables
 
       - name: Run the unit tests
         run: python -m pytest -v tests
