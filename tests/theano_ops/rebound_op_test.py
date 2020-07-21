@@ -16,6 +16,7 @@ except ImportError:
     )
 
 
+@pytest.mark.filterwarnings("ignore:For better performance")
 class TestRebound(utt.InferShapeTester):
     def setUp(self):
         super(TestRebound, self).setUp()
@@ -38,19 +39,16 @@ class TestRebound(utt.InferShapeTester):
 
         return t, f, [m, x], [m_val, x_val]
 
-    @pytest.mark.filterwarnings("ignore:For better performance")
     def test_basic(self):
         _, f, _, in_args = self.get_args()
         f(*in_args)
 
-    @pytest.mark.filterwarnings("ignore:For better performance")
     def test_infer_shape(self):
         t, f, args, arg_vals = self.get_args()
         self._compile_and_check(
             args, self.op(*(list(args) + [t])), arg_vals, self.op_class
         )
 
-    @pytest.mark.filterwarnings("ignore:For better performance")
     def test_grad(self):
         t, _, _, in_args = self.get_args()
         func = lambda *args: self.op(*(list(args) + [t]))[0]  # NOQA
