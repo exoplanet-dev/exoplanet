@@ -190,7 +190,9 @@ class WindowedDualAverageAdaptation(DualAverageAdaptation):
         self._hbar = 0.0
         self._log_step = np.log(self._initial_step)
         self._log_bar = self._log_step
+        self._mu = np.log(10 * self._initial_step)
         self._count = 1
+        self._tuned_stats = []
 
     def update(self, accept_stat, tune):
         if self._n_samples in self.update_steps:
