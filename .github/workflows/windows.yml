@@ -35,6 +35,7 @@ jobs:
         shell: pwsh
         run: |
           python -m pip install -U pip
+          python -m pip install -U numpy
           python -m pip install ".[test]"
           python -c "import theano; print(theano.__version__)"
         env:
@@ -49,18 +50,3 @@ jobs:
           DISTUTILS_USE_SDK: 1
           MSSdk: 1
           CFLAGS: -fno-asynchronous-unwind-tables
-      # - uses: goanpeca/setup-miniconda@v1
-      #   with:
-      #     auto-update-conda: true
-      #     python-version: ${{ matrix.python-version }}
-      # - name: Install dependencies
-      #   run: |
-      #     conda create -n exoplanet python=3.7 -q -c conda-forge
-      #     conda activate exoplanet
-      #     conda install -c conda-forge -q numpy scipy mkl-service libpython m2w64-toolchain theano astropy celerite
-      #     python -m pip install -e .[test]
-      #     python -c "import theano; print(theano.__version__)"
-      # - name: Run tests
-      #   run: |
-      #     conda activate exoplanet
-      #     python -m pytest -v tests
