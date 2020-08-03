@@ -9,16 +9,22 @@
 
 // Includes
 #include <stdlib.h>
+
 #include <Eigen/Core>
 #include <cmath>
 #include <iostream>
 #include <unsupported/Eigen/AutoDiff>
 
+#ifndef __GNUC__
+#define likely(x) (x)
+#define unlikely(x) (x)
+#else
 //! Compiler branching optimization: likely branch
 #define likely(x) __builtin_expect(!!(x), 1)
 
 //! Compiler branching optimization: unlikely branch
 #define unlikely(x) __builtin_expect(!!(x), 0)
+#endif
 
 //! Max iterations in elliptic integrals
 #ifndef STARRY_ELLIP_MAX_ITER
@@ -66,8 +72,8 @@ namespace utils {
 
 //! Commonly used stuff throughout starry
 using std::abs;
-using std::max;
 using std::isinf;
+using std::max;
 using std::swap;
 
 // --------------------------
@@ -75,8 +81,8 @@ using std::swap;
 // --------------------------
 
 //! Matrices
-using Eigen::Ref;
 using Eigen::MatrixBase;
+using Eigen::Ref;
 template <typename T>
 using Vector = Eigen::Matrix<T, Eigen::Dynamic, 1>;
 template <typename T>
@@ -88,8 +94,7 @@ using OneByOne = Eigen::Matrix<T, 1, 1>;
 template <typename T>
 using Matrix = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 template <typename T>
-using RowMatrix =
-    Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+using RowMatrix = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 template <typename T, int N>
 using ADScalar = Eigen::AutoDiffScalar<Eigen::Matrix<T, N, 1>>;
 
