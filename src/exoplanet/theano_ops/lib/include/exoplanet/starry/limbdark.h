@@ -12,6 +12,7 @@
 
 #include <cmath>
 #include <iostream>
+
 #include "exoplanet/starry/ellip.h"
 #include "exoplanet/starry/utils.h"
 
@@ -235,10 +236,8 @@ inline void GreensLimbDark<T>::computeS1() {
         T sqbrinv = T(1.0) / sqbr;
         T Piofk;
         ellip::CEL(ksq, kc, T((b - r) * (b - r) * kcsq), T(0.0), T(1.0), T(1.0),
-                   T(3 * kcsq * (b - r) * (b + r)), kcsq, T(0.0), Piofk, Eofk,
-                   Em1mKdm);
-        Lambda1 = onembmr2 * (Piofk + (-3 + 6 * r2 + 2 * b * r) * Em1mKdm -
-                              fourbr * Eofk) *
+                   T(3 * kcsq * (b - r) * (b + r)), kcsq, T(0.0), Piofk, Eofk, Em1mKdm);
+        Lambda1 = onembmr2 * (Piofk + (-3 + 6 * r2 + 2 * b * r) * Em1mKdm - fourbr * Eofk) *
                   sqbrinv * third;
         if (GRADIENT) {
           dsTdb(1) = 2 * r * onembmr2 * (-Em1mKdm + 2 * Eofk) * sqbrinv * third;
@@ -250,10 +249,9 @@ inline void GreensLimbDark<T>::computeS1() {
         T mu = 3 * bmrdbpr * onembmr2inv;
         T p = bmrdbpr * bmrdbpr * onembpr2 * onembmr2inv;
         T Piofk;
-        ellip::CEL(invksq, kc, p, T(1 + mu), T(1.0), T(1.0), T(p + mu), kcsq,
-                   T(0.0), Piofk, Eofk, Em1mKdm);
-        Lambda1 = 2 * sqonembmr2 *
-                  (onembpr2 * Piofk - (4 - 7 * r2 - b2) * Eofk) * third;
+        ellip::CEL(invksq, kc, p, T(1 + mu), T(1.0), T(1.0), T(p + mu), kcsq, T(0.0), Piofk, Eofk,
+                   Em1mKdm);
+        Lambda1 = 2 * sqonembmr2 * (onembpr2 * Piofk - (4 - 7 * r2 - b2) * Eofk) * third;
         if (GRADIENT) {
           dsTdb(1) = -4 * r * third * sqonembmr2 * (Eofk - 2 * Em1mKdm);
           dsTdr(1) = -4 * r * sqonembmr2 * Eofk;
@@ -261,8 +259,7 @@ inline void GreensLimbDark<T>::computeS1() {
       } else {
         // Case 4
         T rootr1mr = sqrt(r * (1 - r));
-        Lambda1 = 2 * acos(1.0 - 2.0 * r) -
-                  4 * third * (3 + 2 * r - 8 * r2) * rootr1mr -
+        Lambda1 = 2 * acos(1.0 - 2.0 * r) - 4 * third * (3 + 2 * r - 8 * r2) * rootr1mr -
                   2 * pi<T>() * int(r > 0.5);
         Eofk = 1.0;
         Em1mKdm = 1.0;
@@ -334,9 +331,7 @@ inline void GreensLimbDark<T>::upwardM() {
 
   // Recurse upward
   for (int n = 4; n < lmax + 1; ++n)
-    M(n) =
-        (2.0 * (n - 1) * onemr2mb2 * M(n - 2) + (n - 2) * sqarea * M(n - 4)) *
-        invn(n);
+    M(n) = (2.0 * (n - 1) * onemr2mb2 * M(n - 2) + (n - 2) * sqarea * M(n - 4)) * invn(n);
 }
 
 /**
@@ -376,14 +371,12 @@ inline void GreensLimbDark<T>::downwardM() {
     }
 
   } else {
-    throw std::runtime_error(
-        "Downward recursion in `M` not implemented for `k^2` >= 1.");
+    throw std::runtime_error("Downward recursion in `M` not implemented for `k^2` >= 1.");
   }
 
   // Recurse downward
   for (int n = lmax - 4; n > 3; --n)
-    M(n) = ((n + 4) * M(n + 4) - 2.0 * (n + 3) * onemr2mb2 * M(n + 2)) *
-           invsqarea * invn(n + 2);
+    M(n) = ((n + 4) * M(n + 4) - 2.0 * (n + 3) * onemr2mb2 * M(n + 2)) * invsqarea * invn(n + 2);
 
   // Compute lowest four exactly
   computeM0123();
@@ -441,8 +434,7 @@ inline void GreensLimbDark<T>::upwardN() {
   computeN01();
 
   // Recurse upward
-  for (int n = 2; n < lmax + 1; ++n)
-    N(n) = (M(n) + n * onembpr2 * N(n - 2)) * invn(n + 2);
+  for (int n = 2; n < lmax + 1; ++n) N(n) = (M(n) + n * onembpr2 * N(n - 2)) * invn(n + 2);
 }
 
 /**
@@ -477,8 +469,7 @@ inline void GreensLimbDark<T>::downwardN() {
     }
 
   } else {
-    throw std::runtime_error(
-        "Downward recursion in `N` not implemented for `k^2` >= 1.");
+    throw std::runtime_error("Downward recursion in `N` not implemented for `k^2` >= 1.");
   }
 
   // Recurse downward
@@ -551,8 +542,7 @@ inline void GreensLimbDark<T>::compute(const T& b_, const T& r_) {
   if (p0 < p1) swap(p0, p1);
   if (p1 < p2) swap(p1, p2);
   if (p0 < p1) swap(p0, p1);
-  sqarea =
-      (p0 + (p1 + p2)) * (p2 - (p0 - p1)) * (p2 + (p0 - p1)) * (p0 + (p1 - p2));
+  sqarea = (p0 + (p1 + p2)) * (p2 - (p0 - p1)) * (p2 + (p0 - p1)) * (p0 + (p1 - p2));
   kite_area2 = sqrt(max(T(0.0), sqarea));
 
   if (unlikely((b == 0) || (r == 0))) {
@@ -641,8 +631,8 @@ inline void GreensLimbDark<T>::compute(const T& b_, const T& r_) {
       detadb = 4 * pi<T>() * deta2db;
     }
   } else {
-    four_pi_eta = 2 * (-(pi<T>() - kap1) + 2 * eta2 * kap0 -
-                       0.25 * kite_area2 * (1.0 + 5 * r2 + b2));
+    four_pi_eta =
+        2 * (-(pi<T>() - kap1) + 2 * eta2 * kap0 - 0.25 * kite_area2 * (1.0 + 5 * r2 + b2));
     if (GRADIENT) {
       detadr = 8 * r * (r2pb2 * kap0 - kite_area2);
       detadb = 2.0 * invb * (4 * b2 * r2 * kap0 - (1 + r2pb2) * kite_area2);
@@ -666,22 +656,20 @@ inline void GreensLimbDark<T>::compute(const T& b_, const T& r_) {
   sT.segment(3, lmax - 2) =
       -2.0 * r2 * M.segment(3, lmax - 2) +
       ndnp2.segment(3, lmax - 2)
-          .cwiseProduct(onemr2mb2 * M.segment(3, lmax - 2) +
-                        sqarea * M.segment(1, lmax - 2));
+          .cwiseProduct(onemr2mb2 * M.segment(3, lmax - 2) + sqarea * M.segment(1, lmax - 2));
 
   // Compute gradients
   if (GRADIENT) {
     // Compute ds/dr
-    dsTdr.segment(3, lmax - 2) =
-        -2 * r * (n_.segment(5, lmax - 2).cwiseProduct(M.segment(3, lmax - 2)) -
-                  n_.segment(3, lmax - 2).cwiseProduct(M.segment(1, lmax - 2)));
+    dsTdr.segment(3, lmax - 2) = -2 * r *
+                                 (n_.segment(5, lmax - 2).cwiseProduct(M.segment(3, lmax - 2)) -
+                                  n_.segment(3, lmax - 2).cwiseProduct(M.segment(1, lmax - 2)));
 
     if (b > STARRY_BCUT) {
       // Compute ds/db
       dsTdb.segment(3, lmax - 2) =
           (-invb * n_.segment(3, lmax - 2))
-              .cwiseProduct((r2 + b2) * (M.segment(3, lmax - 2) -
-                                         M.segment(1, lmax - 2)) +
+              .cwiseProduct((r2 + b2) * (M.segment(3, lmax - 2) - M.segment(1, lmax - 2)) +
                             b2mr22 * M.segment(1, lmax - 2));
     } else {
       // Compute ds/db using the small b reparametrization
@@ -693,10 +681,8 @@ inline void GreensLimbDark<T>::compute(const T& b_, const T& r_) {
         upwardN();
       dsTdb.segment(3, lmax - 2) =
           -n_.segment(3, lmax - 2)
-               .cwiseProduct((2.0 * r3 + b3 - b - 3.0 * r2 * b) *
-                                 M.segment(1, lmax - 2) +
-                             b * M.segment(3, lmax - 2) -
-                             4.0 * r3 * N.segment(1, lmax - 2));
+               .cwiseProduct((2.0 * r3 + b3 - b - 3.0 * r2 * b) * M.segment(1, lmax - 2) +
+                             b * M.segment(3, lmax - 2) - 4.0 * r3 * N.segment(1, lmax - 2));
     }
   }
 }

@@ -1,12 +1,133 @@
 # -*- coding: utf-8 -*-
 
-__all__ = ["RadiusFromOccAreaOp"]
+__all__ = ["get_cl", "limbdark", "radius_from_occ_area"]
 
 import numpy as np
 import theano
 import theano.tensor as tt
 from scipy.optimize import bisect
-from theano import gof
+
+from . import driver
+
+
+def _resize_or_set(outputs, n, shape):
+    if outputs[n][0] is None:
+        outputs[n][0] = np.empty(shape)
+    else:
+        outputs[n][0] = np.ascontiguousarray(
+            np.resize(outputs[n][0], shape), dtype=np.float64
+        )
+    return outputs[n][0]
+
+
+class GetClRev(theano.Op):
+    __props__ = ()
+    itypes = (tt.dvector,)
+    otypes = (tt.dvector,)
+
+    def infer_shape(self, node, shapes):
+        return shapes
+
+    def perform(self, node, inputs, outputs):
+        bc = inputs[0]
+        bu = _resize_or_set(outputs, 0, bc.shape)
+        driver.get_cl_rev(bc, bu)
+
+
+get_cl_rev = GetClRev()
+
+
+class GetCl(theano.Op):
+
+    __props__ = ()
+    itypes = (tt.dvector,)
+    otypes = (tt.dvector,)
+
+    def infer_shape(self, node, shapes):
+        return shapes
+
+    def perform(self, node, inputs, outputs):
+        u = inputs[0]
+        c = _resize_or_set(outputs, 0, u.shape)
+        driver.get_cl(u, c)
+
+    def grad(self, inputs, gradients):
+        return (get_cl_rev(gradients[0]),)
+
+    def R_op(self, inputs, eval_points):
+        if eval_points[0] is None:
+            return eval_points
+        return self.grad(inputs, eval_points)
+
+
+get_cl = GetCl()
+
+
+class LimbDark(theano.Op):
+    __props__ = ()
+
+    def __init__(self):
+        self.ld = driver.LimbDark()
+        super().__init__()
+
+    def make_node(self, *inputs):
+        in_args = [tt.as_tensor_variable(i) for i in inputs]
+        out_args = [
+            in_args[1].type(),
+            tt.TensorType(
+                dtype="float64", broadcastable=[False] * (in_args[1].ndim + 1)
+            )(),
+            in_args[1].type(),
+            in_args[2].type(),
+        ]
+        return theano.Apply(self, in_args, out_args)
+
+    def infer_shape(self, node, shapes):
+        return (
+            shapes[1],
+            list(shapes[0]) + list(shapes[1]),
+            shapes[1],
+            shapes[2],
+        )
+
+    def perform(self, node, inputs, outputs):
+        cl, b, r, los = inputs
+        f = _resize_or_set(outputs, 0, b.shape)
+        dfdcl = _resize_or_set(outputs, 1, cl.shape + b.shape)
+        dfdb = _resize_or_set(outputs, 2, b.shape)
+        dfdr = _resize_or_set(outputs, 3, b.shape)
+        self.ld.apply(cl, b, r, los, f, dfdcl, dfdb, dfdr)
+
+    def grad(self, inputs, gradients):
+        c, b, r, los = inputs
+        f, dfdcl, dfdb, dfdr = self(*inputs)
+        bf = gradients[0]
+        for i, g in enumerate(gradients[1:]):
+            if not isinstance(g.type, theano.gradient.DisconnectedType):
+                raise ValueError(
+                    "can't propagate gradients wrt parameter {0}".format(i + 1)
+                )
+        bc = tt.sum(
+            tt.reshape(bf, (1, bf.size))
+            * tt.reshape(dfdcl, (c.size, bf.size)),
+            axis=-1,
+        )
+        bb = bf * dfdb
+        br = bf * dfdr
+        return bc, bb, br, tt.zeros_like(los)
+
+    def R_op(self, inputs, eval_points):
+        if eval_points[0] is None:
+            return eval_points
+        return self.grad(inputs, eval_points)
+
+
+limbdark = LimbDark()
+
+
+#
+# Helpers for Radius From Occ Area
+#
 
 
 def kite_area(r, b):
@@ -85,7 +206,12 @@ def depth_grad(r, b):
     )
 
 
-class RadiusFromOccAreaOp(gof.Op):
+#
+# /helpers
+#
+
+
+class RadiusFromOccArea(theano.Op):
     def __init__(self, **kwargs):
         self.kwargs = kwargs
 
@@ -103,12 +229,12 @@ class RadiusFromOccAreaOp(gof.Op):
         value = delta - depth(r, b)
         self.func = theano.function([r, b, delta], value)
 
-        super(RadiusFromOccAreaOp, self).__init__()
+        super().__init__()
 
     def make_node(self, delta, b):
         in_args = [tt.as_tensor_variable(delta), tt.as_tensor_variable(b)]
         out_args = [in_args[1].type()]
-        return gof.Apply(self, in_args, out_args)
+        return theano.Apply(self, in_args, out_args)
 
     def infer_shape(self, node, shapes):
         return (shapes[1],)
@@ -156,3 +282,6 @@ class RadiusFromOccAreaOp(gof.Op):
         if eval_points[0] is None:
             return eval_points
         return self.grad(inputs, eval_points)
+
+
+radius_from_occ_area = RadiusFromOccArea()

@@ -8,11 +8,7 @@ import numpy as np
 import theano.tensor as tt
 
 from ..citations import add_citations_to_model
-from ..theano_ops.starry.get_cl import GetClOp
-from ..theano_ops.starry.limbdark import LimbDarkOp
-
-get_cl = GetClOp()
-limbdark = LimbDarkOp()
+from ..theano_ops.starry import get_cl, limbdark
 
 
 class LimbDarkLightCurve:

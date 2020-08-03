@@ -25,26 +25,19 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          submodules: true
+
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
+        uses: goanpeca/setup-miniconda@v1
         with:
           python-version: ${{ matrix.python-version }}
-
-      # Cache dependencies
-      - uses: actions/cache@v1
-        with:
-          path: ~/.cache/pip
-          key: pip-${{ hashFiles('setup.py') }}
-          restore-keys: |
-            pip-
 
       # Setup
       - name: Install dependencies
         run: |
-          python -m pip install -U pip setuptools numpy pybind11 wheel
+          python -m pip install -U pip
           python -m pip install "${{ matrix.pymc-version }}"
-          python -m pip wheel --wheel-dir=~/.cache/pip/exoplanet --find-links=~/.cache/pip/exoplanet .[test]
-          python -m pip install -U --find-links=~/.cache/pip/exoplanet -e .[test]
+          python -m pip install -U -e .[test]
           python -c 'import theano; print(theano.config.__str__(print_doc=False))'
 
       - name: Run tests
