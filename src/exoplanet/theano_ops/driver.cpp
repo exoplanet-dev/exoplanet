@@ -162,11 +162,12 @@ struct LimbDark {
              py::array_t<double, py::array::c_style> dfdcl_out,
              py::array_t<double, py::array::c_style> dfdb_out,
              py::array_t<double, py::array::c_style> dfdr_out) {
-    flat_unchecked_array b(b_in), r(r_in), los(los_in);
+    flat_unchecked_array<double, py::array::c_style> b(b_in), r(r_in), los(los_in);
     ssize_t N = b.size();
     if (r.size() != N || los.size() != N) throw std::runtime_error("dimension mismatch");
 
-    flat_unchecked_array f(f_out, true), dfdb(dfdb_out, true), dfdr(dfdr_out, true);
+    flat_unchecked_array<double, py::array::c_style> f(f_out, true), dfdb(dfdb_out, true),
+        dfdr(dfdr_out, true);
     if (f.size() != N || dfdb.size() != N || dfdr.size() != N)
       throw std::runtime_error("dimension mismatch");
 
@@ -228,8 +229,8 @@ auto kepler(py::array_t<double, py::array::c_style> M_in,
             py::array_t<double, py::array::c_style> ecc_in,
             py::array_t<double, py::array::c_style> sinf_out,
             py::array_t<double, py::array::c_style> cosf_out) {
-  flat_unchecked_array M(M_in), ecc(ecc_in);
-  flat_unchecked_array cosf(cosf_out, true), sinf(sinf_out, true);
+  flat_unchecked_array<double, py::array::c_style> M(M_in), ecc(ecc_in);
+  flat_unchecked_array<double, py::array::c_style> cosf(cosf_out, true), sinf(sinf_out, true);
   ssize_t N = M.size();
   if (ecc.size() != N || cosf.size() != N || sinf.size() != N)
     throw std::runtime_error("dimension mismatch");
