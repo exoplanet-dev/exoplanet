@@ -6,15 +6,15 @@ import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
-from exoplanet.theano_ops.contact.contact import ContactPointsOp
+from exoplanet.theano_ops.contact_points import ContactPoints
 from exoplanet.theano_ops.kepler import kepler
 
 
 class TestContactPoints(utt.InferShapeTester):
     def setUp(self):
         super(TestContactPoints, self).setUp()
-        self.op_class = ContactPointsOp
-        self.op = ContactPointsOp()
+        self.op_class = ContactPoints
+        self.op = ContactPoints()
 
     def test_infer_shape(self):
         np.random.seed(42)
@@ -44,7 +44,7 @@ class TestContactPoints(utt.InferShapeTester):
 
 class Solver:
     def __init__(self):
-        self.op = ContactPointsOp()
+        self.op = ContactPoints()
         a = tt.dscalar()
         e = tt.dscalar()
         cosw = tt.dscalar()
@@ -121,4 +121,4 @@ def test_shape_segfault():
     ]
 
     with pytest.raises(ValueError):
-        theano.function([], ContactPointsOp()(*args))()
+        theano.function([], ContactPoints()(*args))()

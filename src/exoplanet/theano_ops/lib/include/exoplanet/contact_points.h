@@ -22,21 +22,13 @@ class ContactPointSolver {
   std::vector<Scalar> quad;
 
  public:
-  ContactPointSolver(Scalar a_, Scalar e_, Scalar cosw_, Scalar sinw_,
-                     Scalar cosi_, Scalar sini_)
-      : a(a_),
-        e(e_),
-        cosw(cosw_),
-        sinw(sinw_),
-        cosi(cosi_),
-        sini(-sini_),
-        quad(6) {
+  ContactPointSolver(Scalar a_, Scalar e_, Scalar cosw_, Scalar sinw_, Scalar cosi_, Scalar sini_)
+      : a(a_), e(e_), cosw(cosw_), sinw(sinw_), cosi(cosi_), sini(-sini_), quad(6) {
     build_quadratic();
     Efactor = sqrt((1 - e) / (1 + e));
   }
 
-  std::tuple<int, Scalar, Scalar> find_roots(Scalar L,
-                                             Scalar tol = 1e-8) const {
+  std::tuple<int, Scalar, Scalar> find_roots(Scalar L, Scalar tol = 1e-8) const {
     L /= a;
     auto L2 = L * L;
 
@@ -47,8 +39,7 @@ class ContactPointSolver {
       auto const f_left = objective(L2, -L);
       auto const f_mid = objective(L2, 0);
       auto const f_right = objective(L2, L);
-      if (!std::get<0>(f_left) || !std::get<0>(f_mid) ||
-          !std::get<0>(f_right) ||
+      if (!std::get<0>(f_left) || !std::get<0>(f_mid) || !std::get<0>(f_right) ||
           sgn(std::get<1>(f_left)) == sgn(std::get<1>(f_mid)) ||
           sgn(std::get<1>(f_mid)) == sgn(std::get<1>(f_right))) {
         return std::make_tuple<int, Scalar, Scalar>(1, 0, 0);
@@ -90,8 +81,7 @@ class ContactPointSolver {
   std::tuple<bool, Scalar> convert_to_mean_anomaly(Scalar x) const {
     auto const coords = get_coords(x);
     auto const z = std::get<2>(coords);
-    auto const f =
-        atan2(-x * sinw + z * cosw / sini, x * cosw + z * sinw / sini) - M_PI;
+    auto const f = atan2(-x * sinw + z * cosw / sini, x * cosw + z * sinw / sini) - M_PI;
     auto const E = 2 * atan(Efactor * tan(0.5 * f));
     auto const M = E - e * sin(E);
     return std::make_tuple(std::get<0>(coords), M);
@@ -126,8 +116,7 @@ class ContactPointSolver {
   }
 
   // https://codereview.stackexchange.com/questions/179516/finding-the-root-of-a-function-by-bisection-method
-  std::tuple<bool, Scalar> bisect(Scalar L2, Scalar min, Scalar max,
-                                  Scalar epsilon) const {
+  std::tuple<bool, Scalar> bisect(Scalar L2, Scalar min, Scalar max, Scalar epsilon) const {
     auto f_min = std::get<1>(objective(L2, min));
     while (min + epsilon < max) {
       auto const mid = 0.5 * min + 0.5 * max;

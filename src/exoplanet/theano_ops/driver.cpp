@@ -1,3 +1,4 @@
+#include <exoplanet/contact_points.h>
 #include <exoplanet/kepler.h>
 #include <exoplanet/starry.h>
 #include <pybind11/numpy.h>
@@ -24,7 +25,7 @@ template <typename Scalar, int ExtraFlags>
 struct flat_unchecked_array {
   flat_unchecked_array(py::array_t<Scalar, ExtraFlags> &array, bool require_mutable = false) {
     info = array.request();
-    if (require_mutable && info.readonly) throw std::runtime_error("outputs must be writeable");
+    if (require_mutable && info.readonly) throw std::invalid_argument("outputs must be writeable");
     data = (Scalar *)info.ptr;
   }
 
@@ -55,7 +56,7 @@ auto get_cl(py::array_t<double, py::array::c_style> u_in,
   auto u = u_in.unchecked<1>();
   auto c = c_out.mutable_unchecked<1>();
   ssize_t N = u.size();
-  if (N < 1 || c.size() != N) throw std::runtime_error("dimension mismatch");
+  if (N < 1 || c.size() != N) throw std::invalid_argument("dimension mismatch");
 
   std::vector<double> a(N);
   a[0] = 1;
@@ -98,7 +99,7 @@ auto get_cl_rev(py::array_t<double, py::array::c_style> bc_in,
   auto bc_ = bc_in.unchecked<1>();
   auto bu = bu_out.mutable_unchecked<1>();
   ssize_t N = bc_.size();
-  if (N < 1 || bu.size() != N) throw std::runtime_error("dimension mismatch");
+  if (N < 1 || bu.size() != N) throw std::invalid_argument("dimension mismatch");
 
   std::vector<double> ba(N), bc(N);
   for (ssize_t i = 0; i < N; ++i) {
@@ -164,18 +165,18 @@ struct LimbDark {
              py::array_t<double, py::array::c_style> dfdr_out) {
     flat_unchecked_array<double, py::array::c_style> b(b_in), r(r_in), los(los_in);
     ssize_t N = b.size();
-    if (r.size() != N || los.size() != N) throw std::runtime_error("dimension mismatch");
+    if (r.size() != N || los.size() != N) throw std::invalid_argument("dimension mismatch");
 
     flat_unchecked_array<double, py::array::c_style> f(f_out, true), dfdb(dfdb_out, true),
         dfdr(dfdr_out, true);
     if (f.size() != N || dfdb.size() != N || dfdr.size() != N)
-      throw std::runtime_error("dimension mismatch");
+      throw std::invalid_argument("dimension mismatch");
 
     py::buffer_info cl_info = cl_in.request(), dfdcl_info = dfdcl_out.request();
     ssize_t num_cl = cl_info.size;
     if (dfdcl_info.ndim <= 1 || dfdcl_info.shape[0] != num_cl || dfdcl_info.size != N * num_cl)
-      throw std::runtime_error("invalid dimensions for dfdcl");
-    if (dfdcl_info.readonly) throw std::runtime_error("dfdcl must be writeable");
+      throw std::invalid_argument("invalid dimensions for dfdcl");
+    if (dfdcl_info.readonly) throw std::invalid_argument("dfdcl must be writeable");
 
     Eigen::Map<Eigen::VectorXd> cl((double *)cl_info.ptr, num_cl);
     Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> dfdcl(
@@ -233,13 +234,44 @@ auto kepler(py::array_t<double, py::array::c_style> M_in,
   flat_unchecked_array<double, py::array::c_style> cosf(cosf_out, true), sinf(sinf_out, true);
   ssize_t N = M.size();
   if (ecc.size() != N || cosf.size() != N || sinf.size() != N)
-    throw std::runtime_error("dimension mismatch");
+    throw std::invalid_argument("dimension mismatch");
   for (ssize_t n = 0; n < N; ++n) {
     if (ecc(n) < 0 || ecc(n) > 1)
-      throw std::runtime_error("eccentricity must be in the range [0, 1)");
+      throw std::invalid_argument("eccentricity must be in the range [0, 1)");
     exoplanet::kepler::solve_kepler(M(n), ecc(n), cosf(n), sinf(n));
   }
   return std::make_tuple(cosf_out, sinf_out);
+}
+
+auto contact_points(py::array_t<double, py::array::c_style> a_in,
+                    py::array_t<double, py::array::c_style> e_in,
+                    py::array_t<double, py::array::c_style> cosw_in,
+                    py::array_t<double, py::array::c_style> sinw_in,
+                    py::array_t<double, py::array::c_style> cosi_in,
+                    py::array_t<double, py::array::c_style> sini_in,
+                    py::array_t<double, py::array::c_style> L_in,
+                    py::array_t<double, py::array::c_style> M_left_out,
+                    py::array_t<double, py::array::c_style> M_right_out,
+                    py::array_t<int, py::array::c_style> flag_out, double tol) {
+  flat_unchecked_array<double, py::array::c_style> a(a_in), e(e_in), cosw(cosw_in), sinw(sinw_in),
+      cosi(cosi_in), sini(sini_in), L(L_in);
+  flat_unchecked_array<double, py::array::c_style> M_left(M_left_out, true),
+      M_right(M_right_out, true);
+  flat_unchecked_array<int, py::array::c_style> flag(flag_out, true);
+  ssize_t N = a.size();
+  if (e.size() != N || cosw.size() != N || sinw.size() != N || cosi.size() != N ||
+      sini.size() != N || L.size() != N || M_left.size() != N || M_right.size() != N ||
+      flag.size() != N)
+    throw std::invalid_argument("dimension mismatch");
+  for (ssize_t n = 0; n < N; ++n) {
+    auto const solver = exoplanet::contact_points::ContactPointSolver<double>(
+        a(n), e(n), cosw(n), sinw(n), cosi(n), sini(n));
+    auto const roots = solver.find_roots(L(n), tol);
+    flag(n) = std::get<0>(roots);
+    M_left(n) = std::get<1>(roots);
+    M_right(n) = std::get<2>(roots);
+  }
+  return std::make_tuple(M_left_out, M_right_out, flag_out);
 }
 
 }  // namespace kepler
@@ -269,6 +301,11 @@ PYBIND11_MODULE(driver, m) {
 
   m.def("kepler", &driver::kepler::kepler, py::arg("M").noconvert(), py::arg("ecc").noconvert(),
         py::arg("sinf").noconvert(), py::arg("cosf").noconvert());
+  m.def("contact_points", &driver::kepler::contact_points, py::arg("a").noconvert(),
+        py::arg("e").noconvert(), py::arg("cosw").noconvert(), py::arg("sinw").noconvert(),
+        py::arg("cosi").noconvert(), py::arg("sini").noconvert(), py::arg("L").noconvert(),
+        py::arg("M_left").noconvert(), py::arg("M_right").noconvert(), py::arg("flag").noconvert(),
+        py::arg("tol"));
 
 #ifdef VERSION_INFO
   m.attr("__version__") = VERSION_INFO;

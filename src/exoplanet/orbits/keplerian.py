@@ -15,7 +15,7 @@ from astropy import units as u
 from theano.ifelse import ifelse
 
 from ..citations import add_citations_to_model
-from ..theano_ops.contact import ContactPointsOp
+from ..theano_ops.contact_points import ContactPoints, contact_points
 from ..theano_ops.kepler import kepler
 from ..units import has_unit, to_unit, with_unit
 from .constants import G_grav, au_per_R_sun, c_light, gcc_per_sun
@@ -172,7 +172,9 @@ class KeplerianOrbit:
 
         # Set up the contact points calculation
         if contact_points_kwargs is None:
-            contact_points_kwargs = dict()
+            self.contact_points = contact_points
+        else:
+            self.contact_points = ContactPoints(**contact_points_kwargs)
 
         if Omega is None:
             self.Omega = None
@@ -182,7 +184,6 @@ class KeplerianOrbit:
             self.sin_Omega = tt.sin(self.Omega)
 
         # Eccentricity
-        self.contact_points_op = ContactPointsOp(**contact_points_kwargs)
         if ecc is None:
             self.ecc = None
             self.M0 = 0.5 * np.pi + tt.zeros_like(self.n)
@@ -745,7 +746,7 @@ class KeplerianOrbit:
             flag = z
 
         else:
-            M_contact = self.contact_points_op(
+            M_contact = self.contact_points(
                 self.a,
                 self.ecc,
                 self.cos_omega,
@@ -805,7 +806,7 @@ class KeplerianOrbit:
                 r_star=r_planet,
                 model=model,
             )
-        orbit.contact_points_op = self.contact_points_op
+        orbit.contact_points = self.contact_points
         return orbit
 
 
