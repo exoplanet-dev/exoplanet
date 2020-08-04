@@ -2,8 +2,6 @@
 
 __all__ = ["with_unit", "has_unit", "to_unit"]
 
-import theano.tensor as tt
-
 from .utils import as_tensor_variable
 
 UNIT_ATTR_NAME = "__exoplanet_unit__"

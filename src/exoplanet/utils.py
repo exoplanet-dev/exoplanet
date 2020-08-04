@@ -27,8 +27,8 @@ if theano.config.floatX != "float64":
     )
 
 
-def as_tensor_variable(x, dtype="float64"):
-    t = theano.tensor.as_tensor_variable(x)
+def as_tensor_variable(x, dtype="float64", **kwargs):
+    t = theano.tensor.as_tensor_variable(x, **kwargs)
     if dtype is None:
         return t
     return t.astype(dtype)
