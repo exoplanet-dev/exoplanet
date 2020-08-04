@@ -21,7 +21,7 @@ namespace driver {
 //   |_||_\___|_| .__/\___|_| /__/
 //              |_|
 
-template <typename Scalar, int ExtraFlags>
+template <typename Scalar, int ExtraFlags = py::array::forcecast>
 struct flat_unchecked_array {
   flat_unchecked_array(py::array_t<Scalar, ExtraFlags> &array, bool require_mutable = false) {
     info = array.request();
@@ -288,22 +288,19 @@ PYBIND11_MODULE(driver, m) {
     The computation engine for the Theano ops
 )doc";
 
-  m.def("get_cl", &driver::starry::get_cl, py::arg("u").noconvert(), py::arg("c").noconvert());
-  m.def("get_cl_rev", &driver::starry::get_cl_rev, py::arg("bc").noconvert(),
-        py::arg("bu").noconvert());
+  m.def("get_cl", &driver::starry::get_cl, py::arg("u"), py::arg("c").noconvert());
+  m.def("get_cl_rev", &driver::starry::get_cl_rev, py::arg("bc"), py::arg("bu").noconvert());
 
   py::class_<driver::starry::LimbDark>(m, "LimbDark")
       .def(py::init<>())
-      .def("apply", &driver::starry::LimbDark::apply, py::arg("cl").noconvert(),
-           py::arg("b").noconvert(), py::arg("r").noconvert(), py::arg("los").noconvert(),
-           py::arg("f").noconvert(), py::arg("dfdcl").noconvert(), py::arg("dfdb").noconvert(),
-           py::arg("dfdr").noconvert());
+      .def("apply", &driver::starry::LimbDark::apply, py::arg("cl"), py::arg("b"), py::arg("r"),
+           py::arg("los"), py::arg("f").noconvert(), py::arg("dfdcl").noconvert(),
+           py::arg("dfdb").noconvert(), py::arg("dfdr").noconvert());
 
-  m.def("kepler", &driver::kepler::kepler, py::arg("M").noconvert(), py::arg("ecc").noconvert(),
+  m.def("kepler", &driver::kepler::kepler, py::arg("M"), py::arg("ecc"),
         py::arg("sinf").noconvert(), py::arg("cosf").noconvert());
-  m.def("contact_points", &driver::kepler::contact_points, py::arg("a").noconvert(),
-        py::arg("e").noconvert(), py::arg("cosw").noconvert(), py::arg("sinw").noconvert(),
-        py::arg("cosi").noconvert(), py::arg("sini").noconvert(), py::arg("L").noconvert(),
+  m.def("contact_points", &driver::kepler::contact_points, py::arg("a"), py::arg("e"),
+        py::arg("cosw"), py::arg("sinw"), py::arg("cosi"), py::arg("sini"), py::arg("L"),
         py::arg("M_left").noconvert(), py::arg("M_right").noconvert(), py::arg("flag").noconvert(),
         py::arg("tol"));
 

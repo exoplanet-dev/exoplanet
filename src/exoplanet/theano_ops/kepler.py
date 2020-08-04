@@ -5,6 +5,7 @@ __all__ = ["kepler"]
 import theano
 import theano.tensor as tt
 
+from ..utils import as_tensor_variable
 from . import driver
 from .helpers import resize_or_set
 
@@ -13,7 +14,7 @@ class Kepler(theano.Op):
     __props__ = ()
 
     def make_node(self, M, ecc):
-        in_args = [tt.as_tensor_variable(M), tt.as_tensor_variable(ecc)]
+        in_args = [as_tensor_variable(M), as_tensor_variable(ecc)]
         if any(i.dtype != "float64" for i in in_args):
             raise ValueError("float64 dtypes are required for Kepler op")
         out_args = [in_args[0].type(), in_args[1].type()]

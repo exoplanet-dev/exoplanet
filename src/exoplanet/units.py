@@ -4,6 +4,8 @@ __all__ = ["with_unit", "has_unit", "to_unit"]
 
 import theano.tensor as tt
 
+from .utils import as_tensor_variable
+
 UNIT_ATTR_NAME = "__exoplanet_unit__"
 
 
@@ -20,7 +22,7 @@ def with_unit(obj, unit):
     """
     if hasattr(obj, UNIT_ATTR_NAME):
         raise TypeError("{0} already has units".format(repr(obj)))
-    obj = tt.as_tensor_variable(obj)
+    obj = as_tensor_variable(obj)
     setattr(obj, UNIT_ATTR_NAME, unit)
     return obj
 

@@ -2,8 +2,7 @@
 
 __all__ = ["SecondaryEclipseLightCurve"]
 
-import theano.tensor as tt
-
+from ..utils import as_tensor_variable
 from .limb_dark import LimbDarkLightCurve
 
 
@@ -25,7 +24,7 @@ class SecondaryEclipseLightCurve:
     ):
         self.primary = LimbDarkLightCurve(u_primary, model=model)
         self.secondary = LimbDarkLightCurve(u_secondary, model=model)
-        self.surface_brightness_ratio = tt.as_tensor_variable(
+        self.surface_brightness_ratio = as_tensor_variable(
             surface_brightness_ratio
         )
 
@@ -40,7 +39,7 @@ class SecondaryEclipseLightCurve:
         use_in_transit=None,
         light_delay=False,
     ):
-        r = tt.as_tensor_variable(r)
+        r = as_tensor_variable(r)
         orbit2 = orbit._flip(r)
         lc1 = self.primary.get_light_curve(
             orbit=orbit,

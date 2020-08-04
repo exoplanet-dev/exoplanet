@@ -4,6 +4,8 @@ __all__ = ["SimpleTransitOrbit"]
 
 import theano.tensor as tt
 
+from ..utils import as_tensor_variable
+
 
 class SimpleTransitOrbit(object):
     """An orbit representing a set of planets transiting a common central
@@ -21,11 +23,11 @@ class SimpleTransitOrbit(object):
     """
 
     def __init__(self, period=None, t0=0.0, b=0.0, duration=None, r_star=1.0):
-        self.period = tt.as_tensor_variable(period)
-        self.t0 = tt.as_tensor_variable(t0)
-        self.b = tt.as_tensor_variable(b)
-        self.duration = tt.as_tensor_variable(duration)
-        self.r_star = tt.as_tensor_variable(r_star)
+        self.period = as_tensor_variable(period)
+        self.t0 = as_tensor_variable(t0)
+        self.b = as_tensor_variable(b)
+        self.duration = as_tensor_variable(duration)
+        self.r_star = as_tensor_variable(r_star)
 
         self._b_norm = self.b * self.r_star
         x2 = self.r_star ** 2 - self._b_norm ** 2
@@ -34,7 +36,7 @@ class SimpleTransitOrbit(object):
         self._ref_time = self.t0 - self._half_period
 
     def get_star_position(self, t, light_delay=False):
-        nothing = tt.zeros_like(tt.as_tensor_variable(t))
+        nothing = tt.zeros_like(as_tensor_variable(t))
         return nothing, nothing, nothing
 
     def get_planet_position(self, t, light_delay=False):

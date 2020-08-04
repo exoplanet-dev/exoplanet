@@ -18,6 +18,7 @@ from ..citations import add_citations_to_model
 from ..theano_ops.contact_points import ContactPoints, contact_points
 from ..theano_ops.kepler import kepler
 from ..units import has_unit, to_unit, with_unit
+from ..utils import as_tensor_variable
 from .constants import G_grav, au_per_R_sun, c_light, gcc_per_sun
 
 
@@ -102,7 +103,7 @@ class KeplerianOrbit:
         daordtau = None
         if ecc is None and duration is not None:
             if r_star is None:
-                r_star = tt.as_tensor_variable(1.0)
+                r_star = as_tensor_variable(1.0)
             if b is None:
                 raise ValueError(
                     "'b' must be provided for a circular orbit with a "
@@ -179,7 +180,7 @@ class KeplerianOrbit:
         if Omega is None:
             self.Omega = None
         else:
-            self.Omega = tt.as_tensor_variable(Omega)
+            self.Omega = as_tensor_variable(Omega)
             self.cos_Omega = tt.cos(self.Omega)
             self.sin_Omega = tt.sin(self.Omega)
 
@@ -189,19 +190,19 @@ class KeplerianOrbit:
             self.M0 = 0.5 * np.pi + tt.zeros_like(self.n)
             incl_factor = 1
         else:
-            self.ecc = tt.as_tensor_variable(ecc)
+            self.ecc = as_tensor_variable(ecc)
             if omega is not None:
                 if sin_omega is not None and cos_omega is not None:
                     raise ValueError(
                         "either 'omega' or 'sin_omega' and 'cos_omega' can be "
                         "provided"
                     )
-                self.omega = tt.as_tensor_variable(omega)
+                self.omega = as_tensor_variable(omega)
                 self.cos_omega = tt.cos(self.omega)
                 self.sin_omega = tt.sin(self.omega)
             elif sin_omega is not None and cos_omega is not None:
-                self.cos_omega = tt.as_tensor_variable(cos_omega)
-                self.sin_omega = tt.as_tensor_variable(sin_omega)
+                self.cos_omega = as_tensor_variable(cos_omega)
+                self.sin_omega = as_tensor_variable(sin_omega)
                 self.omega = tt.arctan2(self.sin_omega, self.cos_omega)
 
             else:
@@ -228,7 +229,7 @@ class KeplerianOrbit:
                 raise ValueError(
                     "only one of 'incl', 'b', and 'duration' can be given"
                 )
-            self.b = tt.as_tensor_variable(b)
+            self.b = as_tensor_variable(b)
             self.cos_incl = self.dcosidb * self.b
             self.incl = tt.arccos(self.cos_incl)
         elif incl is not None:
@@ -236,7 +237,7 @@ class KeplerianOrbit:
                 raise ValueError(
                     "only one of 'incl', 'b', and 'duration' can be given"
                 )
-            self.incl = tt.as_tensor_variable(incl)
+            self.incl = as_tensor_variable(incl)
             self.cos_incl = tt.cos(self.incl)
             self.b = self.cos_incl / self.dcosidb
         elif duration is not None:
@@ -244,7 +245,7 @@ class KeplerianOrbit:
                 raise ValueError(
                     "fitting with duration only works for eccentric orbits"
                 )
-            self.duration = tt.as_tensor_variable(to_unit(duration, u.day))
+            self.duration = as_tensor_variable(to_unit(duration, u.day))
             c = tt.sin(np.pi * self.duration * incl_factor / self.period)
             c2 = c * c
             aor = self.a_planet / self.r_star
@@ -275,10 +276,10 @@ class KeplerianOrbit:
             t0 = tt.zeros_like(self.period)
 
         if t0 is None:
-            self.t_periastron = tt.as_tensor_variable(t_periastron)
+            self.t_periastron = as_tensor_variable(t_periastron)
             self.t0 = self.t_periastron + self.M0 / self.n
         else:
-            self.t0 = tt.as_tensor_variable(t0)
+            self.t0 = as_tensor_variable(t0)
             self.t_periastron = self.t0 - self.M0 / self.n
 
         self.tref = self.t_periastron - self.t0
@@ -728,7 +729,7 @@ class KeplerianOrbit:
             )
 
         z = tt.zeros_like(self.a)
-        r = tt.as_tensor_variable(r) + z
+        r = as_tensor_variable(r) + z
         R = self.r_star + z
 
         # Wrap the times into time since transit
@@ -840,7 +841,7 @@ def get_aor_from_transit_duration(duration, period, b, ror=None):
 
     """
     if ror is None:
-        ror = tt.as_tensor_variable(0.0)
+        ror = as_tensor_variable(0.0)
     b2 = b ** 2
     opk2 = (1 + ror) ** 2
     phi = np.pi * duration / period
@@ -859,14 +860,14 @@ def _get_consistent_inputs(a, period, rho_star, r_star, m_star, m_planet):
         )
 
     if m_planet is not None:
-        m_planet = tt.as_tensor_variable(to_unit(m_planet, u.M_sun))
+        m_planet = as_tensor_variable(to_unit(m_planet, u.M_sun))
 
     if a is not None:
-        a = tt.as_tensor_variable(to_unit(a, u.R_sun))
+        a = as_tensor_variable(to_unit(a, u.R_sun))
         if m_planet is None:
             m_planet = tt.zeros_like(a)
     if period is not None:
-        period = tt.as_tensor_variable(to_unit(period, u.day))
+        period = as_tensor_variable(to_unit(period, u.day))
         if m_planet is None:
             m_planet = tt.zeros_like(period)
 
@@ -881,9 +882,9 @@ def _get_consistent_inputs(a, period, rho_star, r_star, m_star, m_planet):
 
         # Default to a stellar radius of 1 if not provided
         if r_star is None:
-            r_star = tt.as_tensor_variable(1.0)
+            r_star = as_tensor_variable(1.0)
         else:
-            r_star = tt.as_tensor_variable(to_unit(r_star, u.R_sun))
+            r_star = as_tensor_variable(to_unit(r_star, u.R_sun))
 
         # Compute the implied mass via Kepler's 3rd law
         m_tot = 4 * np.pi * np.pi * a ** 3 / (G_grav * period ** 2)
@@ -909,15 +910,15 @@ def _get_consistent_inputs(a, period, rho_star, r_star, m_star, m_planet):
 
     if rho_star is not None and not implied_rho_star:
         if has_unit(rho_star):
-            rho_star = tt.as_tensor_variable(
+            rho_star = as_tensor_variable(
                 to_unit(rho_star, u.M_sun / u.R_sun ** 3)
             )
         else:
-            rho_star = tt.as_tensor_variable(rho_star) / gcc_per_sun
+            rho_star = as_tensor_variable(rho_star) / gcc_per_sun
     if r_star is not None:
-        r_star = tt.as_tensor_variable(to_unit(r_star, u.R_sun))
+        r_star = as_tensor_variable(to_unit(r_star, u.R_sun))
     if m_star is not None:
-        m_star = tt.as_tensor_variable(to_unit(m_star, u.M_sun))
+        m_star = as_tensor_variable(to_unit(m_star, u.M_sun))
 
     # Work out the stellar parameters
     if rho_star is None:

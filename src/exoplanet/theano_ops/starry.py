@@ -7,6 +7,7 @@ import theano
 import theano.tensor as tt
 from scipy.optimize import bisect
 
+from ..utils import as_tensor_variable
 from . import driver
 from .helpers import resize_or_set
 
@@ -62,9 +63,12 @@ class LimbDark(theano.Op):
         super().__init__()
 
     def make_node(self, *inputs):
-        in_args = [tt.as_tensor_variable(i) for i in inputs]
+        in_args = [as_tensor_variable(i) for i in inputs]
         if any(i.dtype != "float64" for i in in_args):
-            raise ValueError("float64 dtypes are required for LimbDark op")
+            raise ValueError(
+                "float64 dtypes are required for LimbDark op; "
+                "got:\n{0}".format([i.dtype for i in inputs])
+            )
         out_args = [
             in_args[1].type(),
             tt.TensorType(
@@ -225,7 +229,7 @@ class RadiusFromOccArea(theano.Op):
         super().__init__()
 
     def make_node(self, delta, b):
-        in_args = [tt.as_tensor_variable(delta), tt.as_tensor_variable(b)]
+        in_args = [as_tensor_variable(delta), as_tensor_variable(b)]
         out_args = [in_args[1].type()]
         return theano.Apply(self, in_args, out_args)
 

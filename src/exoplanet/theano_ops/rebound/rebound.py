@@ -9,6 +9,8 @@ import theano
 import theano.tensor as tt
 from theano import gof
 
+from ...utils import as_tensor_variable
+
 
 class ReboundOp(gof.Op):
 
@@ -21,9 +23,9 @@ class ReboundOp(gof.Op):
 
     def make_node(self, masses, initial_coords, times):
         in_args = [
-            tt.as_tensor_variable(masses),
-            tt.as_tensor_variable(initial_coords),
-            tt.as_tensor_variable(times),
+            as_tensor_variable(masses),
+            as_tensor_variable(initial_coords),
+            as_tensor_variable(times),
         ]
         dtype = theano.config.floatX
         out_args = [

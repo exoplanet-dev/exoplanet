@@ -131,6 +131,7 @@ def test_variable_texp():
 
 
 def test_contact_bug():
+    print(theano.config.floatX)
     orbit = KeplerianOrbit(period=3.456, ecc=0.6, omega=-1.5)
     t = np.linspace(-0.1, 0.1, 1000)
     u = [0.3, 0.2]
