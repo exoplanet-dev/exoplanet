@@ -19,7 +19,7 @@ namespace kepler {
 // Calculates x - sin(x) and 1 - cos(x) to 20 significant digits for x in [0,
 // pi)
 template <typename T>
-inline void sin_cos_reduc(T x, T *SnReduc, T *CsReduc) {
+inline void sin_cos_reduc(T x, T* SnReduc, T* CsReduc) {
   const T s[] = {1.0 / 6,   1.0 / 20,  1.0 / 42,  1.0 / 72,  1.0 / 110,
                  1.0 / 156, 1.0 / 210, 1.0 / 272, 1.0 / 342, 1.0 / 420};
   const T c[] = {0.5,       1.0 / 12,  1.0 / 30,  1.0 / 56,  1.0 / 90,
@@ -108,8 +108,7 @@ inline T refine_estimate(T M, T ecc, T ome, T E) {
   T d_3 = -f_0 / (f_1 - 0.5 * f_0 * f_2 / f_1);
   T d_4 = -f_0 / (f_1 + 0.5 * d_3 * f_2 + (d_3 * d_3) * f_3 / 6);
   T d_42 = d_4 * d_4;
-  T dE = -f_0 /
-         (f_1 + 0.5 * d_4 * f_2 + d_4 * d_4 * f_3 / 6 - d_42 * d_4 * f_2 / 24);
+  T dE = -f_0 / (f_1 + 0.5 * d_4 * f_2 + d_4 * d_4 * f_3 / 6 - d_42 * d_4 * f_2 / 24);
 
   return E + dE;
 }
@@ -135,6 +134,39 @@ inline T solve_kepler(T M, T ecc) {
   if (high) E = two_pi - E;
 
   return E;  // + M_ref;
+}
+
+template <typename T>
+inline T solve_kepler(T M, T ecc, T& cosf, T& sinf) {
+  const T tol = T(1.0e-10);
+  if (ecc < tol) {
+    cosf = cos(M);
+    sinf = sin(M);
+    return npy_mod(M, T(2 * M_PI));
+  }
+
+  T E = solve_kepler(M, ecc);
+  T sE = sin(E);
+  T cE = cos(E);
+
+  // First, compute tan(0.5*E) = sin(E) / (1 + cos(E))
+  T denom = 1 + cE;
+  if (denom > tol) {
+    T tanf2 = sqrt((1 + ecc) / (1 - ecc)) * sE / denom;  // tan(0.5*f)
+    T tanf2_2 = tanf2 * tanf2;
+
+    // Then we compute sin(f) and cos(f) using:
+    // sin(f) = 2*tan(0.5*f)/(1 + tan(0.5*f)^2), and
+    // cos(f) = (1 - tan(0.5*f)^2)/(1 + tan(0.5*f)^2)
+    denom = 1 / (1 + tanf2_2);
+    sinf = 2 * tanf2 * denom;
+    cosf = (1 - tanf2_2) * denom;
+  } else {
+    // If cos(E) = -1, E = pi and tan(0.5*E) -> inf and f = E = pi
+    sinf = 0;
+    cosf = -1;
+  }
+  return E;
 }
 
 }  // namespace kepler

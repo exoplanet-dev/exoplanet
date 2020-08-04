@@ -5,14 +5,14 @@ import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
-from exoplanet.theano_ops.kepler import KeplerOp
+from exoplanet.theano_ops.kepler import Kepler
 
 
 class TestKeplerSolver(utt.InferShapeTester):
     def setUp(self):
         super(TestKeplerSolver, self).setUp()
-        self.op_class = KeplerOp
-        self.op = KeplerOp()
+        self.op_class = Kepler
+        self.op = Kepler()
 
     def _get_M_and_f(self, e, E):
         M = E - e * np.sin(E)

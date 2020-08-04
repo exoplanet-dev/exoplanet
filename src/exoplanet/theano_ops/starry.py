@@ -8,16 +8,7 @@ import theano.tensor as tt
 from scipy.optimize import bisect
 
 from . import driver
-
-
-def _resize_or_set(outputs, n, shape):
-    if outputs[n][0] is None:
-        outputs[n][0] = np.empty(shape)
-    else:
-        outputs[n][0] = np.ascontiguousarray(
-            np.resize(outputs[n][0], shape), dtype=np.float64
-        )
-    return outputs[n][0]
+from .helpers import resize_or_set
 
 
 class GetClRev(theano.Op):
@@ -30,7 +21,7 @@ class GetClRev(theano.Op):
 
     def perform(self, node, inputs, outputs):
         bc = inputs[0]
-        bu = _resize_or_set(outputs, 0, bc.shape)
+        bu = resize_or_set(outputs, 0, bc.shape)
         driver.get_cl_rev(bc, bu)
 
 
@@ -48,7 +39,7 @@ class GetCl(theano.Op):
 
     def perform(self, node, inputs, outputs):
         u = inputs[0]
-        c = _resize_or_set(outputs, 0, u.shape)
+        c = resize_or_set(outputs, 0, u.shape)
         driver.get_cl(u, c)
 
     def grad(self, inputs, gradients):
@@ -72,6 +63,8 @@ class LimbDark(theano.Op):
 
     def make_node(self, *inputs):
         in_args = [tt.as_tensor_variable(i) for i in inputs]
+        if any(i.dtype != "float64" for i in in_args):
+            raise ValueError("float64 dtypes are required for LimbDark op")
         out_args = [
             in_args[1].type(),
             tt.TensorType(
@@ -92,10 +85,10 @@ class LimbDark(theano.Op):
 
     def perform(self, node, inputs, outputs):
         cl, b, r, los = inputs
-        f = _resize_or_set(outputs, 0, b.shape)
-        dfdcl = _resize_or_set(outputs, 1, cl.shape + b.shape)
-        dfdb = _resize_or_set(outputs, 2, b.shape)
-        dfdr = _resize_or_set(outputs, 3, b.shape)
+        f = resize_or_set(outputs, 0, b.shape)
+        dfdcl = resize_or_set(outputs, 1, cl.shape + b.shape)
+        dfdb = resize_or_set(outputs, 2, b.shape)
+        dfdr = resize_or_set(outputs, 3, b.shape)
         self.ld.apply(cl, b, r, los, f, dfdcl, dfdb, dfdr)
 
     def grad(self, inputs, gradients):

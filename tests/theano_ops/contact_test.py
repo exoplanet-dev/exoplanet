@@ -7,7 +7,7 @@ import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
 from exoplanet.theano_ops.contact.contact import ContactPointsOp
-from exoplanet.theano_ops.kepler.kepler import KeplerOp
+from exoplanet.theano_ops.kepler import kepler
 
 
 class TestContactPoints(utt.InferShapeTester):
@@ -54,9 +54,8 @@ class Solver:
         L = tt.dscalar()
         M1, M2, flag = self.op(a, e, cosw, sinw, cosi, sini, L)
 
-        kepler_op = KeplerOp()
-        sinf1, cosf1 = kepler_op(M1, e)
-        sinf2, cosf2 = kepler_op(M2, e)
+        sinf1, cosf1 = kepler(M1, e)
+        sinf2, cosf2 = kepler(M2, e)
 
         self.func = theano.function(
             [a, e, cosw, sinw, cosi, sini, L],

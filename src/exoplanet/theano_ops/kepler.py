@@ -1,43 +1,32 @@
 # -*- coding: utf-8 -*-
 
-__all__ = ["KeplerOp"]
+__all__ = ["kepler"]
 
 import theano
 import theano.tensor as tt
-from theano import gof
 
-from ..build_utils import get_cache_version, get_compile_args, get_header_dirs
+from . import driver
+from .helpers import resize_or_set
 
 
-class KeplerOp(gof.COp):
+class Kepler(theano.Op):
     __props__ = ()
-    func_file = "./kepler.cc"
-    func_name = "APPLY_SPECIFIC(kepler)"
 
-    def __init__(self, **kwargs):
-        super(KeplerOp, self).__init__(self.func_file, self.func_name)
-
-    def c_code_cache_version(self):
-        return get_cache_version()
-
-    def c_headers(self, compiler):
-        return ["exoplanet/theano_helpers.h", "exoplanet/kepler.h"]
-
-    def c_header_dirs(self, compiler):
-        return get_header_dirs(eigen=False)
-
-    def c_compile_args(self, compiler):
-        return get_compile_args(compiler)
-
-    def make_node(self, mean_anom, eccen):
-        in_args = [
-            tt.as_tensor_variable(mean_anom),
-            tt.as_tensor_variable(eccen),
-        ]
-        return gof.Apply(self, in_args, [in_args[0].type(), in_args[0].type()])
+    def make_node(self, M, ecc):
+        in_args = [tt.as_tensor_variable(M), tt.as_tensor_variable(ecc)]
+        if any(i.dtype != "float64" for i in in_args):
+            raise ValueError("float64 dtypes are required for Kepler op")
+        out_args = [in_args[0].type(), in_args[1].type()]
+        return theano.Apply(self, in_args, out_args)
 
     def infer_shape(self, node, shapes):
-        return shapes[0], shapes[0]
+        return shapes
+
+    def perform(self, node, inputs, outputs):
+        M, ecc = inputs
+        sinf = resize_or_set(outputs, 0, M.shape)
+        cosf = resize_or_set(outputs, 1, M.shape)
+        driver.kepler(M, ecc, sinf, cosf)
 
     def grad(self, inputs, gradients):
         M, e = inputs
@@ -70,3 +59,6 @@ class KeplerOp(gof.COp):
         if eval_points[0] is None:
             return eval_points
         return self.grad(inputs, eval_points)
+
+
+kepler = Kepler()

@@ -1,3 +1,4 @@
+#include <exoplanet/kepler.h>
 #include <exoplanet/starry.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
@@ -8,7 +9,33 @@
 
 namespace py = pybind11;
 
+// ASCII art from:
+// http://patorjk.com/software/taag/#p=display&f=Small&c=c++
+
 namespace driver {
+
+//    _        _
+//   | |_  ___| |_ __  ___ _ _ ___
+//   | ' \/ -_) | '_ \/ -_) '_(_-<
+//   |_||_\___|_| .__/\___|_| /__/
+//              |_|
+
+template <typename Scalar, int ExtraFlags>
+struct flat_unchecked_array {
+  flat_unchecked_array(py::array_t<Scalar, ExtraFlags> &array, bool require_mutable = false) {
+    info = array.request();
+    if (require_mutable && info.readonly) throw std::runtime_error("outputs must be writeable");
+    data = (Scalar *)info.ptr;
+  }
+
+  inline Scalar &operator()(ssize_t index) { return data[index]; }
+  inline ssize_t shape(ssize_t index) const { return info.shape[index]; }
+  inline ssize_t size() const { return info.size; }
+  inline ssize_t ndim() const { return info.ndim; }
+
+  py::buffer_info info;
+  Scalar *data;
+};
 
 template <typename T>
 int sgn(T val) {
@@ -135,24 +162,13 @@ struct LimbDark {
              py::array_t<double, py::array::c_style> dfdcl_out,
              py::array_t<double, py::array::c_style> dfdb_out,
              py::array_t<double, py::array::c_style> dfdr_out) {
-    py::buffer_info b_info = b_in.request(), r_info = r_in.request(), los_info = los_in.request();
-    ssize_t N = b_info.size;
-    if (r_info.size != N || los_info.size != N) throw std::runtime_error("dimension mismatch");
+    flat_unchecked_array b(b_in), r(r_in), los(los_in);
+    ssize_t N = b.size();
+    if (r.size() != N || los.size() != N) throw std::runtime_error("dimension mismatch");
 
-    py::buffer_info f_info = f_out.request(), dfdb_info = dfdb_out.request(),
-                    dfdr_info = dfdr_out.request();
-    if (f_info.size != N || dfdb_info.size != N || dfdr_info.size != N)
+    flat_unchecked_array f(f_out, true), dfdb(dfdb_out, true), dfdr(dfdr_out, true);
+    if (f.size() != N || dfdb.size() != N || dfdr.size() != N)
       throw std::runtime_error("dimension mismatch");
-    if (f_info.readonly || dfdb_info.readonly || dfdr_info.readonly)
-      throw std::runtime_error("outputs must be writeable");
-
-    double *b = (double *)b_info.ptr;
-    double *r = (double *)r_info.ptr;
-    double *los = (double *)los_info.ptr;
-
-    double *f = (double *)f_info.ptr;
-    double *dfdb = (double *)dfdb_info.ptr;
-    double *dfdr = (double *)dfdr_info.ptr;
 
     py::buffer_info cl_info = cl_in.request(), dfdcl_info = dfdcl_out.request();
     ssize_t num_cl = cl_info.size;
@@ -170,24 +186,24 @@ struct LimbDark {
       ld = exoplanet::starry::limbdark::GreensLimbDark<double>(int(num_cl));
 
     for (ssize_t i = 0; i < N; ++i) {
-      f[i] = 0;
-      dfdb[i] = 0;
-      dfdr[i] = 0;
+      f(i) = 0;
+      dfdb(i) = 0;
+      dfdr(i) = 0;
 
-      if (los[i] > 0) {
-        auto b_ = std::abs(b[i]);
-        auto r_ = std::abs(r[i]);
+      if (los(i) > 0) {
+        auto b_ = std::abs(b(i));
+        auto r_ = std::abs(r(i));
         if (b_ < 1 + r_) {
           ld.compute<true>(b_, r_);
           auto sT = ld.sT;
 
           // The value of the light curve
-          f[i] = sT.dot(cl) - 1;
+          f(i) = sT.dot(cl) - 1;
 
           // The gradients
           dfdcl.col(i) = sT;
-          dfdb[i] = sgn(b[i]) * ld.dsTdb.dot(cl);
-          dfdr[i] = sgn(r[i]) * ld.dsTdr.dot(cl);
+          dfdb(i) = sgn(b(i)) * ld.dsTdb.dot(cl);
+          dfdr(i) = sgn(r(i)) * ld.dsTdr.dot(cl);
         }
       }
     }
@@ -199,7 +215,40 @@ struct LimbDark {
 };
 
 }  // namespace starry
+
+//    _            _
+//   | |_____ _ __| |___ _ _
+//   | / / -_) '_ \ / -_) '_|
+//   |_\_\___| .__/_\___|_|
+//           |_|
+
+namespace kepler {
+
+auto kepler(py::array_t<double, py::array::c_style> M_in,
+            py::array_t<double, py::array::c_style> ecc_in,
+            py::array_t<double, py::array::c_style> sinf_out,
+            py::array_t<double, py::array::c_style> cosf_out) {
+  flat_unchecked_array M(M_in), ecc(ecc_in);
+  flat_unchecked_array cosf(cosf_out, true), sinf(sinf_out, true);
+  ssize_t N = M.size();
+  if (ecc.size() != N || cosf.size() != N || sinf.size() != N)
+    throw std::runtime_error("dimension mismatch");
+  for (ssize_t n = 0; n < N; ++n) {
+    if (ecc(n) < 0 || ecc(n) > 1)
+      throw std::runtime_error("eccentricity must be in the range [0, 1)");
+    exoplanet::kepler::solve_kepler(M(n), ecc(n), cosf(n), sinf(n));
+  }
+  return std::make_tuple(cosf_out, sinf_out);
+}
+
+}  // namespace kepler
 }  // namespace driver
+
+//              _    _         _ _ _
+//    _ __ _  _| |__(_)_ _  __| / / |
+//   | '_ \ || | '_ \ | ' \/ _` | | |
+//   | .__/\_, |_.__/_|_||_\__,_|_|_|
+//   |_|   |__/
 
 PYBIND11_MODULE(driver, m) {
   m.doc() = R"doc(
@@ -216,6 +265,9 @@ PYBIND11_MODULE(driver, m) {
            py::arg("b").noconvert(), py::arg("r").noconvert(), py::arg("los").noconvert(),
            py::arg("f").noconvert(), py::arg("dfdcl").noconvert(), py::arg("dfdb").noconvert(),
            py::arg("dfdr").noconvert());
+
+  m.def("kepler", &driver::kepler::kepler, py::arg("M").noconvert(), py::arg("ecc").noconvert(),
+        py::arg("sinf").noconvert(), py::arg("cosf").noconvert());
 
 #ifdef VERSION_INFO
   m.attr("__version__") = VERSION_INFO;

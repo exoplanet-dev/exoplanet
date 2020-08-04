@@ -16,7 +16,7 @@ from theano.ifelse import ifelse
 
 from ..citations import add_citations_to_model
 from ..theano_ops.contact import ContactPointsOp
-from ..theano_ops.kepler import KeplerOp
+from ..theano_ops.kepler import kepler
 from ..units import has_unit, to_unit, with_unit
 from .constants import G_grav, au_per_R_sun, c_light, gcc_per_sun
 
@@ -98,8 +98,6 @@ class KeplerianOrbit:
         add_citations_to_model(self.__citations__, model=model)
 
         self.jacobians = defaultdict(lambda: defaultdict(None))
-
-        self.kepler_op = KeplerOp(**kwargs)
 
         daordtau = None
         if ecc is None and duration is not None:
@@ -336,7 +334,7 @@ class KeplerianOrbit:
         M = (self._warp_times(t, _pad=_pad) - self.tref) * self.n
         if self.ecc is None:
             return tt.sin(M), tt.cos(M)
-        sinf, cosf = self.kepler_op(M, self.ecc + tt.zeros_like(M))
+        sinf, cosf = kepler(M, self.ecc + tt.zeros_like(M))
         return sinf, cosf
 
     def _get_position_and_velocity(self, t, parallax=None):
@@ -807,7 +805,6 @@ class KeplerianOrbit:
                 r_star=r_planet,
                 model=model,
             )
-        orbit.kepler_op = self.kepler_op
         orbit.contact_points_op = self.contact_points_op
         return orbit
 
@@ -823,7 +820,7 @@ def get_true_anomaly(M, e, **kwargs):
         The true anomaly of the orbit.
 
     """
-    sinf, cosf = KeplerOp()(M, e)
+    sinf, cosf = kepler(M, e)
     return tt.arctan2(sinf, cosf)
 
 
