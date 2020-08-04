@@ -3,7 +3,6 @@
 __all__ = [
     "__version__",
     "distributions",
-    "gp",
     "orbits",
     "interp",
     "get_dense_nuts_step",
@@ -11,7 +10,7 @@ __all__ = [
     "optimize",
 ]
 
-from . import distributions, gp, interp, orbits
+from . import distributions, interp, orbits
 from .citations import CITATIONS
 from .distributions import *  # NOQA
 from .estimators import *  # NOQA

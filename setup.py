@@ -46,6 +46,7 @@ EXTRA_REQUIRE = {
         "coveralls",
         "pybind11",
         "celerite>=0.3.1",
+        "celerite2",
         "batman-package",
         "rebound; sys_platform != 'win32'",
         "starry; sys_platform != 'win32'",

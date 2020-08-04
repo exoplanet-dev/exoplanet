@@ -6,8 +6,7 @@ import theano
 import theano.tensor as tt
 from scipy.linalg import cho_solve, cholesky
 
-from exoplanet.gp import terms
-from exoplanet.gp.celerite import GP
+from exoplanet.gp import GP, terms
 
 
 def test_broadcast_dim():
@@ -25,7 +24,7 @@ def test_broadcast_dim():
     x.tag.test_value = np.zeros(2)
     y.tag.test_value = np.zeros(2)
     diag.tag.test_value = np.ones(2)
-    gp = GP(kernel, x, diag, J=2)
+    gp = GP(kernel, x, diag=diag)
     loglike = gp.log_likelihood(y)
 
     args = [logS0, logw0, logQ, x, y, diag]
@@ -43,7 +42,9 @@ def test_drop_non_broadcastable():
     np.random.seed(123)
     mean = tt.dscalar()
     mean.tag.test_value = 0.1
-    gp = GP(terms.RealTerm(a=1.0, c=1.0), np.linspace(0, 10, 50), np.ones(50))
+    gp = GP(
+        terms.RealTerm(a=1.0, c=1.0), np.linspace(0, 10, 50), diag=np.ones(50)
+    )
     arg = np.random.rand(50) - mean
     res = gp.apply_inverse(arg[:, None])
     theano.grad(tt.sum(res), [arg])
@@ -65,32 +66,32 @@ def _get_theano_kernel(celerite_kernel):
         )
     elif isinstance(celerite_kernel, cterms.RealTerm):
         return terms.RealTerm(
-            log_a=celerite_kernel.log_a, log_c=celerite_kernel.log_c
+            a=np.exp(celerite_kernel.log_a), c=np.exp(celerite_kernel.log_c)
         )
     elif isinstance(celerite_kernel, cterms.ComplexTerm):
         if not celerite_kernel.fit_b:
             return terms.ComplexTerm(
-                log_a=celerite_kernel.log_a,
+                a=np.exp(celerite_kernel.log_a),
                 b=0.0,
-                log_c=celerite_kernel.log_c,
-                log_d=celerite_kernel.log_d,
+                c=np.exp(celerite_kernel.log_c),
+                d=np.exp(celerite_kernel.log_d),
             )
         return terms.ComplexTerm(
-            log_a=celerite_kernel.log_a,
-            log_b=celerite_kernel.log_b,
-            log_c=celerite_kernel.log_c,
-            log_d=celerite_kernel.log_d,
+            a=np.exp(celerite_kernel.log_a),
+            b=np.exp(celerite_kernel.log_b),
+            c=np.exp(celerite_kernel.log_c),
+            d=np.exp(celerite_kernel.log_d),
         )
     elif isinstance(celerite_kernel, cterms.SHOTerm):
         return terms.SHOTerm(
-            log_S0=celerite_kernel.log_S0,
-            log_Q=celerite_kernel.log_Q,
-            log_w0=celerite_kernel.log_omega0,
+            S0=np.exp(celerite_kernel.log_S0),
+            Q=np.exp(celerite_kernel.log_Q),
+            w0=np.exp(celerite_kernel.log_omega0),
         )
     elif isinstance(celerite_kernel, cterms.Matern32Term):
         return terms.Matern32Term(
-            log_sigma=celerite_kernel.log_sigma,
-            log_rho=celerite_kernel.log_rho,
+            sigma=np.exp(celerite_kernel.log_sigma),
+            rho=np.exp(celerite_kernel.log_rho),
         )
     raise NotImplementedError()
 
@@ -135,21 +136,21 @@ def test_gp(celerite_kernel, seed=1234):
     )
 
     kernel = _get_theano_kernel(celerite_kernel)
-    gp = GP(kernel, x, diag)
+    gp = GP(kernel, x, diag=diag)
     loglike = gp.log_likelihood(y).eval()
 
     assert np.allclose(loglike, celerite_loglike)
 
-    mu = gp.predict()
-    _, var = gp.predict(return_var=True)
-    _, cov = gp.predict(return_cov=True)
+    mu = gp.predict(y)
+    _, var = gp.predict(y, return_var=True)
+    _, cov = gp.predict(y, return_cov=True)
     assert np.allclose(mu.eval(), celerite_mu)
     assert np.allclose(var.eval(), celerite_var)
     assert np.allclose(cov.eval(), celerite_cov)
 
-    mu = gp.predict(t)
-    _, var = gp.predict(t, return_var=True)
-    _, cov = gp.predict(t, return_cov=True)
+    mu = gp.predict(y, t)
+    _, var = gp.predict(y, t, return_var=True)
+    _, cov = gp.predict(y, t, return_cov=True)
     assert np.allclose(mu.eval(), celerite_mu_t)
     assert np.allclose(var.eval(), celerite_var_t)
     assert np.allclose(cov.eval(), celerite_cov_t)
@@ -162,25 +163,25 @@ def test_integrated_diag(seed=1234):
     yerr = np.random.uniform(0.1, 0.5, len(x))
     diag = yerr ** 2
 
-    kernel = terms.SHOTerm(log_S0=0.1, log_Q=1.0, log_w0=0.5)
-    kernel += terms.RealTerm(log_a=0.1, log_c=0.4)
+    kernel = terms.SHOTerm(S0=0.1, Q=1.0, w0=0.5)
+    kernel += terms.RealTerm(a=0.1, c=0.4)
 
     a = kernel.get_celerite_matrices(x, diag)[0].eval()
-    k0 = kernel.value(tt.zeros(1)).eval()
+    k0 = kernel.get_value(tt.zeros(1)).eval()
     assert np.allclose(a, k0 + diag)
 
     kernel = terms.IntegratedTerm(kernel, dt)
     a = kernel.get_celerite_matrices(x, diag)[0].eval()
-    k0 = kernel.value(tt.zeros(1)).eval()
+    k0 = kernel.get_value(tt.zeros(1)).eval()
     assert np.allclose(a, k0 + diag)
 
 
 def _check_model(kernel, x, diag, y):
-    gp = GP(kernel, x, diag)
+    gp = GP(kernel, x, diag=diag)
     loglike = gp.log_likelihood(y).eval()
-    Ly = gp.dot_l(y[:, None]).eval()
+    Ly = gp.dot_tril(y[:, None]).eval()
 
-    K = kernel.value(x[:, None] - x[None, :]).eval()
+    K = kernel.get_value(x[:, None] - x[None, :]).eval()
     K[np.diag_indices_from(K)] += diag
     factor = (cholesky(K, overwrite_a=True, lower=True), True)
 
@@ -196,18 +197,15 @@ def _check_model(kernel, x, diag, y):
 @pytest.mark.parametrize(
     "kernel",
     [
-        terms.RealTerm(log_a=0.1, log_c=0.5),
-        terms.RealTerm(log_a=0.1, log_c=0.5)
-        + terms.RealTerm(log_a=-0.1, log_c=0.7),
-        terms.ComplexTerm(log_a=0.1, b=0.0, log_c=0.5, log_d=0.1),
-        terms.ComplexTerm(log_a=0.1, log_b=-0.2, log_c=0.5, log_d=0.1),
-        terms.SHOTerm(log_S0=0.1, log_Q=-1, log_w0=0.5),
-        terms.SHOTerm(log_S0=0.1, log_Q=1.0, log_w0=0.5),
-        terms.SHOTerm(log_S0=0.1, log_Q=1.0, log_w0=0.5)
-        + terms.RealTerm(log_a=0.1, log_c=0.4),
-        terms.SHOTerm(log_S0=0.1, log_Q=1.0, log_w0=0.5)
-        * terms.RealTerm(log_a=0.1, log_c=0.4),
-        terms.Matern32Term(log_sigma=0.1, log_rho=0.4),
+        terms.RealTerm(a=0.1, c=0.5),
+        terms.RealTerm(a=0.1, c=0.5) + terms.RealTerm(a=np.exp(-0.1), c=0.7),
+        terms.ComplexTerm(a=0.1, b=0.0, c=0.5, d=0.1),
+        terms.ComplexTerm(a=0.1, b=-0.2, c=0.5, d=0.1),
+        terms.SHOTerm(S0=0.1, Q=np.exp(-1), w0=0.5),
+        terms.SHOTerm(S0=0.1, Q=1.0, w0=0.5),
+        terms.SHOTerm(S0=0.1, Q=1.0, w0=0.5) + terms.RealTerm(a=0.1, c=0.4),
+        terms.SHOTerm(S0=0.1, Q=1.0, w0=0.5) * terms.RealTerm(a=0.1, c=0.4),
+        terms.Matern32Term(sigma=0.1, rho=0.4),
     ],
 )
 def test_integrated(kernel, seed=1234):
@@ -235,7 +233,9 @@ def test_sho_reparam(seed=6083):
     for a, b in zip(func1(), func2()):
         assert np.allclose(a, b)
 
-    kernel2 = terms.SHOTerm(log_Sw4=np.log(S0) + 4 * np.log(w0), w0=w0, Q=Q)
+    kernel2 = terms.SHOTerm(
+        Sw4=np.exp(np.log(S0) + 4 * np.log(w0)), w0=w0, Q=Q
+    )
     func2 = theano.function([], kernel2.coefficients)
     for a, b in zip(func1(), func2()):
         assert np.allclose(a, b)
@@ -248,7 +248,9 @@ def test_sho_reparam(seed=6083):
     for a, b in zip(func1(), func2()):
         assert np.allclose(a, b)
 
-    kernel2 = terms.SHOTerm(log_Sw4=np.log(S0) + 4 * np.log(w0), w0=w0, Q=Q)
+    kernel2 = terms.SHOTerm(
+        Sw4=np.exp(np.log(S0) + 4 * np.log(w0)), w0=w0, Q=Q
+    )
     func2 = theano.function([], kernel2.coefficients)
     for a, b in zip(func1(), func2()):
         assert np.allclose(a, b)
@@ -257,14 +259,14 @@ def test_sho_reparam(seed=6083):
 def test_fortran_order(seed=5091986):
     np.random.seed(seed)
 
-    kernel = terms.SHOTerm(log_S0=0.1, log_Q=1.0, log_w0=0.5)
+    kernel = terms.SHOTerm(S0=0.1, Q=1.0, w0=0.5)
 
     x = np.sort(np.random.uniform(0, 100, 100))
     y = np.sin(x)
     yerr = np.random.uniform(0.1, 0.5, len(x))
     diag = yerr ** 2
 
-    gp = GP(kernel, x, diag)
+    gp = GP(kernel, x, diag=diag)
     loglike = gp.log_likelihood(y).eval()
     loglike_f = gp.log_likelihood(np.asfortranarray(y)).eval()
     assert np.allclose(loglike, loglike_f)
