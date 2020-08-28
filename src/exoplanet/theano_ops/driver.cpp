@@ -1,5 +1,5 @@
+#include <exoplanet/calcEA.h>
 #include <exoplanet/contact_points.h>
-#include <exoplanet/kepler.h>
 #include <exoplanet/starry.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
@@ -238,7 +238,8 @@ auto kepler(py::array_t<double, py::array::c_style> M_in,
   for (ssize_t n = 0; n < N; ++n) {
     if (ecc(n) < 0 || ecc(n) > 1)
       throw std::invalid_argument("eccentricity must be in the range [0, 1)");
-    exoplanet::kepler::solve_kepler(M(n), ecc(n), cosf(n), sinf(n));
+    // exoplanet::kepler::solve_kepler(M(n), ecc(n), cosf(n), sinf(n));
+    exoplanet::calcEA::solve_kepler(M(n), ecc(n), &(cosf(n)), &(sinf(n)));
   }
   return std::make_tuple(cosf_out, sinf_out);
 }
