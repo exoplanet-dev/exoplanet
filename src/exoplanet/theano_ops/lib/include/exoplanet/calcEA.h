@@ -138,7 +138,6 @@ void calcEA(double M, double ecc, double *E, double *sinE, double *cosE) {
     MAsign = -1;
     MA = twopi - MA;
   }
-
   /* Series expansion */
   if (2 * MA + 1 - ecc < 0.2) {
     EA = EAstart(MA, ecc);
@@ -159,9 +158,10 @@ void calcEA(double M, double ecc, double *E, double *sinE, double *cosE) {
     bounds[12] = pi;
 
     /* Which interval? */
-    for (k = 11; k > -1; k--) {
+    for (k = 11; k > 0; k--) {
       if (MA > bounds[k]) break;
     }
+    // if (k < 0) k = 0;
 
     /* Values at the two endpoints. */
 

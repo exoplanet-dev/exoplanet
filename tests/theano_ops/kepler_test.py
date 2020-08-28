@@ -52,7 +52,6 @@ class TestKeplerSolver(utt.InferShapeTester):
 
     def test_solver(self):
         e = np.linspace(0, 1, 500)[:-1]
-        print(e)
         E = np.linspace(-300, 300, 1001)
         e = e[None, :] + np.zeros((len(E), len(e)))
         E = E[:, None] + np.zeros_like(e)
@@ -82,6 +81,7 @@ class TestKeplerSolver(utt.InferShapeTester):
         np.random.seed(1234)
         M_val = np.concatenate(
             (
+                np.linspace(-10, 10, 100),
                 [
                     0.0,
                     -np.pi + 1e-3,
@@ -94,24 +94,6 @@ class TestKeplerSolver(utt.InferShapeTester):
             )
         )
         e_val = np.random.uniform(0, 0.9, len(M_val))
+
         a = lambda *args: tt.arctan2(*self.op(*args))  # NOQA
         utt.verify_grad(a, [M_val, e_val], eps=1e-8)
-
-        # M_val = np.concatenate(
-        #     (
-        #         np.linspace(-10, 10, 100),
-        #         [
-        #             0.0,
-        #             -np.pi + 1e-3,
-        #             np.pi - 1e-3,
-        #             0.5 * np.pi,
-        #             -0.5 * np.pi,
-        #             1.5 * np.pi,
-        #             2 * np.pi + 1e-3,
-        #         ],
-        #     )
-        # )
-        # e_val = np.random.uniform(0, 0.9, len(M_val))
-
-        # a = lambda *args: tt.arctan2(*self.op(*args))  # NOQA
-        # utt.verify_grad(a, [M_val, e_val], eps=1e-8)
