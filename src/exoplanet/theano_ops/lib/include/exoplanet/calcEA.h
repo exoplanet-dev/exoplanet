@@ -265,6 +265,7 @@ double solve_kepler(double M, double ecc, double *cosf, double *sinf) {
     *sinf = 0;
     *cosf = -1;
   }
+  return E;
 }
 
 }  // namespace calcEA
