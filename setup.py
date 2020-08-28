@@ -61,6 +61,14 @@ EXTRA_REQUIRE = {
         "lightkurve",
         "jupytext",
     ],
+    "tutorials": [
+        "jupytext",
+        "jupyter",
+        "nbconvert",
+        "matplotlib",
+        "corner",
+        "lightkurve",
+    ],
     "nbody": [
         "rebound; sys_platform != 'win32'",
         "rebound_pymc3>=0.0.3; sys_platform != 'win32'",
