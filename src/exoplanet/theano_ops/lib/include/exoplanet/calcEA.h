@@ -91,7 +91,7 @@ double EAstart(double M, double ecc) {
 
   double chi = M / (sqrt_ome * ome);
   double Lam = sqrt(8 + 9 * chi * chi);
-  double S = pow(Lam + 3 * chi, 1. / 3);
+  double S = cbrt(Lam + 3 * chi);
   double sigma = 6 * chi / (2 + S * S + 4. / (S * S));
   double s2 = sigma * sigma;
 
