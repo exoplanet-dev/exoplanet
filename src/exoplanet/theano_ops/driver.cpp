@@ -304,10 +304,4 @@ PYBIND11_MODULE(driver, m) {
         py::arg("cosw"), py::arg("sinw"), py::arg("cosi"), py::arg("sini"), py::arg("L"),
         py::arg("M_left").noconvert(), py::arg("M_right").noconvert(), py::arg("flag").noconvert(),
         py::arg("tol"));
-
-#ifdef VERSION_INFO
-  m.attr("__version__") = VERSION_INFO;
-#else
-  m.attr("__version__") = "dev";
-#endif
 }
