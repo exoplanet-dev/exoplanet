@@ -23,13 +23,12 @@ CLASSIFIERS = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
 ]
+SETUP_REQUIRES = ["setuptools>=40.6.0", "setuptools_scm"]
 INSTALL_REQUIRES = [
     "theano>=1.0.4",
     "numpy>=1.13.0",
     "pymc3>=3.5",
     "astropy>=3.1",
-    "setuptools>=40.6.0",
-    "setuptools_scm",
 ]
 EXTRA_REQUIRE = {
     "test": [
@@ -131,6 +130,7 @@ if __name__ == "__main__":
         install_requires=INSTALL_REQUIRES,
         extras_require=EXTRA_REQUIRE,
         classifiers=CLASSIFIERS,
+        setup_requires=SETUP_REQUIRES,
         zip_safe=False,
         options={"bdist_wheel": {"universal": "1"}},
     )
