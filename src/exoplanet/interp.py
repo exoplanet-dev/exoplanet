@@ -8,7 +8,7 @@ import theano.tensor as tt
 from .theano_ops.interp import RegularGridOp
 
 
-class RegularGridInterpolator(object):
+class RegularGridInterpolator:
     """Linear interpolation on a regular grid in arbitrary dimensions
 
     The data must be defined on a filled regular grid, but the spacing may be

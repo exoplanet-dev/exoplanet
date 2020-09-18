@@ -7,7 +7,7 @@ import theano.tensor as tt
 from ..utils import as_tensor_variable
 
 
-class SimpleTransitOrbit(object):
+class SimpleTransitOrbit:
     """An orbit representing a set of planets transiting a common central
 
     This orbit is parameterized by the observables of a transiting system,
