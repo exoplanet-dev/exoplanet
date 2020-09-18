@@ -9,7 +9,7 @@ import theano
 import theano.tensor as tt
 from theano import gof
 
-from ...utils import as_tensor_variable
+from ..utils import as_tensor_variable
 
 
 class ReboundOp(gof.Op):
