@@ -216,6 +216,78 @@ struct LimbDark {
   exoplanet::starry::limbdark::GreensLimbDark<double> ld;
 };
 
+struct SimpleLimbDark {
+  SimpleLimbDark() : ld(0){};
+
+  void allocate_cl(py::array_t<double, py::array::c_style> cl_in) {
+    auto cl_array = cl_in.unchecked<1>();
+    ssize_t N = cl_array.size();
+    if (ld.lmax != int(N)) ld = exoplanet::starry::limbdark::GreensLimbDark<double>(int(N));
+    cl.resize(N);
+    for (ssize_t n = 0; n < N; ++n) {
+      cl(n) = cl_array(n);
+    }
+  }
+
+  void set_u(py::array_t<double, py::array::c_style> u_in) {
+    auto u = u_in.unchecked<1>();
+    ssize_t N = u.size();
+    if (N < 2) throw std::invalid_argument("invalid dimensions");
+
+    std::vector<double> a(N);
+    a[0] = 1;
+    for (ssize_t n = 1; n < N; ++n) a[n] = 0;
+
+    // Compute the a_n coefficients
+    double bcoeff;
+    int sign;
+    for (ssize_t i = 1; i < N; ++i) {
+      bcoeff = 1;
+      sign = 1;
+      for (ssize_t j = 0; j <= i; ++j) {
+        a[j] -= u(i) * bcoeff * sign;
+        sign *= -1;
+        bcoeff *= (double(i - j) / (j + 1));
+      }
+    }
+
+    // Now, compute the c_n coefficients
+    cl.resize(N);
+    for (ssize_t j = N - 1; j >= std::max<ssize_t>(2, N - 2); --j) {
+      cl(j) = a[j] / (j + 2);
+    }
+    for (ssize_t j = N - 3; j >= 2; --j) {
+      cl(j) = a[j] / (j + 2) + cl(j + 2);
+    }
+    if (N >= 4)
+      cl(1) = a[1] + 3 * cl(3);
+    else
+      cl(1) = a[1];
+    if (N >= 3)
+      cl(0) = a[0] + 2 * cl(2);
+    else
+      cl(0) = a[0];
+
+    cl.array() /= M_PI * (cl(0) + 2 * cl(1) / 3.0);
+
+    // Re-initialize if lmax is wrong
+    if (ld.lmax != int(N)) ld = exoplanet::starry::limbdark::GreensLimbDark<double>(int(N));
+  }
+
+  double apply(double b, double r) {
+    auto b_ = std::abs(b);
+    auto r_ = std::abs(r);
+    if (cl.rows() > 0 && b_ < 1 + r_) {
+      ld.compute<false>(b_, r_);
+      return double(ld.sT.dot(cl) - 1);
+    }
+    return 0.0;
+  }
+
+  Eigen::VectorXd cl;
+  exoplanet::starry::limbdark::GreensLimbDark<double> ld;
+};
+
 }  // namespace starry
 
 //    _            _
@@ -238,7 +310,6 @@ auto kepler(py::array_t<double, py::array::c_style> M_in,
   for (ssize_t n = 0; n < N; ++n) {
     if (ecc(n) < 0 || ecc(n) > 1)
       throw std::invalid_argument("eccentricity must be in the range [0, 1)");
-    // exoplanet::kepler::solve_kepler(M(n), ecc(n), cosf(n), sinf(n));
     exoplanet::calcEA::solve_kepler(M(n), ecc(n), &(cosf(n)), &(sinf(n)));
   }
   return std::make_tuple(cosf_out, sinf_out);
@@ -297,6 +368,30 @@ PYBIND11_MODULE(driver, m) {
       .def("apply", &driver::starry::LimbDark::apply, py::arg("cl"), py::arg("b"), py::arg("r"),
            py::arg("los"), py::arg("f").noconvert(), py::arg("dfdcl").noconvert(),
            py::arg("dfdb").noconvert(), py::arg("dfdr").noconvert());
+
+  py::class_<driver::starry::SimpleLimbDark>(m, "SimpleLimbDark")
+      .def(py::init<>())
+      .def("set_u", &driver::starry::SimpleLimbDark::set_u, py::arg("u"))
+      .def("apply", py::vectorize(&driver::starry::SimpleLimbDark::apply), py::arg("b"),
+           py::arg("r"))
+      .def(py::pickle(
+          [](const driver::starry::SimpleLimbDark &obj) {
+            int N = obj.cl.rows();
+            auto array = py::array_t<double>(N);
+            py::buffer_info buf = array.request();
+            double *data = (double *)buf.ptr;
+            for (int n = 0; n < N; ++n) {
+              data[n] = obj.cl(n);
+            }
+            return py::make_tuple(array);
+          },
+          [](py::tuple data) {
+            if (data.size() != 1) throw std::runtime_error("Invalid state!");
+            driver::starry::SimpleLimbDark ld;
+            auto array = data[0].cast<py::array_t<double>>();
+            ld.allocate_cl(array);
+            return ld;
+          }));
 
   m.def("kepler", &driver::kepler::kepler, py::arg("M"), py::arg("ecc"),
         py::arg("sinf").noconvert(), py::arg("cosf").noconvert());

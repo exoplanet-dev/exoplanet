@@ -22,3 +22,4 @@ venv-test
 .tox
 *.ipynb
 .envrc
+tmp

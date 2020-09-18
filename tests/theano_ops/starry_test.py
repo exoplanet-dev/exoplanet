@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import pickle
+
 import numpy as np
 import theano
 import theano.tensor as tt
@@ -11,6 +13,7 @@ from exoplanet.theano_ops.starry import (
     LimbDark,
     RadiusFromOccArea,
 )
+from exoplanet.theano_ops.driver import SimpleLimbDark
 
 
 class TestGetCl(utt.InferShapeTester):
@@ -147,3 +150,35 @@ class TestRadiusFromOccArea(utt.InferShapeTester):
 
             est = 0.5 * (plus - minus) / eps
             utt.assert_allclose(est, g[n], atol=2 * eps)
+
+
+def test_simple():
+    np.random.seed(4502934)
+    r = np.random.uniform(0, 1.0, 50)
+    b = np.random.uniform(-1.2, 1.2, len(r))
+
+    u = np.array([0.5, 0.3])
+    cl = GetCl()(tt.as_tensor_variable(u)).eval()
+    cl /= np.pi * (cl[0] + 2 * cl[1] / 3)
+    f0 = LimbDark()(cl, b, r, np.ones_like(b))[0].eval()
+
+    ld = SimpleLimbDark()
+    assert np.allclose(ld.apply(b, r), 0.0)
+
+    ld.set_u(u)
+    assert np.allclose(ld.apply(b, r), f0)
+
+
+def test_simple_pickle():
+    np.random.seed(4502934)
+    r = np.random.uniform(0, 1.0, 50)
+    b = np.random.uniform(-1.2, 1.2, len(r))
+    u = np.array([0.5, 0.3])
+
+    ld = SimpleLimbDark()
+    ld.set_u(u)
+    f0 = ld.apply(b, r)
+
+    data = pickle.dumps(ld, -1)
+    ld2 = pickle.loads(data)
+    assert np.allclose(ld2.apply(b, r), f0)
