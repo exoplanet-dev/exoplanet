@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.3.2
+#       jupytext_version: 1.6.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -139,7 +139,7 @@ _ = plt.title("map model")
 # ## Sampling
 #
 # Now, let's sample from the posterior defined by this model.
-# As usual, there are strong covariances between some of the parameters so we'll use :func:`exoplanet.get_dense_nuts_step`.
+# As usual, there are strong covariances between some of the parameters so we'll use `init="adapt_full"`.
 
 # %%
 np.random.seed(42)
@@ -150,7 +150,8 @@ with model:
         start=map_soln,
         cores=2,
         chains=2,
-        step=xo.get_dense_nuts_step(target_accept=0.9),
+        init="adapt_full",
+        target_accept=0.9,
     )
 
 # %% [markdown]

@@ -53,7 +53,6 @@ magnitude.
    tutorials/rv
    tutorials/transit
    tutorials/astrometric
-   tutorials/gp
    tutorials/light-delay
 
 

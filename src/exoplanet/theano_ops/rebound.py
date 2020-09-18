@@ -114,10 +114,6 @@ class ReboundOp(gof.Op):
         # Save the results
         outputs[0][0] = np.ascontiguousarray(coords[time_inds])
         outputs[1][0] = np.ascontiguousarray(jac[time_inds])
-        # outputs[0][0] = np.ascontiguousarray(
-        #     np.moveaxis(coords[time_inds], 2, 0)
-        # )
-        # outputs[1][0] = np.ascontiguousarray(np.moveaxis(jac[time_inds], 2, 0))
 
     def grad(self, inputs, gradients):
         masses, initial_coords, times = inputs

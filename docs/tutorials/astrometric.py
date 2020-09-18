@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.3.2
+#       jupytext_version: 1.6.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -357,16 +357,20 @@ with model:
         start=map_soln,
         cores=2,
         chains=2,
-        step=xo.get_dense_nuts_step(target_accept=0.9, adaptation_window=201),
+        init="adapt_full",
+        target_accept=0.9,
     )
 
 # %% [markdown]
 # First we can check the convergence for some of the key parameters.
 
 # %%
-pm.summary(
-    trace, varnames=["P", "tperi", "a_ang", "omega", "Omega", "incl", "ecc"]
-)
+with model:
+    summary = pm.summary(
+        trace,
+        varnames=["P", "tperi", "a_ang", "omega", "Omega", "incl", "ecc"],
+    )
+summary
 
 # %% [markdown]
 # That looks pretty good.
@@ -441,27 +445,30 @@ with plx_model:
         start=plx_map_soln,
         cores=2,
         chains=2,
-        step=xo.get_dense_nuts_step(target_accept=0.9, start=plx_map_soln),
+        init="adapt_full",
+        target_accept=0.9,
     )
 
 # %% [markdown]
 # Check the convergence diagnostics.
 
 # %%
-pm.summary(
-    plx_trace,
-    varnames=[
-        "P",
-        "tperi",
-        "a_ang",
-        "omega",
-        "Omega",
-        "incl",
-        "ecc",
-        "M_tot",
-        "plx",
-    ],
-)
+with model:
+    summary = pm.summary(
+        plx_trace,
+        varnames=[
+            "P",
+            "tperi",
+            "a_ang",
+            "omega",
+            "Omega",
+            "incl",
+            "ecc",
+            "M_tot",
+            "plx",
+        ],
+    )
+summary
 
 # %% [markdown]
 # And make the corner plot for the physical parameters.

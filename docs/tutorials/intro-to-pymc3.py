@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.3.2
+#       jupytext_version: 1.6.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -144,7 +144,8 @@ _ = pm.traceplot(trace, var_names=["m", "b", "logs"])
 # * `Rhat` shows the [Gelman–Rubin statistic](https://docs.pymc.io/api/diagnostics.html#pymc3.diagnostics.gelman_rubin) and it should be close to 1.
 
 # %%
-pm.summary(trace, var_names=["m", "b", "logs"])
+with model:
+    pm.summary(trace, var_names=["m", "b", "logs"])
 
 # %% [markdown]
 # The last diagnostic plot that we'll make here is the [corner plot made using corner.py](https://corner.readthedocs.io).
@@ -234,13 +235,12 @@ _ = plt.xlabel("phase")
 # 2. All of the parameters have initial guesses provided. This is an example where this makes a big difference because some of the parameters (like period) are very tightly constrained.
 # 3. Some of the lines are wrapped in `Deterministic` distributions. This can be useful because it allows us to track values as the chain progresses even if they're not parameters. For example, after sampling, we will have a sample for `bkg` (the background RV trend) for each step in the chain. This can be especially useful for making plots of the results.
 # 4. Similarly, at the end of the model definition, we compute the RV curve for a single orbit on a fine grid. This can be very useful for diagnosing fits gone wrong.
-# 5. For parameters that specify angles (like $\omega$, called `w` in the model below), it can be inefficient to sample in the angle directly because of the fact that the value wraps around at $2\pi$. Instead, it can be better to sample the unit vector specified by the angle. In practice, this can be achieved by sampling a 2-vector from an isotropic Gaussian and normalizing the components by the norm. This is implemented as part of *exoplanet* in the :class:`exoplanet.distributions.Angle` class.
+# 5. For parameters that specify angles (like $\omega$, called `w` in the model below), it can be inefficient to sample in the angle directly because of the fact that the value wraps around at $2\pi$. Instead, it can be better to sample the unit vector specified by the angle or as a parameterin a unit disk, when combined with eccentricity. In practice, this can be achieved by sampling a 2-vector from an isotropic Gaussian and normalizing the components by the norm. These are implemented as part of *exoplanet* in the :class:`exoplanet.distributions.Angle` and :class:`exoplanet.distributions.UnitDisk` classes.
 
 # %%
 import theano.tensor as tt
 
-from exoplanet.orbits import get_true_anomaly
-from exoplanet.distributions import Angle
+import exoplanet as xo
 
 with pm.Model() as model:
 
@@ -255,11 +255,14 @@ with pm.Model() as model:
         "logP", lower=0, upper=np.log(10), testval=np.log(lit_period)
     )
     phi = pm.Uniform("phi", lower=0, upper=2 * np.pi, testval=0.1)
-    e = pm.Uniform("e", lower=0, upper=1, testval=0.1)
-    w = Angle("w")
-    logjitter = pm.Uniform(
-        "logjitter", lower=-10, upper=5, testval=np.log(np.mean(rv_err))
-    )
+
+    # Parameterize the eccentricity using:
+    #  h = sqrt(e) * sin(w)
+    #  k = sqrt(e) * cos(w)
+    hk = xo.UnitDisk("hk", testval=np.array([0.01, 0.01]))
+    e = pm.Deterministic("e", hk[0] ** 2 + hk[1] ** 2)
+    w = pm.Deterministic("w", tt.arctan2(hk[1], hk[0]))
+
     rv0 = pm.Normal("rv0", mu=0.0, sd=10.0, testval=0.0)
     rvtrend = pm.Normal("rvtrend", mu=0.0, sd=10.0, testval=0.0)
 
@@ -269,7 +272,6 @@ with pm.Model() as model:
     K = pm.Deterministic("K", tt.exp(logK))
     cosw = tt.cos(w)
     sinw = tt.sin(w)
-    s2 = tt.exp(2 * logjitter)
     t0 = (phi + w) / n
 
     # The RV model
@@ -277,19 +279,18 @@ with pm.Model() as model:
     M = n * t - (phi + w)
 
     # This is the line that uses the custom Kepler solver
-    f = get_true_anomaly(M, e + tt.zeros_like(M))
+    f = xo.orbits.get_true_anomaly(M, e + tt.zeros_like(M))
     rvmodel = pm.Deterministic(
         "rvmodel", bkg + K * (cosw * (tt.cos(f) + e) - sinw * tt.sin(f))
     )
 
     # Condition on the observations
-    err = tt.sqrt(rv_err ** 2 + tt.exp(2 * logjitter))
-    pm.Normal("obs", mu=rvmodel, sd=err, observed=rv)
+    pm.Normal("obs", mu=rvmodel, sd=rv_err, observed=rv)
 
     # Compute the phased RV signal
     phase = np.linspace(0, 1, 500)
     M_pred = 2 * np.pi * phase - (phi + w)
-    f_pred = get_true_anomaly(M_pred, e + tt.zeros_like(M_pred))
+    f_pred = xo.orbits.get_true_anomaly(M_pred, e + tt.zeros_like(M_pred))
     rvphase = pm.Deterministic(
         "rvphase", K * (cosw * (tt.cos(f_pred) + e) - sinw * tt.sin(f_pred))
     )
@@ -341,7 +342,13 @@ plt.tight_layout()
 # %%
 with model:
     trace = pm.sample(
-        draws=2000, tune=1000, start=map_params, chains=2, cores=2
+        draws=2000,
+        tune=1000,
+        start=map_params,
+        chains=2,
+        cores=2,
+        target_accept=0.95,
+        init="adapt_full",
     )
 
 # %% [markdown]
@@ -350,10 +357,12 @@ with model:
 # (Not too bad for less than 30 seconds of run time!)
 
 # %%
-pm.summary(
-    trace,
-    var_names=["logK", "logP", "phi", "e", "w", "logjitter", "rv0", "rvtrend"],
-)
+with model:
+    summary = pm.summary(
+        trace,
+        var_names=["logK", "logP", "phi", "e", "w", "rv0", "rvtrend"],
+    )
+summary
 
 # %% [markdown]
 # Similarly, we can make the corner plot again for this model.

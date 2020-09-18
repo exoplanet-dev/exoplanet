@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.3.2
+#       jupytext_version: 1.6.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -26,7 +26,11 @@
 # This tutorial briefly describes these features and their use.
 #
 # ## Dense mass matrices
-#
+
+# %% [raw]
+# .. note:: Since PyMC3 version 3.9, there is support for this built into the ``pm.sample`` function using the argument ``init="adapt_full"``.
+
+# %% [markdown]
 # The main extra is the :func:`exoplanet.get_dense_nuts_step` function that extends the PyMC3 sampling procedure to include support for learning off-diagonal elements of the mass matrix.
 # This is *very* important for any problems where there are covariances between the parameters (this is true for pretty much all exoplanet models).
 # A thorough discussion of this [can be found elsewhere online](https://dfm.io/posts/pymc3-mass-matrix/), but here is a simple demo where we sample a covariant Gaussian using :func:`exoplanet.get_dense_nuts_step`.
