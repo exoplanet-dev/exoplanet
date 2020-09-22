@@ -69,6 +69,7 @@ EXTRA_REQUIRE = {
         "matplotlib",
         "corner",
         "lightkurve",
+        "xarray<=0.16.0",
     ],
     "nbody": [
         "rebound; sys_platform != 'win32'",
