@@ -40,6 +40,7 @@ EXTRA_REQUIRE = {
         "nose",
         "parameterized",
         "arviz",
+        "xarray<=0.16.0",
         "pytest",
         "pytest-cov>=2.6.1",
         "pytest-env",
