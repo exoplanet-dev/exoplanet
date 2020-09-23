@@ -38,7 +38,7 @@ autodoc_mock_imports = [
 ]
 
 # The name of your GitHub repository
-rtds_action_github_repo = "USERNAME/REPONAME"
+rtds_action_github_repo = "exoplanet-dev/exoplanet"
 rtds_action_path = "tutorials"
 rtds_action_artifact_prefix = "notebooks-for-"
 rtds_action_github_token = os.environ["GITHUB_TOKEN"]
