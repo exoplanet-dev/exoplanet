@@ -1,0 +1,3 @@
+[submodule "src/exoplanet/theano_ops/lib/vendor/eigen"]
+	path = src/exoplanet/theano_ops/lib/vendor/eigen
+	url = https://gitlab.com/libeigen/eigen.git

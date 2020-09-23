@@ -6,7 +6,7 @@ import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
-from exoplanet.theano_ops.rebound.rebound import ReboundOp
+from exoplanet.theano_ops.rebound import ReboundOp
 
 try:
     import rebound  # NOQA

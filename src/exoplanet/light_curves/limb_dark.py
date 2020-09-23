@@ -8,11 +8,8 @@ import numpy as np
 import theano.tensor as tt
 
 from ..citations import add_citations_to_model
-from ..theano_ops.starry.get_cl import GetClOp
-from ..theano_ops.starry.limbdark import LimbDarkOp
-
-get_cl = GetClOp()
-limbdark = LimbDarkOp()
+from ..theano_ops.starry import get_cl, limbdark
+from ..utils import as_tensor_variable
 
 
 class LimbDarkLightCurve:
@@ -27,7 +24,7 @@ class LimbDarkLightCurve:
 
     def __init__(self, u, model=None):
         add_citations_to_model(self.__citations__, model=model)
-        self.u = tt.as_tensor_variable(u)
+        self.u = as_tensor_variable(u)
         u_ext = tt.concatenate([-1 + tt.zeros(1, dtype=self.u.dtype), self.u])
         self.c = get_cl(u_ext)
         self.c_norm = self.c / (np.pi * (self.c[0] + 2 * self.c[1] / 3))
@@ -49,8 +46,8 @@ class LimbDarkLightCurve:
             ``delta`` at impact parameter ``b``.
 
         """
-        b = tt.as_tensor_variable(b)
-        delta = tt.as_tensor_variable(delta)
+        b = as_tensor_variable(b)
+        delta = as_tensor_variable(delta)
         n = 1 + tt.arange(self.u.size)
         f0 = 1 - tt.sum(2 * self.u / (n ** 2 + 3 * n + 2))
         arg = 1 - tt.sqrt(1 - b ** 2)
@@ -120,9 +117,9 @@ class LimbDarkLightCurve:
             not light_delay if use_in_transit is None else use_in_transit
         )
 
-        r = tt.as_tensor_variable(r)
+        r = as_tensor_variable(r)
         r = tt.reshape(r, (r.size,))
-        t = tt.as_tensor_variable(t)
+        t = as_tensor_variable(t)
 
         if use_in_transit:
             transit_model = tt.shape_padleft(
@@ -137,7 +134,7 @@ class LimbDarkLightCurve:
                 tt.zeros_like(tgrid), r.ndim
             )
         else:
-            texp = tt.as_tensor_variable(texp)
+            texp = as_tensor_variable(texp)
 
             oversample = int(oversample)
             oversample += 1 - oversample % 2
@@ -204,7 +201,7 @@ class LimbDarkLightCurve:
                 and the source.
 
         """
-        b = tt.as_tensor_variable(b)
+        b = as_tensor_variable(b)
         if los is None:
             los = tt.ones_like(b)
         return limbdark(self.c_norm, b, r, los)[0]

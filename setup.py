@@ -6,8 +6,10 @@
 import codecs
 import os
 import re
+import sys
 
-from setuptools import find_packages, setup
+from setuptools import Extension, find_packages, setup
+from setuptools.command.build_ext import build_ext
 
 # PROJECT SPECIFIC
 
@@ -25,9 +27,11 @@ CLASSIFIERS = [
 ]
 SETUP_REQUIRES = ["setuptools>=40.6.0", "setuptools_scm"]
 INSTALL_REQUIRES = [
+    "pybind11>=2.4",
     "theano>=1.0.4",
     "numpy>=1.13.0",
     "pymc3>=3.5",
+    "xarray<=0.16.0",
     "astropy>=3.1",
 ]
 EXTRA_REQUIRE = {
@@ -41,12 +45,9 @@ EXTRA_REQUIRE = {
         "pytest-env",
         "coveralls",
         "pybind11",
-        "celerite>=0.3.1",
         "batman-package",
         "rebound; sys_platform != 'win32'",
         "starry; sys_platform != 'win32'",
-        "torch; sys_platform != 'win32'",
-        "torchvision; sys_platform != 'win32'",
     ],
     "docs": [
         "sphinx>=1.7.5",
@@ -59,6 +60,15 @@ EXTRA_REQUIRE = {
         "corner",
         "lightkurve",
         "jupytext",
+        "rtds_action",
+    ],
+    "tutorials": [
+        "jupytext",
+        "jupyter",
+        "nbconvert",
+        "matplotlib",
+        "corner",
+        "lightkurve",
     ],
     "nbody": [
         "rebound; sys_platform != 'win32'",
@@ -88,6 +98,104 @@ EXTRA_REQUIRE["dev"] = (
 
 # END PROJECT SPECIFIC
 
+# PYBIND11
+
+
+class get_pybind_include:
+    def __init__(self, user=False):
+        self.user = user
+
+    def __str__(self):
+        import pybind11
+
+        return pybind11.get_include(self.user)
+
+
+class get_numpy_include:
+    def __str__(self):
+        import numpy
+
+        return numpy.get_include()
+
+
+class custom_build_ext(build_ext):
+    c_opts = {"msvc": ["/EHsc"], "unix": []}
+    l_opts = {"msvc": [], "unix": []}
+
+    if sys.platform == "darwin":
+        darwin_opts = [
+            "-stdlib=libc++",
+            "-mmacosx-version-min=10.14",
+            "-march=native",
+        ]
+        c_opts["unix"] += darwin_opts
+        l_opts["unix"] += darwin_opts
+
+    def has_flag(self, flagname):
+        import tempfile
+
+        import setuptools
+
+        with tempfile.NamedTemporaryFile("w", suffix=".cpp") as f:
+            f.write("int main (int argc, char **argv) { return 0; }")
+            try:
+                self.compiler.compile([f.name], extra_postargs=[flagname])
+            except setuptools.distutils.errors.CompileError:
+                return False
+        return True
+
+    def cpp_flag(self):
+        flags = ["-std=c++17", "-std=c++14", "-std=c++11"]
+
+        for flag in flags:
+            if self.has_flag(flag):
+                return flag
+
+        raise RuntimeError(
+            "Unsupported compiler. At least C++11 support is needed."
+        )
+
+    def build_extensions(self):
+        ct = self.compiler.compiler_type
+        opts = self.c_opts.get(ct, [])
+        link_opts = self.l_opts.get(ct, [])
+        if ct == "unix":
+            opts.append(
+                '-DVERSION_INFO="%s"' % self.distribution.get_version()
+            )
+            opts.append(self.cpp_flag())
+            if self.has_flag("-fvisibility=hidden"):
+                opts.append("-fvisibility=hidden")
+        elif ct == "msvc":
+            opts.append(
+                '/DVERSION_INFO=\\"%s\\"' % self.distribution.get_version()
+            )
+        for ext in self.extensions:
+            ext.extra_compile_args = opts
+            ext.extra_link_args = link_opts
+        build_ext.build_extensions(self)
+
+
+include_dirs = [
+    "src/exoplanet/theano_ops/lib/include",
+    "src/exoplanet/theano_ops/lib/vendor/eigen",
+    get_numpy_include(),
+    get_pybind_include(),
+    get_pybind_include(user=True),
+]
+if "READTHEDOCS" in os.environ:
+    ext_modules = []
+else:
+    ext_modules = [
+        Extension(
+            "exoplanet.theano_ops.driver",
+            ["src/exoplanet/theano_ops/driver.cpp"],
+            include_dirs=include_dirs,
+            language="c++",
+        )
+    ]
+
+# END PYBIND11
 
 HERE = os.path.dirname(os.path.realpath(__file__))
 
@@ -132,5 +240,6 @@ if __name__ == "__main__":
         classifiers=CLASSIFIERS,
         setup_requires=SETUP_REQUIRES,
         zip_safe=False,
-        options={"bdist_wheel": {"universal": "1"}},
+        ext_modules=ext_modules,
+        cmdclass={"build_ext": custom_build_ext},
     )

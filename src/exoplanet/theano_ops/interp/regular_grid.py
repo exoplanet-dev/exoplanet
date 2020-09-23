@@ -2,12 +2,14 @@
 
 __all__ = ["RegularGridOp"]
 
+import sys
+
 import pkg_resources
 import theano
 import theano.tensor as tt
 from theano import gof
 
-from ..build_utils import get_cache_version, get_compile_args, get_header_dirs
+from ...exoplanet_version import __version__
 
 
 class RegularGridOp(gof.COp):
@@ -33,18 +35,28 @@ class RegularGridOp(gof.COp):
         super(RegularGridOp, self).__init__(self.func_file, self.func_name)
 
     def c_code_cache_version(self):
-        return get_cache_version()
+        if "dev" in __version__:
+            return ()
+        return tuple(map(int, __version__.split(".")))
 
     def c_headers(self, compiler):
         return ["theano_helpers.h"]
 
     def c_header_dirs(self, compiler):
         return [
-            pkg_resources.resource_filename(__name__, "include")
-        ] + get_header_dirs()
+            pkg_resources.resource_filename(__name__, "include"),
+            pkg_resources.resource_filename(__name__, "../lib/vendor/eigen"),
+        ]
 
     def c_compile_args(self, compiler):
-        args = get_compile_args(compiler)
+        args = ["-std=c++11", "-DNDEBUG"]
+        if sys.platform == "darwin":
+            args += ["-stdlib=libc++", "-mmacosx-version-min=10.7"]
+        if sys.platform.startswith("win"):
+            args += ["-D_USE_MATH_DEFINES", "-D_hypot=hypot"]
+        else:
+            args += ["-O2"]
+
         args.append("-DREGULAR_GRID_NDIM={0}".format(self.ndim))
         if self.ndim == 1:
             args.append("-DREGULAR_GRID_NDIM_ORDER=Eigen::ColMajor")

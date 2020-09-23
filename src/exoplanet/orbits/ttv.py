@@ -5,6 +5,7 @@ __all__ = ["TTVOrbit", "compute_expected_transit_times"]
 import numpy as np
 import theano.tensor as tt
 
+from ..utils import as_tensor_variable
 from .keplerian import KeplerianOrbit
 
 
@@ -78,14 +79,14 @@ class TTVOrbit(KeplerianOrbit):
                 "one of 'ttvs' or 'transit_times' must be " "defined"
             )
         if ttvs is not None:
-            self.ttvs = [tt.as_tensor_variable(ttv, ndim=1) for ttv in ttvs]
+            self.ttvs = [as_tensor_variable(ttv, ndim=1) for ttv in ttvs]
             if transit_inds is None:
                 self.transit_inds = [
                     tt.arange(ttv.shape[0]) for ttv in self.ttvs
                 ]
             else:
                 self.transit_inds = [
-                    tt.cast(tt.as_tensor_variable(inds, ndim=1), "int64")
+                    tt.cast(as_tensor_variable(inds, ndim=1), "int64")
                     for inds in transit_inds
                 ]
 
@@ -98,12 +99,12 @@ class TTVOrbit(KeplerianOrbit):
             period = []
             t0 = []
             for i, times in enumerate(transit_times):
-                times = tt.as_tensor_variable(times, ndim=1)
+                times = as_tensor_variable(times, ndim=1)
                 if transit_inds is None:
                     inds = tt.arange(times.shape[0])
                 else:
                     inds = tt.cast(
-                        tt.as_tensor_variable(transit_inds[i]), "int64"
+                        as_tensor_variable(transit_inds[i]), "int64"
                     )
                 self.transit_inds.append(inds)
 

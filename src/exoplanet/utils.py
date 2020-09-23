@@ -20,6 +20,19 @@ import theano
 
 logger = logging.getLogger("exoplanet")
 
+if theano.config.floatX != "float64":
+    warnings.warn(
+        "exoplanet should only be used with 'float64' precision, "
+        "but theano.config.floatX == '{0}'".format(theano.config.floatX)
+    )
+
+
+def as_tensor_variable(x, dtype="float64", **kwargs):
+    t = theano.tensor.as_tensor_variable(x, **kwargs)
+    if dtype is None:
+        return t
+    return t.astype(dtype)
+
 
 def get_args_for_theano_function(point=None, model=None):
     """Get the arguments required to evaluate a PyMC3 model component

@@ -24,6 +24,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinx.ext.mathjax",
+    "rtds_action",
 ]
 
 autodoc_mock_imports = [
@@ -36,21 +37,11 @@ autodoc_mock_imports = [
     "rebound_pymc3",
 ]
 
-# Convert the tutorials
-for fn in chain(
-    glob.glob("_static/notebooks/*.ipynb"),
-    glob.glob("_static/notebooks/gallery/*.ipynb"),
-):
-    name = os.path.splitext(os.path.split(fn)[1])[0]
-    outfn = os.path.join("tutorials", name + ".rst")
-    print("Building {0}...".format(name))
-    subprocess.check_call(
-        "jupyter nbconvert --template tutorials/tutorial_rst --to rst "
-        + fn
-        + " --output-dir tutorials",
-        shell=True,
-    )
-    subprocess.check_call("python fix_internal_links.py " + outfn, shell=True)
+# The name of your GitHub repository
+rtds_action_github_repo = "USERNAME/REPONAME"
+rtds_action_path = "tutorials"
+rtds_action_artifact_prefix = "notebooks-for-"
+rtds_action_github_token = os.environ["GITHUB_TOKEN"]
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
