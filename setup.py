@@ -30,6 +30,7 @@ INSTALL_REQUIRES = [
     "theano>=1.0.4",
     "numpy>=1.13.0",
     "pymc3>=3.5",
+    "xarray<=0.16.0",
     "astropy>=3.1",
     "setuptools>=40.6.0",
     "setuptools_scm",
@@ -40,7 +41,6 @@ EXTRA_REQUIRE = {
         "nose",
         "parameterized",
         "arviz",
-        "xarray<=0.16.0",
         "pytest",
         "pytest-cov>=2.6.1",
         "pytest-env",
@@ -69,7 +69,6 @@ EXTRA_REQUIRE = {
         "matplotlib",
         "corner",
         "lightkurve",
-        "xarray<=0.16.0",
     ],
     "nbody": [
         "rebound; sys_platform != 'win32'",
