@@ -48,12 +48,12 @@ magnitude.
    :maxdepth: 2
    :caption: Tutorials
 
-   tutorials/intro-to-pymc3
-   tutorials/pymc3-extras
-   tutorials/rv
-   tutorials/transit
-   tutorials/astrometric
-   tutorials/light-delay
+   tutorials/intro-to-pymc3.ipynb
+   tutorials/pymc3-extras.ipynb
+   tutorials/rv.ipynb
+   tutorials/transit.ipynb
+   tutorials/astrometric.ipynb
+   tutorials/light-delay.ipynb
 
 
 License & attribution
