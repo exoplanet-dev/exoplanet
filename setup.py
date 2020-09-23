@@ -61,6 +61,7 @@ EXTRA_REQUIRE = {
         "corner",
         "lightkurve",
         "jupytext",
+        "rtds_action",
     ],
     "tutorials": [
         "jupytext",
