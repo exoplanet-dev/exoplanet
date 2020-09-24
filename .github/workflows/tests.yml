@@ -32,9 +32,9 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: ~/.theano
-          key: ${{ runner.os }}-theano-${{ matrix.python-version }}
+          key: ${{ runner.os }}-theano-py${{ matrix.python-version }}-${{ matrix.pymc-version }}
           restore-keys: |
-            ${{ runner.os }}-theano-${{ matrix.python-version }}
+            ${{ runner.os }}-theano-py${{ matrix.python-version }}-${{ matrix.pymc-version }}
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: goanpeca/setup-miniconda@v1
