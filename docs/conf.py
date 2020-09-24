@@ -14,7 +14,7 @@ except DistributionNotFound:
 
 
 def setup(app):
-    app.add_css("css/exoplanet.css?v=2020-01-15")
+    app.add_css_file("css/exoplanet.css?v=2020-01-15")
 
 
 nbsphinx.RST_TEMPLATE = nbsphinx.RST_TEMPLATE.replace(
