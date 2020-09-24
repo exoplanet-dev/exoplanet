@@ -3,6 +3,7 @@
 
 import os
 
+import nbsphinx
 import sphinx_typlog_theme
 from pkg_resources import DistributionNotFound, get_distribution
 
@@ -13,8 +14,12 @@ except DistributionNotFound:
 
 
 def setup(app):
-    app.add_stylesheet("css/exoplanet.css?v=2020-01-15")
+    app.add_css("css/exoplanet.css?v=2020-01-15")
 
+
+nbsphinx.RST_TEMPLATE = nbsphinx.RST_TEMPLATE.replace(
+    "{%- if width %}", "{%- if 0 %}"
+).replace("{%- if height %}", "{%- if 0 %}")
 
 extensions = [
     "sphinx.ext.autodoc",
