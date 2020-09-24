@@ -19,6 +19,7 @@ from pymc3.util import (
 )
 
 from .utils import (
+    deprecated,
     get_args_for_theano_function,
     get_theano_function_for_var,
     logger,
@@ -64,6 +65,7 @@ def get_point(wrapper, x):
     }
 
 
+@deprecated("the optimize function from the pymc3-ext library")
 def optimize(
     start=None,
     vars=None,
@@ -134,6 +136,7 @@ def optimize(
     return point
 
 
+@deprecated("the optimize_iterator function from the pymc3-ext library")
 def optimize_iterator(
     stepper, maxiter=1000, start=None, vars=None, model=None, **kwargs
 ):

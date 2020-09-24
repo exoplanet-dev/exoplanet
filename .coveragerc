@@ -2,11 +2,14 @@
 omit =
     *_test.py
     *__init__*
+    src/exoplanet/optim.py
     src/exoplanet/interp.py
-    src/exoplanet/theano_ops/interp/*
-    src/exoplanet/orbits/dur_to_ecc.py
-    src/exoplanet/distributions/celerite.py
+    src/exoplanet/sampling.py
     src/exoplanet/orbits/constants.py
+    src/exoplanet/light_curves/integrated.py
+    src/exoplanet/light_curves/interpolated.py
+    src/exoplanet/theano_ops/build_utils.py
+    src/exoplanet/theano_ops/interp/*
 
 [report]
 exclude_lines =
