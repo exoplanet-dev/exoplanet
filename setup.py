@@ -183,17 +183,14 @@ include_dirs = [
     get_pybind_include(),
     get_pybind_include(user=True),
 ]
-if "READTHEDOCS" in os.environ:
-    ext_modules = []
-else:
-    ext_modules = [
-        Extension(
-            "exoplanet.theano_ops.driver",
-            ["src/exoplanet/theano_ops/driver.cpp"],
-            include_dirs=include_dirs,
-            language="c++",
-        )
-    ]
+ext_modules = [
+    Extension(
+        "exoplanet.theano_ops.driver",
+        ["src/exoplanet/theano_ops/driver.cpp"],
+        include_dirs=include_dirs,
+        language="c++",
+    )
+]
 
 # END PYBIND11
 
