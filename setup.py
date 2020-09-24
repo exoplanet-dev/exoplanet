@@ -31,7 +31,6 @@ INSTALL_REQUIRES = [
     "theano>=1.0.4",
     "numpy>=1.13.0",
     "pymc3>=3.5",
-    "xarray<=0.16.0",
     "astropy>=3.1",
 ]
 EXTRA_REQUIRE = {
