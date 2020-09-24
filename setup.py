@@ -69,6 +69,7 @@ EXTRA_REQUIRE = {
         "matplotlib",
         "corner",
         "lightkurve",
+        "nbsphinx",
     ],
     "nbody": [
         "rebound; sys_platform != 'win32'",

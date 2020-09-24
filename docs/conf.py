@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import glob
 import os
-import subprocess
-from itertools import chain
 
 import sphinx_typlog_theme
 from pkg_resources import DistributionNotFound, get_distribution
@@ -24,7 +21,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinx.ext.mathjax",
-    "rtds_action",
+    "nbsphinx",
 ]
 
 autodoc_mock_imports = [
@@ -37,11 +34,14 @@ autodoc_mock_imports = [
     "rebound_pymc3",
 ]
 
-# The name of your GitHub repository
-rtds_action_github_repo = "exoplanet-dev/exoplanet"
-rtds_action_path = "tutorials"
-rtds_action_artifact_prefix = "notebooks-for-"
-rtds_action_github_token = os.environ["GITHUB_TOKEN"]
+# RTDs-action
+if "GITHUB_TOKEN" in os.environ:
+    extensions.append("rtds_action")
+
+    rtds_action_github_repo = "exoplanet-dev/exoplanet"
+    rtds_action_path = "tutorials"
+    rtds_action_artifact_prefix = "notebooks-for-"
+    rtds_action_github_token = os.environ["GITHUB_TOKEN"]
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),

@@ -40,7 +40,7 @@ magnitude.
    :caption: User Guide
 
    user/install
-   tutorials/citation
+   tutorials/citation.ipynb
    user/api
    user/dev
 

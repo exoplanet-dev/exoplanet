@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__all__ = ["get_cl", "limbdark", "radius_from_occ_area"]
+__all__ = ["get_cl", "limbdark"]
 
 import numpy as np
 import theano
@@ -279,6 +279,3 @@ class RadiusFromOccArea(theano.Op):
         if eval_points[0] is None:
             return eval_points
         return self.grad(inputs, eval_points)
-
-
-radius_from_occ_area = RadiusFromOccArea()
