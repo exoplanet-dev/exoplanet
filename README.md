@@ -15,8 +15,6 @@
   <br>
   <a href="https://github.com/exoplanet-dev/exoplanet/actions">
     <img src="https://img.shields.io/github/workflow/status/exoplanet-dev/exoplanet/Tests?style=flat&label=tests"></a>
-  <a href="https://github.com/exoplanet-dev/exoplanet/actions">
-    <img src="https://img.shields.io/github/workflow/status/exoplanet-dev/exoplanet/Windows?style=flat&label=windows"></a>
   <a href="https://dev.azure.com/foremanmackey/exoplanet/_build?definitionId=15">
     <img
       src="https://img.shields.io/azure-devops/build/foremanmackey/exoplanet/15/master?label=paper&style=flat"></a>

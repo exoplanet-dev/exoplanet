@@ -10,7 +10,7 @@ from pymc3.step_methods.hmc.quadpotential import QuadPotential
 from pymc3.step_methods.step_sizes import DualAverageAdaptation
 from scipy.linalg import LinAlgError, cholesky, solve_triangular
 
-from .utils import logger
+from .utils import deprecated, logger
 
 
 class QuadPotentialDenseAdapt(QuadPotential):
@@ -237,6 +237,7 @@ def build_schedule(
     return np.append(warmup_window, update_steps)
 
 
+@deprecated("the sample function from the pymc3-ext library")
 def sample(
     *,
     draws=1000,
@@ -316,6 +317,7 @@ def sample(
     return pm.sample(draws=draws, tune=tune, model=model, **kwargs)
 
 
+@deprecated("the init='full_adapt' argument to pm.sample")
 def get_dense_nuts_step(
     start=None,
     adaptation_window=101,
