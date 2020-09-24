@@ -32,7 +32,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: ~/.theano
-          key: ${{ runner.os }}-theano-py${{ matrix.python-version }}-${{ matrix.pymc-version }}-${{ hashFiles('~/.theano/**') }}
+          key: ${{ runner.os }}-theano-py${{ matrix.python-version }}-${{ matrix.pymc-version }}-${{ github.ref }}
           restore-keys: |
             ${{ runner.os }}-theano-py${{ matrix.python-version }}-${{ matrix.pymc-version }}-
 
