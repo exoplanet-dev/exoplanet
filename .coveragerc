@@ -2,6 +2,7 @@
 omit =
     *_test.py
     *__init__*
+    src/exoplanet/gp.py
     src/exoplanet/optim.py
     src/exoplanet/interp.py
     src/exoplanet/sampling.py
