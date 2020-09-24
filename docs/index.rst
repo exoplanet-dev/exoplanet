@@ -65,7 +65,7 @@ The source code is made available under the terms of the MIT license.
 
 If you make use of this code, please cite this package and its dependencies.
 You can find more information about how and what to cite in the
-:ref:`citation` documentation.
+`citation <tutorials/citation.ipynb>`_ documentation.
 
 These docs were made using `Sphinx <https://www.sphinx-doc.org>`_ and the
 `Typlog theme <https://github.com/typlog/sphinx-typlog-theme>`_. They are

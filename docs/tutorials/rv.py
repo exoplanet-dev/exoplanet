@@ -3,8 +3,8 @@
 #   jupytext:
 #     text_representation:
 #       extension: .py
-#       format_name: percent
-#       format_version: '1.3'
+#       format_name: light
+#       format_version: '1.5'
 #       jupytext_version: 1.6.0
 #   kernelspec:
 #     display_name: Python 3
@@ -12,22 +12,22 @@
 #     name: python3
 # ---
 
-# %%
+# + nbsphinx="hidden"
 # %matplotlib inline
+# -
 
-# %%
+# + nbsphinx="hidden"
 # %run notebook_setup
+# -
 
-# %% [markdown]
 # # Radial velocity fitting
 
-# %% [markdown]
 # In this tutorial, we will demonstrate how to fit radial velocity observations of an exoplanetary system using *exoplanet*.
 # We will follow [the getting started tutorial](https://radvel.readthedocs.io/en/latest/tutorials/K2-24_Fitting+MCMC.html) from [the exellent RadVel package](https://radvel.readthedocs.io) where they fit for the parameters of the two planets in [the K2-24 system](https://arxiv.org/abs/1511.04497).
 #
 # First, let's download the data from RadVel:
 
-# %%
+# +
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -48,11 +48,11 @@ t = np.linspace(x.min() - 5, x.max() + 5, 1000)
 plt.errorbar(x, y, yerr=yerr, fmt=".k")
 plt.xlabel("time [days]")
 _ = plt.ylabel("radial velocity [m/s]")
+# -
 
-# %% [markdown]
 # Now, we know the periods and transit times for the planets [from the K2 light curve](https://arxiv.org/abs/1511.04497), so let's start by using the :func:`exoplanet.estimate_semi_amplitude` function to estimate the expected RV semi-amplitudes for the planets.
 
-# %%
+# +
 import exoplanet as xo
 
 periods = [20.8851, 42.3633]
@@ -61,14 +61,14 @@ t0s = [2072.7948, 2082.6251]
 t0_errs = [0.0007, 0.0004]
 Ks = xo.estimate_semi_amplitude(periods, x, y, yerr, t0s=t0s)
 print(Ks, "m/s")
+# -
 
-# %% [markdown]
 # ## The radial velocity model in PyMC3
 #
 # Now that we have the data and an estimate of the initial values for the parameters, let's start defining the probabilistic model in PyMC3 (take a look at :ref:`intro-to-pymc3` if you're new to PyMC3).
 # First, we'll define our priors on the parameters:
 
-# %%
+# +
 import pymc3 as pm
 import theano.tensor as tt
 
@@ -125,11 +125,11 @@ with pm.Model() as model:
     # to the log probability of the PyMC3 model
     err = tt.sqrt(yerr ** 2 + tt.exp(2 * logs))
     pm.Normal("obs", mu=rv_model, sd=err, observed=y)
+# -
 
-# %% [markdown]
 # Now, we can plot the initial model:
 
-# %%
+# +
 plt.errorbar(x, y, yerr=yerr, fmt=".k")
 
 with model:
@@ -142,18 +142,17 @@ plt.xlim(t.min(), t.max())
 plt.xlabel("time [days]")
 plt.ylabel("radial velocity [m/s]")
 _ = plt.title("initial model")
+# -
 
-# %% [markdown]
 # In this plot, the background is the dotted line, the individual planets are the dashed lines, and the full model is the blue line.
 #
 # It doesn't look amazing so let's fit for the maximum a posterior parameters.
 
-# %%
 with model:
     map_soln = xo.optimize(start=model.test_point, vars=[trend])
     map_soln = xo.optimize(start=map_soln)
 
-# %%
+# +
 plt.errorbar(x, y, yerr=yerr, fmt=".k")
 plt.plot(t, map_soln["vrad_pred"], "--k", alpha=0.5)
 plt.plot(t, map_soln["bkg_pred"], ":k", alpha=0.5)
@@ -164,8 +163,8 @@ plt.xlim(t.min(), t.max())
 plt.xlabel("time [days]")
 plt.ylabel("radial velocity [m/s]")
 _ = plt.title("MAP model")
+# -
 
-# %% [markdown]
 # That looks better.
 #
 # ## Sampling
@@ -173,7 +172,6 @@ _ = plt.title("MAP model")
 # Now that we have our model set up and a good estimate of the initial parameters, let's start sampling.
 # There are substantial covariances between some of the parameters so we'll use a :func:`exoplanet.get_dense_nuts_step` to tune the sampler (see the :ref:`pymc3-extras` tutorial for more information).
 
-# %%
 np.random.seed(42)
 with model:
     trace = pm.sample(
@@ -184,31 +182,28 @@ with model:
         step=xo.get_dense_nuts_step(target_accept=0.95),
     )
 
-# %% [markdown]
 # After sampling, it's always a good idea to do some convergence checks.
 # First, let's check the number of effective samples and the Gelman-Rubin statistic for our parameters of interest:
 
-# %%
 pm.summary(
     trace, varnames=["trend", "logs", "omega", "ecc", "t0", "logK", "P"]
 )
 
-# %% [markdown]
 # It looks like everything is pretty much converged here. Not bad for 14 parameters and about a minute of runtime...
 #
 # Then we can make a [corner plot](https://corner.readthedocs.io) of any combination of the parameters.
 # For example, let's look at period, semi-amplitude, and eccentricity:
 
-# %%
+# +
 import corner
 
 samples = pm.trace_to_dataframe(trace, varnames=["P", "logK", "ecc", "omega"])
 _ = corner.corner(samples)
+# -
 
-# %% [markdown]
 # Finally, let's plot the plosterior constraints on the RV model and compare those to the data:
 
-# %%
+# +
 plt.errorbar(x, y, yerr=yerr, fmt=".k")
 
 # Compute the posterior predictions for the RV model
@@ -222,14 +217,13 @@ plt.xlim(t.min(), t.max())
 plt.xlabel("time [days]")
 plt.ylabel("radial velocity [m/s]")
 _ = plt.title("posterior constraints")
+# -
 
-# %% [markdown]
 # ## Phase plots
 #
 # It might be also be interesting to look at the phased plots for this system.
 # Here we'll fold the dataset on the median of posterior period and then overplot the posterior constraint on the folded model orbits.
 
-# %%
 for n, letter in enumerate("bc"):
     plt.figure()
 
@@ -264,17 +258,12 @@ for n, letter in enumerate("bc"):
     plt.ylabel("radial velocity [m/s]")
     plt.title("K2-24{0}".format(letter))
 
-# %% [markdown]
 # ## Citations
 #
 # As described in the :ref:`citation` tutorial, we can use :func:`exoplanet.citations.get_citations_for_model` to construct an acknowledgement and BibTeX listing that includes the relevant citations for this model.
 
-# %%
 with model:
     txt, bib = xo.citations.get_citations_for_model()
 print(txt)
 
-# %%
 print("\n".join(bib.splitlines()[:10]) + "\n...")
-
-# %%

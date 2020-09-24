@@ -4,8 +4,8 @@
 #   jupytext:
 #     text_representation:
 #       extension: .py
-#       format_name: percent
-#       format_version: '1.3'
+#       format_name: light
+#       format_version: '1.5'
 #       jupytext_version: 1.6.0
 #   kernelspec:
 #     display_name: Python 3
@@ -13,16 +13,16 @@
 #     name: python3
 # ---
 
-# %%
+# + nbsphinx="hidden"
 # %matplotlib inline
+# -
 
-# %%
+# + nbsphinx="hidden"
 # %run notebook_setup
+# -
 
-# %% [markdown]
 # # A quick intro to PyMC3 for exoplaneteers
 
-# %% [markdown]
 # [Hamiltonian Monte Carlo (HMC)](https://en.wikipedia.org/wiki/Hamiltonian_Monte_Carlo) methods haven't been widely used in astrophysics, but they are the standard methods for probabilistic inference using Markov chain Monte Carlo (MCMC) in many other fields.
 # *exoplanet* is designed to provide the building blocks for fitting many exoplanet datasets using this technology, and this tutorial presents some of the basic features of the [PyMC3](https://docs.pymc.io/) modeling language and inference engine.
 # The [documentation for PyMC3](https://docs.pymc.io/) includes many other tutorials that you should check out to get more familiar with the features that are available.
@@ -39,7 +39,7 @@
 # To start, we'll generate some fake data using a linear model.
 # Feel free to change the random number seed to try out a different dataset.
 
-# %%
+# +
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -56,8 +56,8 @@ plt.plot(x, y, ".k")
 plt.ylim(-2, 2)
 plt.xlabel("x")
 plt.ylabel("y")
+# -
 
-# %% [markdown]
 # To fit a model to these data, our model will have 3 parameters: the slope $m$, the intercept $b$, and the log of the uncertainty $\log(\sigma)$.
 # To start, let's choose broad uniform priors on these parameters:
 #
@@ -102,7 +102,7 @@ plt.ylabel("y")
 # Now, let's implement this model in PyMC3.
 # The documentation for the distributions available in PyMC3's modeling language can be [found here](https://docs.pymc.io/api/distributions/continuous.html) and these will come in handy as you go on to write your own models.
 
-# %%
+# +
 import pymc3 as pm
 
 with pm.Model() as model:
@@ -125,39 +125,35 @@ with pm.Model() as model:
     # This is how you will sample the model. Take a look at the
     # docs to see that other parameters that are available.
     trace = pm.sample(draws=1000, tune=1000, chains=2, cores=2)
+# -
 
-# %% [markdown]
 # Now since we now have samples, let's make some diagnostic plots.
 # The first plot to look at is the "traceplot" implemented in PyMC3.
 # In this plot, you'll see the marginalized distribution for each parameter on the left and the trace plot (parameter value as a function of step number) on the right.
 # In each panel, you should see two lines with different colors.
 # These are the results of different independent chains and if the results are substantially different in the different chains then there is probably something going wrong.
 
-# %%
 _ = pm.traceplot(trace, var_names=["m", "b", "logs"])
 
-# %% [markdown]
 # It's also good to quantify that "looking substantially different" argument.
 # This is implemented in PyMC3 as the "summary" function.
 # In this table, some of the key columns to look at are `n_eff` and `Rhat`.
 # * `n_eff` shows an estimate of the number of effective (or independent) samples for that parameter. In this case, `n_eff` should probably be around 500 per chain (there should have been 2 chains run).
 # * `Rhat` shows the [Gelman–Rubin statistic](https://docs.pymc.io/api/diagnostics.html#pymc3.diagnostics.gelman_rubin) and it should be close to 1.
 
-# %%
 with model:
     pm.summary(trace, var_names=["m", "b", "logs"])
 
-# %% [markdown]
 # The last diagnostic plot that we'll make here is the [corner plot made using corner.py](https://corner.readthedocs.io).
 # The easiest way to do this using PyMC3 is to first convert the trace to a [Pandas DataFrame](https://pandas.pydata.org/) and then pass that to `corner.py`.
 
-# %%
+# +
 import corner  # https://corner.readthedocs.io
 
 samples = pm.trace_to_dataframe(trace, varnames=["m", "b", "logs"])
 _ = corner.corner(samples, truths=[true_m, true_b, true_logs])
+# -
 
-# %% [markdown]
 # **Extra credit:** Here are a few suggestions for things to try out while getting more familiar with PyMC3:
 #
 # 1. Try initializing the parameters using the `testval` argument to the distributions. Does this improve performance in this case? It will substantially improve performance in more complicated examples.
@@ -183,7 +179,7 @@ _ = corner.corner(samples, truths=[true_m, true_b, true_logs])
 #
 # First, we need to download the data from the exoplanet archive:
 
-# %%
+# +
 import requests
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -224,8 +220,8 @@ plt.annotate(
 )
 plt.ylabel("radial velocity [m/s]")
 _ = plt.xlabel("phase")
+# -
 
-# %% [markdown]
 # Now, here's the implementation of a radial velocity model in PyMC3.
 # Some of this will look familiar after the Hello World example, but things are a bit more complicated now.
 # Take a minute to take a look through this and see if you can follow it.
@@ -237,7 +233,7 @@ _ = plt.xlabel("phase")
 # 4. Similarly, at the end of the model definition, we compute the RV curve for a single orbit on a fine grid. This can be very useful for diagnosing fits gone wrong.
 # 5. For parameters that specify angles (like $\omega$, called `w` in the model below), it can be inefficient to sample in the angle directly because of the fact that the value wraps around at $2\pi$. Instead, it can be better to sample the unit vector specified by the angle or as a parameterin a unit disk, when combined with eccentricity. In practice, this can be achieved by sampling a 2-vector from an isotropic Gaussian and normalizing the components by the norm. These are implemented as part of *exoplanet* in the :class:`exoplanet.distributions.Angle` and :class:`exoplanet.distributions.UnitDisk` classes.
 
-# %%
+# +
 import theano.tensor as tt
 
 import exoplanet as xo
@@ -294,20 +290,20 @@ with pm.Model() as model:
     rvphase = pm.Deterministic(
         "rvphase", K * (cosw * (tt.cos(f_pred) + e) - sinw * tt.sin(f_pred))
     )
+# -
 
-# %% [markdown]
 # In this case, I've found that it is useful to first optimize the parameters to find the "maximum a posteriori" (MAP) parameters and then start the sampler from there.
 # This is useful here because MCMC is not designed to *find* the maximum of the posterior; it's just meant to sample the shape of the posterior.
 # The performance of all MCMC methods can be really bad when the initialization isn't good (especially when some parameters are very well constrained).
 # To find the maximum a posteriori parameters using PyMC3, you can use the :func:`exoplanet.optimize` function:
 
-# %%
+# +
 from exoplanet import optimize
 
 with model:
     map_params = optimize()
+# -
 
-# %% [markdown]
 # Let's make a plot to check that this initialization looks reasonable.
 # In the top plot, we're looking at the RV observations as a function of time with the initial guess for the long-term trend overplotted in blue.
 # In the lower panel, we plot the "folded" curve where we have wrapped the observations onto the best-fit period and the prediction for a single overplotted in orange.
@@ -315,7 +311,7 @@ with model:
 #
 # **Exercise:** Try changing the initial guesses for the parameters (as specified by the `testval` argument) and see how sensitive the results are to these values. Are there some parameters that are less important? Why is this?
 
-# %%
+# +
 fig, axes = plt.subplots(2, 1, figsize=(8, 8))
 
 period = map_params["P"]
@@ -335,11 +331,10 @@ ax.set_ylabel("radial velocity [m/s]")
 ax.set_xlabel("phase [days]")
 
 plt.tight_layout()
+# -
 
-# %% [markdown]
 # Now let's sample the posterior starting from our MAP estimate.
 
-# %%
 with model:
     trace = pm.sample(
         draws=2000,
@@ -351,12 +346,10 @@ with model:
         init="adapt_full",
     )
 
-# %% [markdown]
 # As above, it's always a good idea to take a look at the summary statistics for the chain.
 # If everything went as planned, there should be more than 1000 effective samples per chain and the Rhat values should be close to 1.
 # (Not too bad for less than 30 seconds of run time!)
 
-# %%
 with model:
     summary = pm.summary(
         trace,
@@ -364,21 +357,18 @@ with model:
     )
 summary
 
-# %% [markdown]
 # Similarly, we can make the corner plot again for this model.
 
-# %%
 samples = pm.trace_to_dataframe(trace, varnames=["K", "P", "e", "w"])
 _ = corner.corner(samples)
 
-# %% [markdown]
 # Finally, the last plot that we'll make here is of the posterior predictive density.
 # In this case, this means that we want to look at the distribution of predicted models that are consistent with the data.
 # As above, the top plot shows the raw observations as black error bars and the RV trend model is overplotted in blue.
 # But, this time, the blue line is actually composed of 25 lines that are samples from the posterior over trends that are consistent with the data.
 # In the bottom panel, the orange lines indicate the same 25 posterior samples for the RV curve of one orbit.
 
-# %%
+# +
 fig, axes = plt.subplots(2, 1, figsize=(8, 8))
 
 period = map_params["P"]
@@ -403,5 +393,4 @@ axes[0].set_ylim(-110, 110)
 axes[1].set_ylim(-110, 110)
 
 plt.tight_layout()
-
-# %%
+# -
