@@ -18,6 +18,13 @@ jobs:
         with:
           submodules: true
 
+      - uses: actions/cache@v2
+        with:
+          path: ~/.theano
+          key: ${{ runner.os }}-theano
+          restore-keys: |
+            ${{ runner.os }}-theano
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
