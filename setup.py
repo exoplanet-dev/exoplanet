@@ -61,6 +61,7 @@ EXTRA_REQUIRE = {
         "lightkurve",
         "jupytext",
         "rtds_action",
+        "nbsphinx",
     ],
     "tutorials": [
         "jupytext",
@@ -69,7 +70,6 @@ EXTRA_REQUIRE = {
         "matplotlib",
         "corner",
         "lightkurve",
-        "nbsphinx",
     ],
     "nbody": [
         "rebound; sys_platform != 'win32'",
