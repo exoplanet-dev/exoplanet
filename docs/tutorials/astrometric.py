@@ -422,7 +422,7 @@ _ = ax[0].set_title("posterior inferences")
 
 # ## Including parallax
 #
-# While this is encouraging that we fit an astrometric orbit, a simple astrometric fit to just $\rho$ and $\theta$ isn't actually that physically satisfying, since many of the orbital parameters simply have to do with the orientation relative to us ($i$, $\omega$, and $\Omega$). The only truely intrinsic parameters are $P$ and $e$. To learn more about some of the physical parameters, such as the total mass of the system, we'd like to incorporate distance information to put a physical scale to the problem.
+# While this is encouraging that we fit an astrometric orbit, a simple astrometric fit to just $\rho$ and $\theta$ isn't actually that physically satisfying, since many of the orbital parameters simply have to do with the orientation relative to us ($i$, $\omega$, and $\Omega$). The only truly intrinsic parameters are $P$ and $e$. To learn more about some of the physical parameters, such as the total mass of the system, we'd like to incorporate distance information to put a physical scale to the problem.
 #
 # The *Gaia* DR2 parallax is $\varpi = 24.05 \pm 0.45$ mas.
 #
@@ -474,7 +474,7 @@ _ = corner.corner(samples)
 
 # ## Citations
 #
-# As described in the :ref:`citation` tutorial, we can use [get_citations_for_model](../user/api.rst#exoplanet.citations.get_citations_for_model) to construct an acknowledgment and BibTeX listing that includes the relevant citations for this model.
+# As described in the [Citing exoplanet & its dependencies](./citation.ipynb) tutorial, we can use :func:`exoplanet.citations.get_citations_for_model` to construct an acknowledgment and BibTeX listing that includes the relevant citations for this model.
 
 with model:
     txt, bib = xo.citations.get_citations_for_model()

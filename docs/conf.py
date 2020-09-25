@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import os
+import re
 
 import nbsphinx
 import sphinx_typlog_theme
+from nbsphinx import markdown2rst as original_markdown2rst
 from pkg_resources import DistributionNotFound, get_distribution
 
 try:
@@ -17,10 +19,27 @@ def setup(app):
     app.add_css_file("css/exoplanet.css?v=2020-01-15")
 
 
+# nbsphinx hacks
 nbsphinx.RST_TEMPLATE = nbsphinx.RST_TEMPLATE.replace(
     "{%- if width %}", "{%- if 0 %}"
 ).replace("{%- if height %}", "{%- if 0 %}")
 
+
+def subber(m):
+    return m.group(0).replace("``", "`")
+
+
+prog = re.compile(r":(.+):``(.+)``")
+
+
+def markdown2rst(text):
+    return prog.sub(subber, original_markdown2rst(text))
+
+
+nbsphinx.markdown2rst = markdown2rst
+
+
+# General stuff
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",

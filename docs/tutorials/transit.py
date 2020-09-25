@@ -175,7 +175,7 @@ _ = corner.corner(
 
 # ## Phase plots
 #
-# Like in the radial velocity tutorial (:ref:`rv`), we can make plots of the model predictions for each planet.
+# Like in the [Radial velocity fitting](./rv.ipynb) tutorial, we can make plots of the model predictions for each planet.
 
 for n, letter in enumerate("bc"):
     plt.figure()
@@ -226,7 +226,7 @@ for n, letter in enumerate("bc"):
 
 # ## Citations
 #
-# As described in the :ref:`citation` tutorial, we can use :func:`exoplanet.citations.get_citations_for_model` to construct an acknowledgement and BibTeX listing that includes the relevant citations for this model.
+# As described in the [Citing exoplanet & its dependencies](./citation.ipynb) tutorial, we can use :func:`exoplanet.citations.get_citations_for_model` to construct an acknowledgement and BibTeX listing that includes the relevant citations for this model.
 # This is especially important here because we have used quite a few model components that should be cited.
 
 with model:

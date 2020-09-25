@@ -23,7 +23,7 @@
 # # Radial velocity fitting
 
 # In this tutorial, we will demonstrate how to fit radial velocity observations of an exoplanetary system using *exoplanet*.
-# We will follow [the getting started tutorial](https://radvel.readthedocs.io/en/latest/tutorials/K2-24_Fitting+MCMC.html) from [the exellent RadVel package](https://radvel.readthedocs.io) where they fit for the parameters of the two planets in [the K2-24 system](https://arxiv.org/abs/1511.04497).
+# We will follow [the getting started tutorial](https://radvel.readthedocs.io/en/latest/tutorials/K2-24_Fitting+MCMC.html) from [the excellent RadVel package](https://radvel.readthedocs.io) where they fit for the parameters of the two planets in [the K2-24 system](https://arxiv.org/abs/1511.04497).
 #
 # First, let's download the data from RadVel:
 
@@ -65,7 +65,7 @@ print(Ks, "m/s")
 
 # ## The radial velocity model in PyMC3
 #
-# Now that we have the data and an estimate of the initial values for the parameters, let's start defining the probabilistic model in PyMC3 (take a look at :ref:`intro-to-pymc3` if you're new to PyMC3).
+# Now that we have the data and an estimate of the initial values for the parameters, let's start defining the probabilistic model in PyMC3 (take a look at [A quick intro to PyMC3 for exoplaneteers](./intro-to-pymc3.ipynb) if you're new to PyMC3).
 # First, we'll define our priors on the parameters:
 
 # +
@@ -170,7 +170,7 @@ _ = plt.title("MAP model")
 # ## Sampling
 #
 # Now that we have our model set up and a good estimate of the initial parameters, let's start sampling.
-# There are substantial covariances between some of the parameters so we'll use a :func:`exoplanet.get_dense_nuts_step` to tune the sampler (see the :ref:`pymc3-extras` tutorial for more information).
+# There are substantial covariances between some of the parameters so we'll use the `init="adapt_full"` argument.
 
 np.random.seed(42)
 with model:
@@ -179,7 +179,8 @@ with model:
         draws=4000,
         cores=2,
         chains=2,
-        step=xo.get_dense_nuts_step(target_accept=0.95),
+        target_accept=0.95,
+        init="adapt_full",
     )
 
 # After sampling, it's always a good idea to do some convergence checks.
@@ -260,7 +261,7 @@ for n, letter in enumerate("bc"):
 
 # ## Citations
 #
-# As described in the :ref:`citation` tutorial, we can use :func:`exoplanet.citations.get_citations_for_model` to construct an acknowledgement and BibTeX listing that includes the relevant citations for this model.
+# As described in the [Citing exoplanet & its dependencies](./citation.ipynb) tutorial, we can use :func:`exoplanet.citations.get_citations_for_model` to construct an acknowledgement and BibTeX listing that includes the relevant citations for this model.
 
 with model:
     txt, bib = xo.citations.get_citations_for_model()

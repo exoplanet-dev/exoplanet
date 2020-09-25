@@ -49,7 +49,6 @@ magnitude.
    :caption: Tutorials
 
    tutorials/intro-to-pymc3.ipynb
-   tutorials/pymc3-extras.ipynb
    tutorials/rv.ipynb
    tutorials/transit.ipynb
    tutorials/astrometric.ipynb

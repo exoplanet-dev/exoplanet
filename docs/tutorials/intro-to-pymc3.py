@@ -231,7 +231,7 @@ _ = plt.xlabel("phase")
 # 2. All of the parameters have initial guesses provided. This is an example where this makes a big difference because some of the parameters (like period) are very tightly constrained.
 # 3. Some of the lines are wrapped in `Deterministic` distributions. This can be useful because it allows us to track values as the chain progresses even if they're not parameters. For example, after sampling, we will have a sample for `bkg` (the background RV trend) for each step in the chain. This can be especially useful for making plots of the results.
 # 4. Similarly, at the end of the model definition, we compute the RV curve for a single orbit on a fine grid. This can be very useful for diagnosing fits gone wrong.
-# 5. For parameters that specify angles (like $\omega$, called `w` in the model below), it can be inefficient to sample in the angle directly because of the fact that the value wraps around at $2\pi$. Instead, it can be better to sample the unit vector specified by the angle or as a parameterin a unit disk, when combined with eccentricity. In practice, this can be achieved by sampling a 2-vector from an isotropic Gaussian and normalizing the components by the norm. These are implemented as part of *exoplanet* in the :class:`exoplanet.distributions.Angle` and :class:`exoplanet.distributions.UnitDisk` classes.
+# 5. For parameters that specify angles (like $\omega$, called `w` in the model below), it can be inefficient to sample in the angle directly because of the fact that the value wraps around at $2\pi$. Instead, it can be better to sample the unit vector specified by the angle or as a parameter in a unit disk, when combined with eccentricity. In practice, this can be achieved by sampling a 2-vector from an isotropic Gaussian and normalizing the components by the norm. These are implemented as part of *exoplanet* in the :class:`exoplanet.distributions.Angle` and :class:`exoplanet.distributions.UnitDisk` classes.
 
 # +
 import theano.tensor as tt
@@ -295,7 +295,7 @@ with pm.Model() as model:
 # In this case, I've found that it is useful to first optimize the parameters to find the "maximum a posteriori" (MAP) parameters and then start the sampler from there.
 # This is useful here because MCMC is not designed to *find* the maximum of the posterior; it's just meant to sample the shape of the posterior.
 # The performance of all MCMC methods can be really bad when the initialization isn't good (especially when some parameters are very well constrained).
-# To find the maximum a posteriori parameters using PyMC3, you can use the [optimize](../user/api.rst#exoplanet.optimize) function:
+# To find the maximum a posteriori parameters using PyMC3, you can use the :func:`exoplanet.optimize` function:
 
 # +
 from exoplanet import optimize
