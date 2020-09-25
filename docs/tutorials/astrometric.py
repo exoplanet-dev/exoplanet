@@ -418,7 +418,7 @@ _ = ax[0].set_title("posterior inferences")
 
 # As we can see from the narrow range of orbits (the orange swath appears like a thin line), the orbit is actually highly constrained by the astrometry.
 # We also see two outlier epochs in the vicinity of 2445000 - 2447000, since adjacent epochs seem to be right on the orbit.
-# It's likely the uncertainties were not estimated correctly for these, and the simlplistic jitter model we implemented isn't sophisticated to apply more weight to only these discrepant points.
+# It's likely the uncertainties were not estimated correctly for these, and the simplistic jitter model we implemented isn't sophisticated to apply more weight to only these discrepant points.
 
 # ## Including parallax
 #
@@ -474,7 +474,7 @@ _ = corner.corner(samples)
 
 # ## Citations
 #
-# As described in the :ref:`citation` tutorial, we can use :func:`exoplanet.citations.get_citations_for_model` to construct an acknowledgement and BibTeX listing that includes the relevant citations for this model.
+# As described in the :ref:`citation` tutorial, we can use [get_citations_for_model](../user/api.rst#exoplanet.citations.get_citations_for_model) to construct an acknowledgment and BibTeX listing that includes the relevant citations for this model.
 
 with model:
     txt, bib = xo.citations.get_citations_for_model()

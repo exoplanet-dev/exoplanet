@@ -20,9 +20,9 @@
 
 # The *exoplanet* package is mostly just glue that connects many other ideas and software.
 # In a situation like this, it can be easy to forget about the important infrastructure upon which our science is built.
-# In order to make sure that you can easily give credit where credit is due, we have tried to make it as painless as possible to work out which citations are expected for a model fit using *exoplanet* by including a :func:`exoplanet.citations.get_citations_for_model` function that introspects the current PyMC3 model and constructs a list of citations for the functions used in that model.
+# In order to make sure that you can easily give credit where credit is due, we have tried to make it as painless as possible to work out which citations are expected for a model fit using *exoplanet* by including a [get_citations_for_model](../user/api.rst#exoplanet.citations.get_citations_for_model) function that introspects the current PyMC3 model and constructs a list of citations for the functions used in that model.
 #
-# For example, you might compute a quadratically limb darkened light curve using `starry` (via the :class:`exoplanet.LimbDarkLightCurve` class):
+# For example, you might compute a quadratically limb darkened light curve using `starry` (via the [LimbDarkLightCurve](../user/api.rst#exoplanet.LimbDarkLightCurve) class):
 
 # +
 import pymc3 as pm
@@ -37,7 +37,7 @@ with pm.Model() as model:
     txt, bib = xo.citations.get_citations_for_model()
 # -
 
-# The :func:`exoplanet.citations.get_citations_for_model` function would generate an acknowledgement that cites:
+# The [get_citations_for_model](../user/api.rst#exoplanet.citations.get_citations_for_model) function would generate an acknowledgement that cites:
 #
 # * [PyMC3](https://docs.pymc.io/#citing-pymc3): for the inference engine and modeling framework,
 # * [Theano](http://deeplearning.net/software/theano/citation.html): for the numerical infrastructure,
@@ -45,7 +45,7 @@ with pm.Model() as model:
 # * [Kipping (2013)](https://arxiv.org/abs/1308.0009): for the reparameterization of the limb darkening parameters for a quadratic law, and
 # * [Luger, et al. (2018)](https://arxiv.org/abs/1810.06559): for the light curve calculation.
 #
-# The first output from :func:`exoplanet.citations.get_citations_for_model` gives the acknowledgement text:
+# The first output from [get_citations_for_model](../user/api.rst#exoplanet.citations.get_citations_for_model) gives the acknowledgement text:
 
 print(txt)
 

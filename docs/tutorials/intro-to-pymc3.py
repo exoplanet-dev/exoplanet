@@ -295,7 +295,7 @@ with pm.Model() as model:
 # In this case, I've found that it is useful to first optimize the parameters to find the "maximum a posteriori" (MAP) parameters and then start the sampler from there.
 # This is useful here because MCMC is not designed to *find* the maximum of the posterior; it's just meant to sample the shape of the posterior.
 # The performance of all MCMC methods can be really bad when the initialization isn't good (especially when some parameters are very well constrained).
-# To find the maximum a posteriori parameters using PyMC3, you can use the :func:`exoplanet.optimize` function:
+# To find the maximum a posteriori parameters using PyMC3, you can use the [optimize](../user/api.rst#exoplanet.optimize) function:
 
 # +
 from exoplanet import optimize
