@@ -11,6 +11,7 @@ omit =
     src/exoplanet/light_curves/interpolated.py
     src/exoplanet/theano_ops/build_utils.py
     src/exoplanet/theano_ops/interp/*
+relative_files = true
 
 [report]
 exclude_lines =
