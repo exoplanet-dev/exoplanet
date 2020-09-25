@@ -59,3 +59,14 @@ jobs:
       - name: Coverage
         uses: exoplanet-dev/coveralls-python-action@develop
         continue-on-error: true
+        with:
+          parallel: true
+
+  coverage:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls Finished
+      uses: exoplanet-dev/coveralls-python-action@develop
+      with:
+        parallel-finished: true
