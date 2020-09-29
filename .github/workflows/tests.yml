@@ -32,9 +32,9 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: ~/.theano
-          key: ${{ runner.os }}-theano-py${{ matrix.python-version }}-${{ matrix.pymc-version }}-${{ github.sha }}
+          key: xo-${{ runner.os }}-py${{ matrix.python-version }}-${{ matrix.pymc-version }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-theano-py${{ matrix.python-version }}-${{ matrix.pymc-version }}-
+            xo-${{ runner.os }}-py${{ matrix.python-version }}-${{ matrix.pymc-version }}-
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: goanpeca/setup-miniconda@v1
@@ -66,7 +66,7 @@ jobs:
     needs: tests
     runs-on: ubuntu-latest
     steps:
-    - name: Coveralls Finished
-      uses: exoplanet-dev/coveralls-python-action@develop
-      with:
-        parallel-finished: true
+      - name: Coveralls Finished
+        uses: exoplanet-dev/coveralls-python-action@develop
+        with:
+          parallel-finished: true

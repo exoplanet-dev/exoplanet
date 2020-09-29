@@ -21,9 +21,10 @@ def get_compile_args(compiler):
 
 
 def get_cache_version():
-    if "dev" in __version__:
+    try:
+        return tuple(map(int, __version__.split(".")))
+    except ValueError:
         return ()
-    return tuple(map(int, __version__.split(".")))
 
 
 def get_header_dirs(eigen=True):
