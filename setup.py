@@ -32,6 +32,7 @@ INSTALL_REQUIRES = [
     "numpy>=1.13.0",
     "pymc3>=3.5",
     "astropy>=3.1",
+    "pymc3-ext>=0.0.1",
 ]
 EXTRA_REQUIRE = {
     "test": [
