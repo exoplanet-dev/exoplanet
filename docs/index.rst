@@ -1,3 +1,6 @@
+exoplanet
+=========
+
 *exoplanet* is a toolkit for probabilistic modeling of transit and/or radial
 velocity observations of `exoplanets <https://en.wikipedia.org/wiki/Exoplanet>`_
 and other astronomical time series using `PyMC3 <https://docs.pymc.io>`_.
@@ -9,7 +12,7 @@ These features include:
 
 * A fast and robust solver for Kepler's equation.
 * Scalable Gaussian Processes using `celerite
-  <https://celerite.readthedocs.io>`_.
+  <https://celerite2.readthedocs.io>`_.
 * Fast and accurate limb darkened light curves using `starry
   <https://rodluger.github.io/starry>`_.
 * Common reparameterizations for `limb darkening parameters
@@ -33,7 +36,25 @@ magnitude.
 <https://github.com/exoplanet-dev/exoplanet>`_ so if you have any trouble, `open an issue
 <https://github.com/exoplanet-dev/exoplanet/issues>`_ there.
 
-.. note:: Some tutorials have been moved to the `case studies <https://gallery.exoplanet.codes>`_ page.
+Where to find what you need
+---------------------------
+
+1. For general installation and basic usage, continue scrolling to the table of
+contents below.
+
+2. For more in depth examples of *exoplanet* used for more realistic problems,
+go to the `Case studies page <https://gallery.exoplanet.codes>`_.
+
+3. For more information about scalable Gaussian Processes in PyMC3 (this was
+previously implemented as part of *exoplanet*), see the `celerite2 documentation
+page <httsp://celerite2.readthedocs.io>`_.
+
+4. For helper functions and PyMC3 extras that used to be implemented as part of
+*exoplanet*, see the `pymc3-ext project
+<https://github.com/exoplanet-dev/pymc3-ext>`_.
+
+Table of contents
+-----------------
 
 .. toctree::
    :maxdepth: 2
