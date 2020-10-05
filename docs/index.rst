@@ -53,9 +53,6 @@ page <httsp://celerite2.readthedocs.io>`_.
 *exoplanet*, see the `pymc3-ext project
 <https://github.com/exoplanet-dev/pymc3-ext>`_.
 
-Table of contents
------------------
-
 .. toctree::
    :maxdepth: 2
    :caption: User Guide

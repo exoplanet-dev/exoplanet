@@ -5,7 +5,15 @@ Installation
 
 .. note:: ``exoplanet`` requires Python 3.6 and later.
 
-*exoplanet* doesn't have a compiled components so it can be easily installed from source or by using pip.
+Using pip
+---------
+
+*exoplanet* can also be installed using `pip <https://pip.pypa.io>`_:
+
+.. code-block:: bash
+
+    python -m pip install -U exoplanet
+
 
 Using conda
 -----------
@@ -15,16 +23,6 @@ Using conda
 .. code-block:: bash
 
     conda install -c conda-forge exoplanet
-
-
-Using pip
----------
-
-*exoplanet* can also be installed using `pip <https://pip.pypa.io>`_:
-
-.. code-block:: bash
-
-    python -m pip install -U exoplanet
 
 
 .. _source:
