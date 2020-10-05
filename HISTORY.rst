@@ -1,3 +1,13 @@
+0.4.0 (2020-10-05)
+++++++++++++++++++
+
+- Adds faster solver for Kepler's equation
+- Improves automation of documentation and release process
+- Removes most C++ Ops and replaces them with pre-compiled functions which allows the distribution of binary wheels
+- Removes ``gp`` submodule; moved to new `celerite2 <https://celerite2.readthedocs.io>`_ package
+- Deprecates some non-exoplanet-specific functions and distributions; moved to `pymc3-ext <https://github.com/exoplanet-dev/pymc3-ext>`_ package
+
+
 0.3.3 (2020-09-09)
 ++++++++++++++++++
 
