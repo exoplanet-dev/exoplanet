@@ -14,7 +14,6 @@
 
 # + nbsphinx="hidden"
 # %matplotlib inline
-# -
 
 # + nbsphinx="hidden"
 # %run notebook_setup
@@ -107,9 +106,17 @@ with pm.Model() as model:
     # purposes
     pm.Deterministic("light_curves", light_curves)
 
-    # In this line, we simulate the dataset that we will fit
+    # ******************************************************************* #
+    # On the folowing lines, we simulate the dataset that we will fit     #
+    #                                                                     #
+    # NOTE: if you are fitting real data, you shouldn't include this line #
+    #       because you already have data!                                #
+    # ******************************************************************* #
     y = xo.eval_in_model(light_curve)
     y += yerr * np.random.randn(len(y))
+    # ******************************************************************* #
+    # End of fake data creation; you want to include the following lines  #
+    # ******************************************************************* #
 
     # The likelihood function assuming known Gaussian uncertainty
     pm.Normal("obs", mu=light_curve, sd=yerr, observed=y)
