@@ -41,8 +41,6 @@ class ReboundOp(gof.Op):
     def perform(self, node, inputs, outputs):
         # NOTE: Units should be AU, M_sun, year/2pi
         import rebound
-        import reboundx
-        from reboundx import constants
 
         masses, initial_coords, times = inputs
         masses = np.atleast_1d(masses)
@@ -90,14 +88,22 @@ class ReboundOp(gof.Op):
                 vy=initial_coords[i, 4],
                 vz=initial_coords[i, 5],
             )
-        rebx = reboundx.Extras(sim)
+
         ps = sim.particles
-        gr = rebx.load_force(force)
-        gr.params["c"] = constants.C
+
         if len(gr_sources) != 0:  # if gr_sources have been added
+            try:
+                import reboundx
+                from reboundx import constants
+            except ImportError:
+                raise ImportError("""Please install REBOUNDx to include
+                                relativistic effects.""")
+            rebx = reboundx.Extras(sim)
+            gr = rebx.load_force(force)
+            gr.params["c"] = constants.C
             for i, particle in enumerate(ps):
                 particle.params["gr_source"] = gr_sources[i]
-        rebx.add_force(gr)
+            rebx.add_force(gr)
         # Add the variational particles to track the derivatives
         var_systems = np.empty((num_bodies, 7), dtype=object)
         for i in range(num_bodies):
