@@ -48,6 +48,12 @@ class ReboundOrbit(KeplerianOrbit):
             for k in list(kwargs.keys())
             if k.startswith("rebound_")
         )
+        gr_args = dict(
+            (k, kwargs.pop(k))
+            for k in list(kwargs.keys())
+            if k.startswith("gr")
+        )
+        rebound_args = {**rebound_args, **gr_args}
         # rebound_args["G"] = rebound_G  # Consistent units
         rebound_args["t"] = rebound_args.get("t", 0.0) / day_per_yr_over_2pi
         self.rebound_initial_time = rebound_args["t"]
