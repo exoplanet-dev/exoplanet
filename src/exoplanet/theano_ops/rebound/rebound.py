@@ -96,8 +96,10 @@ class ReboundOp(gof.Op):
                 import reboundx
                 from reboundx import constants
             except ImportError:
-                raise ImportError("""Please install REBOUNDx to include
-                                relativistic effects.""")
+                raise ImportError(
+                    """Please install REBOUNDx to include
+                                relativistic effects."""
+                )
             rebx = reboundx.Extras(sim)
             gr = rebx.load_force(force)
             gr.params["c"] = constants.C
