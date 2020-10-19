@@ -39,7 +39,7 @@ The source code for *exoplanet* can be downloaded and installed `from GitHub
     cd exoplanet
     python -m pip install -e .
 
-Note: if you clone the repo without the ``recursive`` flag, you will need to run
+Note: if you clone the repo without the ``--recursive`` flag, you will need to run
 
 .. code-block:: bash
 
