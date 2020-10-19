@@ -35,7 +35,7 @@ The source code for *exoplanet* can be downloaded and installed `from GitHub
 
 .. code-block:: bash
 
-    git clone https://github.com/exoplanet-dev/exoplanet.git
+    git clone --recursive https://github.com/exoplanet-dev/exoplanet.git
     cd exoplanet
     python -m pip install -e .
 
