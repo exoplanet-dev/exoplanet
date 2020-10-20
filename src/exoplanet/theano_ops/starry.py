@@ -62,6 +62,12 @@ class LimbDark(theano.Op):
         self.ld = driver.LimbDark()
         super().__init__()
 
+    def __getstate__(self):
+        return {}
+
+    def __setstate__(self, data):
+        self.ld = driver.LimbDark()
+
     def make_node(self, *inputs):
         in_args = [as_tensor_variable(i) for i in inputs]
         if any(i.dtype != "float64" for i in in_args):
