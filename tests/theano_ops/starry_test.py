@@ -7,13 +7,13 @@ import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
+from exoplanet.theano_ops.driver import SimpleLimbDark
 from exoplanet.theano_ops.starry import (
     GetCl,
     GetClRev,
     LimbDark,
     RadiusFromOccArea,
 )
-from exoplanet.theano_ops.driver import SimpleLimbDark
 
 
 class TestGetCl(utt.InferShapeTester):
@@ -103,6 +103,12 @@ class TestLimbDark(utt.InferShapeTester):
         _, _, in_args = self.get_args()
         func = lambda *args: self.op(*args)[0]  # NOQA
         utt.verify_grad(func, in_args)
+
+    def test_pickle(self):
+        f, _, in_args = self.get_args()
+        data = pickle.dumps(self.op, -1)
+        new_op = pickle.loads(data)
+        utt.assert_allclose(f(*in_args), new_op(*in_args)[0].eval())
 
 
 class TestRadiusFromOccArea(utt.InferShapeTester):
