@@ -37,11 +37,13 @@ def get_citations_for_model(model=None, width=79):
         list(CITATIONS["exoplanet"][0])
         + list(CITATIONS["pymc3"][0])
         + list(CITATIONS["theano"][0])
+        + list(CITATIONS["arviz"][0])
     )
     bib = [
         CITATIONS["exoplanet"][1],
         CITATIONS["pymc3"][1],
         CITATIONS["theano"][1],
+        CITATIONS["arviz"][1],
     ]
     for k, v in model.__citations__.items():
         cite += list(v[0])
@@ -99,6 +101,21 @@ publisher={PeerJ Inc.}
      year=2016,
     month=may,
       url={http://arxiv.org/abs/1605.02688}
+}
+""",
+    ),
+    "arviz": (
+        ("exoplanet:arviz",),
+        r"""
+@article{exoplanet:arviz,
+    title={{ArviZ} a unified library for exploratory analysis of {Bayesian}
+           models in {Python}},
+   author={Kumar, Ravin and Carroll, Colin and Hartikainen, Ari and Martin,
+           Osvaldo A.},
+  journal={The Journal of Open Source Software},
+     year=2019,
+      doi={10.21105/joss.01143},
+      url={http://joss.theoj.org/papers/10.21105/joss.01143}
 }
 """,
     ),
