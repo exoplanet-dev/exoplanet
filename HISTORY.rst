@@ -1,3 +1,9 @@
+0.4.2 (2020-11-15)
+++++++++++++++++++
+
+- Fixes issue with automatic execution of tutorials
+
+
 0.4.1 (2020-11-15)
 ++++++++++++++++++
 
