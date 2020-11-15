@@ -64,7 +64,7 @@ EXTRA_REQUIRE = {
         "nbsphinx",
     ],
     "tutorials": [
-        "jupytext",
+        "jupytext<1.7.0",
         "jupyter",
         "nbconvert",
         "matplotlib",
