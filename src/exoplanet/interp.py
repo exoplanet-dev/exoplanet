@@ -5,7 +5,7 @@ __all__ = ["RegularGridInterpolator"]
 import theano
 import theano.tensor as tt
 
-from .theano_ops.interp import RegularGridOp
+from .ops.theano.interp import RegularGridOp
 
 
 class RegularGridInterpolator:

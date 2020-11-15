@@ -5,7 +5,7 @@ __all__ = ["kepler"]
 import theano
 import theano.tensor as tt
 
-from ..utils import as_tensor_variable
+from ...utils import as_tensor_variable
 from . import driver
 from .helpers import resize_or_set
 

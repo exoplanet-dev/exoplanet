@@ -8,7 +8,7 @@ import theano.tensor as tt
 from theano.gof import MissingInputError
 
 from ..citations import add_citations_to_model
-from ..theano_ops.starry.integrated_limbdark import IntegratedLimbDarkOp
+from ..ops.theano.starry.integrated_limbdark import IntegratedLimbDarkOp
 from ..utils import eval_in_model
 from .limb_dark import get_cl, limbdark
 

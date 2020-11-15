@@ -15,8 +15,8 @@ from astropy import units as u
 from theano.ifelse import ifelse
 
 from ..citations import add_citations_to_model
-from ..theano_ops.contact_points import ContactPoints, contact_points
-from ..theano_ops.kepler import kepler
+from ..ops.theano.contact_points import ContactPoints, contact_points
+from ..ops.theano.kepler import kepler
 from ..units import has_unit, to_unit, with_unit
 from ..utils import as_tensor_variable
 from .constants import G_grav, au_per_R_sun, c_light, gcc_per_sun

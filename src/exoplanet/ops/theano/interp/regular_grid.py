@@ -9,7 +9,7 @@ import theano
 import theano.tensor as tt
 from theano import gof
 
-from ...exoplanet_version import __version__
+from ....exoplanet_version import __version__
 
 
 class RegularGridOp(gof.COp):

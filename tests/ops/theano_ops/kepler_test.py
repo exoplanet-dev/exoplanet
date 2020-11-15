@@ -5,7 +5,7 @@ import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
-from exoplanet.theano_ops.kepler import Kepler
+from exoplanet.ops.theano.kepler import Kepler
 
 
 class TestKeplerSolver(utt.InferShapeTester):

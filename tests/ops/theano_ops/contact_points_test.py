@@ -6,8 +6,8 @@ import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
-from exoplanet.theano_ops.contact_points import ContactPoints
-from exoplanet.theano_ops.kepler import kepler
+from exoplanet.ops.theano.contact_points import ContactPoints
+from exoplanet.ops.theano.kepler import kepler
 
 
 class TestContactPoints(utt.InferShapeTester):

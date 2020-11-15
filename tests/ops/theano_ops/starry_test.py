@@ -7,8 +7,8 @@ import theano
 import theano.tensor as tt
 from theano.tests import unittest_tools as utt
 
-from exoplanet.theano_ops.driver import SimpleLimbDark
-from exoplanet.theano_ops.starry import (
+from exoplanet.ops.theano.driver import SimpleLimbDark
+from exoplanet.ops.theano.starry import (
     GetCl,
     GetClRev,
     LimbDark,

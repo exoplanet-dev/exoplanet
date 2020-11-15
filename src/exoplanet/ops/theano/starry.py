@@ -7,7 +7,7 @@ import theano
 import theano.tensor as tt
 from scipy.optimize import bisect
 
-from ..utils import as_tensor_variable
+from ...utils import as_tensor_variable
 from . import driver
 from .helpers import resize_or_set
 

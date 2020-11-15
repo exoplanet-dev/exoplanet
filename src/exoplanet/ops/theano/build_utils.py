@@ -6,7 +6,7 @@ import sys
 
 import pkg_resources
 
-from ..exoplanet_version import __version__
+from ...exoplanet_version import __version__
 
 
 def get_compile_args(compiler):
@@ -29,7 +29,7 @@ def get_cache_version():
 
 def get_header_dirs(eigen=True):
     dirs = [
-        pkg_resources.resource_filename(__name__, "lib/include"),
-        pkg_resources.resource_filename(__name__, "lib/vendor/eigen-3.3.7"),
+        pkg_resources.resource_filename(__name__, "../lib/include"),
+        pkg_resources.resource_filename(__name__, "../lib/vendor/eigen"),
     ]
     return dirs

@@ -10,7 +10,7 @@ from .keplerian import KeplerianOrbit
 try:
     from rebound_pymc3.integrate import IntegrateOp as ReboundOp
 except ImportError:
-    from ..theano_ops.rebound import ReboundOp
+    from ..ops.theano.rebound import ReboundOp
 
 
 class ReboundOrbit(KeplerianOrbit):
