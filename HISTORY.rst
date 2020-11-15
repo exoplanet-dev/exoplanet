@@ -1,3 +1,9 @@
+0.4.1 (2020-11-15)
+++++++++++++++++++
+
+- Fixes pickling error when sampling in parallel `#120 <https://github.com/exoplanet-dev/exoplanet/pull/120>`_
+
+
 0.4.0 (2020-10-05)
 ++++++++++++++++++
 
