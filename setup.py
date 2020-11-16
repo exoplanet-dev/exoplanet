@@ -190,7 +190,13 @@ ext_modules = [
         ["src/exoplanet/ops/theano/driver.cpp"],
         include_dirs=include_dirs,
         language="c++",
-    )
+    ),
+    Extension(
+        "exoplanet.ops.jax.xla_ops",
+        ["src/exoplanet/ops/jax/xla_ops.cpp"],
+        include_dirs=include_dirs,
+        language="c++",
+    ),
 ]
 
 # END PYBIND11
