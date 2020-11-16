@@ -71,6 +71,7 @@ page <httsp://celerite2.readthedocs.io>`_.
    tutorials/transit.ipynb
    tutorials/astrometric.ipynb
    tutorials/light-delay.ipynb
+   Case studies <https://gallery.exoplanet.codes>
 
 
 License & attribution
