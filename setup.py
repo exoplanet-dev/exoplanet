@@ -28,7 +28,6 @@ CLASSIFIERS = [
 SETUP_REQUIRES = ["setuptools>=40.6.0", "setuptools_scm"]
 INSTALL_REQUIRES = [
     "pybind11>=2.4",
-    "theano>=1.0.4",
     "numpy>=1.13.0",
     "pymc3>=3.5",
     "astropy>=3.1",
