@@ -17,8 +17,8 @@ from exoplanet.theano_ops.test_tools import InferShapeTester
 
 
 class TestGetCl(InferShapeTester):
-    def setUp(self):
-        super(TestGetCl, self).setUp()
+    def setup_method(self):
+        super().setup_method()
         self.op_class = GetCl
         self.op = GetCl()
 
@@ -42,8 +42,8 @@ class TestGetCl(InferShapeTester):
 
 
 class TestGetClRev(InferShapeTester):
-    def setUp(self):
-        super(TestGetClRev, self).setUp()
+    def setup_method(self):
+        super().setup_method()
         self.op_class = GetClRev
         self.op = GetClRev()
 
@@ -64,8 +64,8 @@ class TestGetClRev(InferShapeTester):
 
 
 class TestLimbDark(InferShapeTester):
-    def setUp(self):
-        super(TestLimbDark, self).setUp()
+    def setup_method(self):
+        super().setup_method()
         self.op_class = LimbDark
         self.op = LimbDark()
 
@@ -112,8 +112,8 @@ class TestLimbDark(InferShapeTester):
 
 
 class TestRadiusFromOccArea(InferShapeTester):
-    def setUp(self):
-        super(TestRadiusFromOccArea, self).setUp()
+    def setup_method(self):
+        super().setup_method()
         self.op_class = RadiusFromOccArea
         self.op = RadiusFromOccArea()
 

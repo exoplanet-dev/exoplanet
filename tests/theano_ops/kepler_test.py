@@ -9,8 +9,8 @@ from exoplanet.theano_ops.test_tools import InferShapeTester
 
 
 class TestKeplerSolver(InferShapeTester):
-    def setUp(self):
-        super(TestKeplerSolver, self).setUp()
+    def setup_method(self):
+        super().setup_method()
         self.op_class = Kepler
         self.op = Kepler()
 

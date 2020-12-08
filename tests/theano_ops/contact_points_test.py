@@ -11,8 +11,8 @@ from exoplanet.theano_ops.test_tools import InferShapeTester
 
 
 class TestContactPoints(InferShapeTester):
-    def setUp(self):
-        super(TestContactPoints, self).setUp()
+    def setup_method(self):
+        super().setup_method()
         self.op_class = ContactPoints
         self.op = ContactPoints()
 

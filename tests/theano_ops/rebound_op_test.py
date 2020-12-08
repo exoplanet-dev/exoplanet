@@ -18,8 +18,8 @@ except ImportError:
 
 @pytest.mark.filterwarnings("ignore:For better performance")
 class TestRebound(InferShapeTester):
-    def setUp(self):
-        super(TestRebound, self).setUp()
+    def setup_method(self):
+        super().setup_method()
         self.op_class = ReboundOp
         self.op = ReboundOp()
 
