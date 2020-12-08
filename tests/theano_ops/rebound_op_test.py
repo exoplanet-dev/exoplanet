@@ -4,9 +4,9 @@ import numpy as np
 import pytest
 import theano
 import theano.tensor as tt
-from theano.tests import unittest_tools as utt
 
 from exoplanet.theano_ops.rebound import ReboundOp
+from exoplanet.theano_ops.test_tools import InferShapeTester
 
 try:
     import rebound  # NOQA
@@ -17,7 +17,7 @@ except ImportError:
 
 
 @pytest.mark.filterwarnings("ignore:For better performance")
-class TestRebound(utt.InferShapeTester):
+class TestRebound(InferShapeTester):
     def setUp(self):
         super(TestRebound, self).setUp()
         self.op_class = ReboundOp
@@ -52,4 +52,4 @@ class TestRebound(utt.InferShapeTester):
     def test_grad(self):
         t, _, _, in_args = self.get_args()
         func = lambda *args: self.op(*(list(args) + [t]))[0]  # NOQA
-        utt.verify_grad(func, in_args, n_tests=1)
+        tt.verify_grad(func, in_args, n_tests=1, rng=np.random)

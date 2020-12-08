@@ -5,7 +5,6 @@ import pickle
 import numpy as np
 import theano
 import theano.tensor as tt
-from theano.tests import unittest_tools as utt
 
 from exoplanet.theano_ops.driver import SimpleLimbDark
 from exoplanet.theano_ops.starry import (
@@ -14,9 +13,10 @@ from exoplanet.theano_ops.starry import (
     LimbDark,
     RadiusFromOccArea,
 )
+from exoplanet.theano_ops.test_tools import InferShapeTester
 
 
-class TestGetCl(utt.InferShapeTester):
+class TestGetCl(InferShapeTester):
     def setUp(self):
         super(TestGetCl, self).setUp()
         self.op_class = GetCl
@@ -29,7 +29,7 @@ class TestGetCl(utt.InferShapeTester):
         inp = np.array([-1, 0.3, 0.2, 0.5])
         out = f(inp)
 
-        utt.assert_allclose(np.array([-0.85, 2.5, -0.425, 0.1]), out)
+        assert np.allclose(np.array([-0.85, 2.5, -0.425, 0.1]), out)
 
     def test_infer_shape(self):
         x = tt.dvector()
@@ -38,10 +38,10 @@ class TestGetCl(utt.InferShapeTester):
         )
 
     def test_grad(self):
-        utt.verify_grad(self.op, [np.array([-1, 0.3, 0.2, 0.5])])
+        tt.verify_grad(self.op, [np.array([-1, 0.3, 0.2, 0.5])], rng=np.random)
 
 
-class TestGetClRev(utt.InferShapeTester):
+class TestGetClRev(InferShapeTester):
     def setUp(self):
         super(TestGetClRev, self).setUp()
         self.op_class = GetClRev
@@ -54,7 +54,7 @@ class TestGetClRev(utt.InferShapeTester):
         inp = np.array([-1, 0.3, 0.2, 0.5])
         out = f(inp)
 
-        utt.assert_allclose(np.array([0, 1.3, 2.05, 3.53]), out)
+        assert np.allclose(np.array([0, 1.3, 2.05, 3.53]), out)
 
     def test_infer_shape(self):
         x = tt.dvector()
@@ -63,7 +63,7 @@ class TestGetClRev(utt.InferShapeTester):
         )
 
 
-class TestLimbDark(utt.InferShapeTester):
+class TestLimbDark(InferShapeTester):
     def setUp(self):
         super(TestLimbDark, self).setUp()
         self.op_class = LimbDark
@@ -86,14 +86,14 @@ class TestLimbDark(utt.InferShapeTester):
     def test_basic(self):
         f, _, in_args = self.get_args()
         out = f(*in_args)
-        utt.assert_allclose(0.0, out[0])
-        utt.assert_allclose(0.0, out[-1])
+        assert np.allclose(0.0, out[0])
+        assert np.allclose(0.0, out[-1])
 
     def test_los(self):
         f, _, in_args = self.get_args()
         in_args[-1] = -np.ones_like(in_args[-1])
         out = f(*in_args)
-        utt.assert_allclose(0.0, out)
+        assert np.allclose(0.0, out)
 
     def test_infer_shape(self):
         f, args, arg_vals = self.get_args()
@@ -102,16 +102,16 @@ class TestLimbDark(utt.InferShapeTester):
     def test_grad(self):
         _, _, in_args = self.get_args()
         func = lambda *args: self.op(*args)[0]  # NOQA
-        utt.verify_grad(func, in_args)
+        tt.verify_grad(func, in_args, rng=np.random)
 
     def test_pickle(self):
         f, _, in_args = self.get_args()
         data = pickle.dumps(self.op, -1)
         new_op = pickle.loads(data)
-        utt.assert_allclose(f(*in_args), new_op(*in_args)[0].eval())
+        assert np.allclose(f(*in_args), new_op(*in_args)[0].eval())
 
 
-class TestRadiusFromOccArea(utt.InferShapeTester):
+class TestRadiusFromOccArea(InferShapeTester):
     def setUp(self):
         super(TestRadiusFromOccArea, self).setUp()
         self.op_class = RadiusFromOccArea
@@ -133,7 +133,7 @@ class TestRadiusFromOccArea(utt.InferShapeTester):
         expect = -LimbDark()(
             np.array([1.0 / np.pi, 0.0]), v_args[1], r, np.ones_like(r)
         )[0].eval()
-        utt.assert_allclose(expect, v_args[0])
+        assert np.allclose(expect, v_args[0])
 
     def test_infer_shape(self):
         f, args, arg_vals = self.get_args()
@@ -155,7 +155,7 @@ class TestRadiusFromOccArea(utt.InferShapeTester):
             v_args[n] += eps
 
             est = 0.5 * (plus - minus) / eps
-            utt.assert_allclose(est, g[n], atol=2 * eps)
+            assert np.allclose(est, g[n], atol=2 * eps)
 
 
 def test_simple():
