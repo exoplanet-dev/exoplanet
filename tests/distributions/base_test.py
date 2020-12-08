@@ -72,7 +72,9 @@ class TestBase(_Base):
 
     def test_unit_vector(self):
         with self._model():
-            dist = UnitVector("x", shape=(2, 3))
+            x = np.zeros((2, 3))
+            x[:, 0] = 1.0
+            dist = UnitVector("x", shape=x.shape, testval=x)
 
             # Test random sampling
             samples = dist.random(size=100)
