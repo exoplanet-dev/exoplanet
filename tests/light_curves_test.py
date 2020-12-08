@@ -7,7 +7,6 @@ import pytest
 import theano
 import theano.tensor as tt
 from packaging import version
-from theano.tests import unittest_tools as utt
 
 from exoplanet.light_curves import (
     LimbDarkLightCurve,
@@ -45,7 +44,7 @@ def test_light_curve():
 
     evaluated = func(u_val, b_val, r_val)
 
-    utt.assert_allclose(expect, evaluated)
+    assert np.allclose(expect, evaluated)
 
 
 def test_light_curve_grad(caplog):
@@ -58,7 +57,7 @@ def test_light_curve_grad(caplog):
     )
 
     with caplog.at_level(logging.DEBUG, logger="theano.gof.cmodule"):
-        utt.verify_grad(lc, [u_val, b_val, r_val])
+        tt.verify_grad(lc, [u_val, b_val, r_val], rng=np.random)
 
 
 def test_in_transit():
@@ -81,14 +80,14 @@ def test_in_transit():
     model1 = lc.get_light_curve(r=r, orbit=orbit, t=t)
     model2 = lc.get_light_curve(r=r, orbit=orbit, t=t, use_in_transit=False)
     vals = theano.function([], [model1, model2])()
-    utt.assert_allclose(*vals)
+    assert np.allclose(*vals)
 
     model1 = lc.get_light_curve(r=r, orbit=orbit, t=t, texp=0.1)
     model2 = lc.get_light_curve(
         r=r, orbit=orbit, t=t, texp=0.1, use_in_transit=False
     )
     vals = theano.function([], [model1, model2])()
-    utt.assert_allclose(*vals)
+    assert np.allclose(*vals)
 
 
 def test_variable_texp():
@@ -120,14 +119,14 @@ def test_variable_texp():
         texp=texp0 + np.zeros_like(t),
     )
     vals = theano.function([], [model1, model2])()
-    utt.assert_allclose(*vals)
+    assert np.allclose(*vals)
 
     model1 = lc.get_light_curve(r=r, orbit=orbit, t=t, texp=texp0)
     model2 = lc.get_light_curve(
         r=r, orbit=orbit, t=t, texp=texp0 + np.zeros_like(t)
     )
     vals = theano.function([], [model1, model2])()
-    utt.assert_allclose(*vals)
+    assert np.allclose(*vals)
 
 
 def test_contact_bug():
@@ -184,7 +183,7 @@ def test_small_star():
     model1 = lc.get_light_curve(r=r_pl, orbit=orbit, t=t)
     model2 = lc.get_light_curve(r=r_pl, orbit=orbit, t=t, use_in_transit=False)
     vals = theano.function([], [model1, model2])()
-    utt.assert_allclose(*vals)
+    assert np.allclose(*vals)
 
     params = TransitParams()
     params.t0 = t0
@@ -199,7 +198,7 @@ def test_small_star():
 
     model = TransitModel(params, t)
     flux = model.light_curve(params)
-    utt.assert_allclose(vals[0][:, 0], flux - 1)
+    assert np.allclose(vals[0][:, 0], flux - 1)
 
 
 def test_singular_points():

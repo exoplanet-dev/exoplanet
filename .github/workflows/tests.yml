@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.7", "3.8"]
-        pymc-version: ["pymc3==3.9"]
+        pymc-version: ["pymc3==3.9", "pymc3==3.10"]
         include:
           - python-version: "3.8"
             pymc-version: "https://github.com/pymc-devs/pymc3/archive/master.zip"
@@ -37,7 +37,7 @@ jobs:
             xo-${{ runner.os }}-py${{ matrix.python-version }}-${{ matrix.pymc-version }}-
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: goanpeca/setup-miniconda@v1
+        uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
@@ -46,15 +46,16 @@ jobs:
       - name: Install dependencies
         shell: bash -l {0}
         run: |
-          python -m pip install --use-feature=2020-resolver -U pip
-          python -m pip install --use-feature=2020-resolver "${{ matrix.pymc-version }}"
-          python -m pip install --use-feature=2020-resolver -e .[test]
+          python -m pip install -U pip
+          python -m pip install "${{ matrix.pymc-version }}"
+          python -m pip install -e .[test]
+          python -m pip install --no-deps starry
           python -c 'import theano; print(theano.config.__str__(print_doc=False))'
 
       - name: Run tests
         shell: bash -l {0}
         run: python -m pytest --cov=exoplanet -v tests
-      
+
       - name: Get unique id
         id: unique-id
         env:

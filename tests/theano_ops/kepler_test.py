@@ -3,14 +3,14 @@
 import numpy as np
 import theano
 import theano.tensor as tt
-from theano.tests import unittest_tools as utt
 
 from exoplanet.theano_ops.kepler import Kepler
+from exoplanet.theano_ops.test_tools import InferShapeTester
 
 
-class TestKeplerSolver(utt.InferShapeTester):
-    def setUp(self):
-        super(TestKeplerSolver, self).setUp()
+class TestKeplerSolver(InferShapeTester):
+    def setup_method(self):
+        super().setup_method()
         self.op_class = Kepler
         self.op = Kepler()
 
@@ -32,8 +32,8 @@ class TestKeplerSolver(utt.InferShapeTester):
 
         assert np.all(np.isfinite(sinf0))
         assert np.all(np.isfinite(cosf0))
-        utt.assert_allclose(np.sin(f), sinf0)
-        utt.assert_allclose(np.cos(f), cosf0)
+        assert np.allclose(np.sin(f), sinf0)
+        assert np.allclose(np.cos(f), cosf0)
 
     def test_pi(self):
         e = np.linspace(0, 1.0, 100)
@@ -47,8 +47,8 @@ class TestKeplerSolver(utt.InferShapeTester):
 
         assert np.all(np.isfinite(sinf0))
         assert np.all(np.isfinite(cosf0))
-        utt.assert_allclose(np.sin(f), sinf0)
-        utt.assert_allclose(np.cos(f), cosf0)
+        assert np.allclose(np.sin(f), sinf0)
+        assert np.allclose(np.cos(f), cosf0)
 
     def test_solver(self):
         e = np.linspace(0, 1, 500)[:-1]
@@ -64,8 +64,8 @@ class TestKeplerSolver(utt.InferShapeTester):
 
         assert np.all(np.isfinite(sinf0))
         assert np.all(np.isfinite(cosf0))
-        utt.assert_allclose(np.sin(f), sinf0)
-        utt.assert_allclose(np.cos(f), cosf0)
+        assert np.allclose(np.sin(f), sinf0)
+        assert np.allclose(np.cos(f), cosf0)
 
     def test_infer_shape(self):
         np.random.seed(42)
@@ -96,4 +96,4 @@ class TestKeplerSolver(utt.InferShapeTester):
         e_val = np.random.uniform(0, 0.9, len(M_val))
 
         a = lambda *args: tt.arctan2(*self.op(*args))  # NOQA
-        utt.verify_grad(a, [M_val, e_val], eps=1e-8)
+        tt.verify_grad(a, [M_val, e_val], eps=1e-8, rng=np.random)

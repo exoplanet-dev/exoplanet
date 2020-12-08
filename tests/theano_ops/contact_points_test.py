@@ -4,15 +4,15 @@ import numpy as np
 import pytest
 import theano
 import theano.tensor as tt
-from theano.tests import unittest_tools as utt
 
 from exoplanet.theano_ops.contact_points import ContactPoints
 from exoplanet.theano_ops.kepler import kepler
+from exoplanet.theano_ops.test_tools import InferShapeTester
 
 
-class TestContactPoints(utt.InferShapeTester):
-    def setUp(self):
-        super(TestContactPoints, self).setUp()
+class TestContactPoints(InferShapeTester):
+    def setup_method(self):
+        super().setup_method()
         self.op_class = ContactPoints
         self.op = ContactPoints()
 
@@ -39,7 +39,7 @@ class TestContactPoints(utt.InferShapeTester):
         )()
 
         assert np.all(M_calc[2] == 0)
-        utt.assert_allclose(M_calc[:2], M_expect)
+        assert np.allclose(M_calc[:2], M_expect)
 
 
 class Solver:

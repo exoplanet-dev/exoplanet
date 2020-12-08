@@ -7,7 +7,6 @@ import theano
 import theano.tensor as tt
 from astropy.constants import c
 from scipy.optimize import minimize
-from theano.tests import unittest_tools as utt
 
 from exoplanet.orbits.keplerian import (
     KeplerianOrbit,
@@ -50,7 +49,7 @@ def test_sky_coords():
     r = np.sqrt(x ** 2 + y ** 2)
 
     # Make sure that the in-transit impact parameter matches batman
-    utt.assert_allclose(r_batman[m], r[m], atol=2e-5)
+    assert np.allclose(r_batman[m], r[m], atol=2e-5)
 
     # In-transit should correspond to positive z in our parameterization
     assert np.all(z[m] > 0)
@@ -114,7 +113,7 @@ def test_velocity():
     for i in range(3):
         g = theano.grad(tt.sum(star_pos[i]), t_tensor)
         star_vel_expect[i] = theano.function([t_tensor], g)(t)
-    utt.assert_allclose(star_vel, star_vel_expect)
+    assert np.allclose(star_vel, star_vel_expect)
 
     planet_pos = orbit.get_planet_position(t_tensor)
     planet_vel = theano.function([], orbit.get_planet_velocity(t))()
@@ -122,7 +121,7 @@ def test_velocity():
     for i in range(3):
         g = theano.grad(tt.sum(planet_pos[i]), t_tensor)
         planet_vel_expect[i] = theano.function([t_tensor], g)(t)
-    utt.assert_allclose(planet_vel, planet_vel_expect)
+    assert np.allclose(planet_vel, planet_vel_expect)
 
     pos = orbit.get_relative_position(t_tensor)
     vel = np.array(theano.function([], orbit.get_relative_velocity(t))())
@@ -130,7 +129,7 @@ def test_velocity():
     for i in range(3):
         g = theano.grad(tt.sum(pos[i]), t_tensor)
         vel_expect[i] = theano.function([t_tensor], g)(t)
-    utt.assert_allclose(vel, vel_expect)
+    assert np.allclose(vel, vel_expect)
 
 
 def test_radial_velocity():
@@ -153,7 +152,7 @@ def test_radial_velocity():
     rv2 = orbit.get_radial_velocity(
         t, K=orbit.K0 * orbit.m_planet * orbit.sin_incl
     ).eval()
-    utt.assert_allclose(rv1, rv2)
+    assert np.allclose(rv1, rv2)
 
 
 def test_acceleration():
@@ -178,7 +177,7 @@ def test_acceleration():
     for i in range(3):
         g = theano.grad(tt.sum(star_vel[i]), t_tensor)
         star_acc_expect[i] = theano.function([t_tensor], g)(t)
-    utt.assert_allclose(star_acc, star_acc_expect)
+    assert np.allclose(star_acc, star_acc_expect)
 
     planet_vel = orbit.get_planet_velocity(t_tensor)
     planet_acc = theano.function([], orbit.get_planet_acceleration(t))()
@@ -186,7 +185,7 @@ def test_acceleration():
     for i in range(3):
         g = theano.grad(tt.sum(planet_vel[i]), t_tensor)
         planet_acc_expect[i] = theano.function([t_tensor], g)(t)
-    utt.assert_allclose(planet_acc, planet_acc_expect)
+    assert np.allclose(planet_acc, planet_acc_expect)
 
     vel = orbit.get_relative_velocity(t_tensor)
     acc = theano.function([], orbit.get_relative_acceleration(t))()
@@ -194,7 +193,7 @@ def test_acceleration():
     for i in range(3):
         g = theano.grad(tt.sum(vel[i]), t_tensor)
         acc_expect[i] = theano.function([t_tensor], g)(t)
-    utt.assert_allclose(acc, acc_expect)
+    assert np.allclose(acc, acc_expect)
 
 
 def test_flip():
@@ -216,15 +215,15 @@ def test_flip():
 
     x1, y1, z1 = theano.function([], orbit1.get_star_position(t))()
     x2, y2, z2 = theano.function([], orbit2.get_planet_position(t))()
-    utt.assert_allclose(x1, x2, atol=1e-5)
-    utt.assert_allclose(y1, y2, atol=1e-5)
-    utt.assert_allclose(z1, z2, atol=1e-5)
+    assert np.allclose(x1, x2, atol=1e-5)
+    assert np.allclose(y1, y2, atol=1e-5)
+    assert np.allclose(z1, z2, atol=1e-5)
 
     x1, y1, z1 = theano.function([], orbit1.get_planet_position(t))()
     x2, y2, z2 = theano.function([], orbit2.get_star_position(t))()
-    utt.assert_allclose(x1, x2, atol=1e-5)
-    utt.assert_allclose(y1, y2, atol=1e-5)
-    utt.assert_allclose(z1, z2, atol=1e-5)
+    assert np.allclose(x1, x2, atol=1e-5)
+    assert np.allclose(y1, y2, atol=1e-5)
+    assert np.allclose(z1, z2, atol=1e-5)
 
 
 def test_flip_circular():
@@ -244,15 +243,15 @@ def test_flip_circular():
 
     x1, y1, z1 = theano.function([], orbit1.get_star_position(t))()
     x2, y2, z2 = theano.function([], orbit2.get_planet_position(t))()
-    utt.assert_allclose(x1, x2, atol=1e-5)
-    utt.assert_allclose(y1, y2, atol=1e-5)
-    utt.assert_allclose(z1, z2, atol=1e-5)
+    assert np.allclose(x1, x2, atol=1e-5)
+    assert np.allclose(y1, y2, atol=1e-5)
+    assert np.allclose(z1, z2, atol=1e-5)
 
     x1, y1, z1 = theano.function([], orbit1.get_planet_position(t))()
     x2, y2, z2 = theano.function([], orbit2.get_star_position(t))()
-    utt.assert_allclose(x1, x2, atol=1e-5)
-    utt.assert_allclose(y1, y2, atol=1e-5)
-    utt.assert_allclose(z1, z2, atol=1e-5)
+    assert np.allclose(x1, x2, atol=1e-5)
+    assert np.allclose(y1, y2, atol=1e-5)
+    assert np.allclose(z1, z2, atol=1e-5)
 
 
 def test_in_transit():
@@ -347,7 +346,7 @@ def test_small_star():
     r = np.sqrt(x ** 2 + y ** 2)
 
     # Make sure that the in-transit impact parameter matches batman
-    utt.assert_allclose(r_batman[m], r[m], atol=2e-5)
+    assert np.allclose(r_batman[m], r[m], atol=2e-5)
 
 
 def test_impact():
@@ -369,15 +368,15 @@ def test_impact():
         omega=omega,
     )
     coords = orbit.get_relative_position(t0)
-    utt.assert_allclose(
+    assert np.allclose(
         (tt.sqrt(coords[0] ** 2 + coords[1] ** 2) / r_star).eval(), b
     )
     assert coords[2].eval() > 0
 
 
 def test_consistent_coords():
-    import astropy.units as u
     import astropy.constants as c
+    import astropy.units as u
 
     au_to_R_sun = (c.au / c.R_sun).value
     a_ang = 0.324  # arcsec
