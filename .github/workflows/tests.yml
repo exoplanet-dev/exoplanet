@@ -37,7 +37,7 @@ jobs:
             xo-${{ runner.os }}-py${{ matrix.python-version }}-${{ matrix.pymc-version }}-
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: goanpeca/setup-miniconda@v1
+        uses: conda-incubator/setup-miniconda@v1
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
@@ -54,7 +54,7 @@ jobs:
       - name: Run tests
         shell: bash -l {0}
         run: python -m pytest --cov=exoplanet -v tests
-      
+
       - name: Get unique id
         id: unique-id
         env:
