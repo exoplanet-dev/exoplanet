@@ -67,8 +67,8 @@ CITATIONS = {
   author = {Daniel Foreman-Mackey and Rodrigo Luger and Ian Czekala and
             Eric Agol and Adrian Price-Whelan and Emily Gilbert and Timothy D.
             Brandt and Tom Barclay and Luke Bouma},
-   title = {exoplanet-dev/exoplanet v0.4.1},
-   month = nov,
+   title = {exoplanet-dev/exoplanet v0.4.3},
+   month = dec,
     year = 2020,
      doi = {10.5281/zenodo.1998447},
      url = {https://doi.org/10.5281/zenodo.1998447}
