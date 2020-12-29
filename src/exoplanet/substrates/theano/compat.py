@@ -12,8 +12,8 @@ __all__ = [
 ]
 
 import theano.tensor as tt
-from theano.ifelse import ifelse
 from exoplanet_core.theano import ops
+from theano.ifelse import ifelse
 
 numpy = tt
 

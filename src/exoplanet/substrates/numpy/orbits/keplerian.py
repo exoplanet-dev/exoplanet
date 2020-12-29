@@ -8,12 +8,12 @@ __all__ = [
 
 from collections import defaultdict
 
-from numpy import pi
 from astropy import units as u
+from numpy import pi
 
 from exoplanet.citations import add_citations_to_model
-from exoplanet.units import has_unit, to_unit
 from exoplanet.constants import G_grav, au_per_R_sun, c_light, gcc_per_sun
+from exoplanet.units import has_unit, to_unit
 
 from .. import compat
 from ..compat import numpy as np

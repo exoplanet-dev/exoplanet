@@ -13,7 +13,6 @@ __all__ = [
 ]
 
 import numpy
-
 from exoplanet_core.numpy import ops
 
 

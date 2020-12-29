@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 
-import theano
 import warnings
 
+import theano
 
 if theano.config.floatX != "float64":
     warnings.warn(

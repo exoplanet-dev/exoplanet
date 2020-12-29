@@ -2,10 +2,9 @@
 
 __all__ = ["TTVOrbit"]
 
-from .keplerian import KeplerianOrbit
-
 from .. import compat
 from ..compat import numpy as np
+from .keplerian import KeplerianOrbit
 
 
 class TTVOrbit(KeplerianOrbit):
