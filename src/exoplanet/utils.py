@@ -8,6 +8,7 @@ __all__ = [
     "get_theano_function_for_var",
     "deprecation_warning",
     "deprecated",
+    "compute_expected_transit_times",
 ]
 
 import logging
@@ -133,3 +134,28 @@ def deprecated(alternate=None):
         return f
 
     return wrapper
+
+
+def compute_expected_transit_times(min_time, max_time, period, t0):
+    """Compute the expected transit times within a dataset
+
+    Args:
+        min_time (float): The start time of the dataset
+        max_time (float): The end time of the dataset
+        period (array): The periods of the planets
+        t0 (array): The reference transit times for the planets
+
+    Returns:
+        A list of arrays of expected transit times for each planet
+
+    """
+    periods = np.atleast_1d(period)
+    t0s = np.atleast_1d(t0)
+    transit_times = []
+    for period, t0 in zip(periods, t0s):
+        min_ind = np.floor((min_time - t0) / period)
+        max_ind = np.ceil((max_time - t0) / period)
+        times = t0 + period * np.arange(min_ind, max_ind, 1)
+        times = times[(min_time <= times) & (times <= max_time)]
+        transit_times.append(times)
+    return transit_times

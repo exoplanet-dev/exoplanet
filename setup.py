@@ -4,15 +4,18 @@
 # https://hynek.me/articles/sharing-your-labor-of-love-pypi-quick-and-dirty/
 
 import codecs
+import glob
 import os
 import re
 import sys
+from shutil import copyfile
 
 from setuptools import Extension, find_packages, setup
 from setuptools.command.build_ext import build_ext
 
 # PROJECT SPECIFIC
 
+HERE = os.path.dirname(os.path.realpath(__file__))
 NAME = "exoplanet"
 PACKAGES = find_packages(where="src")
 META_PATH = os.path.join("src", "exoplanet", "__init__.py")
@@ -27,6 +30,7 @@ CLASSIFIERS = [
 ]
 SETUP_REQUIRES = ["setuptools>=40.6.0", "setuptools_scm"]
 INSTALL_REQUIRES = [
+    "exoplanet-core",
     "pybind11>=2.4",
     "numpy>=1.13.0",
     "pymc3>=3.5",
@@ -193,7 +197,23 @@ ext_modules = [
 
 # END PYBIND11
 
-HERE = os.path.dirname(os.path.realpath(__file__))
+# COPY SUBSTRATES
+
+
+def setup_substrates(filelist):
+    for substrate in ["theano"]:
+        for pattern in filelist:
+            for file in glob.glob(pattern):
+                dest = file.replace(
+                    "substrates/numpy", f"substrates/{substrate}"
+                )
+                os.makedirs(os.path.dirname(dest), exist_ok=True)
+                copyfile(file, dest)
+
+
+setup_substrates(["src/exoplanet/substrates/numpy/orbits/*.py"])
+
+# END SUBSTRATES
 
 
 def read(*parts):

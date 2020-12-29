@@ -23,3 +23,5 @@ venv-test
 *.ipynb
 .envrc
 tmp
+var
+src/exoplanet/substrates/*
