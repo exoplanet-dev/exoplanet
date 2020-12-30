@@ -13,10 +13,10 @@ from numpy import pi
 
 from exoplanet.citations import add_citations_to_model
 from exoplanet.constants import G_grav, au_per_R_sun, c_light, gcc_per_sun
-from exoplanet.units import has_unit, to_unit
 
 from .. import compat
 from ..compat import numpy as np
+from ..units import has_unit, to_unit
 
 
 class KeplerianOrbit:
@@ -89,7 +89,6 @@ class KeplerianOrbit:
         r_star=None,
         rho_star=None,
         model=None,
-        **kwargs
     ):
         add_citations_to_model(self.__citations__, model=model)
 
@@ -428,7 +427,7 @@ class KeplerianOrbit:
         # for the instantaneous velocity and acceleration of the body.
         # See the derivation at https://github.com/rodluger/starry/issues/66
         delay = compat.switch(
-            np.abs(az) < 1.0e-10,
+            compat.abs_(az) < 1.0e-10,
             (z0 - z) / (c_light + vz),
             (c_light / az)
             * (
@@ -684,78 +683,77 @@ class KeplerianOrbit:
             for x in self._get_acceleration(-self.a, -self.m_total, t)
         )
 
-    # def in_transit(self, t, r=0.0, texp=None, light_delay=False):
-    #     """Get a list of timestamps that are in transit
+    def in_transit(self, t, texp=None, light_delay=False):
+        """Get a list of timestamps that are in transit
 
-    #     Args:
-    #         t (vector): A vector of timestamps to be evaluated.
-    #         r (Optional): The radii of the planets.
-    #         texp (Optional[float]): The exposure time.
+        Args:
+            t (vector): A vector of timestamps to be evaluated.
+            texp (Optional[float]): The exposure time.
 
-    #     Returns:
-    #         The indices of the timestamps that are in transit.
+        Returns:
+            The indices of the timestamps that are in transit.
 
-    #     """
-    #     if light_delay:
-    #         raise NotImplementedError(
-    #             "Light travel time delay not yet implemented for `in_transit`"
-    #         )
+        """
+        if light_delay:
+            raise NotImplementedError(
+                "Light travel time delay not yet implemented for `in_transit`"
+            )
 
-    #     z = np.zeros_like(self.a)
-    #     r = compat.as_tensor(r) + z
-    #     R = self.r_star + z
+        z = np.zeros_like(self.a)
+        r = self.r_planet + z
+        R = self.r_star + z
 
-    #     # Wrap the times into time since transit
-    #     hp = 0.5 * self.period
-    #     dt = np.mod(self._warp_times(t) + hp, self.period) - hp
+        # Wrap the times into time since transit
+        hp = 0.5 * self.period
+        dt = np.mod(self._warp_times(t) + hp, self.period) - hp
 
-    #     if self.ecc is None:
-    #         # Equation 14 from Winn (2010)
-    #         k = r / R
-    #         arg = np.square(1 + k) - np.square(self.b)
-    #         factor = R / (self.a * self.sin_incl)
-    #         hdur = hp * np.arcsin(factor * np.sqrt(arg)) / pi
-    #         t_start = -hdur
-    #         t_end = hdur
-    #         flag = z
+        if self.ecc is None:
+            # Equation 14 from Winn (2010)
+            k = r / R
+            arg = np.square(1 + k) - np.square(self.b)
+            factor = R / (self.a * self.sin_incl)
+            hdur = hp * np.arcsin(factor * np.sqrt(arg)) / pi
+            t_start = -hdur
+            t_end = hdur
+            flag = z
 
-    #     else:
-    #         M_contact = self.contact_points(
-    #             self.a,
-    #             self.ecc,
-    #             self.cos_omega,
-    #             self.sin_omega,
-    #             self.cos_incl + z,
-    #             self.sin_incl + z,
-    #             R + r,
-    #         )
-    #         flag = M_contact[2]
+        else:
+            M_contact = compat.ops.contact_points(
+                self.a,
+                self.ecc,
+                self.cos_omega,
+                self.sin_omega,
+                self.cos_incl + z,
+                self.sin_incl + z,
+                R + r,
+            )
+            flag = M_contact[2]
 
-    #         t_start = (M_contact[0] - self.M0) / self.n
-    #         t_start = np.mod(t_start + hp, self.period) - hp
-    #         t_end = (M_contact[1] - self.M0) / self.n
-    #         t_end = np.mod(t_end + hp, self.period) - hp
+            t_start = (M_contact[0] - self.M0) / self.n
+            t_start = np.mod(t_start + hp, self.period) - hp
+            t_end = (M_contact[1] - self.M0) / self.n
+            t_end = np.mod(t_end + hp, self.period) - hp
 
-    #         t_start = compat.switch(
-    #             t_start > 0.0, t_start - self.period, t_start
-    #         )
-    #         t_end = compat.switch(t_end > 0.0, t_end + self.period, t_end)
+            t_start = compat.switch(
+                t_start > 0.0, t_start - self.period, t_start
+            )
+            t_end = compat.switch(t_end < 0.0, t_end + self.period, t_end)
 
-    #     if texp is not None:
-    #         t_start -= 0.5 * texp
-    #         t_end += 0.5 * texp
+        if texp is not None:
+            t_start -= 0.5 * texp
+            t_end += 0.5 * texp
 
-    #     mask = np.any(compat.and_(dt >= t_start, dt <= t_end), axis=-1)
+        mask = np.any(compat.and_(dt >= t_start, dt <= t_end), axis=-1)
 
-    #     result = compat.ifelse(
-    #         np.all(flag == 0),
-    #         np.arange(t.shape[0])[mask],
-    #         np.arange(t.shape[0]),
-    #     )
+        result = compat.ifelse(
+            np.all(compat.eq(flag, 0)),
+            np.arange(t.shape[0])[mask],
+            np.arange(t.shape[0]),
+        )
 
-    #     return result
+        return result
 
-    def _flip(self, r_planet, model=None):
+    def _flip(self, *, model=None):
         if self.ecc is None:
             orbit = type(self)(
                 period=self.period,
@@ -763,8 +761,9 @@ class KeplerianOrbit:
                 incl=self.incl,
                 Omega=self.Omega,
                 m_star=self.m_planet,
+                r_star=self.r_planet,
                 m_planet=self.m_star,
-                r_star=r_planet,
+                r_planet=self.r_star,
                 model=model,
             )
         else:
@@ -776,8 +775,9 @@ class KeplerianOrbit:
                 omega=self.omega - pi,
                 Omega=self.Omega,
                 m_star=self.m_planet,
+                r_star=self.r_planet,
                 m_planet=self.m_star,
-                r_star=r_planet,
+                r_planet=self.r_star,
                 model=model,
             )
         return orbit

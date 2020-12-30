@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 __all__ = [
+    "abs_",
     "and_",
     "as_tensor",
+    "eq",
     "ifelse",
     "isscalar",
     "numpy",
@@ -17,6 +19,9 @@ from exoplanet_core.theano import ops
 from theano.ifelse import ifelse
 
 numpy = tt
+eq = tt.eq
+abs_ = tt.abs_
+searchsorted = tt.extra_ops.searchsorted
 
 
 def as_tensor(x, dtype="float64", **kwargs):
@@ -40,7 +45,3 @@ def switch(m, a, b):
 
 def set_subtensor(inds, a, b):
     return tt.set_subtensor(a[inds], b)
-
-
-def searchsorted(a, v, **kwargs):
-    return tt.extra_ops.searchsorted(a, v, **kwargs)

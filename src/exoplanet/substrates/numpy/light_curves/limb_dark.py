@@ -104,13 +104,20 @@ class LimbDarkLightCurve:
                 as computed using the ``in_transit`` method on ``orbit``.
 
         """
+        use_in_transit = (
+            not light_delay if use_in_transit is None else use_in_transit
+        )
+
         r = np.reshape(orbit.r_planet, (orbit.r_planet.size,))
         t = compat.as_tensor(t)
-        model = np.zeros_like(r) + np.zeros_like(t)[..., None]
+
+        if use_in_transit:
+            model = np.zeros_like(r) + np.zeros_like(t)[..., None]
+            inds = orbit.in_transit(t, texp=texp, light_delay=light_delay)
+            t = t[inds]
 
         if texp is None:
             tgrid = t
-            # rgrid = r + np.zeros_like(t)[..., None]
         else:
             texp = compat.as_tensor(texp)
             dt, stencil = get_stencil(order, oversample)
@@ -122,23 +129,17 @@ class LimbDarkLightCurve:
             tgrid = t[..., None] + dt
 
         rgrid = r + np.zeros_like(tgrid)[..., None]
-        # rgrid = compat.broadcast_to(
-        #     r, np.concatenate((t.shape, [oversample, r.size]))
-        # )
 
         coords = orbit.get_relative_position(tgrid, light_delay=light_delay)
         b = np.sqrt(coords[0] ** 2 + coords[1] ** 2) / orbit.r_star
-        mask = compat.and_(b <= 1 + rgrid, coords[2] > 0)
-        if texp is not None:
-            mask = np.any(mask, axis=(-2, -1))
 
-        lc = self._compute_light_curve(b[mask], rgrid[mask] / orbit.r_star)
-
+        lc = self._compute_light_curve(b, rgrid / orbit.r_star)
         if texp is not None:
             lc = np.sum(stencil[:, None] * lc, axis=-2)
 
-        model = compat.set_subtensor(mask, model, lc)
-        return model
+        if use_in_transit:
+            return compat.set_subtensor(inds, model, lc)
+        return lc
 
     def _compute_light_curve(self, b, r):
         """Compute the light curve for a set of impact parameters and radii

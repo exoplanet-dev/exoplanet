@@ -8,7 +8,7 @@ import theano.tensor as tt
 from astropy.constants import c
 from scipy.optimize import minimize
 
-from exoplanet.orbits.keplerian import (
+from exoplanet.substrates.theano.orbits.keplerian import (
     KeplerianOrbit,
     _get_consistent_inputs,
     get_aor_from_transit_duration,
@@ -210,8 +210,9 @@ def test_flip():
         Omega=1.0,
         incl=0.25 * np.pi,
         m_planet=m_planet,
+        r_planet=0.7,
     )
-    orbit2 = orbit1._flip(0.7)
+    orbit2 = orbit1._flip()
 
     x1, y1, z1 = theano.function([], orbit1.get_star_position(t))()
     x2, y2, z2 = theano.function([], orbit2.get_planet_position(t))()
@@ -238,8 +239,9 @@ def test_flip_circular():
         Omega=1.0,
         incl=0.25 * np.pi,
         m_planet=m_planet,
+        r_planet=0.7,
     )
-    orbit2 = orbit1._flip(0.7)
+    orbit2 = orbit1._flip()
 
     x1, y1, z1 = theano.function([], orbit1.get_star_position(t))()
     x2, y2, z2 = theano.function([], orbit2.get_planet_position(t))()
@@ -257,6 +259,7 @@ def test_flip_circular():
 def test_in_transit():
     t = np.linspace(-20, 20, 1000)
     m_planet = np.array([0.3, 0.5])
+    r_planet = np.array([0.1, 0.03])
     m_star = 1.45
     r_star = 1.5
     orbit = KeplerianOrbit(
@@ -268,19 +271,19 @@ def test_in_transit():
         omega=np.array([0.5, 1.3]),
         Omega=np.array([0.0, 1.0]),
         m_planet=m_planet,
+        r_planet=r_planet,
     )
 
-    r_pl = np.array([0.1, 0.03])
     coords = theano.function([], orbit.get_relative_position(t))()
     r2 = coords[0] ** 2 + coords[1] ** 2
-    inds = theano.function([], orbit.in_transit(t, r=r_pl))()
+    inds = theano.function([], orbit.in_transit(t))()
 
     m = np.isin(np.arange(len(t)), inds)
-    in_ = r2[inds] <= ((r_star + r_pl) ** 2)[None, :]
+    in_ = r2[inds] <= ((r_star + r_planet) ** 2)[None, :]
     in_ &= coords[2][inds] > 0
     assert np.all(np.any(in_, axis=1))
 
-    out = r2[~m] > ((r_star + r_pl) ** 2)[None, :]
+    out = r2[~m] > ((r_star + r_planet) ** 2)[None, :]
     out |= coords[2][~m] <= 0
     assert np.all(out)
 
@@ -288,6 +291,7 @@ def test_in_transit():
 def test_in_transit_circ():
     t = np.linspace(-20, 20, 1000)
     m_planet = np.array([0.3, 0.5])
+    r_planet = np.array([0.1, 0.03])
     m_star = 1.45
     r_star = 1.5
     orbit = KeplerianOrbit(
@@ -298,6 +302,7 @@ def test_in_transit_circ():
         ecc=np.array([0.0, 0.0]),
         omega=np.array([0.0, 0.0]),
         m_planet=m_planet,
+        r_planet=r_planet,
     )
     orbit_circ = KeplerianOrbit(
         m_star=m_star,
@@ -305,11 +310,11 @@ def test_in_transit_circ():
         t0=np.array([0.5, 17.4]),
         period=np.array([10.0, 5.3]),
         m_planet=m_planet,
+        r_planet=r_planet,
     )
 
-    r_pl = np.array([0.1, 0.03])
-    inds = theano.function([], orbit.in_transit(t, r=r_pl))()
-    inds_circ = theano.function([], orbit_circ.in_transit(t, r=r_pl))()
+    inds = theano.function([], orbit.in_transit(t))()
+    inds_circ = theano.function([], orbit_circ.in_transit(t))()
     assert np.all(inds == inds_circ)
 
 
@@ -629,7 +634,7 @@ def test_get_aor_from_transit_duration():
             b=b,
             duration=duration,
             r_star=r_star,
-            ror=ror,
+            r_planet=ror * r_star,
         ),
     ]:
         x, y, z = orbit.get_planet_position(0.5 * duration)
@@ -651,7 +656,12 @@ def test_jacobians():
 
     dv = tt.as_tensor_variable(duration)
     orbit = KeplerianOrbit(
-        period=period, t0=0.0, b=b, duration=dv, r_star=r_star, ror=ror
+        period=period,
+        t0=0.0,
+        b=b,
+        duration=dv,
+        r_star=r_star,
+        r_planet=ror * r_star,
     )
     assert np.allclose(
         orbit.jacobians["duration"]["a"].eval(),
@@ -672,7 +682,12 @@ def test_jacobians():
 
     bv = tt.as_tensor_variable(b)
     orbit = KeplerianOrbit(
-        period=period, t0=0.0, b=bv, a=orbit.a, r_star=r_star, ror=ror
+        period=period,
+        t0=0.0,
+        b=bv,
+        a=orbit.a,
+        r_star=r_star,
+        r_planet=ror * r_star,
     )
     assert np.allclose(
         orbit.jacobians["b"]["cos_incl"].eval(),

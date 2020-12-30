@@ -30,20 +30,18 @@ class SecondaryEclipseLightCurve:
 
     def get_light_curve(
         self,
-        orbit=None,
-        r=None,
-        t=None,
+        *,
+        orbit,
+        t,
         texp=None,
         oversample=7,
         order=0,
         use_in_transit=None,
         light_delay=False,
     ):
-        r = compat.as_tensor(r)
-        orbit2 = orbit._flip(r)
+        orbit2 = orbit._flip()
         lc1 = self.primary.get_light_curve(
             orbit=orbit,
-            r=r,
             t=t,
             texp=texp,
             oversample=oversample,
@@ -53,7 +51,6 @@ class SecondaryEclipseLightCurve:
         )
         lc2 = self.secondary.get_light_curve(
             orbit=orbit2,
-            r=orbit.r_star,
             t=t,
             texp=texp,
             oversample=oversample,
@@ -62,7 +59,7 @@ class SecondaryEclipseLightCurve:
             light_delay=light_delay,
         )
 
-        k = r / orbit.r_star
+        k = orbit.r_planet / orbit.r_star
         flux_ratio = self.surface_brightness_ratio * k ** 2
 
         return (lc1 + flux_ratio * lc2) / (1 + flux_ratio)
