@@ -211,7 +211,12 @@ def setup_substrates(filelist):
                 copyfile(file, dest)
 
 
-setup_substrates(["src/exoplanet/substrates/numpy/orbits/*.py"])
+setup_substrates(
+    [
+        "src/exoplanet/substrates/numpy/orbits/*.py",
+        "src/exoplanet/substrates/numpy/light_curves/*.py",
+    ]
+)
 
 # END SUBSTRATES
 

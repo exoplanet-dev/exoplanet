@@ -4,6 +4,7 @@ __all__ = [
     "and_",
     "as_tensor",
     "ifelse",
+    "isscalar",
     "numpy",
     "ops",
     "searchsorted",
@@ -29,12 +30,16 @@ def and_(m1, m2):
     return tt.and_(m1, m2)
 
 
+def isscalar(x):
+    return as_tensor(x, dtype=None).ndim == 0
+
+
 def switch(m, a, b):
     return tt.switch(m, a, b)
 
 
 def set_subtensor(inds, a, b):
-    tt.set_subtensor(a[inds], b)
+    return tt.set_subtensor(a[inds], b)
 
 
 def searchsorted(a, v, **kwargs):

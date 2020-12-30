@@ -70,6 +70,7 @@ class KeplerianOrbit:
 
     def __init__(
         self,
+        *,
         period=None,
         a=None,
         t0=None,
@@ -82,11 +83,11 @@ class KeplerianOrbit:
         sin_omega=None,
         cos_omega=None,
         Omega=None,
+        r_planet=0.0,
         m_planet=0.0,
         m_star=None,
         r_star=None,
         rho_star=None,
-        ror=None,
         model=None,
         **kwargs
     ):
@@ -94,6 +95,7 @@ class KeplerianOrbit:
 
         self.jacobians = defaultdict(lambda: defaultdict(None))
 
+        self.r_planet = compat.as_tensor(r_planet)
         daordtau = None
         if ecc is None and duration is not None:
             if r_star is None:
@@ -104,7 +106,7 @@ class KeplerianOrbit:
                     "'duration'"
                 )
             aor, daordtau = get_aor_from_transit_duration(
-                duration, period, b, ror=ror
+                duration, period, b, self.r_planet / r_star
             )
             a = r_star * aor
             duration = None
@@ -682,76 +684,76 @@ class KeplerianOrbit:
             for x in self._get_acceleration(-self.a, -self.m_total, t)
         )
 
-    def in_transit(self, t, r=0.0, texp=None, light_delay=False):
-        """Get a list of timestamps that are in transit
+    # def in_transit(self, t, r=0.0, texp=None, light_delay=False):
+    #     """Get a list of timestamps that are in transit
 
-        Args:
-            t (vector): A vector of timestamps to be evaluated.
-            r (Optional): The radii of the planets.
-            texp (Optional[float]): The exposure time.
+    #     Args:
+    #         t (vector): A vector of timestamps to be evaluated.
+    #         r (Optional): The radii of the planets.
+    #         texp (Optional[float]): The exposure time.
 
-        Returns:
-            The indices of the timestamps that are in transit.
+    #     Returns:
+    #         The indices of the timestamps that are in transit.
 
-        """
-        if light_delay:
-            raise NotImplementedError(
-                "Light travel time delay not yet implemented for `in_transit`"
-            )
+    #     """
+    #     if light_delay:
+    #         raise NotImplementedError(
+    #             "Light travel time delay not yet implemented for `in_transit`"
+    #         )
 
-        z = np.zeros_like(self.a)
-        r = compat.as_tensor(r) + z
-        R = self.r_star + z
+    #     z = np.zeros_like(self.a)
+    #     r = compat.as_tensor(r) + z
+    #     R = self.r_star + z
 
-        # Wrap the times into time since transit
-        hp = 0.5 * self.period
-        dt = np.mod(self._warp_times(t) + hp, self.period) - hp
+    #     # Wrap the times into time since transit
+    #     hp = 0.5 * self.period
+    #     dt = np.mod(self._warp_times(t) + hp, self.period) - hp
 
-        if self.ecc is None:
-            # Equation 14 from Winn (2010)
-            k = r / R
-            arg = np.square(1 + k) - np.square(self.b)
-            factor = R / (self.a * self.sin_incl)
-            hdur = hp * np.arcsin(factor * np.sqrt(arg)) / pi
-            t_start = -hdur
-            t_end = hdur
-            flag = z
+    #     if self.ecc is None:
+    #         # Equation 14 from Winn (2010)
+    #         k = r / R
+    #         arg = np.square(1 + k) - np.square(self.b)
+    #         factor = R / (self.a * self.sin_incl)
+    #         hdur = hp * np.arcsin(factor * np.sqrt(arg)) / pi
+    #         t_start = -hdur
+    #         t_end = hdur
+    #         flag = z
 
-        else:
-            M_contact = self.contact_points(
-                self.a,
-                self.ecc,
-                self.cos_omega,
-                self.sin_omega,
-                self.cos_incl + z,
-                self.sin_incl + z,
-                R + r,
-            )
-            flag = M_contact[2]
+    #     else:
+    #         M_contact = self.contact_points(
+    #             self.a,
+    #             self.ecc,
+    #             self.cos_omega,
+    #             self.sin_omega,
+    #             self.cos_incl + z,
+    #             self.sin_incl + z,
+    #             R + r,
+    #         )
+    #         flag = M_contact[2]
 
-            t_start = (M_contact[0] - self.M0) / self.n
-            t_start = np.mod(t_start + hp, self.period) - hp
-            t_end = (M_contact[1] - self.M0) / self.n
-            t_end = np.mod(t_end + hp, self.period) - hp
+    #         t_start = (M_contact[0] - self.M0) / self.n
+    #         t_start = np.mod(t_start + hp, self.period) - hp
+    #         t_end = (M_contact[1] - self.M0) / self.n
+    #         t_end = np.mod(t_end + hp, self.period) - hp
 
-            t_start = compat.switch(
-                t_start > 0.0, t_start - self.period, t_start
-            )
-            t_end = compat.switch(t_end > 0.0, t_end + self.period, t_end)
+    #         t_start = compat.switch(
+    #             t_start > 0.0, t_start - self.period, t_start
+    #         )
+    #         t_end = compat.switch(t_end > 0.0, t_end + self.period, t_end)
 
-        if texp is not None:
-            t_start -= 0.5 * texp
-            t_end += 0.5 * texp
+    #     if texp is not None:
+    #         t_start -= 0.5 * texp
+    #         t_end += 0.5 * texp
 
-        mask = np.any(compat.and_(dt >= t_start, dt <= t_end), axis=-1)
+    #     mask = np.any(compat.and_(dt >= t_start, dt <= t_end), axis=-1)
 
-        result = compat.ifelse(
-            np.all(flag == 0),
-            np.arange(t.shape[0])[mask],
-            np.arange(t.shape[0]),
-        )
+    #     result = compat.ifelse(
+    #         np.all(flag == 0),
+    #         np.arange(t.shape[0])[mask],
+    #         np.arange(t.shape[0]),
+    #     )
 
-        return result
+    #     return result
 
     def _flip(self, r_planet, model=None):
         if self.ecc is None:
@@ -778,7 +780,6 @@ class KeplerianOrbit:
                 r_star=r_planet,
                 model=model,
             )
-        # orbit.contact_points = self.contact_points
         return orbit
 
 
@@ -797,7 +798,7 @@ def get_true_anomaly(M, e, **kwargs):
     return np.arctan2(sinf, cosf)
 
 
-def get_aor_from_transit_duration(duration, period, b, ror=None):
+def get_aor_from_transit_duration(duration, period, b, ror):
     """Get the semimajor axis implied by a circular orbit and duration
 
     Args:
@@ -811,8 +812,6 @@ def get_aor_from_transit_duration(duration, period, b, ror=None):
         ``d a / d duration``
 
     """
-    if ror is None:
-        ror = compat.as_tensor(0.0)
     b2 = b ** 2
     opk2 = (1 + ror) ** 2
     phi = pi * duration / period
