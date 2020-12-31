@@ -4,7 +4,7 @@ __all__ = ["test_basic"]
 
 import pymc3 as pm
 
-import exoplanet.theano as xo
+import exoplanet.pymc as xo
 
 
 def test_basic():

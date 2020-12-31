@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import theano
 
-import exoplanet.theano as xo
+import exoplanet.pymc as xo
 
 
 def test_simple():

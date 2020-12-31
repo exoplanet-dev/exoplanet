@@ -2,7 +2,7 @@
 
 import numpy as np
 
-import exoplanet.theano as xo
+import exoplanet.pymc as xo
 
 
 def test_secondary_eclipse():

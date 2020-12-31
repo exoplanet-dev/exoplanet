@@ -3,7 +3,7 @@
 import numpy as np
 import theano
 
-import exoplanet.theano as xo
+import exoplanet.pymc as xo
 from exoplanet.utils import compute_expected_transit_times
 
 

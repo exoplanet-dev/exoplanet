@@ -8,8 +8,8 @@ import theano.tensor as tt
 from astropy.constants import c
 from scipy.optimize import minimize
 
-import exoplanet.theano as xo
-from exoplanet.theano.units import with_unit
+import exoplanet.pymc as xo
+from exoplanet.pymc.units import with_unit
 
 
 def test_sky_coords():

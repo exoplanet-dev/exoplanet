@@ -8,7 +8,7 @@ import theano
 import theano.tensor as tt
 from packaging import version
 
-import exoplanet.theano as xo
+import exoplanet.pymc as xo
 
 try:
     import starry
