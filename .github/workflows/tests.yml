@@ -49,7 +49,7 @@ jobs:
           python -m pip install -U pip
           python -m pip install "${{ matrix.pymc-version }}"
           python -m pip install -e .[test]
-          python -m pip install --no-deps starry
+          python -m pip install --no-deps starry rebound-pymc3
           python -c 'import theano; print(theano.config.__str__(print_doc=False))'
 
       - name: Run tests
