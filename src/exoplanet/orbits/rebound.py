@@ -10,7 +10,7 @@ from exoplanet.pymc.orbits.keplerian import KeplerianOrbit
 try:
     from rebound_pymc3.integrate import IntegrateOp as ReboundOp
 except ImportError:
-    from ..theano_ops.rebound import ReboundOp
+    from exoplanet.pymc.ops.rebound import ReboundOp
 
 
 class ReboundOrbit(KeplerianOrbit):

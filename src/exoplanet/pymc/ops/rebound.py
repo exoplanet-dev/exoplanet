@@ -9,7 +9,7 @@ import theano
 import theano.tensor as tt
 from theano import gof
 
-from ..utils import as_tensor_variable
+from ..compat import as_tensor
 
 
 class ReboundOp(gof.Op):
@@ -23,9 +23,9 @@ class ReboundOp(gof.Op):
 
     def make_node(self, masses, initial_coords, times):
         in_args = [
-            as_tensor_variable(masses),
-            as_tensor_variable(initial_coords),
-            as_tensor_variable(times),
+            as_tensor(masses),
+            as_tensor(initial_coords),
+            as_tensor(times),
         ]
         dtype = theano.config.floatX
         out_args = [
@@ -106,9 +106,9 @@ class ReboundOp(gof.Op):
             for i in range(num_bodies):
                 for j, coord in enumerate("x y z vx vy vz".split()):
                     for k in range(num_bodies):
-                        for l in range(7):
-                            jac[ind, i, j, k, l] = getattr(
-                                var_systems[k, l].particles[i], coord
+                        for ell in range(7):
+                            jac[ind, i, j, k, ell] = getattr(
+                                var_systems[k, ell].particles[i], coord
                             )
 
         # Save the results
