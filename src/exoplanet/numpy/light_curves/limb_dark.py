@@ -5,9 +5,8 @@ __all__ = ["LimbDarkLightCurve"]
 import numpy
 from numpy import pi
 
-from exoplanet.citations import add_citations_to_model
-
 from .. import compat
+from ..citations import add_citations_to_model
 from ..compat import numpy as np
 
 
@@ -22,13 +21,15 @@ class LimbDarkLightCurve:
 
     __citations__ = ("starry",)
 
-    def __init__(self, u1, u2, model=None):
+    def __init__(self, u1, u2, *, model=None):
         add_citations_to_model(self.__citations__, model=model)
         if not compat.isscalar(u1):
             raise ValueError(
                 "Since v0.5, exoplanet only supports quadratic limb darkening "
                 "and the parameters must be provided as scalars"
             )
+        self.u1 = u1
+        self.u2 = u2
         self.c = compat.as_tensor([1 - u1 - 1.5 * u2, u1 + 2 * u2, -0.25 * u2])
         self.c /= pi * (self.c[0] + self.c[1] / 1.5)
 
@@ -51,10 +52,9 @@ class LimbDarkLightCurve:
         """
         b = compat.as_tensor(b)
         delta = compat.as_tensor(delta)
-        n = 1 + np.arange(self.u.size)
-        f0 = 1 - np.sum(2 * self.u / (n ** 2 + 3 * n + 2))
+        f0 = 1 - 2 * (self.u1 / 6.0 + self.u2 / 12.0)
         arg = 1 - np.sqrt(1 - b ** 2)
-        f = 1 - np.sum(self.u[:, None] * arg ** n[:, None], axis=0)
+        f = 1 - (self.u1 * arg + self.u2 * arg ** 2)
         factor = f0 / f
         ror = np.sqrt(delta * factor)
         if not jac:
@@ -121,11 +121,13 @@ class LimbDarkLightCurve:
         else:
             texp = compat.as_tensor(texp)
             dt, stencil = get_stencil(order, oversample)
-
             if texp.ndim == 0:
                 dt = texp * dt
             else:
-                dt = texp[..., None] * dt
+                if use_in_transit:
+                    dt = texp[inds][..., None] * dt
+                else:
+                    dt = texp[..., None] * dt
             tgrid = t[..., None] + dt
 
         rgrid = r + np.zeros_like(tgrid)[..., None]

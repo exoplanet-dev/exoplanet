@@ -10,9 +10,9 @@ class SecondaryEclipseLightCurve:
     """The light curve for a secondary eclipse model computed using starry
 
     Args:
-        u_primary (vector): A vector of limb darkening coefficients for the
+        u_primary (tuple): The limb darkening coefficients for the
             primary body.
-        u_secondary (vector): A vector of limb darkening coefficients for the
+        u_secondary (tuple): The limb darkening coefficients for the
             secondary body.
         surface_brightness_ratio (scalar): The surface brightness ratio of the
             secondary with respect to the primary.
@@ -20,10 +20,10 @@ class SecondaryEclipseLightCurve:
     """
 
     def __init__(
-        self, u_primary, u_secondary, surface_brightness_ratio, model=None
+        self, u_primary, u_secondary, surface_brightness_ratio, *, model=None
     ):
-        self.primary = LimbDarkLightCurve(u_primary, model=model)
-        self.secondary = LimbDarkLightCurve(u_secondary, model=model)
+        self.primary = LimbDarkLightCurve(*u_primary, model=model)
+        self.secondary = LimbDarkLightCurve(*u_secondary, model=model)
         self.surface_brightness_ratio = compat.as_tensor(
             surface_brightness_ratio
         )

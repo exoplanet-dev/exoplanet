@@ -418,7 +418,7 @@ def test_get_consistent_inputs():
         r_star1,
         m_star1,
         m_planet1,
-    ) = _get_consistent_inputs(
+    ) = xo.orbits.keplerian._get_consistent_inputs(
         None, period0, None, r_star0, m_star0, m_planet0
     )
 
@@ -436,7 +436,9 @@ def test_get_consistent_inputs():
         r_star2,
         m_star2,
         m_planet2,
-    ) = _get_consistent_inputs(a1, None, rho_star1, r_star0, None, m_planet1)
+    ) = xo.orbits.keplerian._get_consistent_inputs(
+        a1, None, rho_star1, r_star0, None, m_planet1
+    )
     assert np.allclose(period1.eval(), period2.eval())
     assert np.allclose(rho_star1.eval(), rho_star2.eval())
     assert np.allclose(r_star1.eval(), r_star2.eval())
@@ -450,7 +452,9 @@ def test_get_consistent_inputs():
         r_star3,
         m_star3,
         m_planet3,
-    ) = _get_consistent_inputs(a2, None, rho_star2, None, m_star2, m_planet2)
+    ) = xo.orbits.keplerian._get_consistent_inputs(
+        a2, None, rho_star2, None, m_star2, m_planet2
+    )
     assert np.allclose(period1.eval(), period3.eval())
     assert np.allclose(rho_star1.eval(), rho_star3.eval())
     assert np.allclose(r_star1.eval(), r_star3.eval())
@@ -464,7 +468,9 @@ def test_get_consistent_inputs():
         r_star4,
         m_star4,
         m_planet4,
-    ) = _get_consistent_inputs(a3, period3, None, r_star3, None, m_planet3)
+    ) = xo.orbits.keplerian._get_consistent_inputs(
+        a3, period3, None, r_star3, None, m_planet3
+    )
     assert np.allclose(period1.eval(), period4.eval())
     assert np.allclose(rho_star1.eval(), rho_star4.eval())
     assert np.allclose(r_star1.eval(), r_star4.eval())
@@ -478,7 +484,7 @@ def test_get_consistent_inputs():
         r_star5,
         m_star5,
         m_planet5,
-    ) = _get_consistent_inputs(
+    ) = xo.orbits.keplerian._get_consistent_inputs(
         a3,
         None,
         with_unit(rho_star3, u.g / u.cm ** 3),
@@ -493,13 +499,19 @@ def test_get_consistent_inputs():
     assert np.allclose(m_planet1.eval(), m_planet5.eval())
 
     with pytest.raises(ValueError):
-        _get_consistent_inputs(None, None, None, r_star3, m_star3, None)
+        xo.orbits.keplerian._get_consistent_inputs(
+            None, None, None, r_star3, m_star3, None
+        )
 
     with pytest.raises(ValueError):
-        _get_consistent_inputs(a3, period3, None, r_star3, m_star3, None)
+        xo.orbits.keplerian._get_consistent_inputs(
+            a3, period3, None, r_star3, m_star3, None
+        )
 
     with pytest.raises(ValueError):
-        _get_consistent_inputs(a3, None, rho_star3, r_star3, m_star3, None)
+        xo.orbits.keplerian._get_consistent_inputs(
+            a3, None, rho_star3, r_star3, m_star3, None
+        )
 
 
 def test_light_delay():
@@ -616,7 +628,9 @@ def test_get_aor_from_transit_duration():
     r_star = 0.7
 
     dv = tt.as_tensor_variable(duration)
-    aor, jac = get_aor_from_transit_duration(dv, period, b, ror)
+    aor, jac = xo.orbits.keplerian.get_aor_from_transit_duration(
+        dv, period, b, ror
+    )
 
     assert np.allclose(theano.grad(aor, dv).eval(), jac.eval())
 

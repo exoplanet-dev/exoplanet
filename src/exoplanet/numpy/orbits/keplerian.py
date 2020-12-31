@@ -11,10 +11,10 @@ from collections import defaultdict
 from astropy import units as u
 from numpy import pi
 
-from exoplanet.citations import add_citations_to_model
 from exoplanet.constants import G_grav, au_per_R_sun, c_light, gcc_per_sun
 
 from .. import compat
+from ..citations import add_citations_to_model
 from ..compat import numpy as np
 from ..units import has_unit, to_unit
 
