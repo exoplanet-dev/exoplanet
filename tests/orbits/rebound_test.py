@@ -73,6 +73,80 @@ def test_keplerian(orbit):
         assert np.allclose(y, y0)
         assert np.allclose(z, z0)
 
+def test_gr_orbit_low_mass_limit():
+    from exoplanet.theano_ops.rebound import ReboundOp as test_rebound_op
+    t = np.linspace(0, 40, 200)
+    m_planet = 0.01
+    m_star = 1
+    period = 100.
+    orbit = ReboundOrbit(
+        m_star=m_star,
+        r_star=1.0,
+        t0=0.5,
+        period=period,
+        ecc=0.1,
+        omega=0.5,
+        Omega=1.0,
+        incl=0.25 * np.pi,
+        m_planet=m_planet,
+    )
+
+    orbit_gr = ReboundOrbit(
+        m_star=m_star,
+        r_star=1.0,
+        t0=0.5,
+        period=period,
+        ecc=0.1,
+        omega=0.5,
+        Omega=1.0,
+        incl=0.25 * np.pi,
+        m_planet=m_planet,
+        ReboundOp=test_rebound_op,
+        gr_star=1,
+        gr_planet=0,
+    )
+    vel = np.array(theano.function([], orbit.get_relative_velocity(t))())
+    vel_gr = np.array(theano.function([], orbit_gr.get_relative_velocity(t))())
+    assert np.allclose(vel, vel_gr, atol=1e-5)
+
+def test_gr_orbit_high_mass_limit():
+    from exoplanet.theano_ops.rebound import ReboundOp as test_rebound_op
+    t = np.linspace(0, 40, 200)
+    m_planet = 1.
+    m_star = 100.
+    period = 10.0
+    orbit = ReboundOrbit(
+        m_star=m_star,
+        r_star=1.0,
+        t0=0.5,
+        period=period,
+        ecc=0.1,
+        omega=0.5,
+        Omega=1.0,
+        incl=0.25 * np.pi,
+        m_planet=m_planet,
+    )
+
+    orbit_gr = ReboundOrbit(
+        m_star=m_star,
+        r_star=1.0,
+        t0=0.5,
+        period=period,
+        ecc=0.1,
+        omega=0.5,
+        Omega=1.0,
+        incl=0.25 * np.pi,
+        m_planet=m_planet,
+        ReboundOp=test_rebound_op,
+        gr_star=1,
+        gr_planet=0,
+    )
+    vel = np.array(theano.function([], orbit.get_relative_velocity(t))())
+    vel_gr = np.array(theano.function([], orbit_gr.get_relative_velocity(t))())
+    resid_sum = np.sum(np.abs(vel[0] - vel_gr[0]))
+    assert resid_sum > 1.
+
+
 
 @pytest.mark.xfail(reason="I don't understand Theano sometimes")
 def test_tensor_bug():
