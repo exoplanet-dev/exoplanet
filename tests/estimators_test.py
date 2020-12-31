@@ -10,7 +10,7 @@ from exoplanet.estimators import (
     estimate_semi_amplitude,
     lomb_scargle_estimator,
 )
-from exoplanet.orbits import KeplerianOrbit
+from exoplanet.numpy.orbits import KeplerianOrbit
 
 
 def test_estimate_semi_amplitude(seed=9502):
@@ -34,8 +34,8 @@ def test_estimate_minimum_mass(seed=9502):
     period = 2.345
     t0 = 0.5
     orbit = KeplerianOrbit(period=period, t0=t0, m_planet=0.01, incl=0.8)
-    y = orbit.get_radial_velocity(t).eval()
-    m1 = (orbit.m_planet * orbit.sin_incl).eval()
+    y = orbit.get_radial_velocity(t)
+    m1 = orbit.m_planet * orbit.sin_incl
     m2 = estimate_minimum_mass(period, t, y).to(u.M_sun).value
     m3 = estimate_minimum_mass(period, t, y, t0s=t0).to(u.M_sun).value
     assert np.abs((m1 - m2) / m1) < 0.01

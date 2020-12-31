@@ -1,38 +1,18 @@
 # -*- coding: utf-8 -*-
 
-__all__ = ["add_citations_to_model", "CITATIONS"]
+__all__ = ["format_citations", "CITATIONS"]
 
-import logging
 import textwrap
 
-import pymc3 as pm
 
-
-def add_citations_to_model(citations, model=None):
-    try:
-        model = pm.modelcontext(model)
-        if not hasattr(model, "__citations__"):
-            model.__citations__ = dict()
-        for k in citations:
-            model.__citations__[k] = CITATIONS[k]
-
-    except TypeError:
-        pass
-
-
-def get_citations_for_model(model=None, width=79):
-    """Get the citations for the components used an exoplanet PyMC3
+def format_citations(citations, width=79):
+    """Get the citations for the components used in an exoplanet model
 
     Returns: The acknowledgement text for exoplanet and its dependencies and a
     string containing the BibTeX entries for the citations in the
     acknowledgement.
 
     """
-    model = pm.modelcontext(model)
-    if not hasattr(model, "__citations__"):
-        logging.warning("no citations registered with model")
-        return "", ""
-
     cite = (
         list(CITATIONS["exoplanet"][0])
         + list(CITATIONS["pymc3"][0])
@@ -45,7 +25,7 @@ def get_citations_for_model(model=None, width=79):
         CITATIONS["theano"][1],
         CITATIONS["arviz"][1],
     ]
-    for k, v in model.__citations__.items():
+    for k, v in citations.items():
         cite += list(v[0])
         bib.append(v[1])
 

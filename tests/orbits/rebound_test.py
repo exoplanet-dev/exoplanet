@@ -4,9 +4,9 @@ import numpy as np
 import pytest
 import theano
 
-from exoplanet.light_curves import LimbDarkLightCurve
-from exoplanet.orbits.keplerian import KeplerianOrbit
 from exoplanet.orbits.rebound import ReboundOrbit
+from exoplanet.pymc.light_curves import LimbDarkLightCurve
+from exoplanet.pymc.orbits.keplerian import KeplerianOrbit
 
 try:
     import rebound  # NOQA
@@ -74,7 +74,6 @@ def test_keplerian(orbit):
         assert np.allclose(z, z0)
 
 
-@pytest.mark.xfail(reason="I don't understand Theano sometimes")
 def test_tensor_bug():
     orbit = ReboundOrbit(
         period=50.0, t0=0.0, ecc=0.5, omega=0.1, b=0.2, m_planet=0.5
@@ -120,12 +119,13 @@ def test_keplerian_light_curve():
         b=[0.51, 0.21],
         m_star=1.51,
         r_star=1.0,
+        r_planet=r,
     )
     orbit0 = KeplerianOrbit(**args)
     orbit = ReboundOrbit(**args)
 
-    ld = LimbDarkLightCurve([0.2, 0.3])
-    lc0 = ld.get_light_curve(orbit=orbit0, r=r, t=t).eval()
-    lc = ld.get_light_curve(orbit=orbit, r=r, t=t).eval()
+    ld = LimbDarkLightCurve(0.2, 0.3)
+    lc0 = ld.get_light_curve(orbit=orbit0, t=t).eval()
+    lc = ld.get_light_curve(orbit=orbit, t=t).eval()
 
     assert np.allclose(lc0, lc)

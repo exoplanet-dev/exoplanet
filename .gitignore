@@ -23,3 +23,6 @@ venv-test
 *.ipynb
 .envrc
 tmp
+var
+src/exoplanet/pymc/orbits/*
+src/exoplanet/pymc/light_curves/*
