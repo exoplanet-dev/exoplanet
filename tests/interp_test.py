@@ -5,7 +5,7 @@ from scipy.interpolate import (
     RegularGridInterpolator as SpRegularGridInterpolator,
 )
 
-from exoplanet.interp import RegularGridInterpolator
+from exoplanet.pymc.interp import RegularGridInterpolator
 
 
 def test_basic():
@@ -23,5 +23,5 @@ def test_basic():
     f0 = interpolator(pts)
 
     op = RegularGridInterpolator((x, y, z), data)
-    f = np.squeeze(op.evaluate(pts).eval())
+    f = np.squeeze(op(pts).eval())
     assert np.allclose(f, f0)

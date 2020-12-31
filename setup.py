@@ -204,7 +204,7 @@ def setup_substrates(filelist):
     import logging
 
     logger = logging.getLogger(__name__)
-    for substrate in ["theano"]:
+    for substrate in ["pymc"]:
         for pattern in filelist:
             for source in glob.glob(f"src/exoplanet/numpy/{pattern}"):
                 dest = source.replace(
