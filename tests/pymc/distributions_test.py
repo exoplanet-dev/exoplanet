@@ -20,13 +20,19 @@ class _Base:
 
     @classmethod
     def teardown_class(cls):
-        pass
+        try:
+            pm.theanof.set_theano_conf({"compute_test_value": "off"})
+        except AttributeError:
+            pass
 
     def setup_method(self):
         np.random.seed(self.random_seed)
 
     def teardown_method(self, method):
-        pass
+        try:
+            pm.theanof.set_theano_conf({"compute_test_value": "off"})
+        except AttributeError:
+            pass
 
     def _sample(self, **kwargs):
         logger = logging.getLogger("pymc3")
