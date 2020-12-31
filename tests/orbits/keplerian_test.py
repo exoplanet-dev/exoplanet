@@ -8,12 +8,8 @@ import theano.tensor as tt
 from astropy.constants import c
 from scipy.optimize import minimize
 
-from exoplanet.substrates.theano.orbits.keplerian import (
-    KeplerianOrbit,
-    _get_consistent_inputs,
-    get_aor_from_transit_duration,
-)
-from exoplanet.units import with_unit
+import exoplanet.theano as xo
+from exoplanet.theano.units import with_unit
 
 
 def test_sky_coords():
@@ -41,7 +37,7 @@ def test_sky_coords():
     m = r_batman < 100.0
     assert m.sum() > 0
 
-    orbit = KeplerianOrbit(
+    orbit = xo.orbits.KeplerianOrbit(
         period=period, a=a, t0=t0, ecc=e, omega=omega, incl=incl
     )
     func = theano.function([], orbit.get_relative_position(t))
@@ -64,7 +60,7 @@ def test_center_of_mass():
     t = np.linspace(0, 100, 1000)
     m_planet = np.array([0.5, 0.1])
     m_star = 1.45
-    orbit = KeplerianOrbit(
+    orbit = xo.orbits.KeplerianOrbit(
         m_star=m_star,
         r_star=1.0,
         t0=np.array([0.5, 17.4]),
@@ -95,7 +91,7 @@ def test_velocity():
     t = np.linspace(0, 100, 1000)
     m_planet = 0.1
     m_star = 1.3
-    orbit = KeplerianOrbit(
+    orbit = xo.orbits.KeplerianOrbit(
         m_star=m_star,
         r_star=1.0,
         t0=0.5,
@@ -136,7 +132,7 @@ def test_radial_velocity():
     t = np.linspace(0, 100, 1000)
     m_planet = 0.1
     m_star = 1.3
-    orbit = KeplerianOrbit(
+    orbit = xo.orbits.KeplerianOrbit(
         m_star=m_star,
         r_star=1.0,
         t0=0.5,
@@ -160,7 +156,7 @@ def test_acceleration():
     t = np.linspace(0, 100, 1000)
     m_planet = 0.1
     m_star = 1.3
-    orbit = KeplerianOrbit(
+    orbit = xo.orbits.KeplerianOrbit(
         m_star=m_star,
         r_star=1.0,
         t0=0.5,
@@ -200,7 +196,7 @@ def test_flip():
     t = np.linspace(0, 100, 1000)
     m_planet = 0.1
     m_star = 1.3
-    orbit1 = KeplerianOrbit(
+    orbit1 = xo.orbits.KeplerianOrbit(
         m_star=m_star,
         r_star=1.1,
         t0=0.5,
@@ -231,7 +227,7 @@ def test_flip_circular():
     t = np.linspace(0, 100, 1000)
     m_planet = 0.1
     m_star = 1.3
-    orbit1 = KeplerianOrbit(
+    orbit1 = xo.orbits.KeplerianOrbit(
         m_star=m_star,
         r_star=1.1,
         t0=0.5,
@@ -262,7 +258,7 @@ def test_in_transit():
     r_planet = np.array([0.1, 0.03])
     m_star = 1.45
     r_star = 1.5
-    orbit = KeplerianOrbit(
+    orbit = xo.orbits.KeplerianOrbit(
         m_star=m_star,
         r_star=r_star,
         t0=np.array([0.5, 17.4]),
@@ -294,7 +290,7 @@ def test_in_transit_circ():
     r_planet = np.array([0.1, 0.03])
     m_star = 1.45
     r_star = 1.5
-    orbit = KeplerianOrbit(
+    orbit = xo.orbits.KeplerianOrbit(
         m_star=m_star,
         r_star=r_star,
         t0=np.array([0.5, 17.4]),
@@ -304,7 +300,7 @@ def test_in_transit_circ():
         m_planet=m_planet,
         r_planet=r_planet,
     )
-    orbit_circ = KeplerianOrbit(
+    orbit_circ = xo.orbits.KeplerianOrbit(
         m_star=m_star,
         r_star=r_star,
         t0=np.array([0.5, 17.4]),
@@ -330,7 +326,7 @@ def test_small_star():
     omega = 0.1
     t = np.linspace(0, period, 500)
 
-    orbit = KeplerianOrbit(
+    orbit = xo.orbits.KeplerianOrbit(
         r_star=r_star,
         m_star=m_star,
         period=period,
@@ -363,7 +359,7 @@ def test_impact():
     ecc = 0.8
     omega = 0.1
 
-    orbit = KeplerianOrbit(
+    orbit = xo.orbits.KeplerianOrbit(
         r_star=r_star,
         m_star=m_star,
         period=period,
@@ -403,7 +399,7 @@ def test_consistent_coords():
     M2 = kappa * Mtot
     M1 = Mtot - M2
 
-    orbit = KeplerianOrbit(a=a * au_to_R_sun, period=P, m_planet=M2)
+    orbit = xo.orbits.KeplerianOrbit(a=a * au_to_R_sun, period=P, m_planet=M2)
 
     assert np.allclose(M1, orbit.m_star.eval())
     assert np.allclose(M2, orbit.m_planet.eval())
@@ -516,7 +512,7 @@ def test_light_delay():
     incl = tt.scalar()
     m_planet = tt.scalar()
     t = tt.scalar()
-    orbit = KeplerianOrbit(
+    orbit = xo.orbits.KeplerianOrbit(
         m_star=m_star,
         r_star=1.0,
         t0=0.0,
@@ -570,7 +566,7 @@ def test_light_delay():
 
 
 def test_light_delay_shape_two_planets_vector_t():
-    orbit = KeplerianOrbit(period=[1.0, 2.0])
+    orbit = xo.orbits.KeplerianOrbit(period=[1.0, 2.0])
     t = np.linspace(0, 10, 50)
     x, y, z = orbit.get_planet_position(t, light_delay=False)
     xr, yr, zr = orbit.get_planet_position(t, light_delay=True)
@@ -578,35 +574,35 @@ def test_light_delay_shape_two_planets_vector_t():
 
 
 def test_light_delay_shape_scalar_t():
-    orbit = KeplerianOrbit(period=1.0)
+    orbit = xo.orbits.KeplerianOrbit(period=1.0)
     x, y, z = orbit.get_planet_position(1.0, light_delay=False)
     xr, yr, zr = orbit.get_planet_position(1.0, light_delay=True)
     assert np.array_equal(x.shape.eval(), xr.shape.eval())
 
 
 def test_light_delay_shape_single_t():
-    orbit = KeplerianOrbit(period=1.0)
+    orbit = xo.orbits.KeplerianOrbit(period=1.0)
     x, y, z = orbit.get_planet_position([1.0], light_delay=False)
     xr, yr, zr = orbit.get_planet_position([1.0], light_delay=True)
     assert np.array_equal(x.shape.eval(), xr.shape.eval())
 
 
 def test_light_delay_shape_vector_t():
-    orbit = KeplerianOrbit(period=1.0)
+    orbit = xo.orbits.KeplerianOrbit(period=1.0)
     x, y, z = orbit.get_planet_position([1.0, 2.0], light_delay=False)
     xr, yr, zr = orbit.get_planet_position([1.0, 2.0], light_delay=True)
     assert np.array_equal(x.shape.eval(), xr.shape.eval())
 
 
 def test_light_delay_shape_two_planets_scalar_t():
-    orbit = KeplerianOrbit(period=[1.0, 2.0])
+    orbit = xo.orbits.KeplerianOrbit(period=[1.0, 2.0])
     x, y, z = orbit.get_planet_position(1.0, light_delay=False)
     xr, yr, zr = orbit.get_planet_position(1.0, light_delay=True)
     assert np.array_equal(x.shape.eval(), xr.shape.eval())
 
 
 def test_light_delay_shape_two_planets_single_t():
-    orbit = KeplerianOrbit(period=[1.0, 2.0])
+    orbit = xo.orbits.KeplerianOrbit(period=[1.0, 2.0])
     x, y, z = orbit.get_planet_position([1.0], light_delay=False)
     xr, yr, zr = orbit.get_planet_position([1.0], light_delay=True)
     assert np.array_equal(x.shape.eval(), xr.shape.eval())
@@ -625,10 +621,10 @@ def test_get_aor_from_transit_duration():
     assert np.allclose(theano.grad(aor, dv).eval(), jac.eval())
 
     for orbit in [
-        KeplerianOrbit(
+        xo.orbits.KeplerianOrbit(
             period=period, t0=0.0, b=b, a=r_star * aor, r_star=r_star
         ),
-        KeplerianOrbit(
+        xo.orbits.KeplerianOrbit(
             period=period,
             t0=0.0,
             b=b,
@@ -655,7 +651,7 @@ def test_jacobians():
     r_star = 0.7
 
     dv = tt.as_tensor_variable(duration)
-    orbit = KeplerianOrbit(
+    orbit = xo.orbits.KeplerianOrbit(
         period=period,
         t0=0.0,
         b=b,
@@ -681,7 +677,7 @@ def test_jacobians():
     )
 
     bv = tt.as_tensor_variable(b)
-    orbit = KeplerianOrbit(
+    orbit = xo.orbits.KeplerianOrbit(
         period=period,
         t0=0.0,
         b=bv,

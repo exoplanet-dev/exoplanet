@@ -132,13 +132,21 @@ class LimbDarkLightCurve:
 
         coords = orbit.get_relative_position(tgrid, light_delay=light_delay)
         b = np.sqrt(coords[0] ** 2 + coords[1] ** 2) / orbit.r_star
+        b = np.reshape(b, rgrid.shape)
+        mask = np.reshape(coords[2], rgrid.shape) > 0
 
-        lc = self._compute_light_curve(b, rgrid / orbit.r_star)
+        lc = np.zeros_like(b)
+        lc = compat.set_subtensor(
+            mask,
+            lc,
+            self._compute_light_curve(b[mask], rgrid[mask] / orbit.r_star),
+        )
         if texp is not None:
             lc = np.sum(stencil[:, None] * lc, axis=-2)
 
         if use_in_transit:
-            return compat.set_subtensor(inds, model, lc)
+            model = compat.set_subtensor(inds, model, lc)
+            return model
         return lc
 
     def _compute_light_curve(self, b, r):

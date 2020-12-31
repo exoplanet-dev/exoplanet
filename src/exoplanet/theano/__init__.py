@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
-__all__ = ["orbits", "light_curves", "KeplerianOrbit", "LimbDarkLightCurve"]
-
+__all__ = ["light_curves", "LimbDarkLightCurve", "orbits", "units"]
 
 import warnings
 
 import theano
 
-from . import light_curves, orbits
+from . import light_curves, orbits, units
 from .light_curves import LimbDarkLightCurve
-from .orbits import KeplerianOrbit
 
 if theano.config.floatX != "float64":
     warnings.warn(

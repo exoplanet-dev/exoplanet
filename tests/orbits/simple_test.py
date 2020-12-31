@@ -4,8 +4,7 @@ import numpy as np
 import pytest
 import theano
 
-from exoplanet.light_curves import LimbDarkLightCurve
-from exoplanet.orbits.simple import SimpleTransitOrbit
+import exoplanet.theano as xo
 
 
 def test_simple():
@@ -21,7 +20,9 @@ def test_simple():
         < 0.5 * duration
     )
 
-    orbit = SimpleTransitOrbit(period, t0, b, duration, r_star)
+    orbit = xo.orbits.SimpleTransitOrbit(
+        period=period, duration=duration, t0=t0, b=b, r_star=r_star
+    )
 
     x, y, z = theano.function([], orbit.get_planet_position(t))()
     b_val = np.sqrt(x ** 2 + y ** 2)
@@ -60,18 +61,23 @@ def test_simple_light_curve():
         np.abs((t - t0 + 0.5 * period) % period - 0.5 * period)
         < 0.5 * duration
     )
-    orbit = SimpleTransitOrbit(period, t0, b, duration, r_star)
+    orbit = xo.orbits.SimpleTransitOrbit(
+        period=period,
+        duration=duration,
+        t0=t0,
+        b=b,
+        r_star=r_star,
+        r_planet=0.01,
+    )
 
-    star = LimbDarkLightCurve([0.2, 0.3])
-    lc1 = star.get_light_curve(
-        orbit=orbit, r=0.01, t=t, use_in_transit=False
-    ).eval()
-    lc2 = star.get_light_curve(orbit=orbit, r=0.01, t=t).eval()
+    star = xo.LimbDarkLightCurve(0.2, 0.3)
+    lc1 = star.get_light_curve(orbit=orbit, t=t, use_in_transit=False).eval()
+    lc2 = star.get_light_curve(orbit=orbit, t=t).eval()
     assert np.allclose(lc1, lc2)
     assert np.allclose(lc2[~m0], 0.0)
 
     lc1 = star.get_light_curve(
-        orbit=orbit, r=0.01, t=t, texp=0.01, use_in_transit=False
+        orbit=orbit, t=t, texp=0.01, use_in_transit=False
     ).eval()
-    lc2 = star.get_light_curve(orbit=orbit, r=0.01, t=t, texp=0.01).eval()
+    lc2 = star.get_light_curve(orbit=orbit, t=t, texp=0.01).eval()
     assert np.allclose(lc1, lc2)

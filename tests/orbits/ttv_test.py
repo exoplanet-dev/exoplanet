@@ -3,8 +3,8 @@
 import numpy as np
 import theano
 
-from exoplanet.orbits.keplerian import KeplerianOrbit
-from exoplanet.orbits.ttv import TTVOrbit, compute_expected_transit_times
+import exoplanet.theano as xo
+from exoplanet.utils import compute_expected_transit_times
 
 
 def test_compute_expected_transit_times():
@@ -32,15 +32,17 @@ def test_consistency(seed=6934104):
         min_time, max_time, periods, t0s
     )
     ttvs = [0.01 * np.random.randn(len(t)) for t in expected_times]
-    orbit = TTVOrbit(
+    orbit = xo.orbits.TTVOrbit(
         period=periods, t0=[t[0] for t in expected_times], ttvs=ttvs
     )
     calc_times = theano.function([], orbit.transit_times)()
     for i in range(len(expected_times)):
         assert np.allclose(calc_times[i], expected_times[i] + ttvs[i])
 
-    orbit1 = TTVOrbit(transit_times=orbit.transit_times)
-    orbit2 = TTVOrbit(period=orbit1.period, t0=orbit1.t0, ttvs=orbit1.ttvs)
+    orbit1 = xo.orbits.TTVOrbit(transit_times=orbit.transit_times)
+    orbit2 = xo.orbits.TTVOrbit(
+        period=orbit1.period, t0=orbit1.t0, ttvs=orbit1.ttvs
+    )
     for i in range(len(expected_times)):
         assert np.allclose(
             orbit1.transit_times[i].eval(), orbit2.transit_times[i].eval()
@@ -58,15 +60,15 @@ def test_no_ttvs():
         min_time, max_time, periods, t0s
     )
 
-    orbit0 = KeplerianOrbit(period=periods, t0=t0s)
+    orbit0 = xo.orbits.KeplerianOrbit(period=periods, t0=t0s)
 
-    orbit1 = TTVOrbit(
+    orbit1 = xo.orbits.TTVOrbit(
         period=periods,
         t0=[t[0] for t in expected_times],
         ttvs=[np.zeros_like(t) for t in expected_times],
     )
 
-    orbit2 = TTVOrbit(transit_times=expected_times)
+    orbit2 = xo.orbits.TTVOrbit(transit_times=expected_times)
 
     for arg in [
         "get_relative_position",

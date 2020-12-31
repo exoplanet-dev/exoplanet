@@ -24,4 +24,5 @@ venv-test
 .envrc
 tmp
 var
-src/exoplanet/substrates/*
+src/exoplanet/theano/orbits/*
+src/exoplanet/theano/light_curves/*

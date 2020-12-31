@@ -21,12 +21,15 @@ class SimpleTransitOrbit:
 
     """
 
-    def __init__(self, period=None, t0=0.0, b=0.0, duration=None, r_star=1.0):
+    def __init__(
+        self, *, period, duration, t0=0.0, b=0.0, r_star=1.0, r_planet=0.0
+    ):
         self.period = compat.as_tensor(period)
+        self.duration = compat.as_tensor(duration)
         self.t0 = compat.as_tensor(t0)
         self.b = compat.as_tensor(b)
-        self.duration = compat.as_tensor(duration)
         self.r_star = compat.as_tensor(r_star)
+        self.r_planet = compat.as_tensor(r_planet)
 
         self._b_norm = self.b * self.r_star
         x2 = self.r_star ** 2 - self._b_norm ** 2
@@ -75,7 +78,7 @@ class SimpleTransitOrbit:
     def get_radial_velocity(self, t, output_units=None):
         raise NotImplementedError("a SimpleTransitOrbit has no velocity")
 
-    def in_transit(self, t, r=None, texp=None, light_delay=False):
+    def in_transit(self, t, texp=None, light_delay=False):
         """Get a list of timestamps that are in transit
 
         Args:
@@ -95,11 +98,8 @@ class SimpleTransitOrbit:
             compat.as_tensor(t)[..., None] - self._ref_time, self.period
         )
         dt -= self._half_period
-        if r is None:
-            tol = 0.5 * self.duration
-        else:
-            x = (r + self.r_star) ** 2 - self._b_norm ** 2
-            tol = np.sqrt(x) / self.speed
+        x = (self.r_planet + self.r_star) ** 2 - self._b_norm ** 2
+        tol = np.sqrt(x) / self.speed
         if texp is not None:
             tol += 0.5 * texp
         mask = np.any(compat.abs_(dt) < tol, axis=-1)

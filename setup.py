@@ -201,20 +201,24 @@ ext_modules = [
 
 
 def setup_substrates(filelist):
+    import logging
+
+    logger = logging.getLogger(__name__)
     for substrate in ["theano"]:
         for pattern in filelist:
-            for file in glob.glob(pattern):
-                dest = file.replace(
-                    "substrates/numpy", f"substrates/{substrate}"
+            for source in glob.glob(f"src/exoplanet/numpy/{pattern}"):
+                dest = source.replace(
+                    "src/exoplanet/numpy", f"src/exoplanet/{substrate}"
                 )
+                logger.info(f"Copying {source} -> {dest}")
                 os.makedirs(os.path.dirname(dest), exist_ok=True)
-                copyfile(file, dest)
+                copyfile(source, dest)
 
 
 setup_substrates(
     [
-        "src/exoplanet/substrates/numpy/orbits/*.py",
-        "src/exoplanet/substrates/numpy/light_curves/*.py",
+        "orbits/*.py",
+        "light_curves/*.py",
     ]
 )
 
