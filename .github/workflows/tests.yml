@@ -55,6 +55,8 @@ jobs:
       - name: Run tests
         shell: bash -l {0}
         run: python -m pytest --cov=exoplanet -v tests
+        env:
+          THEANO_FLAGS: "floatX=float64,compute_test_value=off"
 
       - name: Get unique id
         id: unique-id

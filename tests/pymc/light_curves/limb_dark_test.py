@@ -22,14 +22,14 @@ def test_light_curve():
     u2 = tt.scalar()
     b = tt.vector()
     r = tt.vector()
+    u1_val = u1.tag.test_value = 0.2
+    u2_val = u2.tag.test_value = 0.3
+    b_val = b.tag.test_value = np.linspace(-1.5, 1.5, 100)
+    r_val = r.tag.test_value = 0.1 + np.zeros_like(b_val)
+
     lc = xo.LimbDarkLightCurve(u1, u2)
     f = lc._compute_light_curve(b, r)
     func = theano.function([u1, u2, b, r], f)
-
-    u1_val = 0.2
-    u2_val = 0.3
-    b_val = np.linspace(-1.5, 1.5, 100)
-    r_val = 0.1 + np.zeros_like(b_val)
 
     if version.parse(starry.__version__) < version.parse("0.9.9"):
         m = starry.Map(lmax=2)
