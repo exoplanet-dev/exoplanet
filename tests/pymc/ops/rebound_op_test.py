@@ -5,8 +5,8 @@ import pytest
 import theano
 import theano.tensor as tt
 
-from exoplanet.theano_ops.rebound import ReboundOp
-from exoplanet.theano_ops.test_tools import InferShapeTester
+from exoplanet.pymc.ops.rebound import ReboundOp
+from exoplanet.pymc.ops.test_tools import InferShapeTester
 
 try:
     import rebound  # NOQA
