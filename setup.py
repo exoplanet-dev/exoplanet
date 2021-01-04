@@ -46,6 +46,7 @@ EXTRA_REQUIRE = {
         "pybind11",
         "batman-package",
         "rebound; sys_platform != 'win32'",
+        "reboundx; sys_platform != 'win32'",
     ],
     "docs": [
         "sphinx>=1.7.5",
@@ -72,6 +73,7 @@ EXTRA_REQUIRE = {
     "nbody": [
         "rebound; sys_platform != 'win32'",
         "rebound_pymc3>=0.0.3; sys_platform != 'win32'",
+        "reboundx; sys_platform != 'win32'",
     ],
 }
 EXTRA_REQUIRE["dev"] = (

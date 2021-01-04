@@ -68,9 +68,17 @@ class ReboundOp(gof.Op):
 
         # Set up the simulation
         sim = rebound.Simulation()
-
+        gr_sources = []
         for k, v in self.rebound_args.items():
+            if "gr" in k and "force" not in k:
+                gr_sources += [v]
+                continue
             setattr(sim, k, v)
+
+        if "gr_force" in self.rebound_args.keys():
+            force = self.rebound_args["gr_force"]
+        else:
+            force = "gr"  # default to the gr force
 
         for i in range(num_bodies):
             sim.add(
@@ -83,6 +91,23 @@ class ReboundOp(gof.Op):
                 vz=initial_coords[i, 5],
             )
 
+        ps = sim.particles
+
+        if len(gr_sources) != 0:  # if gr_sources have been added
+            try:
+                import reboundx
+                from reboundx import constants
+            except ImportError:
+                raise ImportError(
+                    """Please install REBOUNDx to include
+                                relativistic effects."""
+                )
+            rebx = reboundx.Extras(sim)
+            gr = rebx.load_force(force)
+            gr.params["c"] = constants.C
+            for i, particle in enumerate(ps):
+                particle.params["gr_source"] = gr_sources[i]
+            rebx.add_force(gr)
         # Add the variational particles to track the derivatives
         var_systems = np.empty((num_bodies, 7), dtype=object)
         for i in range(num_bodies):
