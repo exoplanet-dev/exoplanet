@@ -1,7 +1,13 @@
+0.4.4 (2021-01-04)
+++++++++++++++++++
+
+- Adds support for relativistic orbits using REBOUNDx `#98 <https://github.com/exoplanet-dev/exoplanet/pull/98>`_
+
+
 0.4.3 (2020-12-08)
 ++++++++++++++++++
 
-- Adding support for PyMC3 v3.10 and Theano-pymc
+- Adds support for PyMC3 v3.10 and Theano-pymc
 
 
 0.4.2 (2020-11-15)
