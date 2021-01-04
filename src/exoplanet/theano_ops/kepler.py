@@ -20,8 +20,8 @@ class Kepler(theano.Op):
         out_args = [in_args[0].type(), in_args[1].type()]
         return theano.Apply(self, in_args, out_args)
 
-    def infer_shape(self, node, shapes):
-        return shapes
+    def infer_shape(self, *args):
+        return args[-1]
 
     def perform(self, node, inputs, outputs):
         M, ecc = inputs

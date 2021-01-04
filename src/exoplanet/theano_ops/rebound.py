@@ -34,7 +34,8 @@ class ReboundOp(gof.Op):
         ]
         return gof.Apply(self, in_args, out_args)
 
-    def infer_shape(self, node, shapes):
+    def infer_shape(self, *args):
+        shapes = args[-1]
         return (
             list(shapes[2]) + list(shapes[0]) + [6],
             list(shapes[2]) + list(shapes[0]) + [6] + list(shapes[0]) + [7],

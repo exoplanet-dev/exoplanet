@@ -34,7 +34,8 @@ class ContactPoints(theano.Op):
         ]
         return theano.Apply(self, in_args, out_args)
 
-    def infer_shape(self, node, shapes):
+    def infer_shape(self, *args):
+        shapes = args[-1]
         return shapes[0], shapes[0], shapes[0]
 
     def perform(self, node, inputs, outputs):

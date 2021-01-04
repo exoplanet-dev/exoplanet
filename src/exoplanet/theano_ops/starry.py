@@ -17,8 +17,8 @@ class GetClRev(theano.Op):
     itypes = (tt.dvector,)
     otypes = (tt.dvector,)
 
-    def infer_shape(self, node, shapes):
-        return shapes
+    def infer_shape(self, *args):
+        return args[-1]
 
     def perform(self, node, inputs, outputs):
         bc = inputs[0]
@@ -35,8 +35,8 @@ class GetCl(theano.Op):
     itypes = (tt.dvector,)
     otypes = (tt.dvector,)
 
-    def infer_shape(self, node, shapes):
-        return shapes
+    def infer_shape(self, *args):
+        return args[-1]
 
     def perform(self, node, inputs, outputs):
         u = inputs[0]
@@ -85,7 +85,8 @@ class LimbDark(theano.Op):
         ]
         return theano.Apply(self, in_args, out_args)
 
-    def infer_shape(self, node, shapes):
+    def infer_shape(self, *args):
+        shapes = args[-1]
         return (
             shapes[1],
             list(shapes[0]) + list(shapes[1]),
@@ -239,7 +240,8 @@ class RadiusFromOccArea(theano.Op):
         out_args = [in_args[1].type()]
         return theano.Apply(self, in_args, out_args)
 
-    def infer_shape(self, node, shapes):
+    def infer_shape(self, *args):
+        shapes = args[-1]
         return (shapes[1],)
 
     def perform(self, node, inputs, outputs):
