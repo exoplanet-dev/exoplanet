@@ -64,12 +64,12 @@ CITATIONS = {
         ("exoplanet:exoplanet",),
         r"""
 @misc{exoplanet:exoplanet,
-  author = {Daniel Foreman-Mackey and Rodrigo Luger and Ian Czekala and
-            Eric Agol and Adrian Price-Whelan and Emily Gilbert and Timothy D.
-            Brandt and Tom Barclay and Luke Bouma},
-   title = {exoplanet-dev/exoplanet v0.4.3},
-   month = dec,
-    year = 2020,
+  author = {Daniel Foreman-Mackey and Arjun Savel and Rodrigo Luger and
+            Ian Czekala and Eric Agol and Adrian Price-Whelan and
+            Emily Gilbert and Timothy D. Brandt and Tom Barclay and Luke Bouma},
+   title = {exoplanet-dev/exoplanet v0.4.4},
+   month = jan,
+    year = 2021,
      doi = {10.5281/zenodo.1998447},
      url = {https://doi.org/10.5281/zenodo.1998447}
 }
