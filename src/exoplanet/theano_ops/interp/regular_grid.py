@@ -34,6 +34,9 @@ class RegularGridOp(COp):
         self.bounds_error = bool(bounds_error)
         super(RegularGridOp, self).__init__(self.func_file, self.func_name)
 
+    def perform(self, *args):
+        raise NotImplementedError("Only the C version is implemented")
+
     def c_code_cache_version(self):
         if "dev" in __version__:
             return ()
