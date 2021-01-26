@@ -9,7 +9,7 @@ import theano
 import theano.tensor as tt
 
 from ...exoplanet_version import __version__
-from .compat import Apply, COp, ParamsType
+from ..compat import Apply, COp, ParamsType
 
 
 class RegularGridOp(COp):
