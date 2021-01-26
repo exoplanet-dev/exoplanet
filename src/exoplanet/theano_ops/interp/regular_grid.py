@@ -34,24 +34,24 @@ class RegularGridOp(COp):
         self.bounds_error = bool(bounds_error)
         super(RegularGridOp, self).__init__(self.func_file, self.func_name)
 
-    def perform(self, *args):
+    def perform(self, *args, **kwargs):
         raise NotImplementedError("Only the C version is implemented")
 
-    def c_code_cache_version(self):
+    def c_code_cache_version(self, *args, **kwargs):
         if "dev" in __version__:
             return ()
         return tuple(map(int, __version__.split(".")))
 
-    def c_headers(self, compiler):
+    def c_headers(self, *args, **kwargs):
         return ["theano_helpers.h"]
 
-    def c_header_dirs(self, compiler):
+    def c_header_dirs(self, *args, **kwargs):
         return [
             pkg_resources.resource_filename(__name__, "include"),
             pkg_resources.resource_filename(__name__, "../lib/vendor/eigen"),
         ]
 
-    def c_compile_args(self, compiler):
+    def c_compile_args(self, *args, **kwargs):
         args = ["-std=c++11", "-DNDEBUG"]
         if sys.platform == "darwin":
             args += ["-stdlib=libc++", "-mmacosx-version-min=10.7"]
