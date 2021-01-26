@@ -7,13 +7,13 @@ import sys
 import pkg_resources
 import theano
 import theano.tensor as tt
-from theano import gof
 
 from ...exoplanet_version import __version__
+from .compat import Apply, COp, ParamsType
 
 
-class RegularGridOp(gof.COp):
-    params_type = gof.ParamsType(
+class RegularGridOp(COp):
+    params_type = ParamsType(
         ndim=theano.scalar.int64,
         nout=theano.scalar.int64,
         check_sorted=theano.scalar.bool,
@@ -102,7 +102,7 @@ class RegularGridOp(gof.COp):
             tt.TensorType(dtype=dtype, broadcastable=[False, False])(),
             tt.TensorType(dtype=dtype, broadcastable=[False, False, False])(),
         ]
-        return gof.Apply(self, in_args, out_args)
+        return Apply(self, in_args, out_args)
 
     def grad(self, inputs, gradients):
         xi = inputs[0]

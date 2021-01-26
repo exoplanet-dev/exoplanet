@@ -9,10 +9,11 @@ from scipy.optimize import bisect
 
 from ..utils import as_tensor_variable
 from . import driver
+from .compat import Apply, Op
 from .helpers import resize_or_set
 
 
-class GetClRev(theano.Op):
+class GetClRev(Op):
     __props__ = ()
     itypes = (tt.dvector,)
     otypes = (tt.dvector,)
@@ -29,7 +30,7 @@ class GetClRev(theano.Op):
 get_cl_rev = GetClRev()
 
 
-class GetCl(theano.Op):
+class GetCl(Op):
 
     __props__ = ()
     itypes = (tt.dvector,)
@@ -55,7 +56,7 @@ class GetCl(theano.Op):
 get_cl = GetCl()
 
 
-class LimbDark(theano.Op):
+class LimbDark(Op):
     __props__ = ()
 
     def __init__(self):
@@ -83,7 +84,7 @@ class LimbDark(theano.Op):
             in_args[1].type(),
             in_args[2].type(),
         ]
-        return theano.Apply(self, in_args, out_args)
+        return Apply(self, in_args, out_args)
 
     def infer_shape(self, *args):
         shapes = args[-1]
@@ -215,7 +216,7 @@ def depth_grad(r, b):
 #
 
 
-class RadiusFromOccArea(theano.Op):
+class RadiusFromOccArea(Op):
     def __init__(self, **kwargs):
         self.kwargs = kwargs
 
@@ -238,7 +239,7 @@ class RadiusFromOccArea(theano.Op):
     def make_node(self, delta, b):
         in_args = [as_tensor_variable(delta), as_tensor_variable(b)]
         out_args = [in_args[1].type()]
-        return theano.Apply(self, in_args, out_args)
+        return Apply(self, in_args, out_args)
 
     def infer_shape(self, *args):
         shapes = args[-1]
