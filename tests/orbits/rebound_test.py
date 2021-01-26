@@ -15,6 +15,11 @@ except ImportError:
         "skipping rebound tests when not installed", allow_module_level=True
     )
 
+try:
+    import reboundx
+except ImportError:
+    reboundx = None
+
 
 @pytest.mark.parametrize(
     "orbit",
@@ -73,12 +78,15 @@ def test_keplerian(orbit):
         assert np.allclose(y, y0)
         assert np.allclose(z, z0)
 
+
+@pytest.mark.skipif(reboundx is None, reason="REBOUNDx not installed")
 def test_gr_orbit_low_mass_limit():
     from exoplanet.theano_ops.rebound import ReboundOp as test_rebound_op
+
     t = np.linspace(0, 40, 200)
     m_planet = 0.01
     m_star = 1
-    period = 100.
+    period = 100.0
     orbit = ReboundOrbit(
         m_star=m_star,
         r_star=1.0,
@@ -109,11 +117,14 @@ def test_gr_orbit_low_mass_limit():
     vel_gr = np.array(theano.function([], orbit_gr.get_relative_velocity(t))())
     assert np.allclose(vel, vel_gr, atol=1e-5)
 
+
+@pytest.mark.skipif(reboundx is None, reason="REBOUNDx not installed")
 def test_gr_orbit_high_mass_limit():
     from exoplanet.theano_ops.rebound import ReboundOp as test_rebound_op
+
     t = np.linspace(0, 40, 200)
-    m_planet = 1.
-    m_star = 100.
+    m_planet = 1.0
+    m_star = 100.0
     period = 10.0
     orbit = ReboundOrbit(
         m_star=m_star,
@@ -144,8 +155,7 @@ def test_gr_orbit_high_mass_limit():
     vel = np.array(theano.function([], orbit.get_relative_velocity(t))())
     vel_gr = np.array(theano.function([], orbit_gr.get_relative_velocity(t))())
     resid_sum = np.sum(np.abs(vel[0] - vel_gr[0]))
-    assert resid_sum > 1.
-
+    assert resid_sum > 1.0
 
 
 @pytest.mark.xfail(reason="I don't understand Theano sometimes")
