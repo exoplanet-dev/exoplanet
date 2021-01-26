@@ -7,12 +7,12 @@ import warnings
 import numpy as np
 import theano
 import theano.tensor as tt
-from theano import gof
 
 from ..utils import as_tensor_variable
+from .compat import Apply, Op
 
 
-class ReboundOp(gof.Op):
+class ReboundOp(Op):
 
     __props__ = ()
 
@@ -32,9 +32,10 @@ class ReboundOp(gof.Op):
             tt.TensorType(dtype=dtype, broadcastable=[False] * 3)(),
             tt.TensorType(dtype=dtype, broadcastable=[False] * 5)(),
         ]
-        return gof.Apply(self, in_args, out_args)
+        return Apply(self, in_args, out_args)
 
-    def infer_shape(self, node, shapes):
+    def infer_shape(self, *args):
+        shapes = args[-1]
         return (
             list(shapes[2]) + list(shapes[0]) + [6],
             list(shapes[2]) + list(shapes[0]) + [6] + list(shapes[0]) + [7],

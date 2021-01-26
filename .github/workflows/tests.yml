@@ -17,8 +17,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8"]
-        pymc-version: ["pymc3==3.9", "pymc3==3.10"]
+        python-version: ["3.8"]
+        pymc-version: ["pymc3==3.9.3", "pymc3==3.10", "pymc3==3.11"]
         include:
           - python-version: "3.8"
             pymc-version: "https://github.com/pymc-devs/pymc3/archive/master.zip"

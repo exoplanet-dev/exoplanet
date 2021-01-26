@@ -19,19 +19,11 @@ from exoplanet.distributions.base import (
 class _Base:
     random_seed = 20160911
 
-    @classmethod
-    def setup_class(cls):
-        np.random.seed(cls.random_seed)
-
-    @classmethod
-    def teardown_class(cls):
-        pm.theanof.set_theano_conf({"compute_test_value": "off"})
-
-    def setup_method(self):
-        np.random.seed(self.random_seed)
-
     def teardown_method(self, method):
-        pm.theanof.set_theano_conf({"compute_test_value": "off"})
+        try:
+            pm.theanof.set_theano_conf({"compute_test_value": "off"})
+        except AttributeError:
+            pass
 
     def _sample(self, **kwargs):
         logger = logging.getLogger("pymc3")
@@ -42,6 +34,7 @@ class _Base:
         return pm.sample(**kwargs)
 
     def _model(self, **kwargs):
+        np.random.seed(self.random_seed)
         return pm.Model(**kwargs)
 
 

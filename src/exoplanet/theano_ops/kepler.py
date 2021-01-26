@@ -7,10 +7,11 @@ import theano.tensor as tt
 
 from ..utils import as_tensor_variable
 from . import driver
+from .compat import Apply, Op
 from .helpers import resize_or_set
 
 
-class Kepler(theano.Op):
+class Kepler(Op):
     __props__ = ()
 
     def make_node(self, M, ecc):
@@ -18,10 +19,10 @@ class Kepler(theano.Op):
         if any(i.dtype != "float64" for i in in_args):
             raise ValueError("float64 dtypes are required for Kepler op")
         out_args = [in_args[0].type(), in_args[1].type()]
-        return theano.Apply(self, in_args, out_args)
+        return Apply(self, in_args, out_args)
 
-    def infer_shape(self, node, shapes):
-        return shapes
+    def infer_shape(self, *args):
+        return args[-1]
 
     def perform(self, node, inputs, outputs):
         M, ecc = inputs

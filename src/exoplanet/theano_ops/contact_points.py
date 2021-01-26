@@ -3,15 +3,15 @@
 __all__ = ["contact_points"]
 
 import numpy as np
-import theano
 import theano.tensor as tt
 
 from ..utils import as_tensor_variable
 from . import driver
+from .compat import Apply, Op
 from .helpers import resize_or_set
 
 
-class ContactPoints(theano.Op):
+class ContactPoints(Op):
     __props__ = ()
 
     def __init__(self, tol=1e-10):
@@ -32,9 +32,10 @@ class ContactPoints(theano.Op):
                 dtype="int32", broadcastable=[False] * in_args[0].ndim
             )(),
         ]
-        return theano.Apply(self, in_args, out_args)
+        return Apply(self, in_args, out_args)
 
-    def infer_shape(self, node, shapes):
+    def infer_shape(self, *args):
+        shapes = args[-1]
         return shapes[0], shapes[0], shapes[0]
 
     def perform(self, node, inputs, outputs):

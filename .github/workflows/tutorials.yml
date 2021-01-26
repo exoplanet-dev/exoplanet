@@ -33,6 +33,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip
+          python -m pip install "pymc3<3.10"
           python -m pip install ".[tutorials]"
 
       - name: Execute the notebooks

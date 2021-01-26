@@ -7,13 +7,13 @@ import sys
 import pkg_resources
 import theano
 import theano.tensor as tt
-from theano import gof
 
 from ...exoplanet_version import __version__
+from ..compat import Apply, COp, ParamsType
 
 
-class RegularGridOp(gof.COp):
-    params_type = gof.ParamsType(
+class RegularGridOp(COp):
+    params_type = ParamsType(
         ndim=theano.scalar.int64,
         nout=theano.scalar.int64,
         check_sorted=theano.scalar.bool,
@@ -34,21 +34,24 @@ class RegularGridOp(gof.COp):
         self.bounds_error = bool(bounds_error)
         super(RegularGridOp, self).__init__(self.func_file, self.func_name)
 
-    def c_code_cache_version(self):
+    def perform(self, *args, **kwargs):
+        raise NotImplementedError("Only the C version is implemented")
+
+    def c_code_cache_version(self, *args, **kwargs):
         if "dev" in __version__:
             return ()
         return tuple(map(int, __version__.split(".")))
 
-    def c_headers(self, compiler):
+    def c_headers(self, *args, **kwargs):
         return ["theano_helpers.h"]
 
-    def c_header_dirs(self, compiler):
+    def c_header_dirs(self, *args, **kwargs):
         return [
             pkg_resources.resource_filename(__name__, "include"),
             pkg_resources.resource_filename(__name__, "../lib/vendor/eigen"),
         ]
 
-    def c_compile_args(self, compiler):
+    def c_compile_args(self, *args, **kwargs):
         args = ["-std=c++11", "-DNDEBUG"]
         if sys.platform == "darwin":
             args += ["-stdlib=libc++", "-mmacosx-version-min=10.7"]
@@ -102,7 +105,7 @@ class RegularGridOp(gof.COp):
             tt.TensorType(dtype=dtype, broadcastable=[False, False])(),
             tt.TensorType(dtype=dtype, broadcastable=[False, False, False])(),
         ]
-        return gof.Apply(self, in_args, out_args)
+        return Apply(self, in_args, out_args)
 
     def grad(self, inputs, gradients):
         xi = inputs[0]
