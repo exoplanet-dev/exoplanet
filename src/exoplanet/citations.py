@@ -331,8 +331,46 @@ publisher={PeerJ Inc.}
     "rebound": (
         ("exoplanet:rebound",),
         r"""
-FIXME!!
+@ARTICLE{rebound,
+       author = {{Rein}, H. and {Liu}, S. -F.},
+        title = "{REBOUND: an open-source multi-purpose N-body code for collisional dynamics}",
+      journal = {\aap},
+     keywords = {methods: numerical, planets and satellites: rings, protoplanetary disks, Astrophysics - Earth and Planetary Astrophysics, Astrophysics - Instrumentation and Methods for Astrophysics, Mathematics - Dynamical Systems, Physics - Computational Physics},
+         year = 2012,
+        month = jan,
+       volume = {537},
+          eid = {A128},
+        pages = {A128},
+          doi = {10.1051/0004-6361/201118085},
+archivePrefix = {arXiv},
+       eprint = {1110.4876},
+ primaryClass = {astro-ph.EP},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/2012A&A...537A.128R},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
 """,
+    ),
+    "reboundias15": (
+        ("exoplanet:reboundias15",),
+        r"""
+@ARTICLE{reboundias15,
+       author = {{Rein}, Hanno and {Spiegel}, David S.},
+        title = "{IAS15: a fast, adaptive, high-order integrator for gravitational dynamics, accurate to machine precision over a billion orbits}",
+      journal = {\mnras},
+     keywords = {gravitation, methods: numerical, planets and satellites: dynamical evolution and stability, Astrophysics - Earth and Planetary Astrophysics, Astrophysics - Instrumentation and Methods for Astrophysics, Astrophysics - Solar and Stellar Astrophysics, Mathematics - Numerical Analysis},
+         year = 2015,
+        month = jan,
+       volume = {446},
+       number = {2},
+        pages = {1424-1437},
+          doi = {10.1093/mnras/stu2164},
+archivePrefix = {arXiv},
+       eprint = {1409.4779},
+ primaryClass = {astro-ph.EP},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/2015MNRAS.446.1424R},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+"""
     ),
     "vaneylen19": (
         ("exoplanet:vaneylen19",),
