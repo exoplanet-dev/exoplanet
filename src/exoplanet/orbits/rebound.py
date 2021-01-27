@@ -40,7 +40,8 @@ class ReboundOrbit(KeplerianOrbit):
 
     """
 
-    __citations__ = ("astropy", "rebound")
+    __citations__ = ("astropy", "rebound", "reboundias15,"
+                                           "reboundx")
 
     def __init__(self, *args, **kwargs):
         rebound_args = dict(
