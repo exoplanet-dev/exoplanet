@@ -370,7 +370,7 @@ archivePrefix = {arXiv},
        adsurl = {https://ui.adsabs.harvard.edu/abs/2015MNRAS.446.1424R},
       adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
-"""
+""",
     ),
     "vaneylen19": (
         ("exoplanet:vaneylen19",),
