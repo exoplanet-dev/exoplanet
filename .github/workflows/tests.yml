@@ -60,20 +60,7 @@ jobs:
         uses: AndreMiras/coveralls-python-action@develop
         with:
           parallel: true
-          flag-name: Unit Test
-
-      - name: Get unique id
-        id: unique-id
-        env:
-          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
-        run: |
-          export JOB_ID=`echo $STRATEGY_CONTEXT | md5sum`
-          echo "::set-output name=id::$JOB_ID"
-
-      - uses: actions/upload-artifact@v2
-        with:
-          name: cov-${{ steps.unique-id.outputs.id }}
-          path: .coverage
+          flag-name: Unit Tests
 
   coverage:
     name: "Merge and upload coverage"
@@ -84,20 +71,3 @@ jobs:
         uses: AndreMiras/coveralls-python-action@develop
         with:
           parallel-finished: true
-
-#       - uses: actions/checkout@v2
-#         with:
-#           fetch-depth: 0
-#       - name: Set up Python
-#         uses: actions/setup-python@v1
-#         with:
-#           python-version: 3.7
-#       - name: Download all artifacts
-#         uses: actions/download-artifact@v2
-#       - name: Merge and upload coverage
-#         run: |
-#           python -m pip install coveralls
-#           find . -name \.coverage -exec coverage combine --append {} \;
-#           coveralls
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.github_token }}
