@@ -2,6 +2,7 @@
 
 __all__ = ["kepler"]
 
+import numpy as np
 import theano
 import theano.tensor as tt
 
@@ -28,7 +29,7 @@ class Kepler(Op):
         M, ecc = inputs
         sinf = resize_or_set(outputs, 0, M.shape)
         cosf = resize_or_set(outputs, 1, M.shape)
-        driver.kepler(M, ecc, sinf, cosf)
+        driver.kepler(M % (2 * np.pi), ecc, sinf, cosf)
 
     def grad(self, inputs, gradients):
         M, e = inputs

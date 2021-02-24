@@ -50,6 +50,21 @@ class TestKeplerSolver(InferShapeTester):
         assert np.allclose(np.sin(f), sinf0)
         assert np.allclose(np.cos(f), cosf0)
 
+    def test_twopi(self):
+        e = np.linspace(0, 1.0, 100)[:-1]
+        M = 2 * np.pi + np.zeros_like(e)
+
+        M_t = tt.dvector()
+        e_t = tt.dvector()
+        func = theano.function([M_t, e_t], self.op(M_t, e_t))
+        sinf0, cosf0 = func(np.zeros_like(M), e)
+        sinf, cosf = func(M, e)
+
+        assert np.all(np.isfinite(sinf0))
+        assert np.all(np.isfinite(cosf0))
+        assert np.allclose(sinf, sinf0)
+        assert np.allclose(cosf, cosf0)
+
     def test_solver(self):
         e = np.linspace(0, 1, 500)[:-1]
         E = np.linspace(-300, 300, 1001)
