@@ -27,9 +27,9 @@ CLASSIFIERS = [
 ]
 SETUP_REQUIRES = ["setuptools>=40.6.0", "setuptools_scm"]
 INSTALL_REQUIRES = [
-    "pybind11>=2.4",
     "numpy>=1.13.0",
     "pymc3>=3.5",
+    "arviz<0.11",
     "astropy>=3.1",
     "pymc3-ext>=0.0.1",
 ]
@@ -38,7 +38,6 @@ EXTRA_REQUIRE = {
         "scipy",
         "nose",
         "parameterized",
-        "arviz",
         "pytest",
         "pytest-cov>=2.6.1",
         "pytest-env",
