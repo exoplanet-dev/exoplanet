@@ -28,7 +28,7 @@ CLASSIFIERS = [
 SETUP_REQUIRES = ["setuptools>=40.6.0", "setuptools_scm"]
 INSTALL_REQUIRES = [
     "numpy>=1.13.0",
-    "pymc3>=3.5,<3.11",
+    "pymc3>=3.5",
     "arviz<0.11",
     "astropy>=3.1",
     "pymc3-ext>=0.0.1",
