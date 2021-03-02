@@ -64,12 +64,17 @@ def test_simple_light_curve_compare_kepler():
         period=period, t0=t0, b=b, r_star=r_star, m_star=1
     )
     duration = (period / np.pi) * np.arcsin(
-        ((r_star) ** 2 - (b * r_star) ** 2) ** 0.5 / orbit_keplerian.a
+        ((r_star + r) ** 2 - (b * r_star) ** 2) ** 0.5 / orbit_keplerian.a
     ).eval()
 
     lc_keplerian = star.get_light_curve(orbit=orbit_keplerian, r=r, t=t)
     orbit_simple1 = SimpleTransitOrbit(
-        period=period, t0=t0, b=b, duration=duration, r_star=r_star
+        period=period,
+        t0=t0,
+        b=b,
+        duration=duration,
+        r_star=r_star,
+        ror=r / r_star,
     )
     lc_simple1 = star.get_light_curve(orbit=orbit_simple1, r=r, t=t)
 
@@ -78,5 +83,7 @@ def test_simple_light_curve_compare_kepler():
 
     # No duration/semimajor axis inputs should raise error
     with pytest.raises(ValueError) as err:
-        SimpleTransitOrbit(period=period, t0=t0, b=b, r_star=r_star)
+        SimpleTransitOrbit(
+            period=period, t0=t0, b=b, r_star=r_star, ror=r / r_star
+        )
     # Both duration/semimajor axis inputs should raise error
