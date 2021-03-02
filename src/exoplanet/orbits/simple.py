@@ -3,7 +3,7 @@
 __all__ = ["SimpleTransitOrbit"]
 
 import theano.tensor as tt
-
+import numpy as np
 from ..utils import as_tensor_variable
 
 
@@ -18,15 +18,27 @@ class SimpleTransitOrbit:
         t0: The midpoint time of a reference transit for each planet in days.
         b: The impact parameters of the orbits.
         duration: The durations of the transits in days.
+        a: The semimajor axes of the orbits in ``R_sun``.
         r_star: The radius of the star in ``R_sun``.
 
     """
 
-    def __init__(self, period=None, t0=0.0, b=0.0, duration=None, r_star=1.0):
+    def __init__(
+        self, period=None, t0=0.0, b=0.0, duration=None, r_star=1.0, a=None
+    ):
         self.period = as_tensor_variable(period)
         self.t0 = as_tensor_variable(t0)
         self.b = as_tensor_variable(b)
-        self.duration = as_tensor_variable(duration)
+        if (a is None) and (duration is not None):
+            self.duration = as_tensor_variable(duration)
+        elif (a is not None) and (duration is None):
+            self.a = a
+            self.duration = (period / np.pi) * np.arcsin(
+                ((r_star) ** 2 - (b * r_star) ** 2) ** 0.5 / self.a
+            )
+        else:
+            raise ValueError("Either `a` OR `duration` must be provided.")
+
         self.r_star = as_tensor_variable(r_star)
 
         self._b_norm = self.b * self.r_star
@@ -61,7 +73,7 @@ class SimpleTransitOrbit:
         dt -= self._half_period
         x = tt.squeeze(self.speed * dt)
         y = tt.squeeze(self._b_norm + tt.zeros_like(dt))
-        m = tt.abs_(dt) < 0.5 * self.duration
+        m = tt.abs_(dt) < self.duration
         z = tt.squeeze(m * 1.0 - (~m) * 1.0)
         return x, y, z
 
