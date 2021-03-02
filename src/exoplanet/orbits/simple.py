@@ -2,8 +2,9 @@
 
 __all__ = ["SimpleTransitOrbit"]
 
-import theano.tensor as tt
 import numpy as np
+import theano.tensor as tt
+
 from ..utils import as_tensor_variable
 
 
