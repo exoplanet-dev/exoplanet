@@ -19,26 +19,18 @@ class SimpleTransitOrbit:
         t0: The midpoint time of a reference transit for each planet in days.
         b: The impact parameters of the orbits.
         duration: The durations of the transits in days.
-        a: The semimajor axes of the orbits in ``R_sun``.
         r_star: The radius of the star in ``R_sun``.
 
     """
 
-    def __init__(
-        self, period=None, t0=0.0, b=0.0, duration=None, r_star=1.0, a=None
-    ):
+    def __init__(self, period=None, t0=0.0, b=0.0, duration=None, r_star=1.0):
         self.period = as_tensor_variable(period)
         self.t0 = as_tensor_variable(t0)
         self.b = as_tensor_variable(b)
-        if (a is None) and (duration is not None):
+        if duration is not None:
             self.duration = as_tensor_variable(duration)
-        elif (a is not None) and (duration is None):
-            self.a = a
-            self.duration = (period / np.pi) * np.arcsin(
-                ((r_star) ** 2 - (b * r_star) ** 2) ** 0.5 / self.a
-            )
         else:
-            raise ValueError("Either `a` OR `duration` must be provided.")
+            raise ValueError("`duration` must be provided.")
 
         self.r_star = as_tensor_variable(r_star)
 

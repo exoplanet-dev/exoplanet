@@ -5,7 +5,8 @@ import pytest
 import theano
 
 from exoplanet.light_curves import LimbDarkLightCurve
-from exoplanet.orbits.simple import SimpleTransitOrbit
+from exoplanet.orbits import SimpleTransitOrbit
+from exoplanet.orbits import KeplerianOrbit
 
 
 def test_simple():
@@ -57,37 +58,25 @@ def test_simple_light_curve_compare_kepler():
     r = 0.01
     r_star = 1
     b = 1 - r / r_star * 3
+
+    star = LimbDarkLightCurve([0])
+    orbit_keplerian = KeplerianOrbit(
+        period=period, t0=t0, b=b, r_star=r_star, m_star=1
+    )
     duration = (period / np.pi) * np.arcsin(
         ((r_star) ** 2 - (b * r_star) ** 2) ** 0.5 / orbit_keplerian.a
     ).eval()
 
-    star = xo.LimbDarkLightCurve([0])
-    orbit_keplerian = xo.orbits.KeplerianOrbit(
-        period=period, t0=t0, b=b, r_star=r_star, m_star=1
-    )
     lc_keplerian = star.get_light_curve(orbit=orbit_keplerian, r=r, t=t)
-    orbit_simple1 = xo.orbits.SimpleTransitOrbit(
+    orbit_simple1 = SimpleTransitOrbit(
         period=period, t0=t0, b=b, duration=duration, r_star=r_star
     )
-    lc_simple1 = xo.LimbDarkLightCurve([0]).get_light_curve(
-        orbit=orbit_simple1, r=r, t=t
-    )
-    orbit_simple2 = xo.orbits.SimpleTransitOrbit(
-        period=period, t0=t0, b=b, a=orbit_keplerian.a, r_star=r_star
-    )
-    lc_simple2 = xo.LimbDarkLightCurve([0]).get_light_curve(
-        orbit=orbit_simple2, r=r, t=t
-    )
+    lc_simple1 = star.get_light_curve(orbit=orbit_simple1, r=r, t=t)
 
     # Should look similar to Keplerian orbit
     assert np.allclose(lc_keplerian.eval(), lc_simple1.eval(), rtol=0.001)
-    assert np.allclose(lc_simple1.eval(), lc_simple2.eval(), rtol=0.000001)
 
     # No duration/semimajor axis inputs should raise error
     with pytest.raises(ValueError) as err:
-        xo.orbits.SimpleTransitOrbit(period=period, t0=t0, b=b, r_star=r_star)
+        SimpleTransitOrbit(period=period, t0=t0, b=b, r_star=r_star)
     # Both duration/semimajor axis inputs should raise error
-    with pytest.raises(ValueError) as err:
-        xo.orbits.SimpleTransitOrbit(
-            period=period, t0=t0, b=b, duration=1, a=1, r_star=r_star
-        )
