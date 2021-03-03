@@ -23,17 +23,11 @@ class SimpleTransitOrbit:
 
     """
 
-    def __init__(
-        self, period=None, t0=0.0, b=0.0, duration=None, r_star=1.0, ror=0
-    ):
+    def __init__(self, period, duration, t0=0.0, b=0.0, r_star=1.0, ror=0):
         self.period = as_tensor_variable(period)
         self.t0 = as_tensor_variable(t0)
         self.b = as_tensor_variable(b)
-        if duration is not None:
-            self.duration = as_tensor_variable(duration)
-        else:
-            raise ValueError("`duration` must be provided.")
-
+        self.duration = as_tensor_variable(duration)
         self.r_star = as_tensor_variable(r_star)
 
         self._b_norm = self.b * self.r_star

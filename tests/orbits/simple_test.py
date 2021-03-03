@@ -22,7 +22,9 @@ def test_simple():
         < 0.5 * duration
     )
 
-    orbit = SimpleTransitOrbit(period, t0, b, duration, r_star)
+    orbit = SimpleTransitOrbit(
+        period=period, duration=duration, t0=t0, b=b, r_star=r_star
+    )
 
     x, y, z = theano.function([], orbit.get_planet_position(t))()
     b_val = np.sqrt(x ** 2 + y ** 2)
@@ -80,10 +82,3 @@ def test_simple_light_curve_compare_kepler():
 
     # Should look similar to Keplerian orbit
     assert np.allclose(lc_keplerian.eval(), lc_simple1.eval(), rtol=0.001)
-
-    # No duration/semimajor axis inputs should raise error
-    with pytest.raises(ValueError) as err:
-        SimpleTransitOrbit(
-            period=period, t0=t0, b=b, r_star=r_star, ror=r / r_star
-        )
-    # Both duration/semimajor axis inputs should raise error
