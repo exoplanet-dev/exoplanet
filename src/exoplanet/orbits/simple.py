@@ -2,6 +2,7 @@
 
 __all__ = ["SimpleTransitOrbit"]
 
+import numpy as np
 import theano.tensor as tt
 
 from ..utils import as_tensor_variable
@@ -22,7 +23,7 @@ class SimpleTransitOrbit:
 
     """
 
-    def __init__(self, period=None, t0=0.0, b=0.0, duration=None, r_star=1.0):
+    def __init__(self, period, duration, t0=0.0, b=0.0, r_star=1.0, ror=0):
         self.period = as_tensor_variable(period)
         self.t0 = as_tensor_variable(t0)
         self.b = as_tensor_variable(b)
@@ -30,8 +31,9 @@ class SimpleTransitOrbit:
         self.r_star = as_tensor_variable(r_star)
 
         self._b_norm = self.b * self.r_star
-        x2 = self.r_star ** 2 - self._b_norm ** 2
-        self.speed = 2 * tt.sqrt(x2) / self.duration
+        x2 = r_star ** 2 * ((1 + ror) ** 2 - b ** 2)
+        self.speed = 2 * np.sqrt(x2) / duration
+
         self._half_period = 0.5 * self.period
         self._ref_time = self.t0 - self._half_period
 
