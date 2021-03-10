@@ -2,11 +2,10 @@
 
 import numpy as np
 import pytest
-import theano
+from aesara_theano_fallback import aesara as theano
 
 from exoplanet.light_curves import LimbDarkLightCurve
-from exoplanet.orbits import SimpleTransitOrbit
-from exoplanet.orbits import KeplerianOrbit
+from exoplanet.orbits import KeplerianOrbit, SimpleTransitOrbit
 
 
 def test_simple():

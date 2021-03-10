@@ -70,7 +70,7 @@ print(Ks, "m/s")
 
 # +
 import pymc3 as pm
-import theano.tensor as tt
+import aesara_theano_fallback.tensor as tt
 
 with pm.Model() as model:
 

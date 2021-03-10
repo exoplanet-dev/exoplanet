@@ -2,9 +2,9 @@
 
 import pickle
 
+import aesara_theano_fallback.tensor as tt
 import numpy as np
-import theano
-import theano.tensor as tt
+from aesara_theano_fallback import aesara as theano
 
 from exoplanet.theano_ops.driver import SimpleLimbDark
 from exoplanet.theano_ops.starry import (

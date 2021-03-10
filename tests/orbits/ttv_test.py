@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-import theano
+from aesara_theano_fallback import aesara as theano
 
 from exoplanet.orbits.keplerian import KeplerianOrbit
 from exoplanet.orbits.ttv import TTVOrbit, compute_expected_transit_times

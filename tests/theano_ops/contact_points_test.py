@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import aesara_theano_fallback.tensor as tt
 import numpy as np
 import pytest
-import theano
-import theano.tensor as tt
+from aesara_theano_fallback import aesara as theano
 
 from exoplanet.theano_ops.contact_points import ContactPoints
 from exoplanet.theano_ops.kepler import kepler

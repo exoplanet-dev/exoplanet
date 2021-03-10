@@ -2,9 +2,9 @@
 
 __all__ = ["get_log_abs_det_jacobian", "estimate_inverse_gamma_parameters"]
 
+import aesara_theano_fallback.tensor as tt
 import numpy as np
-import theano
-import theano.tensor as tt
+from aesara_theano_fallback import aesara as theano
 from scipy.optimize import root
 from scipy.special import gammaincc
 

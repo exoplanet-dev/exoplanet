@@ -6,10 +6,9 @@
 import codecs
 import os
 import re
-import sys
 
-from setuptools import Extension, find_packages, setup
-from setuptools.command.build_ext import build_ext
+from pybind11.setup_helpers import Pybind11Extension, build_ext
+from setuptools import find_packages, setup
 
 # PROJECT SPECIFIC
 
@@ -28,10 +27,10 @@ CLASSIFIERS = [
 SETUP_REQUIRES = ["setuptools>=40.6.0", "setuptools_scm"]
 INSTALL_REQUIRES = [
     "numpy>=1.13.0",
-    "pymc3>=3.5",
-    "arviz<0.11",
+    "pymc3>=3.9, <3.12",
     "astropy>=3.1",
     "pymc3-ext>=0.0.1",
+    "aesara-theano-fallback>=0.0.2",
 ]
 EXTRA_REQUIRE = {
     "test": [
@@ -45,7 +44,7 @@ EXTRA_REQUIRE = {
         "pybind11",
         "batman-package",
         "rebound; sys_platform != 'win32'",
-        # "reboundx; sys_platform != 'win32'",
+        "reboundx; sys_platform != 'win32'",
     ],
     "docs": [
         "sphinx>=1.7.5",
@@ -96,95 +95,12 @@ EXTRA_REQUIRE["dev"] = (
     ]
 )
 
-# END PROJECT SPECIFIC
-
-# PYBIND11
-
-
-class get_pybind_include:
-    def __init__(self, user=False):
-        self.user = user
-
-    def __str__(self):
-        import pybind11
-
-        return pybind11.get_include(self.user)
-
-
-class get_numpy_include:
-    def __str__(self):
-        import numpy
-
-        return numpy.get_include()
-
-
-class custom_build_ext(build_ext):
-    c_opts = {"msvc": ["/EHsc"], "unix": []}
-    l_opts = {"msvc": [], "unix": []}
-
-    if sys.platform == "darwin":
-        darwin_opts = [
-            "-stdlib=libc++",
-            "-mmacosx-version-min=10.14",
-            "-march=native",
-        ]
-        c_opts["unix"] += darwin_opts
-        l_opts["unix"] += darwin_opts
-
-    def has_flag(self, flagname):
-        import tempfile
-
-        import setuptools
-
-        with tempfile.NamedTemporaryFile("w", suffix=".cpp") as f:
-            f.write("int main (int argc, char **argv) { return 0; }")
-            try:
-                self.compiler.compile([f.name], extra_postargs=[flagname])
-            except setuptools.distutils.errors.CompileError:
-                return False
-        return True
-
-    def cpp_flag(self):
-        flags = ["-std=c++17", "-std=c++14", "-std=c++11"]
-
-        for flag in flags:
-            if self.has_flag(flag):
-                return flag
-
-        raise RuntimeError(
-            "Unsupported compiler. At least C++11 support is needed."
-        )
-
-    def build_extensions(self):
-        ct = self.compiler.compiler_type
-        opts = self.c_opts.get(ct, [])
-        link_opts = self.l_opts.get(ct, [])
-        if ct == "unix":
-            opts.append(
-                '-DVERSION_INFO="%s"' % self.distribution.get_version()
-            )
-            opts.append(self.cpp_flag())
-            if self.has_flag("-fvisibility=hidden"):
-                opts.append("-fvisibility=hidden")
-        elif ct == "msvc":
-            opts.append(
-                '/DVERSION_INFO=\\"%s\\"' % self.distribution.get_version()
-            )
-        for ext in self.extensions:
-            ext.extra_compile_args = opts
-            ext.extra_link_args = link_opts
-        build_ext.build_extensions(self)
-
-
 include_dirs = [
     "src/exoplanet/theano_ops/lib/include",
     "src/exoplanet/theano_ops/lib/vendor/eigen",
-    get_numpy_include(),
-    get_pybind_include(),
-    get_pybind_include(user=True),
 ]
 ext_modules = [
-    Extension(
+    Pybind11Extension(
         "exoplanet.theano_ops.driver",
         ["src/exoplanet/theano_ops/driver.cpp"],
         include_dirs=include_dirs,
@@ -192,7 +108,8 @@ ext_modules = [
     )
 ]
 
-# END PYBIND11
+# END PROJECT SPECIFIC
+
 
 HERE = os.path.dirname(os.path.realpath(__file__))
 
@@ -238,5 +155,5 @@ if __name__ == "__main__":
         setup_requires=SETUP_REQUIRES,
         zip_safe=False,
         ext_modules=ext_modules,
-        cmdclass={"build_ext": custom_build_ext},
+        cmdclass={"build_ext": build_ext},
     )

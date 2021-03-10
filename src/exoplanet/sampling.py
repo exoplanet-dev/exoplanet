@@ -4,7 +4,7 @@ __all__ = ["QuadPotentialDenseAdapt", "get_dense_nuts_step", "sample"]
 
 import numpy as np
 import pymc3 as pm
-import theano
+from aesara_theano_fallback import aesara as theano
 from pymc3.model import all_continuous, modelcontext
 from pymc3.step_methods.hmc.quadpotential import QuadPotential
 from pymc3.step_methods.step_sizes import DualAverageAdaptation

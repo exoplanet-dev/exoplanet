@@ -2,8 +2,8 @@
 
 __all__ = ["contact_points"]
 
+import aesara_theano_fallback.tensor as tt
 import numpy as np
-import theano.tensor as tt
 
 from ..utils import as_tensor_variable
 from . import driver

@@ -234,7 +234,7 @@ _ = plt.xlabel("phase")
 # 5. For parameters that specify angles (like $\omega$, called `w` in the model below), it can be inefficient to sample in the angle directly because of the fact that the value wraps around at $2\pi$. Instead, it can be better to sample the unit vector specified by the angle or as a parameter in a unit disk, when combined with eccentricity. In practice, this can be achieved by sampling a 2-vector from an isotropic Gaussian and normalizing the components by the norm. These are implemented as part of *exoplanet* in the :class:`exoplanet.distributions.Angle` and :class:`exoplanet.distributions.UnitDisk` classes.
 
 # +
-import theano.tensor as tt
+import aesara_theano_fallback.tensor as tt
 
 import exoplanet as xo
 

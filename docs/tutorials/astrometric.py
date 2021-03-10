@@ -127,8 +127,8 @@ _ = ax[1].set_xlabel("time [years]")
 
 # +
 import pymc3 as pm
-import theano
-import theano.tensor as tt
+from aesara_theano_fallback import aesara as theano
+import aesara_theano_fallback.tensor as tt
 
 import exoplanet as xo
 from exoplanet.distributions import Angle

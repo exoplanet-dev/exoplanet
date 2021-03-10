@@ -2,7 +2,7 @@
 
 import numpy as np
 import pytest
-import theano
+from aesara_theano_fallback import aesara as theano
 
 from exoplanet.light_curves import LimbDarkLightCurve
 from exoplanet.orbits.keplerian import KeplerianOrbit

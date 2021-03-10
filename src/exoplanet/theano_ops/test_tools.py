@@ -3,7 +3,7 @@
 __all__ = ["InferShapeTester"]
 
 import numpy as np
-import theano
+from aesara_theano_fallback import aesara as theano
 
 
 class InferShapeTester:

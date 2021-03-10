@@ -2,10 +2,10 @@
 
 import logging
 
+import aesara_theano_fallback.tensor as tt
 import numpy as np
 import pytest
-import theano
-import theano.tensor as tt
+from aesara_theano_fallback import aesara as theano
 from packaging import version
 
 from exoplanet.light_curves import (

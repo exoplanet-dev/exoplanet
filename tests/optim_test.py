@@ -1,7 +1,7 @@
+import aesara_theano_fallback.tensor as tt
 import numpy as np
 import pymc3 as pm
 import pytest
-import theano.tensor as tt
 
 from exoplanet import optim as op
 from exoplanet.optim import optimize

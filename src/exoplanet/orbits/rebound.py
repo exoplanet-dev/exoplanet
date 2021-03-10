@@ -2,7 +2,7 @@
 
 __all__ = ["ReboundOrbit"]
 
-import theano.tensor as tt
+import aesara_theano_fallback.tensor as tt
 
 from .constants import au_per_R_sun, day_per_yr_over_2pi
 from .keplerian import KeplerianOrbit

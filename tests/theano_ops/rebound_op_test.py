@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import aesara_theano_fallback.tensor as tt
 import numpy as np
 import pytest
-import theano
-import theano.tensor as tt
+from aesara_theano_fallback import aesara as theano
 
 from exoplanet.theano_ops.rebound import ReboundOp
 from exoplanet.theano_ops.test_tools import InferShapeTester

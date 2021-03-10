@@ -16,7 +16,7 @@ from functools import wraps
 
 import numpy as np
 import pymc3 as pm
-import theano
+from aesara_theano_fallback import aesara as theano
 
 logger = logging.getLogger("exoplanet")
 

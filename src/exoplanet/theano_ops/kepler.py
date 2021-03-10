@@ -2,9 +2,9 @@
 
 __all__ = ["kepler"]
 
+import aesara_theano_fallback.tensor as tt
 import numpy as np
-import theano
-import theano.tensor as tt
+from aesara_theano_fallback import aesara as theano
 
 from ..utils import as_tensor_variable
 from . import driver

@@ -2,7 +2,7 @@
 # ref: https://github.com/pymc-devs/pymc3/blob/master/pymc3/tests/conftest.py
 
 import pytest
-import theano
+from aesara_theano_fallback import aesara as theano
 
 
 @pytest.fixture(scope="package", autouse=True)

@@ -17,10 +17,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8"]
-        pymc-version: ["pymc3==3.9.3", "pymc3==3.10", "pymc3==3.11"]
+        python-version: ["3.9"]
+        pymc-version: ["pymc3~=3.9", "pymc3~=3.10", "pymc3~=3.11"]
         include:
-          - python-version: "3.8"
+          - python-version: "3.9"
             pymc-version: "https://github.com/pymc-devs/pymc3/archive/master.zip"
 
     steps:
@@ -50,14 +50,13 @@ jobs:
           python -m pip install "${{ matrix.pymc-version }}"
           python -m pip install -e .[test]
           python -m pip install --no-deps starry rebound-pymc3
-          python -c 'import theano; print(theano.config.__str__(print_doc=False))'
 
       - name: Run tests
         shell: bash -l {0}
         run: python -m pytest --cov=exoplanet -v tests
 
       - name: Coveralls
-        uses: AndreMiras/coveralls-python-action@develop
+        uses: AndreMiras/coveralls-python-action@v20201129
         with:
           parallel: true
           flag-name: Unit Tests
@@ -68,6 +67,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Coveralls Finished
-        uses: AndreMiras/coveralls-python-action@develop
+        uses: AndreMiras/coveralls-python-action@v20201129
         with:
           parallel-finished: true
