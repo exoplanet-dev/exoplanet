@@ -19,7 +19,7 @@ A clear and concise description of what you expected to happen.
 **Your setup (please complete the following information):**
  - Version of exoplanet:
  - Operating system:
- - Python version & installation method (pip, conda, etc.): 
+ - Python version & installation method (pip, conda, etc.):
 
 **Additional context**
 Add any other context about the problem here.
