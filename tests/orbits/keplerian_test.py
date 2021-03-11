@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import aesara_theano_fallback.tensor as tt
 import astropy.units as u
 import numpy as np
 import pytest
-import theano
-import theano.tensor as tt
+from aesara_theano_fallback import aesara as theano
 from astropy.constants import c
 from scipy.optimize import minimize
 

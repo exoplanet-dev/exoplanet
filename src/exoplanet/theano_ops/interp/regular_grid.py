@@ -4,9 +4,9 @@ __all__ = ["RegularGridOp"]
 
 import sys
 
+import aesara_theano_fallback.tensor as tt
 import pkg_resources
-import theano
-import theano.tensor as tt
+from aesara_theano_fallback import aesara as theano
 
 from ...exoplanet_version import __version__
 from ..compat import Apply, COp, ParamsType

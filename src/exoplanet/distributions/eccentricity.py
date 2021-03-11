@@ -2,9 +2,9 @@
 
 __all__ = ["kipping13", "vaneylen19"]
 
+import aesara_theano_fallback.tensor as tt
 import numpy as np
 import pymc3 as pm
-import theano.tensor as tt
 
 from ..citations import add_citations_to_model
 from .base import UnitUniform

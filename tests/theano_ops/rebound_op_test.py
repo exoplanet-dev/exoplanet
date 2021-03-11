@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import aesara_theano_fallback.tensor as tt
 import numpy as np
 import pytest
-import theano
-import theano.tensor as tt
+from aesara_theano_fallback import aesara as theano
 
 from exoplanet.theano_ops.rebound import ReboundOp
 from exoplanet.theano_ops.test_tools import InferShapeTester
@@ -52,4 +52,4 @@ class TestRebound(InferShapeTester):
     def test_grad(self):
         t, _, _, in_args = self.get_args()
         func = lambda *args: self.op(*(list(args) + [t]))[0]  # NOQA
-        tt.verify_grad(func, in_args, n_tests=1, rng=np.random)
+        theano.gradient.verify_grad(func, in_args, n_tests=1, rng=np.random)

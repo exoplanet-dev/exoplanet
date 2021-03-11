@@ -4,8 +4,8 @@ __all__ = ["LimbDarkLightCurve", "StarryLightCurve"]
 
 import warnings
 
+import aesara_theano_fallback.tensor as tt
 import numpy as np
-import theano.tensor as tt
 
 from ..citations import add_citations_to_model
 from ..theano_ops.starry import get_cl, limbdark

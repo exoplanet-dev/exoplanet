@@ -2,13 +2,10 @@
 
 __all__ = ["Apply", "COp", "Op", "Params", "ParamsType"]
 
-# Yep...
-try:
-    from theano.graph.basic import Apply
-    from theano.graph.op import ExternalCOp as COp
-    from theano.graph.op import Op
-    from theano.graph.params_type import Params, ParamsType
-except ImportError:
-    from theano.gof.graph import Apply
-    from theano.gof.op import COp, Op
-    from theano.gof.params_type import Params, ParamsType
+from aesara_theano_fallback.graph import basic, op, params_type
+
+Apply = basic.Apply
+COp = op.ExternalCOp
+Op = op.Op
+Params = params_type.Params
+ParamsType = params_type.ParamsType

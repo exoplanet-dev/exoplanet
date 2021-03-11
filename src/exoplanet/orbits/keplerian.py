@@ -9,10 +9,10 @@ __all__ = [
 import warnings
 from collections import defaultdict
 
+import aesara_theano_fallback.tensor as tt
 import numpy as np
-import theano.tensor as tt
+from aesara_theano_fallback import ifelse
 from astropy import units as u
-from theano.ifelse import ifelse
 
 from ..citations import add_citations_to_model
 from ..theano_ops.contact_points import ContactPoints, contact_points

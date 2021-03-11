@@ -2,10 +2,10 @@
 
 __all__ = ["IntegratedLimbDarkLightCurve"]
 
+import aesara_theano_fallback.tensor as tt
 import numpy as np
-import theano
-import theano.tensor as tt
-from theano.gof import MissingInputError
+from aesara_theano_fallback import aesara as theano
+from aesara_theano_fallback.graph import fg
 
 from ..citations import add_citations_to_model
 from ..theano_ops.starry.integrated_limbdark import IntegratedLimbDarkOp
@@ -37,11 +37,11 @@ class IntegratedLimbDarkLightCurve:  # pragma: no cover
         try:
             func = theano.function([], self.c_norm.size)
             return int(func())
-        except MissingInputError:
+        except fg.MissingInputError:
             pass
         try:
             return int(eval_in_model(self.c_norm.size))
-        except (MissingInputError, TypeError):
+        except (fg.MissingInputError, TypeError):
             return -1
 
     def get_light_curve(

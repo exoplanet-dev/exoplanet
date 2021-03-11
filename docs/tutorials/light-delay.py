@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.7.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -14,7 +14,6 @@
 
 # + nbsphinx="hidden"
 # %matplotlib inline
-# -
 
 # + nbsphinx="hidden"
 # %run notebook_setup
@@ -111,4 +110,3 @@ plt.legend(fontsize=10, loc="lower right")
 plt.title(
     "Light delay causes transits to occur 8.32 minutes early", fontsize=14
 )
-# -

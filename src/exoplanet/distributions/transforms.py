@@ -6,9 +6,9 @@ __all__ = [
     "impact_parameter",
 ]
 
+import aesara_theano_fallback.tensor as tt
 import numpy as np
 import pymc3.distributions.transforms as tr
-import theano.tensor as tt
 from pymc3.distributions import draw_values
 
 

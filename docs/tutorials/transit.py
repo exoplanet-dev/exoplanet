@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.7.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -70,6 +70,7 @@ yerr = 5e-4
 
 # +
 import pymc3 as pm
+import pymc3_ext as pmx
 
 with pm.Model() as model:
 
@@ -112,7 +113,7 @@ with pm.Model() as model:
     # NOTE: if you are fitting real data, you shouldn't include this line #
     #       because you already have data!                                #
     # ******************************************************************* #
-    y = xo.eval_in_model(light_curve)
+    y = pmx.eval_in_model(light_curve)
     y += yerr * np.random.randn(len(y))
     # ******************************************************************* #
     # End of fake data creation; you want to include the following lines  #
@@ -123,7 +124,7 @@ with pm.Model() as model:
 
     # Fit for the maximum a posteriori parameters given the simuated
     # dataset
-    map_soln = xo.optimize(start=model.test_point)
+    map_soln = pmx.optimize(start=model.test_point)
 # -
 
 # Now we can plot the simulated data and the maximum a posteriori model to make sure that our initialization looks ok.
@@ -142,24 +143,29 @@ _ = plt.title("map model")
 # ## Sampling
 #
 # Now, let's sample from the posterior defined by this model.
-# As usual, there are strong covariances between some of the parameters so we'll use `init="adapt_full"`.
+# As usual, there are strong covariances between some of the parameters so we'll use `pmx.sample` from [pymc3-ext](https://github.com/exoplanet-dev/pymc3-ext).
 
 np.random.seed(42)
 with model:
-    trace = pm.sample(
+    trace = pmx.sample(
         tune=3000,
         draws=3000,
         start=map_soln,
         cores=2,
         chains=2,
-        init="adapt_full",
         target_accept=0.9,
     )
 
 # After sampling, it's important that we assess convergence.
 # We can do that using the `pymc3.summary` function:
 
-pm.summary(trace, varnames=["period", "t0", "r", "b", "u", "mean"])
+import arviz as az
+
+with model:
+    summary = az.summary(
+        trace, var_names=["period", "t0", "r", "b", "u", "mean"]
+    )
+summary
 
 # That looks pretty good!
 # Fitting this without *exoplanet* would have taken a lot more patience.
@@ -169,14 +175,16 @@ pm.summary(trace, varnames=["period", "t0", "r", "b", "u", "mean"])
 # +
 import corner
 
-samples = pm.trace_to_dataframe(trace, varnames=["period", "r"])
-truth = np.concatenate(
-    xo.eval_in_model([period, r], model.test_point, model=model)
+truth = dict(
+    zip(
+        ["period", "r"],
+        xo.eval_in_model([period, r], model.test_point, model=model),
+    )
 )
 _ = corner.corner(
-    samples,
+    trace,
+    var_names=["period", "r"],
     truths=truth,
-    labels=["period 1", "period 2", "radius 1", "radius 2"],
 )
 # -
 

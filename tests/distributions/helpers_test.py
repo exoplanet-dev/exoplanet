@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import aesara_theano_fallback.tensor as tt
 import numpy as np
 import pymc3 as pm
 import pytest
-import theano
-import theano.tensor as tt
+from aesara_theano_fallback import aesara as theano
 from scipy.stats import invgamma
 
 from exoplanet.distributions.helpers import (

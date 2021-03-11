@@ -2,10 +2,10 @@
 
 import logging
 
+import aesara_theano_fallback.tensor as tt
 import numpy as np
 import pytest
-import theano
-import theano.tensor as tt
+from aesara_theano_fallback import aesara as theano
 from packaging import version
 
 from exoplanet.light_curves import (
@@ -57,7 +57,7 @@ def test_light_curve_grad(caplog):
     )
 
     with caplog.at_level(logging.DEBUG, logger="theano.gof.cmodule"):
-        tt.verify_grad(lc, [u_val, b_val, r_val], rng=np.random)
+        theano.gradient.verify_grad(lc, [u_val, b_val, r_val], rng=np.random)
 
 
 def test_in_transit():

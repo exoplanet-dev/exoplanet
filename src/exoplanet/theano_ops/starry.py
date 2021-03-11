@@ -2,9 +2,9 @@
 
 __all__ = ["get_cl", "limbdark"]
 
+import aesara_theano_fallback.tensor as tt
 import numpy as np
-import theano
-import theano.tensor as tt
+from aesara_theano_fallback import aesara as theano
 from scipy.optimize import bisect
 
 from ..utils import as_tensor_variable

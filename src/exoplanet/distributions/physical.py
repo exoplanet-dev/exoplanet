@@ -2,9 +2,9 @@
 
 __all__ = ["QuadLimbDark", "ImpactParameter"]
 
+import aesara_theano_fallback.tensor as tt
 import numpy as np
 import pymc3 as pm
-import theano.tensor as tt
 from pymc3.distributions import draw_values, generate_samples
 
 from ..citations import add_citations_to_model

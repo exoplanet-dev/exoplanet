@@ -2,8 +2,8 @@
 
 __all__ = ["RegularGridInterpolator"]
 
-import theano
-import theano.tensor as tt
+import aesara_theano_fallback.tensor as tt
+from aesara_theano_fallback import aesara as theano
 
 from .theano_ops.interp import RegularGridOp
 

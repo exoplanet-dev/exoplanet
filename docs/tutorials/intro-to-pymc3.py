@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.7.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -15,7 +15,6 @@
 
 # + nbsphinx="hidden"
 # %matplotlib inline
-# -
 
 # + nbsphinx="hidden"
 # %run notebook_setup
@@ -133,7 +132,12 @@ with pm.Model() as model:
 # In each panel, you should see two lines with different colors.
 # These are the results of different independent chains and if the results are substantially different in the different chains then there is probably something going wrong.
 
-_ = pm.traceplot(trace, var_names=["m", "b", "logs"])
+# +
+import arviz as az
+
+with model:
+    az.plot_trace(trace, var_names=["m", "b", "logs"])
+# -
 
 # It's also good to quantify that "looking substantially different" argument.
 # This is implemented in PyMC3 as the "summary" function.
@@ -142,7 +146,8 @@ _ = pm.traceplot(trace, var_names=["m", "b", "logs"])
 # * `Rhat` shows the [Gelman–Rubin statistic](https://docs.pymc.io/api/diagnostics.html#pymc3.diagnostics.gelman_rubin) and it should be close to 1.
 
 with model:
-    pm.summary(trace, var_names=["m", "b", "logs"])
+    summary = az.summary(trace, var_names=["m", "b", "logs"])
+summary
 
 # The last diagnostic plot that we'll make here is the [corner plot made using corner.py](https://corner.readthedocs.io).
 # The easiest way to do this using PyMC3 is to first convert the trace to a [Pandas DataFrame](https://pandas.pydata.org/) and then pass that to `corner.py`.
@@ -150,8 +155,12 @@ with model:
 # +
 import corner  # https://corner.readthedocs.io
 
-samples = pm.trace_to_dataframe(trace, varnames=["m", "b", "logs"])
-_ = corner.corner(samples, truths=[true_m, true_b, true_logs])
+names = ["m", "b", "logs"]
+_ = corner.corner(
+    trace,
+    var_names=names,
+    truths=dict(zip(names, [true_m, true_b, true_logs])),
+)
 # -
 
 # **Extra credit:** Here are a few suggestions for things to try out while getting more familiar with PyMC3:
@@ -231,10 +240,11 @@ _ = plt.xlabel("phase")
 # 2. All of the parameters have initial guesses provided. This is an example where this makes a big difference because some of the parameters (like period) are very tightly constrained.
 # 3. Some of the lines are wrapped in `Deterministic` distributions. This can be useful because it allows us to track values as the chain progresses even if they're not parameters. For example, after sampling, we will have a sample for `bkg` (the background RV trend) for each step in the chain. This can be especially useful for making plots of the results.
 # 4. Similarly, at the end of the model definition, we compute the RV curve for a single orbit on a fine grid. This can be very useful for diagnosing fits gone wrong.
-# 5. For parameters that specify angles (like $\omega$, called `w` in the model below), it can be inefficient to sample in the angle directly because of the fact that the value wraps around at $2\pi$. Instead, it can be better to sample the unit vector specified by the angle or as a parameter in a unit disk, when combined with eccentricity. In practice, this can be achieved by sampling a 2-vector from an isotropic Gaussian and normalizing the components by the norm. These are implemented as part of *exoplanet* in the :class:`exoplanet.distributions.Angle` and :class:`exoplanet.distributions.UnitDisk` classes.
+# 5. For parameters that specify angles (like $\omega$, called `w` in the model below), it can be inefficient to sample in the angle directly because of the fact that the value wraps around at $2\pi$. Instead, it can be better to sample the unit vector specified by the angle or as a parameter in a unit disk, when combined with eccentricity. In practice, this can be achieved by sampling a 2-vector from an isotropic Gaussian and normalizing the components by the norm. These are implemented in the [pymc3-ext](https://github.com/exoplanet-dev/pymc3-ext) package.
 
 # +
-import theano.tensor as tt
+import pymc3_ext as pmx
+import aesara_theano_fallback.tensor as tt
 
 import exoplanet as xo
 
@@ -255,7 +265,7 @@ with pm.Model() as model:
     # Parameterize the eccentricity using:
     #  h = sqrt(e) * sin(w)
     #  k = sqrt(e) * cos(w)
-    hk = xo.UnitDisk("hk", testval=np.array([0.01, 0.01]))
+    hk = pmx.UnitDisk("hk", testval=np.array([0.01, 0.01]))
     e = pm.Deterministic("e", hk[0] ** 2 + hk[1] ** 2)
     w = pm.Deterministic("w", tt.arctan2(hk[1], hk[0]))
 
@@ -295,14 +305,10 @@ with pm.Model() as model:
 # In this case, I've found that it is useful to first optimize the parameters to find the "maximum a posteriori" (MAP) parameters and then start the sampler from there.
 # This is useful here because MCMC is not designed to *find* the maximum of the posterior; it's just meant to sample the shape of the posterior.
 # The performance of all MCMC methods can be really bad when the initialization isn't good (especially when some parameters are very well constrained).
-# To find the maximum a posteriori parameters using PyMC3, you can use the :func:`exoplanet.optimize` function:
-
-# +
-from exoplanet import optimize
+# To find the maximum a posteriori parameters using PyMC3, you can use the `optimize` function from [pymc3-ext](https://github.com/exoplanet-dev/pymc3-ext):
 
 with model:
-    map_params = optimize()
-# -
+    map_params = pmx.optimize()
 
 # Let's make a plot to check that this initialization looks reasonable.
 # In the top plot, we're looking at the RV observations as a function of time with the initial guess for the long-term trend overplotted in blue.
@@ -333,34 +339,36 @@ ax.set_xlabel("phase [days]")
 plt.tight_layout()
 # -
 
-# Now let's sample the posterior starting from our MAP estimate.
+# Now let's sample the posterior starting from our MAP estimate (here we're using the sampling routine from [pymc3-ext](https://github.com/exoplanet-dev/pymc3-ext) which wraps the PyMC3 function with some better defaults).
 
 with model:
-    trace = pm.sample(
+    trace = pmx.sample(
         draws=2000,
         tune=1000,
         start=map_params,
         chains=2,
         cores=2,
         target_accept=0.95,
-        init="adapt_full",
     )
 
 # As above, it's always a good idea to take a look at the summary statistics for the chain.
 # If everything went as planned, there should be more than 1000 effective samples per chain and the Rhat values should be close to 1.
 # (Not too bad for less than 30 seconds of run time!)
 
+# +
+import arviz as az
+
 with model:
-    summary = pm.summary(
+    summary = az.summary(
         trace,
         var_names=["logK", "logP", "phi", "e", "w", "rv0", "rvtrend"],
     )
 summary
+# -
 
 # Similarly, we can make the corner plot again for this model.
 
-samples = pm.trace_to_dataframe(trace, varnames=["K", "P", "e", "w"])
-_ = corner.corner(samples)
+_ = corner.corner(trace, var_names=["K", "P", "e", "w"])
 
 # Finally, the last plot that we'll make here is of the posterior predictive density.
 # In this case, this means that we want to look at the distribution of predicted models that are consistent with the data.
@@ -393,4 +401,3 @@ axes[0].set_ylim(-110, 110)
 axes[1].set_ylim(-110, 110)
 
 plt.tight_layout()
-# -

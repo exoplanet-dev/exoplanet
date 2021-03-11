@@ -2,9 +2,9 @@
 
 import pickle
 
+import aesara_theano_fallback.tensor as tt
 import numpy as np
-import theano
-import theano.tensor as tt
+from aesara_theano_fallback import aesara as theano
 
 from exoplanet.theano_ops.driver import SimpleLimbDark
 from exoplanet.theano_ops.starry import (
@@ -38,7 +38,9 @@ class TestGetCl(InferShapeTester):
         )
 
     def test_grad(self):
-        tt.verify_grad(self.op, [np.array([-1, 0.3, 0.2, 0.5])], rng=np.random)
+        theano.gradient.verify_grad(
+            self.op, [np.array([-1, 0.3, 0.2, 0.5])], rng=np.random
+        )
 
 
 class TestGetClRev(InferShapeTester):
@@ -102,7 +104,7 @@ class TestLimbDark(InferShapeTester):
     def test_grad(self):
         _, _, in_args = self.get_args()
         func = lambda *args: self.op(*args)[0]  # NOQA
-        tt.verify_grad(func, in_args, rng=np.random)
+        theano.gradient.verify_grad(func, in_args, rng=np.random)
 
     def test_pickle(self):
         f, _, in_args = self.get_args()
