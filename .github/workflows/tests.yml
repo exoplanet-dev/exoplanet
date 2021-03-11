@@ -46,6 +46,7 @@ jobs:
         run: |
           python -m pip install -U pip
           python -m pip install "${{ matrix.pymc-version }}" "${{ matrix.arviz-version }}"
+          python -m pip install "reboundx>=3.2.0"
           python -m pip install -e .[test]
           python -m pip install --no-deps starry rebound-pymc3
 

@@ -43,8 +43,6 @@ EXTRA_REQUIRE = {
         "coveralls",
         "pybind11",
         "batman-package",
-        "rebound; sys_platform != 'win32'",
-        "reboundx; sys_platform != 'win32'",
     ],
     "docs": [
         "sphinx>=1.7.5",
