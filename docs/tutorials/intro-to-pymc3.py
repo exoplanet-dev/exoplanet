@@ -132,7 +132,12 @@ with pm.Model() as model:
 # In each panel, you should see two lines with different colors.
 # These are the results of different independent chains and if the results are substantially different in the different chains then there is probably something going wrong.
 
-_ = pm.traceplot(trace, var_names=["m", "b", "logs"])
+# +
+import arviz as az
+
+with model:
+    az.plot_trace(trace, var_names=["m", "b", "logs"])
+# -
 
 # It's also good to quantify that "looking substantially different" argument.
 # This is implemented in PyMC3 as the "summary" function.
@@ -141,7 +146,8 @@ _ = pm.traceplot(trace, var_names=["m", "b", "logs"])
 # * `Rhat` shows the [Gelman–Rubin statistic](https://docs.pymc.io/api/diagnostics.html#pymc3.diagnostics.gelman_rubin) and it should be close to 1.
 
 with model:
-    pm.summary(trace, var_names=["m", "b", "logs"])
+    summary = az.summary(trace, var_names=["m", "b", "logs"])
+summary
 
 # The last diagnostic plot that we'll make here is the [corner plot made using corner.py](https://corner.readthedocs.io).
 # The easiest way to do this using PyMC3 is to first convert the trace to a [Pandas DataFrame](https://pandas.pydata.org/) and then pass that to `corner.py`.
@@ -149,8 +155,12 @@ with model:
 # +
 import corner  # https://corner.readthedocs.io
 
-samples = pm.trace_to_dataframe(trace, varnames=["m", "b", "logs"])
-_ = corner.corner(samples, truths=[true_m, true_b, true_logs])
+names = ["m", "b", "logs"]
+_ = corner.corner(
+    trace,
+    var_names=names,
+    truths=dict(zip(names, [true_m, true_b, true_logs])),
+)
 # -
 
 # **Extra credit:** Here are a few suggestions for things to try out while getting more familiar with PyMC3:
