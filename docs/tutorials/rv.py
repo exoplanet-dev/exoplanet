@@ -62,7 +62,10 @@ Ks = xo.estimate_semi_amplitude(periods, x, y, yerr, t0s=t0s)
 print(Ks, "m/s")
 # -
 
-0.5 * (np.log(np.array(periods) + np.array(period_errs)) - np.log(np.array(periods) - np.array(period_errs)))
+0.5 * (
+    np.log(np.array(periods) + np.array(period_errs))
+    - np.log(np.array(periods) - np.array(period_errs))
+)
 
 np.array(period_errs) / np.array(periods)
 
@@ -95,13 +98,13 @@ with pm.Model() as model:
     )
 
     # Eccentricity & argument of periasteron
-    ecs = pmx.UnitDisk("ecs", shape=(2, 2), testval=0.01*np.ones((2, 2)))
+    ecs = pmx.UnitDisk("ecs", shape=(2, 2), testval=0.01 * np.ones((2, 2)))
     ecc = pm.Deterministic("ecc", tt.sum(ecs ** 2, axis=0))
     omega = pm.Deterministic("omega", tt.arctan2(ecs[1], ecs[0]))
     xo.eccentricity.vaneylen19(
-            "ecc_prior", multi=True, shape=2, fixed=True, observed=ecc
-        )
-    
+        "ecc_prior", multi=True, shape=2, fixed=True, observed=ecc
+    )
+
     # Jitter & a quadratic RV trend
     logs = pm.Normal("logs", mu=np.log(np.median(yerr)), sd=5.0)
     trend = pm.Normal("trend", mu=0, sd=10.0 ** -np.arange(3)[::-1], shape=3)
@@ -198,8 +201,8 @@ with model:
 import arviz as az
 
 az.summary(
-        trace, var_names=["trend", "logs", "omega", "ecc", "t0", "logK", "P"]
-    )
+    trace, var_names=["trend", "logs", "omega", "ecc", "t0", "logK", "P"]
+)
 # -
 
 # It looks like everything is pretty much converged here. Not bad for 14 parameters and about a minute of runtime...
