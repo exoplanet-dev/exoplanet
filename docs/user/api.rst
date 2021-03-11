@@ -44,18 +44,11 @@ Estimators
 Distributions
 -------------
 
-.. autofunction:: exoplanet.distributions.get_log_abs_det_jacobian
-.. autofunction:: exoplanet.distributions.estimate_inverse_gamma_parameters
-
-
 Base distributions
 ~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: exoplanet.distributions.UnitUniform
-.. autoclass:: exoplanet.distributions.UnitVector
-.. autoclass:: exoplanet.distributions.UnitDisk
-.. autoclass:: exoplanet.distributions.Angle
-.. autoclass:: exoplanet.distributions.Periodic
+These distributions have been moved to the `pymc3-ext project
+<https://github.com/exoplanet-dev/pymc3-ext>`_.
 
 Physical distributions
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -70,28 +63,13 @@ Eccentricity distributions
 .. autofunction:: exoplanet.distributions.eccentricity.vaneylen19
 
 
-Utilities
----------
-
-.. autofunction:: exoplanet.optimize
-.. autofunction:: exoplanet.eval_in_model
-.. autofunction:: exoplanet.get_theano_function_for_var
-.. autofunction:: exoplanet.get_args_for_theano_function
-.. autofunction:: exoplanet.get_samples_from_trace
-.. autofunction:: exoplanet.get_dense_nuts_step
+Miscellaneous
+-------------
 
 .. autofunction:: exoplanet.orbits.ttv.compute_expected_transit_times
-
-
-Units
------
 
 .. autofunction:: exoplanet.units.with_unit
 .. autofunction:: exoplanet.units.has_unit
 .. autofunction:: exoplanet.units.to_unit
-
-
-Citations
----------
 
 .. autofunction:: exoplanet.citations.get_citations_for_model
