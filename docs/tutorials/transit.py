@@ -50,7 +50,7 @@ plt.xlabel("time [days]")
 _ = plt.xlim(t.min(), t.max())
 # -
 
-# But the real power comes from the fact that this is defined as a [Theano operation](http://deeplearning.net/software/theano/extending/extending_theano.html) so it can be combined with PyMC3 to do transit inference using Hamiltonian Monte Carlo.
+# But the real power comes from the fact that this is defined as a [Theano operation](https://aesara.readthedocs.io/en/latest/extending/index.html) so it can be combined with PyMC3 to do transit inference using Hamiltonian Monte Carlo.
 #
 # ## The transit model in PyMC3
 #

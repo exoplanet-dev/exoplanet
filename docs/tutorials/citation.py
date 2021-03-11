@@ -40,7 +40,7 @@ with pm.Model() as model:
 # The :func:`exoplanet.citations.get_citations_for_model` function would generate an acknowledgement that cites:
 #
 # * [PyMC3](https://docs.pymc.io/#citing-pymc3): for the inference engine and modeling framework,
-# * [Theano](http://deeplearning.net/software/theano/citation.html): for the numerical infrastructure,
+# * [Theano/Aesara](https://aesara.readthedocs.io/en/latest/citation.html): for the numerical infrastructure,
 # * [AstroPy](http://www.astropy.org/acknowledging.html): for units and constants,
 # * [Kipping (2013)](https://arxiv.org/abs/1308.0009): for the reparameterization of the limb darkening parameters for a quadratic law, and
 # * [Luger, et al. (2018)](https://arxiv.org/abs/1810.06559): for the light curve calculation.

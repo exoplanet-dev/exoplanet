@@ -52,16 +52,15 @@ Note: if you clone the repo without the ``--recursive`` flag, you will need to r
 Notes about running on Windows
 ------------------------------
 
-Running exoplanet on Windows can be a little tricky because of the dependence on Theano and runtime compilation,
-but it is currently tested on Windows with Python 3.7 and 3.8.
-The following (based on the tips from `the Theano docs <http://deeplearning.net/software/theano_versions/dev/install_windows.html>`_) seem to work:
+Running exoplanet on Windows can be a little tricky because of the dependence on
+runtime compilation, but it has been used on Windows successfully. The following
+conda installation steps seem to work:
 
 .. code-block:: bash
 
-    conda create --name exoplanetTest python=3.8 pip
-    conda install --name exoplanetTest numpy scipy mkl-service libpython m2w64-toolchain astropy matplotlib theano
-    conda install --name exoplanetTest -c conda-forge pybind11 celerite
-    python -m pip install -e .[test]
+    conda create --name exoplanetTest python pip
+    conda install --name exoplanetTest numpy scipy mkl-service libpython m2w64-toolchain astropy
+    python -m pip install -e ".[test]"
 
 
 Testing
@@ -71,7 +70,7 @@ To run the unit tests, install the development dependencies using pip:
 
 .. code-block:: bash
 
-    python -m pip install .[test]
+    python -m pip install ".[test]"
 
 and then execute:
 

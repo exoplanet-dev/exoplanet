@@ -54,6 +54,7 @@ autodoc_mock_imports = [
     "astropy",
     "pymc3",
     "theano",
+    "aesara_theano_fallback",
     "tqdm",
     "rebound_pymc3",
 ]
@@ -81,7 +82,7 @@ master_doc = "index"
 # General information about the project.
 project = "exoplanet"
 author = "Dan Foreman-Mackey"
-copyright = "2018, 2019, 2020, " + author
+copyright = "2018, 2019, 2020, 2021, " + author
 
 version = __version__
 release = __version__

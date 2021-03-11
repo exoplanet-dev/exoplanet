@@ -174,7 +174,7 @@ _ = corner.corner(
 # While the above example was cute, it doesn't really fully exploit the power of PyMC3 and it doesn't really show some of the real issues that you will face when you use PyMC3 as an astronomer.
 # To get a better sense of how you might use PyMC3 in Real Life™, let's take a look at a more realistic example: fitting a Keplerian orbit to radial velocity observations.
 #
-# One of the key aspects of this problem that I want to highlight is the fact that PyMC3 (and the underlying model building framework [Theano](http://deeplearning.net/software/theano/)) don't have out-of-the-box support for the root-finding that is required to solve Kepler's equation.
+# One of the key aspects of this problem that I want to highlight is the fact that PyMC3 (and the underlying model building framework [Theano (recently renamed to Aesara)](https://aesara.readthedocs.io/)) don't have out-of-the-box support for the root-finding that is required to solve Kepler's equation.
 # As part of the process of computing a Keplerian RV model, we must solve the equation:
 #
 # $$
@@ -182,8 +182,8 @@ _ = corner.corner(
 # $$
 #
 # for the eccentric anomaly $E$ given some mean anomaly $M$ and eccentricity $e$.
-# There are commonly accepted methods of solving this equation using [Newton's method](https://en.wikipedia.org/wiki/Newton%27s_method), but if we want to expose that to PyMC3, we have to define a [custom Theano operation](http://deeplearning.net/software/theano/extending/extending_theano.html) with a custom gradient.
-# I won't go into the details of the math (because [I blogged about it](https://dfm.io/posts/stan-c++/)) and I won't go into the details of the implementation (because [you can take a look at it on GitHub](https://github.com/exoplanet-dev/exoplanet/tree/master/exoplanet/theano_ops/kepler)).
+# There are commonly accepted methods of solving this equation using [Newton's method](https://en.wikipedia.org/wiki/Newton%27s_method), but if we want to expose that to PyMC3, we have to define a [custom Theano operation](https://aesara.readthedocs.io/en/latest/extending/index.html) with a custom gradient.
+# I won't go into the details of the math (because [I blogged about it](https://dfm.io/posts/stan-c++/)) and I won't go into the details of the implementation (because [you can take a look at it on GitHub](https://github.com/exoplanet-dev/exoplanet/tree/main/exoplanet/theano_ops/kepler.py)).
 # So, for this tutorial, we'll use the custom Kepler solver that is implemented as part of *exoplanet* and fit the publicly available radial velocity observations of the famous exoplanetary system 51 Peg using PyMC3.
 #
 # First, we need to download the data from the exoplanet archive:

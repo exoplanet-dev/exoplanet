@@ -37,7 +37,7 @@ local machine:
 
 .. code-block:: bash
 
-    git clone https://github.com/YOURUSERNAME/exoplanet.git
+    git clone --recursive https://github.com/YOURUSERNAME/exoplanet.git
     cd exoplanet
     git checkout -b BRANCHNAME
 
@@ -47,21 +47,7 @@ Then you should set up an isolated environment for development using a `Conda
 environment
 <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_,
 `virtualenv <https://virtualenv.pypa.io/>`_, `venv
-<https://docs.python.org/3/library/venv.html>`_, or similar. If using ``conda``,
-you can get the current development environment from the ``environment.yml``
-file:
-
-.. code-block:: bash
-
-    conda env create --prefix env -f environment.yml
-    conda activate ./env
-
-If you have an existing ``conda`` environment for ``exoplanet``, you can update
-it using:
-
-.. code-block:: bash
-
-    conda env update --prefix ./env -f environment.yml  --prune
+<https://docs.python.org/3/library/venv.html>`_, or similar.
 
 If you're using a ``pip`` based environment, you can install the developer
 dependencies as follows:
@@ -69,14 +55,7 @@ dependencies as follows:
 .. code-block:: bash
 
     python -m pip install -U pip
-    python -m pip install -U .[dev]
-
-After your environment is set up, you can install the current development
-version of ``exoplanet``:
-
-.. code-block:: bash
-
-    python -m pip install -e .
+    python -m pip install -U -e ".[dev]"
 
 
 Finding your way around the codebase
@@ -105,25 +84,11 @@ computational run time. These can be found in the `case studies
 <https://github.com/exoplanet-dev/case-studies>`_ repo and there is more
 information there about how to contribute.
 
-3. **Theano ops**: ``exoplanet`` comes bundled with a set of custom Theano ops
+3. **Theano/Aesara ops**: ``exoplanet`` comes bundled with a set of custom ops
 that are implemented in ``src/exoplanet/theano_ops``. As a user, you'll rarely
 interact with these directly and we haven't put a lot of work into making them
-user friendly, but if you are interested in diving in, here are some tips.
-First, you should check out the Theano docs that describe how to develop new ops
-in `Python
-<http://deeplearning.net/software/theano/extending/extending_theano.html>`_ and
-`C/C++
-<http://deeplearning.net/software/theano/extending/extending_theano_c.html>`_.
-Most of the ``exoplanet`` ops are implemented in C++ for speed and we've made
-the design decision to separate the "science" code (which implements the actual
-operation without any dependency on Theano) and "wrapper" code (which sets up
-the interface). The science code is implemented as a header-only C++ library in
-``src/exoplanet/theano_ops/lib/include/exoplanet`` and then, in most cases,
-these functions are accessed via the `pybind11
-<https://github.com/pybind/pybind11>`_ interface implemented in
-``src/exoplanet/theano_ops/driver.cpp``. Then the wrappers are implemented as
-submodules in ``src/exoplanet/theano_ops``. A good place to start is the
-``KeplerOp`` implemented in ``src/exoplanet/theano_ops/kepler.py``.
+user friendly, but if you are interested in diving in, feel free to ask
+questions on GitHub or via email.
 
 
 Testing your contribution
@@ -137,45 +102,3 @@ request using the following command:
 .. code-block:: bash
 
     python -m pytest -v tests
-
-
-Code style
-----------
-
-We have a pretty strict (but easy to implement!) set of style guidelines for the
-codebase. For Python code, we use `isort
-<https://github.com/timothycrosley/isort>`_ and `black
-<https://github.com/psf/black>`_. The custom settings for these projects can be
-found in ``pyproject.toml``. Before opening a pull request, you can run the
-formatters as follows:
-
-.. code-block:: bash
-
-    isort -rc src
-    black src
-
-Or, you can use `pre-commit <https://pre-commit.com>`_ to automatically apply the formatting whenever you commit:
-
-.. code-block:: bash
-
-    python -m pip install -U pre-commit
-    pre-commit install
-
-
-Release management
-------------------
-
-.. note:: Most of this build process is based on the October 2019 update to
-`this blog post
-<https://hynek.me/articles/sharing-your-labor-of-love-pypi-quick-and-dirty/>`_
-so you should check that out if you want more info.
-
-This section is mainly internal, but these are the steps that should be executed to produce a new release.
-
-1. Update citation date and version in ``src/exoplanet/citations.py``.
-
-2. Update changelog date in ``HISTORY.rst``.
-
-3. Tag a GitHub release on both the `exoplanet repository
-<https://github.com/exoplanet-dev/exoplanet>`_ and the `case studies repository
-<https://github.com/exoplanet-dev/case-studies>`_
