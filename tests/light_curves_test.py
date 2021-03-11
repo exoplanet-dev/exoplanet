@@ -57,7 +57,7 @@ def test_light_curve_grad(caplog):
     )
 
     with caplog.at_level(logging.DEBUG, logger="theano.gof.cmodule"):
-        tt.verify_grad(lc, [u_val, b_val, r_val], rng=np.random)
+        theano.gradient.verify_grad(lc, [u_val, b_val, r_val], rng=np.random)
 
 
 def test_in_transit():

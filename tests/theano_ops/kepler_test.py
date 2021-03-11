@@ -111,4 +111,4 @@ class TestKeplerSolver(InferShapeTester):
         e_val = np.random.uniform(0, 0.9, len(M_val))
 
         a = lambda *args: tt.arctan2(*self.op(*args))  # NOQA
-        tt.verify_grad(a, [M_val, e_val], eps=1e-8, rng=np.random)
+        theano.gradient.verify_grad(a, [M_val, e_val], eps=1e-8, rng=np.random)

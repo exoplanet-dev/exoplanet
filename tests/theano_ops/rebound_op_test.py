@@ -52,4 +52,4 @@ class TestRebound(InferShapeTester):
     def test_grad(self):
         t, _, _, in_args = self.get_args()
         func = lambda *args: self.op(*(list(args) + [t]))[0]  # NOQA
-        tt.verify_grad(func, in_args, n_tests=1, rng=np.random)
+        theano.gradient.verify_grad(func, in_args, n_tests=1, rng=np.random)
