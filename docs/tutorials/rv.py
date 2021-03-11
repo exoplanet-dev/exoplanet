@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.7.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -14,7 +14,6 @@
 
 # + nbsphinx="hidden"
 # %matplotlib inline
-# -
 
 # + nbsphinx="hidden"
 # %run notebook_setup
@@ -70,6 +69,7 @@ print(Ks, "m/s")
 
 # +
 import pymc3 as pm
+import pymc3_ext as pmx
 import aesara_theano_fallback.tensor as tt
 
 with pm.Model() as model:
@@ -90,10 +90,8 @@ with pm.Model() as model:
     )
 
     # Eccentricity & argument of periasteron
-    ecc = xo.distributions.UnitUniform(
-        "ecc", shape=2, testval=np.array([0.1, 0.1])
-    )
-    omega = xo.distributions.Angle("omega", shape=2)
+    ecc = pmx.UnitUniform("ecc", shape=2, testval=np.array([0.1, 0.1]))
+    omega = pmx.Angle("omega", shape=2)
 
     # Jitter & a quadratic RV trend
     logs = pm.Normal("logs", mu=np.log(np.median(yerr)), sd=5.0)
@@ -133,9 +131,9 @@ with pm.Model() as model:
 plt.errorbar(x, y, yerr=yerr, fmt=".k")
 
 with model:
-    plt.plot(t, xo.eval_in_model(model.vrad_pred), "--k", alpha=0.5)
-    plt.plot(t, xo.eval_in_model(model.bkg_pred), ":k", alpha=0.5)
-    plt.plot(t, xo.eval_in_model(model.rv_model_pred), label="model")
+    plt.plot(t, pmx.eval_in_model(model.vrad_pred), "--k", alpha=0.5)
+    plt.plot(t, pmx.eval_in_model(model.bkg_pred), ":k", alpha=0.5)
+    plt.plot(t, pmx.eval_in_model(model.rv_model_pred), label="model")
 
 plt.legend(fontsize=10)
 plt.xlim(t.min(), t.max())
@@ -149,8 +147,8 @@ _ = plt.title("initial model")
 # It doesn't look amazing so let's fit for the maximum a posterior parameters.
 
 with model:
-    map_soln = xo.optimize(start=model.test_point, vars=[trend])
-    map_soln = xo.optimize(start=map_soln)
+    map_soln = pmx.optimize(start=model.test_point, vars=[trend])
+    map_soln = pmx.optimize(start=map_soln)
 
 # +
 plt.errorbar(x, y, yerr=yerr, fmt=".k")
@@ -170,25 +168,30 @@ _ = plt.title("MAP model")
 # ## Sampling
 #
 # Now that we have our model set up and a good estimate of the initial parameters, let's start sampling.
-# There are substantial covariances between some of the parameters so we'll use the `init="adapt_full"` argument.
+# There are substantial covariances between some of the parameters so we'll use the `pmx.sample` function from [pymc3-ext](https://github.com/exoplanet-dev/pymc3-ext) which wraps `pm.sample` function with some better defaults and tuning strategies.
 
 np.random.seed(42)
 with model:
-    trace = pm.sample(
+    trace = pmx.sample(
         tune=4000,
         draws=4000,
         cores=2,
         chains=2,
         target_accept=0.95,
-        init="adapt_full",
     )
 
 # After sampling, it's always a good idea to do some convergence checks.
 # First, let's check the number of effective samples and the Gelman-Rubin statistic for our parameters of interest:
 
-pm.summary(
-    trace, varnames=["trend", "logs", "omega", "ecc", "t0", "logK", "P"]
-)
+# +
+import arviz as az
+
+with model:
+    summary = az.summary(
+        trace, var_names=["trend", "logs", "omega", "ecc", "t0", "logK", "P"]
+    )
+summary
+# -
 
 # It looks like everything is pretty much converged here. Not bad for 14 parameters and about a minute of runtime...
 #
@@ -198,8 +201,7 @@ pm.summary(
 # +
 import corner
 
-samples = pm.trace_to_dataframe(trace, varnames=["P", "logK", "ecc", "omega"])
-_ = corner.corner(samples)
+_ = corner.corner(trace, var_names=["P", "logK", "ecc", "omega"])
 # -
 
 # Finally, let's plot the plosterior constraints on the RV model and compare those to the data:

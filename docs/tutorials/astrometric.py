@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.7.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -14,7 +14,6 @@
 
 # + nbsphinx="hidden"
 # %matplotlib inline
-# -
 
 # + nbsphinx="hidden"
 # %run notebook_setup
@@ -127,11 +126,12 @@ _ = ax[1].set_xlabel("time [years]")
 
 # +
 import pymc3 as pm
+import pymc3_ext as pmx
+
 from aesara_theano_fallback import aesara as theano
 import aesara_theano_fallback.tensor as tt
 
 import exoplanet as xo
-from exoplanet.distributions import Angle
 
 from astropy import constants
 
@@ -235,15 +235,15 @@ def get_model(parallax=None):
         # directly
         omega0 = 251.6 * deg - np.pi
         Omega0 = 159.6 * deg
-        p = Angle("p", testval=0.5 * (Omega0 + omega0))
-        m = Angle("m", testval=0.5 * (Omega0 - omega0))
+        p = pmx.Angle("p", testval=0.5 * (Omega0 + omega0))
+        m = pmx.Angle("m", testval=0.5 * (Omega0 - omega0))
         omega = pm.Deterministic("omega", p - m)
         Omega = pm.Deterministic("Omega", p + m)
 
         # For these orbits, it can also be better to fit for a phase angle
         # (relative to a reference time) instead of the time of periasteron
         # passage directly
-        phase = Angle("phase", testval=0.0)
+        phase = pmx.Angle("phase", testval=0.0)
         tperi = pm.Deterministic("tperi", T0 + P * phase / (2 * np.pi))
 
         # Geometric uiform prior on cos(incl)
@@ -299,11 +299,11 @@ def get_model(parallax=None):
 
         # Optimize to find the initial parameters
         map_soln = model.test_point
-        map_soln = xo.optimize(map_soln, vars=[log_rho_s, log_theta_s])
-        map_soln = xo.optimize(map_soln, vars=[phase])
-        map_soln = xo.optimize(map_soln, vars=[p, m, ecc])
-        map_soln = xo.optimize(map_soln, vars=[logP, a_ang, phase])
-        map_soln = xo.optimize(map_soln)
+        map_soln = pmx.optimize(map_soln, vars=[log_rho_s, log_theta_s])
+        map_soln = pmx.optimize(map_soln, vars=[phase])
+        map_soln = pmx.optimize(map_soln, vars=[p, m, ecc])
+        map_soln = pmx.optimize(map_soln, vars=[logP, a_ang, phase])
+        map_soln = pmx.optimize(map_soln)
 
     return model, map_soln
 
@@ -350,24 +350,27 @@ _ = ax[0].set_title("map orbit")
 
 np.random.seed(1234)
 with model:
-    trace = pm.sample(
+    trace = pmx.sample(
         tune=5000,
         draws=4000,
         start=map_soln,
         cores=2,
         chains=2,
-        init="adapt_full",
         target_accept=0.9,
     )
 
 # First we can check the convergence for some of the key parameters.
 
+# +
+import arviz as az
+
 with model:
-    summary = pm.summary(
+    summary = az.summary(
         trace,
-        varnames=["P", "tperi", "a_ang", "omega", "Omega", "incl", "ecc"],
+        var_names=["P", "tperi", "a_ang", "omega", "Omega", "incl", "ecc"],
     )
 summary
+# -
 
 # That looks pretty good.
 # Now here's a corner plot showing the covariances between parameters.
@@ -375,16 +378,9 @@ summary
 # +
 import corner
 
-samples = pm.trace_to_dataframe(trace, varnames=["ecc"])
-samples["$P$ [yr]"] = trace["P"] / yr
-samples["$T_\mathrm{peri} - T_0$ [day]"] = trace["tperi"] - T0
-samples["$a$ [arcsec]"] = trace["a_ang"]
-samples["$\omega$ [deg]"] = (trace["omega"] / deg) % 360
-samples["$\Omega$ [deg]"] = (trace["Omega"] / deg) % 360
-samples["$i$ [deg]"] = (trace["incl"] / deg) % 360
-samples["$e$"] = samples["ecc"]
-del samples["ecc"]
-_ = corner.corner(samples)
+_ = corner.corner(
+    trace, var_names=["P", "tperi", "a_ang", "omega", "Omega", "incl", "ecc"]
+)
 # -
 
 # Finally, we can plot the posterior constraints on $\rho$ and $\theta$.
@@ -432,22 +428,21 @@ plx_model, plx_map_soln = get_model(parallax=[24.05, 0.45])
 
 np.random.seed(5432)
 with plx_model:
-    plx_trace = pm.sample(
+    plx_trace = pmx.sample(
         tune=5000,
         draws=4000,
         start=plx_map_soln,
         cores=2,
         chains=2,
-        init="adapt_full",
         target_accept=0.9,
     )
 
 # Check the convergence diagnostics.
 
 with model:
-    summary = pm.summary(
+    summary = az.summary(
         plx_trace,
-        varnames=[
+        var_names=[
             "P",
             "tperi",
             "a_ang",
@@ -463,14 +458,7 @@ summary
 
 # And make the corner plot for the physical parameters.
 
-samples = pm.trace_to_dataframe(plx_trace, varnames=["ecc"])
-samples["$P$ [yr]"] = plx_trace["P"] / yr
-samples["$T_\mathrm{peri} - T_0$ [day]"] = plx_trace["tperi"] - T0
-samples["$a$ [au]"] = plx_trace["a"]
-samples["$M_\mathrm{tot}$ [$M_\odot$]"] = plx_trace["M_tot"]
-samples["$e$"] = plx_trace["ecc"]
-del samples["ecc"]
-_ = corner.corner(samples)
+_ = corner.corner(plx_trace, var_names=["P", "tperi", "a", "ecc", "M_tot"])
 
 # ## Citations
 #
