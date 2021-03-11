@@ -29,7 +29,7 @@ INSTALL_REQUIRES = [
     "numpy>=1.13.0",
     "pymc3>=3.9, <3.12",
     "astropy>=3.1",
-    "pymc3-ext>=0.0.1",
+    "pymc3-ext>=0.1.0",
     "aesara-theano-fallback>=0.0.2",
 ]
 EXTRA_REQUIRE = {
