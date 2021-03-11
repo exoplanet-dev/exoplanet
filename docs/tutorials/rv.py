@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.7.1
+#       jupytext_version: 1.10.3
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -62,6 +62,10 @@ Ks = xo.estimate_semi_amplitude(periods, x, y, yerr, t0s=t0s)
 print(Ks, "m/s")
 # -
 
+0.5 * (np.log(np.array(periods) + np.array(period_errs)) - np.log(np.array(periods) - np.array(period_errs)))
+
+np.array(period_errs) / np.array(periods)
+
 # ## The radial velocity model in PyMC3
 #
 # Now that we have the data and an estimate of the initial values for the parameters, let's start defining the probabilistic model in PyMC3 (take a look at [A quick intro to PyMC3 for exoplaneteers](./intro-to-pymc3.ipynb) if you're new to PyMC3).
@@ -76,23 +80,28 @@ with pm.Model() as model:
 
     # Gaussian priors based on transit data (from Petigura et al.)
     t0 = pm.Normal("t0", mu=np.array(t0s), sd=np.array(t0_errs), shape=2)
-    P = pm.Bound(pm.Normal, lower=0)(
-        "P",
-        mu=np.array(periods),
-        sd=np.array(period_errs),
+    logP = pm.Normal(
+        "logP",
+        mu=np.log(periods),
+        sd=np.array(period_errs) / np.array(periods),
         shape=2,
-        testval=np.array(periods),
+        testval=np.log(periods),
     )
+    P = pm.Deterministic("P", tt.exp(logP))
 
     # Wide log-normal prior for semi-amplitude
-    logK = pm.Bound(pm.Normal, lower=0)(
-        "logK", mu=np.log(Ks), sd=10.0, shape=2, testval=np.log(Ks)
+    logK = pm.Normal(
+        "logK", mu=np.log(Ks), sd=2.0, shape=2, testval=np.log(Ks)
     )
 
     # Eccentricity & argument of periasteron
-    ecc = pmx.UnitUniform("ecc", shape=2, testval=np.array([0.1, 0.1]))
-    omega = pmx.Angle("omega", shape=2)
-
+    ecs = pmx.UnitDisk("ecs", shape=(2, 2), testval=0.01*np.ones((2, 2)))
+    ecc = pm.Deterministic("ecc", tt.sum(ecs ** 2, axis=0))
+    omega = pm.Deterministic("omega", tt.arctan2(ecs[1], ecs[0]))
+    xo.eccentricity.vaneylen19(
+            "ecc_prior", multi=True, shape=2, fixed=True, observed=ecc
+        )
+    
     # Jitter & a quadratic RV trend
     logs = pm.Normal("logs", mu=np.log(np.median(yerr)), sd=5.0)
     trend = pm.Normal("trend", mu=0, sd=10.0 ** -np.arange(3)[::-1], shape=3)
@@ -148,6 +157,8 @@ _ = plt.title("initial model")
 
 with model:
     map_soln = pmx.optimize(start=model.test_point, vars=[trend])
+    map_soln = pmx.optimize(start=map_soln, vars=[t0, trend, logK, logP, logs])
+    map_soln = pmx.optimize(start=map_soln, vars=[ecs])
     map_soln = pmx.optimize(start=map_soln)
 
 # +
@@ -186,11 +197,9 @@ with model:
 # +
 import arviz as az
 
-with model:
-    summary = az.summary(
+az.summary(
         trace, var_names=["trend", "logs", "omega", "ecc", "t0", "logK", "P"]
     )
-summary
 # -
 
 # It looks like everything is pretty much converged here. Not bad for 14 parameters and about a minute of runtime...
@@ -201,7 +210,8 @@ summary
 # +
 import corner
 
-_ = corner.corner(trace, var_names=["P", "logK", "ecc", "omega"])
+with model:
+    _ = corner.corner(trace, var_names=["P", "logK", "ecc", "omega"])
 # -
 
 # Finally, let's plot the plosterior constraints on the RV model and compare those to the data:
