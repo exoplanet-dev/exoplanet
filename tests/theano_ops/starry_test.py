@@ -38,7 +38,9 @@ class TestGetCl(InferShapeTester):
         )
 
     def test_grad(self):
-        theano.gradient.verify_grad(self.op, [np.array([-1, 0.3, 0.2, 0.5])], rng=np.random)
+        theano.gradient.verify_grad(
+            self.op, [np.array([-1, 0.3, 0.2, 0.5])], rng=np.random
+        )
 
 
 class TestGetClRev(InferShapeTester):
