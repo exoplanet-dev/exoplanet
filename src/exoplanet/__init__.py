@@ -5,7 +5,6 @@ __all__ = [
     "distributions",
     "orbits",
     "interp",
-    "get_dense_nuts_step",
     "sample",
     "optimize",
 ]
@@ -17,7 +16,7 @@ from .estimators import *  # NOQA
 from .exoplanet_version import __version__
 from .light_curves import *  # NOQA
 from .optim import optimize
-from .sampling import get_dense_nuts_step, sample
+from .sampling import sample
 from .utils import *  # NOQA
 
 __bibtex__ = __citation__ = CITATIONS["exoplanet"][1]

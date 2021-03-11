@@ -12,7 +12,6 @@ on:
 
 jobs:
   tests:
-    name: "${{ matrix.pymc-version }} on py${{ matrix.python-version }}"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

@@ -3,7 +3,6 @@ import numpy as np
 import pymc3 as pm
 import pytest
 
-from exoplanet import optim as op
 from exoplanet.optim import optimize
 
 try:
@@ -35,39 +34,3 @@ def test_optimize_exception(capsys):
         captured = capsys.readouterr()
         assert "array:" in captured.out
         assert "point:" in captured.out
-
-
-def rosenbrock(x):
-    return (1 - x[0]) ** 2 + 100 * (x[1] - x[0] ** 2) ** 2
-
-
-@pytest.mark.skipif(torch is None, reason="torch is not installed")
-@pytest.mark.parametrize(
-    "kwargs",
-    [
-        {},
-        {"lr": 1e-4},
-        {"lr": 1e-4, "betas": [0.92, 0.96]},
-        {"lr": 1e-4, "betas": [0.92, 0.96], "eps": 1e-3},
-        {"lr": 1e-4, "weight_decay": 0.1},
-        {"amsgrad": True},
-    ],
-)
-def test_adam(kwargs, seed=20200520):
-    np.random.seed(seed)
-    x0 = np.random.randn(2)
-
-    x_torch = torch.tensor(x0, dtype=torch.float64, requires_grad=True)
-    optimizer = torch.optim.Adam([x_torch], **kwargs)
-
-    with pm.Model():
-        x = pm.Flat("x", shape=2, testval=x0)
-        pm.Potential("rosenbrock", -rosenbrock(x))
-        for obj, point in op.optimize_iterator(
-            op.Adam(**kwargs), 100, vars=[x]
-        ):
-            optimizer.zero_grad()
-            loss = rosenbrock(x_torch)
-            loss.backward()
-            optimizer.step()
-            assert np.allclose(x_torch.detach().numpy(), point["x"])
