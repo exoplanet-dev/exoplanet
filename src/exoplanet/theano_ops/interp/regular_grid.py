@@ -8,7 +8,7 @@ import aesara_theano_fallback.tensor as tt
 import pkg_resources
 from aesara_theano_fallback import aesara as theano
 
-from ...exoplanet_version import __version__
+from ..build_utils import get_cache_version
 from ..compat import Apply, COp, ParamsType
 
 
@@ -38,9 +38,7 @@ class RegularGridOp(COp):
         raise NotImplementedError("Only the C version is implemented")
 
     def c_code_cache_version(self, *args, **kwargs):
-        if "dev" in __version__:
-            return ()
-        return tuple(map(int, __version__.split(".")))
+        return get_cache_version()
 
     def c_headers(self, *args, **kwargs):
         return ["theano_helpers.h"]
