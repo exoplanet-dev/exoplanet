@@ -1,3 +1,10 @@
+0.4.5 (2021-03-15)
+++++++++++++++++++
+
+- Adds support for recent versions of PyMC3 built on Aesara `#150 <https://github.com/exoplanet-dev/exoplanet/pull/150>`_
+- Fixes bug in `SimpleTransitOrbit` contact point calculation `#148 <https://github.com/exoplanet-dev/exoplanet/pull/148>`_
+
+
 0.4.4 (2021-01-04)
 ++++++++++++++++++
 
