@@ -15,9 +15,8 @@ These features include:
   <https://celerite2.readthedocs.io>`_.
 * Fast and accurate limb darkened light curves using `starry
   <https://rodluger.github.io/starry>`_.
-* Common reparameterizations for `limb darkening parameters
-  <https://arxiv.org/abs/1308.0009>`_, and `planet radius and impact
-  parameter <https://arxiv.org/abs/1811.04859>`_.
+* Common reparameterizations for exoplanet-specific parameters
+  like `limb darkening <https://arxiv.org/abs/1308.0009>`_.
 * And many others!
 
 All of these functions and distributions include methods for efficiently
@@ -36,22 +35,23 @@ magnitude.
 <https://github.com/exoplanet-dev/exoplanet>`_ so if you have any trouble, `open an issue
 <https://github.com/exoplanet-dev/exoplanet/issues>`_ there.
 
-Where to find what you need
----------------------------
+.. admonition:: Where to find what you need
+   :class: hint
 
-1. For general installation and basic usage, continue scrolling to the table of
-contents below.
+   🖥 For general installation and basic usage, continue scrolling to the table of
+   contents below.
 
-2. For more in depth examples of *exoplanet* used for more realistic problems,
-go to the `Case studies page <https://gallery.exoplanet.codes>`_.
+   🖼 For more in depth examples of *exoplanet* used for more realistic problems,
+   go to the `Case studies page <https://gallery.exoplanet.codes>`_.
 
-3. For more information about scalable Gaussian Processes in PyMC3 (this was
-previously implemented as part of *exoplanet*), see the `celerite2 documentation
-page <httsp://celerite2.readthedocs.io>`_.
+   📈 For more information about scalable Gaussian Processes in PyMC3 (this was
+   previously implemented as part of *exoplanet*), see the `celerite2 documentation
+   page <httsp://celerite2.readthedocs.io>`_.
 
-4. For helper functions and PyMC3 extras that used to be implemented as part of
-*exoplanet*, see the `pymc3-ext project
-<https://github.com/exoplanet-dev/pymc3-ext>`_.
+   👉 For helper functions and PyMC3 extras that used to be implemented as part of
+   *exoplanet*, see the `pymc3-ext project
+   <https://github.com/exoplanet-dev/pymc3-ext>`_.
+
 
 .. toctree::
    :maxdepth: 2
@@ -59,6 +59,7 @@ page <httsp://celerite2.readthedocs.io>`_.
 
    user/install
    tutorials/citation.ipynb
+   user/theano
    user/api
    user/dev
 
