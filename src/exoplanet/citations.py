@@ -34,8 +34,7 @@ def get_citations_for_model(model=None, width=79):
         return "", ""
 
     cite = (
-        list(CITATIONS["exoplanet"][0])
-        + list(CITATIONS["pymc3"][0])
+        list(CITATIONS["pymc3"][0])
         + list(CITATIONS["theano"][0])
         + list(CITATIONS["arviz"][0])
     )
@@ -61,9 +60,9 @@ def get_citations_for_model(model=None, width=79):
 
 CITATIONS = {
     "exoplanet": (
-        ("exoplanet:exoplanet",),
+        ("exoplanet",),
         r"""
-@misc{exoplanet:exoplanet,
+@misc{exoplanet,
   author = {Daniel Foreman-Mackey and Arjun Savel and Rodrigo Luger and
             Ian Czekala and Eric Agol and Adrian Price-Whelan and
             Christina Hedges and Emily Gilbert and Tom Barclay and Luke Bouma
