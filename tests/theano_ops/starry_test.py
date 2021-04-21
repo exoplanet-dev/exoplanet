@@ -50,7 +50,9 @@ class TestGetClRev(InferShapeTester):
         self.op = GetClRev()
 
     def test_basic(self):
-        out = self.op(np.array([-1, 0.3, 0.2, 0.5])).eval()
+        out = self.op(
+            tt.as_tensor_variable(np.array([-1, 0.3, 0.2, 0.5]))
+        ).eval()
         assert np.allclose(np.array([0, 1.3, 2.05, 3.53]), out)
 
     def test_infer_shape(self):
