@@ -36,7 +36,6 @@ jobs:
 
       # Setup
       - name: Install dependencies
-        shell: bash -l {0}
         run: |
           python -m pip install -U pip
           python -m pip install ${{ matrix.pymc-arviz }}
@@ -45,8 +44,22 @@ jobs:
           python -m pip install -e .[test]
           python -m pip install --no-deps starry rebound-pymc3
 
-      - name: Run tests
+      - name: Get compiledir
+        id: compiledir
         shell: bash -l {0}
+        run: |
+          python -c "from aesara_theano_fallback import aesara; print('::set-output name=compiledir::' + aesara.config.compiledir)"
+
+      - name: Cache compiledir
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.compiledir.outputs.compiledir }}
+          key: compiledir-${{ steps.compiledir.outputs.compiledir }}-${{ github.sha }}
+          restore-keys: |
+            compiledir-${{ steps.compiledir.outputs.compiledir }}-
+            compiledir-
+
+      - name: Run tests
         run: python -m pytest --cov=exoplanet -v tests
 
       - name: Coveralls
