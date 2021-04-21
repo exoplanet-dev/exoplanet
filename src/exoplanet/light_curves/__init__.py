@@ -3,12 +3,9 @@
 __all__ = [
     "LimbDarkLightCurve",
     "SecondaryEclipseLightCurve",
-    "StarryLightCurve",
-    # "IntegratedLimbDarkLightCurve",
     "InterpolatedLightCurve",
 ]
 
-# from .integrated import IntegratedLimbDarkLightCurve
 from .interpolated import InterpolatedLightCurve
-from .limb_dark import LimbDarkLightCurve, StarryLightCurve
+from .limb_dark import LimbDarkLightCurve
 from .secondary_eclipse import SecondaryEclipseLightCurve

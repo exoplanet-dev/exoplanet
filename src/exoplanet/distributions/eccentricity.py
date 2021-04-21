@@ -7,7 +7,6 @@ import numpy as np
 import pymc3 as pm
 
 from ..citations import add_citations_to_model
-from .base import UnitUniform
 
 
 def kipping13(
@@ -134,15 +133,12 @@ def vaneylen19(
         frac_sd = 0.2
 
     with model:
-        if lower is None and upper is None:
-            ecc = UnitUniform(name, **kwargs)
-        else:
-            ecc = pm.Uniform(
-                name,
-                lower=0.0 if lower is None else lower,
-                upper=1.0 if upper is None else upper,
-                **kwargs,
-            )
+        ecc = pm.Uniform(
+            name,
+            lower=0.0 if lower is None else lower,
+            upper=1.0 if upper is None else upper,
+            **kwargs,
+        )
 
         with pm.Model(name=name):
 

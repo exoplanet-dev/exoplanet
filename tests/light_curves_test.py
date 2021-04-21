@@ -22,16 +22,11 @@ except ImportError:
 
 @pytest.mark.skipif(starry is None, reason="starry is not installed")
 def test_light_curve():
-    u = tt.vector()
-    b = tt.vector()
-    r = tt.vector()
-    lc = LimbDarkLightCurve(u)
-    f = lc._compute_light_curve(b, r)
-    func = theano.function([u, b, r], f)
-
     u_val = np.array([0.2, 0.3, 0.1, 0.5])
     b_val = np.linspace(-1.5, 1.5, 100)
     r_val = 0.1 + np.zeros_like(b_val)
+    lc = LimbDarkLightCurve(u_val)
+    evaluated = lc._compute_light_curve(b_val, r_val).eval()
 
     if version.parse(starry.__version__) < version.parse("0.9.9"):
         m = starry.Map(lmax=len(u_val))
@@ -41,8 +36,6 @@ def test_light_curve():
         m = starry.Map(udeg=len(u_val))
         m[1:] = u_val
         expect = m.flux(xo=b_val, ro=r_val[0]).eval() - 1
-
-    evaluated = func(u_val, b_val, r_val)
 
     assert np.allclose(expect, evaluated)
 
@@ -56,8 +49,11 @@ def test_light_curve_grad(caplog):
         b, r
     )
 
-    with caplog.at_level(logging.DEBUG, logger="theano.gof.cmodule"):
-        theano.gradient.verify_grad(lc, [u_val, b_val, r_val], rng=np.random)
+    with theano.configparser.change_flags(compute_test_value="off"):
+        with caplog.at_level(logging.DEBUG, logger="theano.gof.cmodule"):
+            theano.gradient.verify_grad(
+                lc, [u_val, b_val, r_val], rng=np.random
+            )
 
 
 def test_in_transit():
@@ -123,7 +119,11 @@ def test_variable_texp():
 
     model1 = lc.get_light_curve(r=r, orbit=orbit, t=t, texp=texp0)
     model2 = lc.get_light_curve(
-        r=r, orbit=orbit, t=t, texp=texp0 + np.zeros_like(t)
+        r=r,
+        orbit=orbit,
+        t=t,
+        texp=texp0 + np.zeros_like(t),
+        use_in_transit=False,
     )
     vals = theano.function([], [model1, model2])()
     assert np.allclose(*vals)
@@ -202,13 +202,14 @@ def test_small_star():
 
 
 def test_singular_points():
-    u = tt.vector()
+    u = np.array([0.2, 0.3, 0.1, 0.5])
     b = tt.vector()
+    b.tag.test_value = np.array([0.5])
     r = tt.vector()
+    r.tag.test_value = np.array([0.1])
     lc = LimbDarkLightCurve(u)
     f = lc._compute_light_curve(b, r)
-    func = theano.function([u, b, r], f)
-    u_val = np.array([0.2, 0.3, 0.1, 0.5])
+    func = theano.function([b, r], f)
 
     def compare(b_val, r_val, b_eps, r_eps):
         """
@@ -218,7 +219,7 @@ def test_singular_points():
         """
         b_val = [b_val - b_eps, b_val + b_eps, b_val]
         r_val = [r_val - r_eps, r_val + r_eps, r_val]
-        flux = func(u_val, b_val, r_val)
+        flux = func(b_val, r_val)
         assert np.allclose(np.mean(flux[:2]), flux[2])
 
     # Test the b = 1 - r singular point

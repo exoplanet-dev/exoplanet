@@ -17,7 +17,7 @@ from astropy import units as u
 from ..citations import add_citations_to_model
 from ..theano_ops.contact_points import ContactPoints, contact_points
 from ..theano_ops.kepler import kepler
-from ..units import has_unit, to_unit, with_unit
+from ..units import has_unit, to_unit
 from ..utils import as_tensor_variable
 from .constants import G_grav, au_per_R_sun, c_light, gcc_per_sun
 
@@ -90,8 +90,6 @@ class KeplerianOrbit:
         r_star=None,
         rho_star=None,
         ror=None,
-        m_planet_units=None,
-        rho_star_units=None,
         model=None,
         contact_points_kwargs=None,
         **kwargs
@@ -121,21 +119,6 @@ class KeplerianOrbit:
             a = r_star * aor
             duration = None
 
-        # Parameters
-        if m_planet_units is not None:
-            warnings.warn(
-                "The `m_planet_units` argument has been deprecated. "
-                "Use `with_unit` instead.",
-                DeprecationWarning,
-            )
-            m_planet = with_unit(m_planet, m_planet_units)
-        if rho_star_units is not None:
-            warnings.warn(
-                "The `rho_star_units` argument has been deprecated. "
-                "Use `with_unit` instead.",
-                DeprecationWarning,
-            )
-            rho_star = with_unit(rho_star, rho_star_units)
         inputs = _get_consistent_inputs(
             a, period, rho_star, r_star, m_star, m_planet
         )

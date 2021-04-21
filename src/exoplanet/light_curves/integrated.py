@@ -9,7 +9,6 @@ from aesara_theano_fallback.graph import fg
 
 from ..citations import add_citations_to_model
 from ..theano_ops.starry.integrated_limbdark import IntegratedLimbDarkOp
-from ..utils import eval_in_model
 from .limb_dark import get_cl, limbdark
 
 
@@ -38,10 +37,6 @@ class IntegratedLimbDarkLightCurve:  # pragma: no cover
             func = theano.function([], self.c_norm.size)
             return int(func())
         except fg.MissingInputError:
-            pass
-        try:
-            return int(eval_in_model(self.c_norm.size))
-        except (fg.MissingInputError, TypeError):
             return -1
 
     def get_light_curve(

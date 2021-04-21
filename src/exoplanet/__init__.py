@@ -1,13 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__all__ = [
-    "__version__",
-    "distributions",
-    "orbits",
-    "interp",
-    "sample",
-    "optimize",
-]
+__all__ = ["__version__", "distributions", "orbits", "interp"]
 
 from . import distributions, interp, orbits
 from .citations import CITATIONS
@@ -15,8 +8,6 @@ from .distributions import *  # NOQA
 from .estimators import *  # NOQA
 from .exoplanet_version import __version__
 from .light_curves import *  # NOQA
-from .optim import optimize
-from .sampling import sample
 from .utils import *  # NOQA
 
 __bibtex__ = __citation__ = CITATIONS["exoplanet"][1]
