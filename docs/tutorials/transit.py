@@ -178,7 +178,7 @@ import corner
 truth = dict(
     zip(
         ["period", "r"],
-        xo.eval_in_model([period, r], model.test_point, model=model),
+        pmx.eval_in_model([period, r], model.test_point, model=model),
     )
 )
 _ = corner.corner(

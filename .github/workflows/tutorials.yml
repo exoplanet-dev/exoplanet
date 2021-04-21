@@ -19,13 +19,6 @@ jobs:
         with:
           submodules: true
 
-      - uses: actions/cache@v2
-        with:
-          path: ~/.theano
-          key: ${{ runner.os }}-theano-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-theano-
-
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -36,6 +29,21 @@ jobs:
           python -m pip install -U pip
           python -m pip install "pymc3~=3.10"
           python -m pip install ".[tutorials]"
+
+      - name: Get compiledir
+        id: compiledir
+        shell: bash -l {0}
+        run: |
+          python -c "from aesara_theano_fallback import aesara; print('::set-output name=compiledir::' + aesara.config.compiledir)"
+
+      - name: Cache compiledir
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.compiledir.outputs.compiledir }}
+          key: tutorials-${{ steps.compiledir.outputs.compiledir }}-${{ github.sha }}
+          restore-keys: |
+            tutorials-${{ steps.compiledir.outputs.compiledir }}-
+            tutorials-
 
       - name: Execute the notebooks
         run: |

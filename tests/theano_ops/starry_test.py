@@ -50,12 +50,7 @@ class TestGetClRev(InferShapeTester):
         self.op = GetClRev()
 
     def test_basic(self):
-        x = tt.dvector()
-        f = theano.function([x], self.op(x))
-
-        inp = np.array([-1, 0.3, 0.2, 0.5])
-        out = f(inp)
-
+        out = self.op(np.array([-1, 0.3, 0.2, 0.5])).eval()
         assert np.allclose(np.array([0, 1.3, 2.05, 3.53]), out)
 
     def test_infer_shape(self):
@@ -76,12 +71,13 @@ class TestLimbDark(InferShapeTester):
         b = tt.vector()
         r = tt.vector()
         los = tt.vector()
-        f = theano.function([c, b, r, los], self.op(c, b, r, los)[0])
 
-        c_val = np.array([-0.85, 2.5, -0.425, 0.1])
-        b_val = np.linspace(-1.5, 1.5, 100)
-        r_val = 0.1 + np.zeros_like(b_val)
-        los_val = np.ones_like(b_val)
+        c.tag.test_value = c_val = np.array([-0.85, 2.5, -0.425, 0.1])
+        b.tag.test_value = b_val = np.linspace(-1.5, 1.5, 100)
+        r.tag.test_value = r_val = 0.1 + np.zeros_like(b_val)
+        los.tag.test_value = los_val = np.ones_like(b_val)
+
+        f = theano.function([c, b, r, los], self.op(c, b, r, los)[0])
 
         return f, [c, b, r, los], [c_val, b_val, r_val, los_val]
 
@@ -122,10 +118,11 @@ class TestRadiusFromOccArea(InferShapeTester):
     def get_args(self):
         delta = tt.vector()
         b = tt.vector()
-        f = theano.function([delta, b], self.op(delta, b))
 
-        delta_val = np.linspace(0.01, 0.99, 100)
-        b_val = np.linspace(0.01, 1.5, len(delta_val))
+        delta.tag.test_value = delta_val = np.linspace(0.01, 0.99, 100)
+        b.tag.test_value = b_val = np.linspace(0.01, 1.5, len(delta_val))
+
+        f = theano.function([delta, b], self.op(delta, b))
 
         return f, [delta, b], [delta_val, b_val]
 
