@@ -6,6 +6,7 @@ __all__ = [
     "get_aor_from_transit_duration",
 ]
 
+import warnings
 from collections import defaultdict
 
 import aesara_theano_fallback.tensor as tt
