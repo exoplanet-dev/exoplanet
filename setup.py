@@ -24,10 +24,9 @@ CLASSIFIERS = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
 ]
-SETUP_REQUIRES = ["setuptools>=40.6.0", "setuptools_scm"]
 INSTALL_REQUIRES = [
     "numpy>=1.13.0",
-    "pymc3>=3.9, <3.12",
+    "pymc3>=3.9",
     "astropy>=3.1",
     "pymc3-ext>=0.1.0",
     "aesara-theano-fallback>=0.0.2",
@@ -35,13 +34,11 @@ INSTALL_REQUIRES = [
 EXTRA_REQUIRE = {
     "test": [
         "scipy",
-        "nose",
-        "parameterized",
+        # "nose",
+        # "parameterized",
         "pytest",
         "pytest-cov>=2.6.1",
         "pytest-env",
-        "coveralls",
-        "pybind11",
         "batman-package",
     ],
     "docs": [
@@ -59,39 +56,14 @@ EXTRA_REQUIRE = {
         "nbsphinx",
     ],
     "tutorials": [
-        "jupytext<1.7.0",
+        "jupytext>1.7.0",
         "jupyter",
         "nbconvert",
         "matplotlib",
         "corner",
         "lightkurve",
     ],
-    "nbody": [
-        "rebound; sys_platform != 'win32'",
-        "rebound_pymc3>=0.0.3; sys_platform != 'win32'",
-        "reboundx; sys_platform != 'win32'",
-    ],
 }
-EXTRA_REQUIRE["dev"] = (
-    EXTRA_REQUIRE["test"]
-    + EXTRA_REQUIRE["docs"]
-    + EXTRA_REQUIRE["nbody"]
-    + [
-        "pre-commit",
-        "black",
-        "black_nbconvert",
-        "isort",
-        "toml",
-        "flake8",
-        "nbstripout",
-        "jupytext",
-        "radvel",
-        "jupyterlab",
-        "lightkurve",
-        "pep517",
-        "twine",
-    ]
-)
 
 include_dirs = [
     "src/exoplanet/theano_ops/lib/include",
@@ -150,7 +122,6 @@ if __name__ == "__main__":
         install_requires=INSTALL_REQUIRES,
         extras_require=EXTRA_REQUIRE,
         classifiers=CLASSIFIERS,
-        setup_requires=SETUP_REQUIRES,
         zip_safe=False,
         ext_modules=ext_modules,
         cmdclass={"build_ext": build_ext},
