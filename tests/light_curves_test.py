@@ -197,9 +197,9 @@ def test_small_star():
 def test_singular_points():
     u = np.array([0.2, 0.3, 0.1, 0.5])
     b = tt.vector()
-    b.tag.test_value = 0.5
+    b.tag.test_value = np.array([0.5])
     r = tt.vector()
-    r.tag.test_value = 0.1
+    r.tag.test_value = np.array([0.1])
     lc = LimbDarkLightCurve(u)
     f = lc._compute_light_curve(b, r)
     func = theano.function([b, r], f)
