@@ -56,9 +56,7 @@ jobs:
           path: ${{ steps.compiledir.outputs.compiledir }}
           key: compiledir-${{ steps.compiledir.outputs.compiledir }}-${{ matrix.pymc-arviz }}-${{ github.sha }}
           restore-keys: |
-            compiledir-${{ steps.compiledir.outputs.compiledir }}-${{ matrix.pymc-arviz }}
-            compiledir-${{ steps.compiledir.outputs.compiledir }}-
-            compiledir-
+            compiledir-${{ steps.compiledir.outputs.compiledir }}-${{ matrix.pymc-arviz }}-
 
       - name: Run tests
         run: python -m pytest --cov=exoplanet -v tests
