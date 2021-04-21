@@ -133,8 +133,6 @@ def vaneylen19(
         frac_sd = 0.2
 
     with model:
-        lower = 0.0 if lower is None else lower
-        lower = 1.0 if upper is None else upper
         ecc = pm.Uniform(
             name,
             lower=0.0 if lower is None else lower,
