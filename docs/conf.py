@@ -56,7 +56,6 @@ autodoc_mock_imports = [
     "theano",
     "aesara_theano_fallback",
     "tqdm",
-    "rebound_pymc3",
 ]
 
 # RTDs-action

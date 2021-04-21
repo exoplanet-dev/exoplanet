@@ -36,7 +36,7 @@ class TestKeplerSolver(InferShapeTester):
         assert np.allclose(np.cos(f), cosf0)
 
     def test_pi(self):
-        e = np.linspace(0, 1.0, 100)
+        e = np.linspace(0, 1.0, 100)[:-1]
         E = np.pi + np.zeros_like(e)
         M, f = self._get_M_and_f(e, E)
 
