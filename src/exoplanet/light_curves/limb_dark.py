@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__all__ = ["LimbDarkLightCurve", "StarryLightCurve"]
-
-import warnings
+__all__ = ["LimbDarkLightCurve"]
 
 import aesara_theano_fallback.tensor as tt
 import numpy as np
@@ -205,13 +203,3 @@ class LimbDarkLightCurve:
         if los is None:
             los = tt.ones_like(b)
         return limbdark(self.c_norm, b, r, los)[0]
-
-
-class StarryLightCurve(LimbDarkLightCurve):  # pragma: no cover
-    def __init__(self, *args, **kwargs):
-        warnings.warn(
-            "StarryLightCurve has been deprecated. "
-            "Use LimbDarkLightCurve instead.",
-            DeprecationWarning,
-        )
-        super(StarryLightCurve, self).__init__(*args, **kwargs)
