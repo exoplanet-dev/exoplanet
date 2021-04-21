@@ -7,7 +7,7 @@ from aesara_theano_fallback import aesara as theano
 
 @pytest.fixture(scope="package", autouse=True)
 def theano_config():
-    flags = dict(compute_test_value="off")
+    flags = dict(compute_test_value="raise")
     config = theano.configparser.change_flags(**flags)
     with config:
         yield

@@ -14,12 +14,6 @@ from exoplanet.distributions.physical import ImpactParameter, QuadLimbDark
 class _Base:
     random_seed = 20160911
 
-    def teardown_method(self, method):
-        try:
-            pm.theanof.set_theano_conf({"compute_test_value": "off"})
-        except AttributeError:
-            pass
-
     def _sample(self, **kwargs):
         logger = logging.getLogger("pymc3")
         logger.propagate = False
