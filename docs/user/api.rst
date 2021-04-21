@@ -44,12 +44,6 @@ Estimators
 Distributions
 -------------
 
-Base distributions
-~~~~~~~~~~~~~~~~~~
-
-These distributions have been moved to the `pymc3-ext project
-<https://github.com/exoplanet-dev/pymc3-ext>`_.
-
 Physical distributions
 ~~~~~~~~~~~~~~~~~~~~~~
 

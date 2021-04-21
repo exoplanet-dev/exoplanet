@@ -5,8 +5,6 @@ __all__ = ["InterpolatedLightCurve"]
 import aesara_theano_fallback.tensor as tt
 import numpy as np
 
-from ..utils import eval_in_model
-
 
 def interp(n, x, xmin, xmax, dx, func):
     xp = tt.arange(xmin - dx, xmax + 2.5 * dx, dx)
@@ -50,12 +48,9 @@ class InterpolatedLightCurve:
             try:
                 vec = orbit.period.tag.test_value
             except AttributeError:
-                try:
-                    vec = eval_in_model(orbit.period)
-                except TypeError:
-                    raise ValueError(
-                        "Can't compute num_planets, please provide a value"
-                    )
+                raise ValueError(
+                    "Can't compute num_planets, please provide a value"
+                )
             num_planets = len(np.atleast_1d(vec))
         else:
             num_planets = int(self.num_planets)
