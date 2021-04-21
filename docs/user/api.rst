@@ -14,9 +14,6 @@ Orbits
 .. autoclass:: exoplanet.orbits.TTVOrbit
    :inherited-members:
 
-.. autoclass:: exoplanet.orbits.ReboundOrbit
-   :inherited-members:
-
 .. autoclass:: exoplanet.orbits.SimpleTransitOrbit
    :inherited-members:
 
