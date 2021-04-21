@@ -642,6 +642,24 @@ def test_get_aor_from_transit_duration():
         assert np.allclose(tt.sqrt(x ** 2 + y ** 2).eval(), r_star * (1 + ror))
 
 
+@pytest.mark.filterwarnings("error::UserWarning")
+def test_duration_without_ror_warning():
+    duration = 0.12
+    period = 10.1235
+    b = 0.34
+    ror = 0.06
+    r_star = 0.7
+
+    with pytest.raises(UserWarning):
+        KeplerianOrbit(
+            period=period, t0=0.0, b=b, duration=duration, r_star=r_star
+        )
+
+    KeplerianOrbit(
+        period=period, t0=0.0, b=b, duration=duration, r_star=r_star, ror=ror
+    )
+
+
 def test_jacobians():
     duration = 0.12
     period = 10.1235

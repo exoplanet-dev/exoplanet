@@ -106,6 +106,12 @@ class KeplerianOrbit:
                     "'b' must be provided for a circular orbit with a "
                     "'duration'"
                 )
+            if ror is None:
+                warnings.warn(
+                    "When using the 'duration' parameter in KeplerianOrbit, "
+                    "the 'ror' parameter should also be provided.",
+                    UserWarning,
+                )
             aor, daordtau = get_aor_from_transit_duration(
                 duration, period, b, ror=ror
             )
