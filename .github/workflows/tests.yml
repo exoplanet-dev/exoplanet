@@ -59,7 +59,7 @@ jobs:
             compiledir-${{ steps.compiledir.outputs.compiledir }}-${{ matrix.pymc-arviz }}-
 
       - name: Run tests
-        run: python -m pytest --cov=exoplanet -v tests
+        run: python -m pytest --cov=exoplanet -v tests/light_curves_test.py::test_light_curve_grad
 
       - name: Coveralls
         uses: AndreMiras/coveralls-python-action@v20201129
