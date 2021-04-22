@@ -8,8 +8,9 @@ from aesara_theano_fallback import aesara as theano
 from aesara_theano_fallback.graph import fg
 
 from ..citations import add_citations_to_model
-from ..theano_ops.starry.integrated_limbdark import IntegratedLimbDarkOp
-from .limb_dark import get_cl, limbdark
+
+# from ..theano_ops.starry.integrated_limbdark import IntegratedLimbDarkOp
+# from .limb_dark import get_cl, limbdark
 
 
 class IntegratedLimbDarkLightCurve:  # pragma: no cover

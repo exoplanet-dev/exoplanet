@@ -22,10 +22,10 @@ except ImportError:
 
 @pytest.mark.skipif(starry is None, reason="starry is not installed")
 def test_light_curve():
-    u_val = np.array([0.2, 0.3, 0.1, 0.5])
+    u_val = np.array([0.2, 0.3])
     b_val = np.linspace(-1.5, 1.5, 100)
     r_val = 0.1 + np.zeros_like(b_val)
-    lc = LimbDarkLightCurve(u_val)
+    lc = LimbDarkLightCurve(u_val[0], u_val[1])
     evaluated = lc._compute_light_curve(b_val, r_val).eval()
 
     if version.parse(starry.__version__) < version.parse("0.9.9"):
@@ -41,19 +41,35 @@ def test_light_curve():
 
 
 def test_light_curve_grad(caplog):
-    u_val = np.array([0.2, 0.3, 0.1, 0.5])
+    u_val = np.array([0.2, 0.3])
     b_val = np.linspace(-1.5, 1.5, 20)
     r_val = 0.1 + np.zeros_like(b_val)
 
-    lc = lambda u, b, r: LimbDarkLightCurve(u)._compute_light_curve(  # NOQA
-        b, r
-    )
+    lc = lambda u, b, r: LimbDarkLightCurve(  # NOQA
+        u[0], u[1]
+    )._compute_light_curve(b, r)
 
     with theano.configparser.change_flags(compute_test_value="off"):
         with caplog.at_level(logging.DEBUG, logger="theano.gof.cmodule"):
             theano.gradient.verify_grad(
                 lc, [u_val, b_val, r_val], rng=np.random
             )
+
+
+def test_vector_params():
+    u = tt.vector()
+    u.tag.test_value = u_val = np.array([0.3, 0.2])
+    b = np.linspace(-1.5, 1.5, 20)
+    r = 0.1 + np.zeros_like(b)
+
+    with pytest.warns(DeprecationWarning, match=r"vector of limb darkening"):
+        lc1 = theano.function(
+            [u], LimbDarkLightCurve(u)._compute_light_curve(b, r)
+        )(u_val)
+    lc2 = theano.function(
+        [u], LimbDarkLightCurve(u[0], u[1])._compute_light_curve(b, r)
+    )(u_val)
+    np.testing.assert_allclose(lc1, lc2)
 
 
 def test_in_transit():
@@ -69,10 +85,10 @@ def test_in_transit():
         omega=np.array([0.5, 1.3]),
         m_planet=m_planet,
     )
-    u = np.array([0.2, 0.3, 0.1, 0.5])
+    u = np.array([0.2, 0.3])
     r = np.array([0.1, 0.01])
 
-    lc = LimbDarkLightCurve(u)
+    lc = LimbDarkLightCurve(u[0], u[1])
     model1 = lc.get_light_curve(r=r, orbit=orbit, t=t)
     model2 = lc.get_light_curve(r=r, orbit=orbit, t=t, use_in_transit=False)
     vals = theano.function([], [model1, model2])()
@@ -99,11 +115,11 @@ def test_variable_texp():
         omega=np.array([0.5, 1.3]),
         m_planet=m_planet,
     )
-    u = np.array([0.2, 0.3, 0.1, 0.5])
+    u = np.array([0.2, 0.3])
     r = np.array([0.1, 0.01])
     texp0 = 0.1
 
-    lc = LimbDarkLightCurve(u)
+    lc = LimbDarkLightCurve(u[0], u[1])
     model1 = lc.get_light_curve(
         r=r, orbit=orbit, t=t, texp=texp0, use_in_transit=False
     )
@@ -130,17 +146,16 @@ def test_variable_texp():
 
 
 def test_contact_bug():
-    print(theano.config.floatX)
     orbit = KeplerianOrbit(period=3.456, ecc=0.6, omega=-1.5)
     t = np.linspace(-0.1, 0.1, 1000)
     u = [0.3, 0.2]
     y1 = (
-        LimbDarkLightCurve(u)
+        LimbDarkLightCurve(u[0], u[1])
         .get_light_curve(orbit=orbit, r=0.1, t=t, texp=0.02)
         .eval()
     )
     y2 = (
-        LimbDarkLightCurve(u)
+        LimbDarkLightCurve(u[0], u[1])
         .get_light_curve(
             orbit=orbit, r=0.1, t=t, texp=0.02, use_in_transit=False
         )
@@ -178,7 +193,7 @@ def test_small_star():
     a = orbit.a.eval()
     incl = orbit.incl.eval()
 
-    lc = LimbDarkLightCurve(u_star)
+    lc = LimbDarkLightCurve(u_star[0], u_star[1])
 
     model1 = lc.get_light_curve(r=r_pl, orbit=orbit, t=t)
     model2 = lc.get_light_curve(r=r_pl, orbit=orbit, t=t, use_in_transit=False)
@@ -202,12 +217,12 @@ def test_small_star():
 
 
 def test_singular_points():
-    u = np.array([0.2, 0.3, 0.1, 0.5])
+    u = np.array([0.2, 0.3])
     b = tt.vector()
     b.tag.test_value = np.array([0.5])
     r = tt.vector()
     r.tag.test_value = np.array([0.1])
-    lc = LimbDarkLightCurve(u)
+    lc = LimbDarkLightCurve(u[0], u[1])
     f = lc._compute_light_curve(b, r)
     func = theano.function([b, r], f)
 
@@ -253,7 +268,7 @@ def _check_quad(u, b, depth, ror):
 
 def test_approx_transit_depth():
     u = np.array([0.3, 0.2])
-    lc = LimbDarkLightCurve(u)
+    lc = LimbDarkLightCurve(u[0], u[1])
 
     for b, delta in [
         (np.float64(0.5), np.float64(0.01)),
@@ -268,10 +283,10 @@ def test_approx_transit_depth():
 
 def test_secondary_eclipse():
     u1 = np.array([0.3, 0.2])
-    lc1 = LimbDarkLightCurve(u1)
+    lc1 = LimbDarkLightCurve(u1[0], u1[1])
 
     u2 = np.array([0.4, 0.1])
-    lc2 = LimbDarkLightCurve(u1)
+    lc2 = LimbDarkLightCurve(u2[0], u2[1])
 
     s = 0.3
     ror = 0.08

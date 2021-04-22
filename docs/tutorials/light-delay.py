@@ -88,14 +88,14 @@ t = np.linspace(-0.5, 0.5, 20000)
 
 # No light delay
 light_curve1 = (
-    xo.LimbDarkLightCurve([0.5, 0.25])
+    xo.LimbDarkLightCurve(0.5, 0.25)
     .get_light_curve(orbit=orbit, r=0.1, t=t)
     .eval()
 )
 
 # With light delay
 light_curve2 = (
-    xo.LimbDarkLightCurve([0.5, 0.25])
+    xo.LimbDarkLightCurve(0.5, 0.25)
     .get_light_curve(orbit=orbit, r=0.1, t=t, light_delay=True)
     .eval()
 )
