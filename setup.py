@@ -25,6 +25,7 @@ CLASSIFIERS = [
 ]
 INSTALL_REQUIRES = ["exoplanet-core[pymc]>=0.1", "astropy>=3.1"]
 EXTRA_REQUIRE = {
+    "extras": ["pymc3-ext>=0.1.0", "celerite2>=0.2.0"],
     "test": [
         "scipy",
         "pytest",

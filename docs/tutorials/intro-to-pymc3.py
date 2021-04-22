@@ -142,8 +142,9 @@ with model:
 # It's also good to quantify that "looking substantially different" argument.
 # This is implemented in PyMC3 as the "summary" function.
 # In this table, some of the key columns to look at are `n_eff` and `Rhat`.
-# * `n_eff` shows an estimate of the number of effective (or independent) samples for that parameter. In this case, `n_eff` should probably be around 500 per chain (there should have been 2 chains run).
-# * `Rhat` shows the [Gelman–Rubin statistic](https://docs.pymc.io/api/diagnostics.html#pymc3.diagnostics.gelman_rubin) and it should be close to 1.
+#
+# 1. `n_eff` shows an estimate of the number of effective (or independent) samples for that parameter. In this case, `n_eff` should probably be around 500 per chain (there should have been 2 chains run).
+# 2. `Rhat` shows the [Gelman–Rubin statistic](https://docs.pymc.io/api/diagnostics.html#pymc3.diagnostics.gelman_rubin) and it should be close to 1.
 
 with model:
     summary = az.summary(trace, var_names=["m", "b", "logs"])

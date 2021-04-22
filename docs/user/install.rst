@@ -8,17 +8,28 @@ Installation
 Using pip
 ---------
 
-*exoplanet* can also be installed using `pip <https://pip.pypa.io>`_:
+The recommended method of installing *exoplanet* is with `pip
+<https://pip.pypa.io>`_:
 
 .. code-block:: bash
 
     python -m pip install -U exoplanet
 
+If you want to install some recommended extras (`pymc3-ext
+<https://github.com/exoplanet-dev/pymc3-ext>`_ and `celerite2
+<https://celerite2.readthedocs.io>`_), you can use the following, or just follow
+the instructions on the relevant documentation pages:
+
+.. code-block:: bash
+
+    python -m pip install -U "exoplanet[extras]"
+
 
 Using conda
 -----------
 
-*exoplanet* can be installed using `conda <https://docs.conda.io>`_ from ``conda-forge``:
+*exoplanet* can also be installed using `conda <https://docs.conda.io>`_ from
+``conda-forge``:
 
 .. code-block:: bash
 
@@ -35,32 +46,9 @@ The source code for *exoplanet* can be downloaded and installed `from GitHub
 
 .. code-block:: bash
 
-    git clone --recursive https://github.com/exoplanet-dev/exoplanet.git
+    git clone https://github.com/exoplanet-dev/exoplanet.git
     cd exoplanet
     python -m pip install -e .
-
-Note: if you clone the repo without the ``--recursive`` flag, you will need to run
-
-.. code-block:: bash
-
-   git submodule init
-   git submodule update
-
-
-.. _windows:
-
-Notes about running on Windows
-------------------------------
-
-Running exoplanet on Windows can be a little tricky because of the dependence on
-runtime compilation, but it has been used on Windows successfully. The following
-conda installation steps seem to work:
-
-.. code-block:: bash
-
-    conda create --name exoplanetTest python pip
-    conda install --name exoplanetTest numpy scipy mkl-service libpython m2w64-toolchain astropy
-    python -m pip install -e ".[test]"
 
 
 Testing
@@ -70,7 +58,7 @@ To run the unit tests, install the development dependencies using pip:
 
 .. code-block:: bash
 
-    python -m pip install ".[test]"
+    python -m pip install -e ".[test]"
 
 and then execute:
 
@@ -78,6 +66,6 @@ and then execute:
 
     python -m pytest -v tests
 
-All of the tests should (of course) pass.
-If any of the tests don't pass and if you can't sort out why, `open an issue
-on GitHub <https://github.com/exoplanet-dev/exoplanet/issues>`_.
+All of the tests should (of course) pass. If any of the tests don't pass and if
+you can't sort out why, `open an issue on GitHub
+<https://github.com/exoplanet-dev/exoplanet/issues>`_.

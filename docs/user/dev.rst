@@ -37,7 +37,7 @@ local machine:
 
 .. code-block:: bash
 
-    git clone --recursive https://github.com/YOURUSERNAME/exoplanet.git
+    git clone https://github.com/YOURUSERNAME/exoplanet.git
     cd exoplanet
     git checkout -b BRANCHNAME
 
@@ -85,9 +85,10 @@ computational run time. These can be found in the `case studies
 information there about how to contribute.
 
 3. **Theano/Aesara ops**: ``exoplanet`` comes bundled with a set of custom ops
-that are implemented in ``src/exoplanet/theano_ops``. As a user, you'll rarely
-interact with these directly and we haven't put a lot of work into making them
-user friendly, but if you are interested in diving in, feel free to ask
+that are implemented in the `exoplanet-core project
+<https://github.com/exoplanet-dev/exoplanet-core>`_. As a user, hopefully you'll
+rarely interact with these directly and we haven't put a lot of work into making
+them user friendly, but if you are interested in diving in, feel free to ask
 questions on GitHub or via email.
 
 
