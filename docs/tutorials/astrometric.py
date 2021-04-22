@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.7.1
+#       jupytext_version: 1.10.3
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -273,10 +273,10 @@ def get_model(parallax=None):
 
         # Add jitter terms to both separation and position angle
         log_rho_s = pm.Normal(
-            "log_rho_s", mu=np.log(np.median(rho_err)), sd=5.0
+            "log_rho_s", mu=np.log(np.median(rho_err)), sd=2.0
         )
         log_theta_s = pm.Normal(
-            "log_theta_s", mu=np.log(np.median(theta_err)), sd=5.0
+            "log_theta_s", mu=np.log(np.median(theta_err)), sd=2.0
         )
         rho_tot_err = tt.sqrt(rho_err ** 2 + tt.exp(2 * log_rho_s))
         theta_tot_err = tt.sqrt(theta_err ** 2 + tt.exp(2 * log_theta_s))
@@ -351,8 +351,8 @@ _ = ax[0].set_title("map orbit")
 np.random.seed(1234)
 with model:
     trace = pmx.sample(
-        tune=5000,
-        draws=4000,
+        tune=3000,
+        draws=2000,
         start=map_soln,
         cores=2,
         chains=2,
@@ -429,8 +429,8 @@ plx_model, plx_map_soln = get_model(parallax=[24.05, 0.45])
 np.random.seed(5432)
 with plx_model:
     plx_trace = pmx.sample(
-        tune=5000,
-        draws=4000,
+        tune=3000,
+        draws=2000,
         start=plx_map_soln,
         cores=2,
         chains=2,

@@ -11,11 +11,15 @@ from ..utils import as_tensor_variable
 
 
 class LimbDarkLightCurve:
-    """A limb darkened light curve computed using starry
+    """A quadratically limb darkened light curve
+
+    .. note:: Earlier versions of exoplanet supported higher (and lower) order
+        limb darkening, but this support was removed in v0.5.0. For higher
+        order limb darkening profiles, use starry directly.
 
     Args:
-        u (vector): A vector of limb darkening coefficients.
-
+        u1 (scalar): The first limb darkening coefficient
+        u2 (scalar): The second limb darkening coefficient
     """
 
     __citations__ = ("starry",)
