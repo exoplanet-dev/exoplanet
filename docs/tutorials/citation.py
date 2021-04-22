@@ -31,7 +31,7 @@ import exoplanet as xo
 with pm.Model() as model:
     u = xo.distributions.QuadLimbDark("u")
     orbit = xo.orbits.KeplerianOrbit(period=10.0)
-    light_curve = xo.LimbDarkLightCurve(u)
+    light_curve = xo.LimbDarkLightCurve(u[0], u[1])
     transit = light_curve.get_light_curve(r=0.1, orbit=orbit, t=[0.0, 0.1])
 
     txt, bib = xo.citations.get_citations_for_model()

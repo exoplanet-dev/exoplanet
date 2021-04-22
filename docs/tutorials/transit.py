@@ -37,7 +37,7 @@ orbit = xo.orbits.KeplerianOrbit(period=3.456)
 t = np.linspace(-0.1, 0.1, 1000)
 u = [0.3, 0.2]
 light_curve = (
-    xo.LimbDarkLightCurve(u)
+    xo.LimbDarkLightCurve(*u)
     .get_light_curve(orbit=orbit, r=0.1, t=t, texp=0.02)
     .eval()
 )
@@ -98,7 +98,7 @@ with pm.Model() as model:
     orbit = xo.orbits.KeplerianOrbit(period=period, t0=t0, b=b)
 
     # Compute the model light curve using starry
-    light_curves = xo.LimbDarkLightCurve(u).get_light_curve(
+    light_curves = xo.LimbDarkLightCurve(u[0], u[1]).get_light_curve(
         orbit=orbit, r=r, t=t
     )
     light_curve = pm.math.sum(light_curves, axis=-1) + mean

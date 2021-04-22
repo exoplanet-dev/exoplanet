@@ -60,7 +60,7 @@ def test_simple_light_curve_compare_kepler():
     r_star = 1
     b = 1 - r / r_star * 3
 
-    star = LimbDarkLightCurve([0])
+    star = LimbDarkLightCurve(0.2, 0.3)
     orbit_keplerian = KeplerianOrbit(
         period=period, t0=t0, b=b, r_star=r_star, m_star=1
     )
