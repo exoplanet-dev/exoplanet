@@ -7,7 +7,6 @@ import codecs
 import os
 import re
 
-from pybind11.setup_helpers import Pybind11Extension, build_ext
 from setuptools import find_packages, setup
 
 # PROJECT SPECIFIC
@@ -24,18 +23,10 @@ CLASSIFIERS = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
 ]
-INSTALL_REQUIRES = [
-    "numpy>=1.13.0",
-    "pymc3>=3.9",
-    "astropy>=3.1",
-    "pymc3-ext>=0.1.0",
-    "aesara-theano-fallback>=0.0.2",
-]
+INSTALL_REQUIRES = ["exoplanet-core[pymc]>=0.1", "astropy>=3.1"]
 EXTRA_REQUIRE = {
     "test": [
         "scipy",
-        # "nose",
-        # "parameterized",
         "pytest",
         "pytest-cov>=2.6.1",
         "pytest-env",
@@ -43,15 +34,7 @@ EXTRA_REQUIRE = {
     ],
     "docs": [
         "sphinx>=1.7.5",
-        "pandoc",
-        "jupyter",
-        "ipywidgets",
         "sphinx-typlog-theme",
-        "nbformat",
-        "nbconvert",
-        "corner",
-        "lightkurve",
-        "jupytext",
         "rtds_action",
         "nbsphinx",
     ],
@@ -62,21 +45,9 @@ EXTRA_REQUIRE = {
         "matplotlib",
         "corner",
         "lightkurve",
+        "pymc3-ext>=0.1.0",
     ],
 }
-
-include_dirs = [
-    "src/exoplanet/theano_ops/lib/include",
-    "src/exoplanet/theano_ops/lib/vendor/eigen",
-]
-ext_modules = [
-    Pybind11Extension(
-        "exoplanet.theano_ops.driver",
-        ["src/exoplanet/theano_ops/driver.cpp"],
-        include_dirs=include_dirs,
-        language="c++",
-    )
-]
 
 # END PROJECT SPECIFIC
 
@@ -119,10 +90,9 @@ if __name__ == "__main__":
         packages=PACKAGES,
         package_dir={"": "src"},
         include_package_data=True,
+        python_requires=">=3.6",
         install_requires=INSTALL_REQUIRES,
         extras_require=EXTRA_REQUIRE,
         classifiers=CLASSIFIERS,
         zip_safe=False,
-        ext_modules=ext_modules,
-        cmdclass={"build_ext": build_ext},
     )

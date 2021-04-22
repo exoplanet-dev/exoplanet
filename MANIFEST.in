@@ -1,7 +1,0 @@
-include README.md LICENSE *.rst *.toml *.yml *.yaml
-
-graft src/exoplanet/theano_ops/lib/include
-graft src/exoplanet/theano_ops/lib/vendor/eigen
-
-recursive-include src/exoplanet/theano_ops *.cc
-recursive-include src/exoplanet/theano_ops *.h

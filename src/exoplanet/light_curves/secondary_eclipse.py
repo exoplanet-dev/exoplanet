@@ -22,8 +22,12 @@ class SecondaryEclipseLightCurve:
     def __init__(
         self, u_primary, u_secondary, surface_brightness_ratio, model=None
     ):
-        self.primary = LimbDarkLightCurve(u_primary, model=model)
-        self.secondary = LimbDarkLightCurve(u_secondary, model=model)
+        self.primary = LimbDarkLightCurve(
+            u_primary[0], u_primary[1], model=model
+        )
+        self.secondary = LimbDarkLightCurve(
+            u_secondary[0], u_secondary[1], model=model
+        )
         self.surface_brightness_ratio = as_tensor_variable(
             surface_brightness_ratio
         )

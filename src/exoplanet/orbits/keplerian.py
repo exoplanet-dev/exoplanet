@@ -13,10 +13,9 @@ import aesara_theano_fallback.tensor as tt
 import numpy as np
 from aesara_theano_fallback import ifelse
 from astropy import units as u
+from exoplanet_core.pymc import ops
 
 from ..citations import add_citations_to_model
-from ..theano_ops.contact_points import ContactPoints, contact_points
-from ..theano_ops.kepler import kepler
 from ..units import has_unit, to_unit
 from ..utils import as_tensor_variable
 from .constants import G_grav, au_per_R_sun, c_light, gcc_per_sun
@@ -159,12 +158,6 @@ class KeplerianOrbit:
             )
 
         self.K0 = self.n * self.a / self.m_total
-
-        # Set up the contact points calculation
-        if contact_points_kwargs is None:
-            self.contact_points = contact_points
-        else:
-            self.contact_points = ContactPoints(**contact_points_kwargs)
 
         if Omega is None:
             self.Omega = None
@@ -325,7 +318,7 @@ class KeplerianOrbit:
         M = (self._warp_times(t, _pad=_pad) - self.tref) * self.n
         if self.ecc is None:
             return tt.sin(M), tt.cos(M)
-        sinf, cosf = kepler(M, self.ecc + tt.zeros_like(M))
+        sinf, cosf = ops.kepler(M, self.ecc + tt.zeros_like(M))
         return sinf, cosf
 
     def _get_position_and_velocity(self, t, parallax=None):
@@ -736,7 +729,7 @@ class KeplerianOrbit:
             flag = z
 
         else:
-            M_contact = self.contact_points(
+            M_contact = ops.contact_points(
                 self.a,
                 self.ecc,
                 self.cos_omega,
@@ -796,7 +789,6 @@ class KeplerianOrbit:
                 r_star=r_planet,
                 model=model,
             )
-        orbit.contact_points = self.contact_points
         return orbit
 
 
@@ -811,7 +803,7 @@ def get_true_anomaly(M, e, **kwargs):
         The true anomaly of the orbit.
 
     """
-    sinf, cosf = kepler(M, e)
+    sinf, cosf = ops.kepler(M, e)
     return tt.arctan2(sinf, cosf)
 
 

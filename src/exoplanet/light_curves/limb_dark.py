@@ -4,10 +4,26 @@ __all__ = ["LimbDarkLightCurve"]
 
 import aesara_theano_fallback.tensor as tt
 import numpy as np
+from exoplanet_core.pymc import ops
 
 from ..citations import add_citations_to_model
-from ..theano_ops.starry import get_cl, limbdark
-from ..utils import as_tensor_variable
+from ..utils import as_tensor_variable, deprecation_warning
+
+
+def get_cl(u1, u2):
+    u1 = as_tensor_variable(u1)
+    u2 = as_tensor_variable(u2)
+    c0 = 1 - u1 - 1.5 * u2
+    c1 = u1 + 2 * u2
+    c2 = -0.25 * u2
+    norm = np.pi * (c0 + c1 / 1.5)
+    return tt.stack([c0, c1, c2]) / norm
+
+
+def quad_limbdark_light_curve(c, b, r):
+    b = as_tensor_variable(b)
+    r = as_tensor_variable(r)
+    return tt.dot(ops.quad_solution_vector(b, r), c) - 1.0
 
 
 class LimbDarkLightCurve:
@@ -24,12 +40,19 @@ class LimbDarkLightCurve:
 
     __citations__ = ("starry",)
 
-    def __init__(self, u, model=None):
+    def __init__(self, u1, u2=None, model=None):
         add_citations_to_model(self.__citations__, model=model)
-        self.u = as_tensor_variable(u)
-        u_ext = tt.concatenate([-1 + tt.zeros(1, dtype=self.u.dtype), self.u])
-        self.c = get_cl(u_ext)
-        self.c_norm = self.c / (np.pi * (self.c[0] + 2 * self.c[1] / 3))
+        if u2 is None:
+            deprecation_warning(
+                "using a vector of limb darkening coefficients is deprecated; "
+                "use u1 and u2 directly"
+            )
+            self.u1 = as_tensor_variable(u1[0])
+            self.u2 = as_tensor_variable(u1[1])
+        else:
+            self.u1 = as_tensor_variable(u1)
+            self.u2 = as_tensor_variable(u2)
+        self.c = get_cl(self.u1, self.u2)
 
     def get_ror_from_approx_transit_depth(self, delta, b, jac=False):
         """Get the radius ratio corresponding to a particular transit depth
@@ -50,10 +73,9 @@ class LimbDarkLightCurve:
         """
         b = as_tensor_variable(b)
         delta = as_tensor_variable(delta)
-        n = 1 + tt.arange(self.u.size)
-        f0 = 1 - tt.sum(2 * self.u / (n ** 2 + 3 * n + 2))
+        f0 = 1 - 2 * self.u1 / 6.0 - 2 * self.u2 / 12.0
         arg = 1 - tt.sqrt(1 - b ** 2)
-        f = 1 - tt.sum(self.u[:, None] * arg ** n[:, None], axis=0)
+        f = 1 - self.u1 * arg - self.u2 * arg ** 2
         factor = f0 / f
         ror = tt.sqrt(delta * factor)
         if not jac:
@@ -199,11 +221,12 @@ class LimbDarkLightCurve:
             b (tensor): A tensor of impact parameter values.
             r (tensor): A tensor of radius ratios with the same shape as ``b``.
             los (Optional[tensor]): The coordinates of the body along the
-                line-of-sight. If ``los < 0`` the body is between the observer
+                line-of-sight. If ``los > 0`` the body is between the observer
                 and the source.
 
         """
         b = as_tensor_variable(b)
         if los is None:
             los = tt.ones_like(b)
-        return limbdark(self.c_norm, b, r, los)[0]
+        lc = quad_limbdark_light_curve(self.c, b, r)
+        return tt.switch(tt.gt(los, 0), lc, tt.zeros_like(lc))
