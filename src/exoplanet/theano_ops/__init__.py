@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
 
-__all__ = ["kepler", "contact_points", "starry", "interp"]
+__all__ = ["contact_points", "kepler", "starry"]
 
-from . import contact_points, interp, kepler, starry
+from . import contact_points, kepler, starry
