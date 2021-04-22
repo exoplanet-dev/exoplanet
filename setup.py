@@ -37,6 +37,7 @@ EXTRA_REQUIRE = {
         "sphinx-typlog-theme",
         "rtds_action",
         "nbsphinx",
+        "ipython",
     ],
     "tutorials": [
         "jupytext>1.7.0",
