@@ -22,22 +22,7 @@ astronomy with a focus on observations of exoplanets, using `PyMC3` [@pymc3].
 engine that scales well to problems with a large number of parameters.
 `exoplanet` extends `PyMC3`’s modeling language to support many of the custom
 functions and distributions required when fitting exoplanet datasets or other
-exoplanet time series. Besides the primary `exoplanet` package, the _exoplanet_
-ecosystem of projects includes:
-
-- `exoplanet-core`[^exoplanet-core], which includes efficient and well-tested
-  compiled implementations of all of the exoplanet-specific operations required
-  by the exoplanet package;
-- `celerite2`[^celerite2], an updated implementation of the _celerite_
-  algorithm[^celerite] [@foremanmackey17, @foremanmackey18] for scalable
-  Gaussian Process regression for time series data;
-- `pymc3-ext`[^pymc3-ext], a set of helper functions to make `PyMC3` more
-  amenable to the standard astronomical workflow; and
-- `rebound-pymc3`[^rebound-pymc3], an interface between _REBOUND_ [@rein12],
-  _REBOUNDx_ [@tamayo20], and `PyMC3` to enable inference with full N-body orbit
-  integration.
-
-This paper describes this suite of packages and their relationships.
+exoplanet time series.
 
 # Statement of need
 
@@ -58,15 +43,44 @@ citations of the Zenodo record [@zenodo].
 
 # The _exoplanet_ software ecosystem
 
-## exoplanet
+Besides the primary `exoplanet` package, the _exoplanet_ ecosystem of projects
+includes several other libraries. This paper describes and is the primary
+reference for this full suite of packages. The following provides a short
+description of each library within this ecosystem and discusses how they are
+related.
 
-## exoplanet-core
+- `exoplanet`[^exoplanet] is
+- `exoplanet-core`[^exoplanet-core], which includes efficient and well-tested
+  compiled implementations of all of the exoplanet-specific operations required
+  by the exoplanet package;
+- `celerite2`[^celerite2], an updated implementation of the _celerite_
+  algorithm[^celerite] [@foremanmackey17, @foremanmackey18] for scalable
+  Gaussian Process regression for time series data;
+- `pymc3-ext`[^pymc3-ext], a set of helper functions to make `PyMC3` more
+  amenable to the standard astronomical workflow; and
+- `rebound-pymc3`[^rebound-pymc3], an interface between _REBOUND_ [@rein12],
+  _REBOUNDx_ [@tamayo20], and `PyMC3` to enable inference with full N-body orbit
+  integration.
 
-## celerite2
+# Documentation & case studies
 
-## pymc3-ext
+The main documentation page for the _exoplanet_ libraries lives at
+[docs.exoplanet.codes](https://docs.exoplanet.codes) where it is hosted on
+[ReadTheDocs](https://readthedocs.org). The tutorials included with the
+documentation are automatically executed on every push or pull request to the
+GitHub repository, with the goal of ensuring that the tutorials are always
+compatible with the current version of the code. The `celerite2` project has its
+own documentation page at
+[celerite2.readthedocs.io](https://celerite2.readthedocs.io), with tutorials
+that are similarly automatically executed.
 
-## rebound-pymc3
+Alongside these documentation pages, there is a parallel "Case Studies" website
+at [gallery.exoplanet.codes](https://gallery.exoplanet.codes) that includes more
+detailed example use cases for `exoplanet` and the other libraries described
+here. Like the tutorials on the documentation page, these case studies are
+automatically executed using GitHub Actions, but at a less regular cadence (once
+a week and when are new release of the `exoplanet` library is made) since the
+runtime is much longer.
 
 # Similar tools
 
@@ -96,8 +110,15 @@ framework used by `PyMC3`. This allows the use of modern inference algorithms
 such as No U-Turn Sampling [@hoffman14] or Automatic Differentiation Variational
 Inference [@kucukelbir17].
 
+# Acknowledgements
+
+We would like to thank the Astronomical Data Group at Flatiron for listening to
+every iteration of this project and for providing great feedback every step of
+the way.
+
 # References
 
+[^exoplanet]: [https://github.com/exoplanet-dev/exoplanet](https://github.com/exoplanet-dev/exoplanet)
 [^exoplanet-core]: [https://github.com/exoplanet-dev/exoplanet-core](https://github.com/exoplanet-dev/exoplanet-core)
 [^celerite2]: [https://celerite2.readthedocs.io](https://celerite2.readthedocs.io)
 [^celerite]: [https://celerite.readthedocs.io](https://celerite.readthedocs.io)
