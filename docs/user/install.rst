@@ -24,6 +24,14 @@ the instructions on the relevant documentation pages:
 
     python -m pip install -U "exoplanet[extras]"
 
+Both of these installation methods will install the required dependencies:
+
+- [numpy](https://numpy.org)
+- [astropy](https://www.astropy.org)
+- [pymc3](https://docs.pymc.io)
+- [exoplanet-core](https://github.com/exoplanet-dev/exoplanet-core)
+- [aesara-theano-fallback](https://github.com/exoplanet-dev/aesara-theano-fallback)
+
 
 Using conda
 -----------
