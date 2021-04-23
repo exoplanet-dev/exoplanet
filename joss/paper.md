@@ -4,7 +4,7 @@ tags:
   - Python
   - astronomy
 authors:
-  - name: Daniel Foreman-Mackey^[Author order TBD]
+  - name: Daniel Foreman-Mackey
     orcid: 0000-0002-9328-5652
     affiliation: 1
   - name: Thomas Barclay
@@ -12,8 +12,15 @@ authors:
     affiliation: 2
   - name: Jiayin Dong
     orcid: 0000-0002-3610-6953
-    affiliation: "3, 4"
+    affiliation: "3,4"
+  - name: Tyler A. Gordon
+    orcid: 0000-0001-5253-1987
+    affiliation: 5
+  - name: final list/order TBD
+    affiliation: 0
 affiliations:
+  - name: No affiliation
+    index: 0
   - name: Center for Computational Astrophysics, Flatiron Institute, New York, NY, USA
     index: 1
   - name: University of Maryland Baltimore County, Baltimore, MD, USA
@@ -22,6 +29,8 @@ affiliations:
     index: 3
   - name: Center for Exoplanets & Habitable Worlds, The Pennsylvania State University, University Park, PA, USA
     index: 4
+  - name: Department of Astronomy, University of Washington, University of Washington, Seattle, WA, USA
+    index: 5
 date: 23 April 2021
 bibliography: paper.bib
 ---
