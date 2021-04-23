@@ -1,5 +1,52 @@
+<p align="center">
+  <img width="50" src="https://raw.githubusercontent.com/exoplanet-dev/exoplanet/main/docs/_static/logo.png">
+  <br><br>
+  
+  <a href="https://github.com/exoplanet-dev/exoplanet/actions/workflows/tests.yml">
+    <img src="https://github.com/exoplanet-dev/exoplanet/actions/workflows/tests.yml/badge.svg" alt="Tests">
+  </a>
+  <a href="https://github.com/exoplanet-dev/exoplanet/actions/workflows/tutorials.yml">
+    <img src="https://github.com/exoplanet-dev/exoplanet/actions/workflows/tutorials.yml/badge.svg" alt="Tutorials">
+  </a>
+  <a href="https://docs.exoplanet.codes">
+    <img src="https://readthedocs.org/projects/exoplanet/badge/?version=latest" alt="Docs">
+  </a>
+</p>
+
 # exoplanet
 
-Fast & scalable MCMC for all your exoplanet needs!
+Fast & scalable MCMC for all your exoplanet needs! *exoplanet* is a toolkit for
+probabilistic modeling of time series data in astronomy with a focus on
+observations of [exoplanets](https://en.wikipedia.org/wiki/Exoplanet), using
+[PyMC3](https://docs.pymc.io). *PyMC3* is a flexible and high-performance model
+building language and inference engine that scales well to problems with a large
+number of parameters. *exoplanet* extends *PyMC3*'s language to support many of
+the custom functions and distributions required when fitting exoplanet datasets.
 
-Read the documentation at [docs.exoplanet.codes](https://docs.exoplanet.codes).
+Read the full documentation at [docs.exoplanet.codes](https://docs.exoplanet.codes).
+
+## Installation
+
+The quickest way to get started is to use [pip](https://pip.pypa.io):
+
+```bash
+python -m pip install exoplanet
+```
+
+Note that you will need Python (>=3.6) installed for this to work, but then this will
+install all the required dependencies.
+
+Check out the [main installation documentation
+page](https://docs.exoplanet.codes/en/latest/user/install/) for more options.
+
+## Usage
+
+Check out the tutorials and API docs on [the docs page](https://docs.exoplanet.codes)
+for example usage and much more info. You can also find more in-depth examples on the
+[exoplanet case studies page](https://gallery.exoplanet.codes).
+
+## Contributing
+
+*exoplanet* is an open source project and we would love it if you wanted to contribute.
+Check out [the developer documentation](https://docs.exoplanet.codes/en/latest/user/dev/)
+for more info about getting started.
