@@ -25,7 +25,7 @@ functions and distributions required when fitting exoplanet datasets or other
 exoplanet time series.
 
 While it has been used for other applications, such as the study of stellar
-rotation [e.g. @gillen20, @medina20], the primary purpose of `exoplanet` is the
+rotation [e.g. @gillen20 and @medina20], the primary purpose of `exoplanet` is the
 characterization of exoplanets or binary star systems using transit light
 curves, radial velocity time series, and/or astrometric time series. In
 particular, the typical use case would be to use one or more of these datasets
@@ -60,7 +60,7 @@ related.
 - `exoplanet`[^exoplanet] is the primary library and it includes implementations
   of many special functions required for exoplanet data analysis. This includes
   the spherical geometry for computing orbits, some exoplanet-specific
-  distributions for eccentricity [@kipping13b, @vaneylen19] and limb darkening
+  distributions for eccentricity [@kipping13b,@vaneylen19] and limb darkening
   [@kipping13], and exposure-time integrated limb darkened transit light curves.
 - `exoplanet-core`[^exoplanet-core] provides efficient, well-tested, and
   differentiable implementations of all of the exoplanet-specific operations
@@ -69,7 +69,7 @@ related.
   implementation for `PyMC3` and `Theano`, `exoplanet-core` includes
   implementations in `numpy` and `jax`.
 - `celerite2`[^celerite2], an updated implementation of the _celerite_
-  algorithm[^celerite] [@foremanmackey17, @foremanmackey18] for scalable
+  algorithm[^celerite] [@foremanmackey17,@foremanmackey18] for scalable
   Gaussian Process regression for time series data. Like `exoplanet-core`,
   `celerite2` includes support for `numpy`, `jax`, and `PyMC3`, as well as some
   recent generalizations of the _celerite_ algorithm [@gordon20].
@@ -111,7 +111,7 @@ it is worth listing some of these tools and situating `exoplanet` in this
 context.
 
 Some of the most popular tools in this space include (and note that this is far
-from a comprehensive list!) `EXOFAST` [@eastman13, @eastman19], `radvel`
+from a comprehensive list!) `EXOFAST` [@eastman13,@eastman19], `radvel`
 [@fulton18], `juliet` [@espinoza19], `exostriker` [@trifonov19], `PYANETI`
 [@barragan19], `allesfitter` [@guenther20], and `orbitize` [@blunt20]. These
 packages all focus on providing a high level interface for designing models and
@@ -138,7 +138,7 @@ every iteration of this project and for providing great feedback every step of
 the way.
 
 Besides the software cited above, `exoplanet` is also built on top of `ArviZ`
-[@arviz], `AstroPy` [@astropy13, @astropy18], and `NumPy` [@numpy].
+[@arviz], `AstroPy` [@astropy13,@astropy18], and `NumPy` [@numpy].
 
 # References
 
