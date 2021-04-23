@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - joss
   pull_request:
     branches:
       - main
@@ -36,6 +37,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           path: joss
+          name: joss
 
       - name: Deploy
         if: ${{ github.event_name != 'pull_request' }}
