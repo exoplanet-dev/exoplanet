@@ -17,10 +17,8 @@ authors:
     orcid: 0000-0001-5253-1987
     affiliation: 5
   - name: final list/order TBD
-    affiliation: 0
+    affiliation: ""
 affiliations:
-  - name: No affiliation
-    index: 0
   - name: Center for Computational Astrophysics, Flatiron Institute, New York, NY, USA
     index: 1
   - name: University of Maryland Baltimore County, Baltimore, MD, USA
