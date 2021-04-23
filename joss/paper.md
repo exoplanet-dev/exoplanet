@@ -58,14 +58,14 @@ with huge survey datasets currently available and more forthcoming. Within this
 research domain, there is significant investment into the discovery and
 characterization of exoplanets, planets orbiting stars other than our Sun. These
 datasets are large (on the scale of hundreds of thousands of observations per
-star from space-based observatories such as _Kepler_ and _TESS_) and the
+star from space-based observatories such as _Kepler_ and _TESS_), and the
 research questions are becoming more ambitious (in terms of both the
-computational cost of the physical models, and the flexibility of these models).
+computational cost of the physical models and the flexibility of these models).
 The packages in the _exoplanet_ ecosystem are designed to enable rigorous
 probabilistic inference with these large datasets and high-dimensional models by
 providing a high-performance and well-tested infrastructure for integrating
 these models with modern modeling frameworks such as `PyMC3`. Since its initial
-release at the end of 2018, `exoplanet` has been widely used with HOWMANY
+release at the end of 2018, `exoplanet` has been widely used with 58
 citations of the Zenodo record [@zenodo].
 
 # The _exoplanet_ software ecosystem
@@ -76,14 +76,14 @@ reference for this full suite of packages. The following provides a short
 description of each library within this ecosystem and discusses how they are
 related.
 
-- `exoplanet`[^exoplanet] is the primary library and it includes implementations
-  of many special functions required for exoplanet data analysis. This includes
+- `exoplanet`[^exoplanet] is the primary library, and it includes implementations
+  of many special functions required for exoplanet data analysis. These include
   the spherical geometry for computing orbits, some exoplanet-specific
   distributions for eccentricity [@kipping13b; @vaneylen19] and limb darkening
   [@kipping13], and exposure-time integrated limb darkened transit light curves.
 - `exoplanet-core`[^exoplanet-core] provides efficient, well-tested, and
   differentiable implementations of all of the exoplanet-specific operations
-  that must be compiled for performance. This includes an efficient solver for
+  that must be compiled for performance. These include an efficient solver for
   Kepler's equation and limb darkened transit light curves [agol20]. Besides the
   implementation for `PyMC3` and `Theano`, `exoplanet-core` includes
   implementations in `numpy` and `jax`.
@@ -124,7 +124,7 @@ runtime is much longer.
 # Similar tools
 
 There is a rich ecosystem of tooling available for inference with models such as
-the ones supported by `exoplanet`. Each of these tools has their own set of
+the ones supported by `exoplanet`. Each of these tools has its own set of
 strengths and limitations and we will not make a detailed comparison here, but
 it is worth listing some of these tools and situating `exoplanet` in this
 context.
@@ -133,16 +133,16 @@ Some of the most popular tools in this space include (and note that this is far
 from a comprehensive list!) `EXOFAST` [@eastman13; @eastman19], `radvel`
 [@fulton18], `juliet` [@espinoza19], `exostriker` [@trifonov19], `PYANETI`
 [@barragan19], `allesfitter` [@guenther20], and `orbitize` [@blunt20]. These
-packages all focus on providing a high level interface for designing models and
-then executing a fit. `exoplanet`, however, is designed to be lower level, and
+packages all focus on providing a high-level interface for designing models and
+then executing a fit. `exoplanet`, however, is designed to be lower level and
 more conceptually similar to tools like `batman` [@kreidberg15], `PyTransit`
 [@parviainen15], `ellc` [@maxted16], or `starry` [@luger19], which provide the
 building blocks for evaluating the models required for inference with exoplanet
 datasets. In fact, several of the higher-level packages listed above include
-these lower-level libraries as dependencies and our hope is that `exoplanet`
+these lower-level libraries as dependencies, and our hope is that `exoplanet`
 could provide the backend for future high-level libraries.
 
-As emphasized in the title of this paper, the main selling point `exoplanet`
+As emphasized in the title of this paper, the main selling point of `exoplanet`
 when compared to other tools in this space is that it supports differentiation
 of all components of the model and is designed to integrate seamlessly with the
 `aesara` [@aesara; formerly known as `Theano`, @theano] automatic differentiation
