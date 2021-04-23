@@ -4,12 +4,24 @@ tags:
   - Python
   - astronomy
 authors:
-  - name: Daniel Foreman-Mackey
+  - name: Daniel Foreman-Mackey^[Author order TBD]
     orcid: 0000-0002-9328-5652
     affiliation: 1
+  - name: Thomas Barclay
+    orcid: 0000-0001-7139-2724
+    affiliation: 2
+  - name: Jiayin Dong
+    orcid: 0000-0002-3610-6953
+    affiliation: "3, 4"
 affiliations:
-  - name: Center for Computational Astrophysics, Flatiron Institute, New York, NY
+  - name: Center for Computational Astrophysics, Flatiron Institute, New York, NY, USA
     index: 1
+  - name: University of Maryland Baltimore County, Baltimore, MD, USA
+    index: 2
+  - name: The Pennsylvania State University, University Park, PA, USA
+    index: 3
+  - name: Center for Exoplanets & Habitable Worlds, The Pennsylvania State University, University Park, PA, USA
+    index: 4
 date: 23 April 2021
 bibliography: paper.bib
 ---
@@ -126,7 +138,7 @@ could provide the backend for future high-level libraries.
 As emphasized in the title of this paper, the main selling point `exoplanet`
 when compared to other tools in this space is that it supports differentiation
 of all components of the model and is designed to integrate seamlessly with the
-`aesara` [@aesara; formerly known as `Theano` @theano] automatic differentiation
+`aesara` [@aesara; formerly known as `Theano`, @theano] automatic differentiation
 framework used by `PyMC3`. This allows the use of modern inference algorithms
 such as No U-Turn Sampling [@hoffman14] or Automatic Differentiation Variational
 Inference [@kucukelbir17].
