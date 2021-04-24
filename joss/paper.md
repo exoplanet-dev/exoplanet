@@ -16,6 +16,18 @@ authors:
   - name: Tyler A. Gordon
     orcid: 0000-0001-5253-1987
     affiliation: 5
+  - name: Emily A. Gilbert
+    orcid: 0000-0002-0388-8004
+    affiliation: 6
+  - name: Ian Czekala
+    orcid: 0000-0002-1483-8811
+    affiliation: "3,4,7,8"
+  - name: Arjun B. Savel
+    orcid: 0000-0002-2454-768X
+    affiliation: 9
+  - name: Luke G. Bouma
+    orcid: 0000-0002-0514-5538
+    affiliation: 10
   - name: final list/order TBD
     affiliation: ""
 affiliations:
@@ -29,6 +41,16 @@ affiliations:
     index: 4
   - name: Department of Astronomy, University of Washington, University of Washington, Seattle, WA, USA
     index: 5
+  - name: Department of Astronomy and Astrophysics, University of Chicago, Chicago, IL 60637, USA
+    index: 6
+  - name: Center for Astrostatistics, The Pennsylvania State University, University Park, PA, USA
+    index: 7
+  - name: Institute for Computational & Data Sciences, The Pennsylvania State University, University Park, PA, USA
+    index: 8
+  - name: Department of Astronomy, University of Maryland, College Park, MD, USA
+    index: 9
+  - name: Department of Astrophysical Sciences, Princeton University, Princeton, NJ, USA
+    index: 10
 date: 23 April 2021
 bibliography: paper.bib
 ---
