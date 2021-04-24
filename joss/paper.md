@@ -73,12 +73,13 @@ functions and distributions required when fitting exoplanet datasets or other
 exoplanet time series.
 
 While it has been used for other applications, such as the study of stellar
-rotation [@gillen20; @medina20], the primary purpose of `exoplanet` is the
-characterization of exoplanets or binary star systems using transit light
-curves, radial velocity time series, and/or astrometric time series. In
-particular, the typical use case would be to use one or more of these datasets
-to place constraints on the physical and orbital parameters of the system, such
-as planet mass or orbital period, for example.
+variability [e.g., @gillen20; @medina20], the primary purpose of
+`exoplanet` is the characterization of exoplanets [e.g., @gilbert20;
+@plavchan20] or multiple star systems [e.g., @czekala21] using transit light curves,
+radial velocity time series, and/or astrometric time series. In particular, the
+typical use case would be to use one or more of these datasets to place
+constraints on the physical and orbital parameters of the system, such as planet
+mass or orbital period, for example.
 
 # Statement of need
 
