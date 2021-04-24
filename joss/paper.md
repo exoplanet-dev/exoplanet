@@ -28,6 +28,9 @@ authors:
   - name: Luke G. Bouma
     orcid: 0000-0002-0514-5538
     affiliation: 10
+  - name: Daniel R Hey
+    orcid: 0000-0003-3244-5357
+    affiliation: "11,12"
   - name: final list/order TBD
     affiliation: ""
 affiliations:
@@ -51,6 +54,10 @@ affiliations:
     index: 9
   - name: Department of Astrophysical Sciences, Princeton University, Princeton, NJ, USA
     index: 10
+  - name: Sydney Institute for Astronomy, School of Physics, University of Sydney, Camperdown, New South Wales, Australia
+    index: 11
+  - name: Stellar Astrophysics Centre, Department of Physics and Astronomy, Aarhus University, Aarhus, Denmark
+    index: 12
 date: 23 April 2021
 bibliography: paper.bib
 ---
