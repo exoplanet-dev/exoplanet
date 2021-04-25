@@ -4,6 +4,7 @@ __all__ = ["LimbDarkLightCurve"]
 
 import aesara_theano_fallback.tensor as tt
 import numpy as np
+from aesara_theano_fallback import aesara as theano
 from exoplanet_core.pymc import ops
 
 from ..citations import add_citations_to_model
@@ -47,8 +48,23 @@ class LimbDarkLightCurve:
                 "using a vector of limb darkening coefficients is deprecated; "
                 "use u1 and u2 directly"
             )
-            self.u1 = as_tensor_variable(u1[0])
-            self.u2 = as_tensor_variable(u1[1])
+
+            # If a vector is provided, we need to assert that it is 2D
+            msg = (
+                "only quadratic limb darkening is supported; "
+                "use `starry` for more flexibility"
+            )
+            try:
+                assert_op = theano.assert_op.Assert(msg)
+            except AttributeError:
+                assert_op = tt.opt.Assert(msg)
+            u1 = as_tensor_variable(u1)
+            u1 = assert_op(
+                u1, tt.and_(tt.eq(u1.ndim, 1), tt.eq(u1.shape[0], 2))
+            )
+
+            self.u1 = u1[0]
+            self.u2 = u1[1]
         else:
             self.u1 = as_tensor_variable(u1)
             self.u2 = as_tensor_variable(u2)

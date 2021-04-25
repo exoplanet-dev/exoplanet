@@ -26,11 +26,11 @@ the instructions on the relevant documentation pages:
 
 Both of these installation methods will install the required dependencies:
 
-- [numpy](https://numpy.org)
-- [astropy](https://www.astropy.org)
-- [pymc3](https://docs.pymc.io)
-- [exoplanet-core](https://github.com/exoplanet-dev/exoplanet-core)
-- [aesara-theano-fallback](https://github.com/exoplanet-dev/aesara-theano-fallback)
+- `numpy <https://numpy.org>`_
+- `astropy <https://www.astropy.org>`_
+- `pymc3 <https://docs.pymc.io>`_
+- `exoplanet-core <https://github.com/exoplanet-dev/exoplanet-core>`_
+- `aesara-theano-fallback <https://github.com/exoplanet-dev/aesara-theano-fallback>`_
 
 
 Using conda

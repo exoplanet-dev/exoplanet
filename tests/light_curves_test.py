@@ -71,6 +71,11 @@ def test_vector_params():
     )(u_val)
     np.testing.assert_allclose(lc1, lc2)
 
+    with pytest.raises(AssertionError):
+        theano.function(
+            [], LimbDarkLightCurve([0.3])._compute_light_curve(b, r)
+        )()
+
 
 def test_in_transit():
     t = np.linspace(-20, 20, 1000)
