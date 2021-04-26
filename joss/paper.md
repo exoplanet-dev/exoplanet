@@ -171,7 +171,8 @@ from a comprehensive list!) `EXOFAST` [@eastman13; @eastman19], `radvel`
 packages all focus on providing a high-level interface for designing models and
 then executing a fit. `exoplanet`, however, is designed to be lower level and
 more conceptually similar to tools like `batman` [@kreidberg15], `PyTransit`
-[@parviainen15], `ellc` [@maxted16], or `starry` [@luger19], which provide the
+[@parviainen15], `ellc` [@maxted16], `starry` [@luger19], or `Limbdark.jl`
+[@agol20], which provide the
 building blocks for evaluating the models required for inference with exoplanet
 datasets. In fact, several of the higher-level packages listed above include
 these lower-level libraries as dependencies, and our hope is that `exoplanet`
