@@ -28,6 +28,9 @@ authors:
   - name: Daniel R Hey
     orcid: 0000-0003-3244-5357
     affiliation: "11,12"
+  - name: Rodrigo Luger
+    orcid: 0000-0002-0296-3826
+    affiliation: "1,14"
   - name: Brett M. Morris
     orcid: 0000-0003-2528-3409
     affiliation: 13
@@ -63,6 +66,8 @@ affiliations:
     index: 12
   - name: Center for Space and Habitability, University of Bern, Bern, Switzerland
     index: 13
+  - name: Virtual Planetary Laboratory, University of Washington, Seattle, WA
+    index: 14
 date: 23 April 2021
 bibliography: paper.bib
 ---
