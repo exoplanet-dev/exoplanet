@@ -7,6 +7,9 @@ authors:
   - name: Daniel Foreman-Mackey
     orcid: 0000-0002-9328-5652
     affiliation: 1
+  - name: Eric Agol
+    orcid: 0000-0002-0802-9145
+    affiliation: "5,14"
   - name: Thomas Barclay
     orcid: 0000-0001-7139-2724
     affiliation: 2
@@ -25,6 +28,9 @@ authors:
   - name: Tyler A. Gordon
     orcid: 0000-0001-5253-1987
     affiliation: 5
+  - name: Christina Hedges
+    orcid: 0000-0002-3385-8391
+    affiliation: "15,16"
   - name: Daniel R Hey
     orcid: 0000-0003-3244-5357
     affiliation: "11,12"
@@ -37,9 +43,6 @@ authors:
   - name: Arjun B. Savel
     orcid: 0000-0002-2454-768X
     affiliation: 9
-  - name: Eric Agol
-    orcid: 0000-0002-0802-9145
-    affiliation: "5,14"
   - name: final list/order TBD
     affiliation: ""
 affiliations:
@@ -69,8 +72,12 @@ affiliations:
     index: 12
   - name: Center for Space and Habitability, University of Bern, Bern, Switzerland
     index: 13
-  - name: Virtual Planetary Laboratory, University of Washington, Seattle, WA
+  - name: Virtual Planetary Laboratory, University of Washington, Seattle, WA, USA
     index: 14
+  - name: NASA Ames Research Center, Moffett Field, CA, USA
+    index: 15
+  - name: Bay Area Environmental Research Institute, Moffett Field, CA, USA
+    index: 16
 date: 23 April 2021
 bibliography: paper.bib
 ---
@@ -86,13 +93,14 @@ functions and distributions required when fitting exoplanet datasets or other
 exoplanet time series.
 
 While it has been used for other applications, such as the study of stellar
-variability [e.g., @gillen20; @medina20], the primary purpose of
-`exoplanet` is the characterization of exoplanets [e.g., @gilbert20;
-@plavchan20] or multiple star systems [e.g., @czekala21] using transit light curves,
-radial velocity time series, and/or astrometric time series. In particular, the
-typical use case would be to use one or more of these datasets to place
-constraints on the physical and orbital parameters of the system, such as planet
-mass or orbital period, for example.
+variability [e.g., @gillen20; @medina20], the primary purpose of `exoplanet` is
+the characterization of exoplanets [e.g., @gilbert20; @plavchan20] or multiple
+star systems [e.g., @czekala21] using transit light curves, radial velocity time
+series, and/or astrometric time series. In particular, the typical use case
+would be to use one or more of these datasets to place constraints on the
+physical and orbital parameters of the system, such as planet mass or orbital
+period, while simultaneously taking into account the effects of stellar
+variability.
 
 # Statement of need
 
@@ -180,19 +188,21 @@ packages all focus on providing a high-level interface for designing models and
 then executing a fit. `exoplanet`, however, is designed to be lower level and
 more conceptually similar to tools like `batman` [@kreidberg15], `PyTransit`
 [@parviainen15], `ellc` [@maxted16], `starry` [@luger19], or `Limbdark.jl`
-[@agol20], which provide the
-building blocks for evaluating the models required for inference with exoplanet
-datasets. In fact, several of the higher-level packages listed above include
-these lower-level libraries as dependencies, and our hope is that `exoplanet`
-could provide the backend for future high-level libraries.
+[@agol20], which provide the building blocks for evaluating the models required
+for inference with exoplanet datasets. In fact, several of the higher-level
+packages listed above include these lower-level libraries as dependencies, and
+our hope is that `exoplanet` could provide the backend for future high-level
+libraries.
 
 As emphasized in the title of this paper, the main selling point of `exoplanet`
 when compared to other tools in this space is that it supports differentiation
 of all components of the model and is designed to integrate seamlessly with the
-`aesara` [@aesara; formerly known as `Theano`, @theano] automatic differentiation
-framework used by `PyMC3`. This allows the use of modern inference algorithms
-such as No U-Turn Sampling [@hoffman14] or Automatic Differentiation Variational
-Inference [@kucukelbir17].
+`aesara` [@aesara; formerly known as `Theano`, @theano] automatic
+differentiation framework used by `PyMC3`. This allows the use of modern
+inference algorithms such as No U-Turn Sampling [@hoffman14] or Automatic
+Differentiation Variational Inference [@kucukelbir17]. These algorithms can have
+some computational and conceptual advantages over inference methods that do not
+use gradients, especially for high-dimensional models.
 
 # Acknowledgements
 
