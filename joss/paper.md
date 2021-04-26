@@ -10,30 +10,30 @@ authors:
   - name: Thomas Barclay
     orcid: 0000-0001-7139-2724
     affiliation: 2
-  - name: Jiayin Dong
-    orcid: 0000-0002-3610-6953
-    affiliation: "3,4"
-  - name: Tyler A. Gordon
-    orcid: 0000-0001-5253-1987
-    affiliation: 5
-  - name: Emily A. Gilbert
-    orcid: 0000-0002-0388-8004
-    affiliation: 6
-  - name: Ian Czekala
-    orcid: 0000-0002-1483-8811
-    affiliation: "3,4,7,8"
-  - name: Arjun B. Savel
-    orcid: 0000-0002-2454-768X
-    affiliation: 9
   - name: Luke G. Bouma
     orcid: 0000-0002-0514-5538
     affiliation: 10
+  - name: Ian Czekala
+    orcid: 0000-0002-1483-8811
+    affiliation: "3,4,7,8"
+  - name: Jiayin Dong
+    orcid: 0000-0002-3610-6953
+    affiliation: "3,4"
+  - name: Emily A. Gilbert
+    orcid: 0000-0002-0388-8004
+    affiliation: 6
+  - name: Tyler A. Gordon
+    orcid: 0000-0001-5253-1987
+    affiliation: 5
   - name: Daniel R Hey
     orcid: 0000-0003-3244-5357
     affiliation: "11,12"
   - name: Brett M. Morris
     orcid: 0000-0003-2528-3409
     affiliation: 13
+  - name: Arjun B. Savel
+    orcid: 0000-0002-2454-768X
+    affiliation: 9
   - name: final list/order TBD
     affiliation: ""
 affiliations:
