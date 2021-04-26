@@ -119,7 +119,7 @@ related.
 - `exoplanet-core`[^exoplanet-core] provides efficient, well-tested, and
   differentiable implementations of all of the exoplanet-specific operations
   that must be compiled for performance. These include an efficient solver for
-  Kepler's equation and limb darkened transit light curves [agol20]. Besides the
+  Kepler's equation and limb darkened transit light curves [@agol20]. Besides the
   implementation for `PyMC3` and `Theano`, `exoplanet-core` includes
   implementations in `numpy` and `jax`.
 - `celerite2`[^celerite2], an updated implementation of the _celerite_
