@@ -202,7 +202,13 @@ differentiation framework used by `PyMC3`. This allows the use of modern
 inference algorithms such as No U-Turn Sampling [@hoffman14] or Automatic
 Differentiation Variational Inference [@kucukelbir17]. These algorithms can have
 some computational and conceptual advantages over inference methods that do not
-use gradients, especially for high-dimensional models.
+use gradients, especially for high-dimensional models.  The computation of gradients
+is also useful for model optimization; this is necessary when, say, searching
+for new exoplanets, mapping out degeneracies or multiple modes of a posterior,
+or estimating uncertainties from a Hessian.  Care has been taken to provide gradients
+which are numerically stable, and more accurate and faster to evaluate than
+finite-difference gradients which can be subject to significant numerical errors
+and require 2N computations of a model with N free parameters.
 
 # Acknowledgements
 
