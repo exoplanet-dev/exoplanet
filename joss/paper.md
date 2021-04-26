@@ -37,6 +37,9 @@ authors:
   - name: Arjun B. Savel
     orcid: 0000-0002-2454-768X
     affiliation: 9
+  - name: Eric Agol
+    orcid: 0000-0002-0802-9145
+    affiliation: "5,14"
   - name: final list/order TBD
     affiliation: ""
 affiliations:
