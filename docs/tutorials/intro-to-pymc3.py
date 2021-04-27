@@ -71,7 +71,7 @@ plt.ylabel("y")
 # 0 & \mathrm{otherwise} \\
 # \end{array}\right. \\
 # p(\log(\sigma)) &=& \left\{\begin{array}{ll}
-# 1/10 & \mathrm{if}\,-5 < b < 5 \\
+# 1/10 & \mathrm{if}\,-5 < \log(\sigma) < 5 \\
 # 0 & \mathrm{otherwise} \\
 # \end{array}\right.
 # \end{eqnarray}
