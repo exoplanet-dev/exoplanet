@@ -43,6 +43,6 @@ and:
 In both of these examples, the library will attempt to provide a consistent
 interface regardless of which backend is installed. That being said, this has
 only been designed to support the features used by *exoplanet* and `starry
-<https://github.com/rodluger/starry>`_, so your milage might vary. Check out
+<https://github.com/rodluger/starry>`_, so your mileage might vary. Check out
 `aesara-theano-fallback on GitHub for more information or to open issues
 <https://github.com/exoplanet-dev/aesara-theano-fallback>`_.
