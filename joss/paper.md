@@ -84,23 +84,22 @@ bibliography: paper.bib
 
 # Summary
 
-`exoplanet` is a toolkit for probabilistic modeling of time series data in
-astronomy with a focus on observations of exoplanets, using `PyMC3` [@pymc3].
+`exoplanet` is a toolkit for probabilistic modeling of astronomical time series
+data, with a focus on observations of exoplanets, using `PyMC3` [@pymc3].
 `PyMC3` is a flexible and high-performance model building language and inference
 engine that scales well to problems with a large number of parameters.
 `exoplanet` extends `PyMC3`’s modeling language to support many of the custom
-functions and distributions required when fitting exoplanet datasets or other
-exoplanet time series.
+functions and probability distributions required when fitting exoplanet datasets
+or other astronomical time series.
 
 While it has been used for other applications, such as the study of stellar
 variability [e.g., @gillen20; @medina20], the primary purpose of `exoplanet` is
 the characterization of exoplanets [e.g., @gilbert20; @plavchan20] or multiple
-star systems [e.g., @czekala21] using transit light curves, radial velocity time
-series, and/or astrometric time series. In particular, the typical use case
-would be to use one or more of these datasets to place constraints on the
-physical and orbital parameters of the system, such as planet mass or orbital
-period, while simultaneously taking into account the effects of stellar
-variability.
+star systems [e.g., @czekala21] using time series photometry, astrometry, and/or
+radial velocity. In particular, the typical use case would be to use one or more
+of these datasets to place constraints on the physical and orbital parameters of
+the system, such as planet mass or orbital period, while simultaneously taking
+into account the effects of stellar variability.
 
 # Statement of need
 
@@ -122,8 +121,8 @@ citations of the Zenodo record [@zenodo].
 # The _exoplanet_ software ecosystem
 
 Besides the primary `exoplanet` package, the _exoplanet_ ecosystem of projects
-includes several other libraries. This paper describes and is the primary
-reference for this full suite of packages. The following provides a short
+includes several other libraries. This paper describes, and is the primary
+reference for, this full suite of packages. The following provides a short
 description of each library within this ecosystem and discusses how they are
 related.
 
@@ -169,7 +168,7 @@ at [gallery.exoplanet.codes](https://gallery.exoplanet.codes) that includes more
 detailed example use cases for `exoplanet` and the other libraries described
 here. Like the tutorials on the documentation page, these case studies are
 automatically executed using GitHub Actions, but at a less regular cadence (once
-a week and when are new release of the `exoplanet` library is made) since the
+a week and when a new release of the `exoplanet` library is made) since the
 runtime is much longer.
 
 # Similar tools
