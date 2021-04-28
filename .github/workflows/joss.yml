@@ -17,13 +17,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      # - name: Generate .tex
-      #   uses: docker://openjournals/paperdraft:latest
-      #   with:
-      #     args: joss/paper.md --defaults=metadata.yaml --to=latex --output=paper.tex
-      #   env:
-      #     GIT_SHA: $GITHUB_SHA
-      #     JOURNAL: joss
+      - name: Generate .tex
+        uses: docker://openjournals/paperdraft:latest
+        with:
+          args: joss/paper.md --defaults=metadata.yaml --to=latex --output=paper.tex
+        env:
+          GIT_SHA: $GITHUB_SHA
+          JOURNAL: joss
 
       - name: Generate .pdf
         uses: docker://openjournals/paperdraft:latest
