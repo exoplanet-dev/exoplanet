@@ -7,89 +7,87 @@ authors:
   - name: Daniel Foreman-Mackey
     orcid: 0000-0002-9328-5652
     affiliation: 1
-  - name: Eric Agol
-    orcid: 0000-0002-0802-9145
-    affiliation: "5,14"
-  - name: Thomas Barclay
-    orcid: 0000-0001-7139-2724
-    affiliation: 2
-  - name: Luke G. Bouma
-    orcid: 0000-0002-0514-5538
-    affiliation: 10
-  - name: Timothy D. Brandt
-    orcid: 0000-0003-2630-8073
-    affiliation: 18
-  - name: Ian Czekala
-    orcid: 0000-0002-1483-8811
-    affiliation: "3,4,7,8"
-  - name: Trevor J. David
-    orcid: 0000-0001-6534-6246
-    affiliation: "1,17"
-  - name: Jiayin Dong
-    orcid: 0000-0002-3610-6953
-    affiliation: "3,4"
-  - name: Emily A. Gilbert
-    orcid: 0000-0002-0388-8004
-    affiliation: 6
-  - name: Tyler A. Gordon
-    orcid: 0000-0001-5253-1987
-    affiliation: 5
-  - name: Christina Hedges
-    orcid: 0000-0002-3385-8391
-    affiliation: "15,16"
-  - name: Daniel R Hey
-    orcid: 0000-0003-3244-5357
-    affiliation: "11,12"
   - name: Rodrigo Luger
     orcid: 0000-0002-0296-3826
-    affiliation: "1,14"
+    affiliation: "1,2"
+  - name: Eric Agol
+    orcid: 0000-0002-0802-9145
+    affiliation: "3,2"
+  - name: Thomas Barclay
+    orcid: 0000-0001-7139-2724
+    affiliation: 4
+  - name: Luke G. Bouma
+    orcid: 0000-0002-0514-5538
+    affiliation: 5
+  - name: Timothy D. Brandt
+    orcid: 0000-0003-2630-8073
+    affiliation: 6
+  - name: Ian Czekala
+    orcid: 0000-0002-1483-8811
+    affiliation: "7,8,9,10"
+  - name: Trevor J. David
+    orcid: 0000-0001-6534-6246
+    affiliation: "1,11"
+  - name: Jiayin Dong
+    orcid: 0000-0002-3610-6953
+    affiliation: "7,8"
+  - name: Emily A. Gilbert
+    orcid: 0000-0002-0388-8004
+    affiliation: 12
+  - name: Tyler A. Gordon
+    orcid: 0000-0001-5253-1987
+    affiliation: 3
+  - name: Christina Hedges
+    orcid: 0000-0002-3385-8391
+    affiliation: "13,14"
+  - name: Daniel R Hey
+    orcid: 0000-0003-3244-5357
+    affiliation: "15,16"
   - name: Brett M. Morris
     orcid: 0000-0003-2528-3409
-    affiliation: 13
+    affiliation: 17
   - name: Adrian M. Price-Whelan
     orcid: 0000-0003-0872-7098
     affiliation: 1
   - name: Arjun B. Savel
     orcid: 0000-0002-2454-768X
-    affiliation: 9
-  - name: final list/order TBD
-    affiliation: ""
+    affiliation: 18
 affiliations:
   - name: Center for Computational Astrophysics, Flatiron Institute, New York, NY, USA
     index: 1
-  - name: University of Maryland Baltimore County, Baltimore, MD, USA
-    index: 2
-  - name: The Pennsylvania State University, University Park, PA, USA
-    index: 3
-  - name: Center for Exoplanets & Habitable Worlds, The Pennsylvania State University, University Park, PA, USA
-    index: 4
-  - name: Department of Astronomy, University of Washington, University of Washington, Seattle, WA, USA
-    index: 5
-  - name: Department of Astronomy and Astrophysics, University of Chicago, Chicago, IL, USA
-    index: 6
-  - name: Center for Astrostatistics, The Pennsylvania State University, University Park, PA, USA
-    index: 7
-  - name: Institute for Computational & Data Sciences, The Pennsylvania State University, University Park, PA, USA
-    index: 8
-  - name: Department of Astronomy, University of Maryland, College Park, MD, USA
-    index: 9
-  - name: Department of Astrophysical Sciences, Princeton University, Princeton, NJ, USA
-    index: 10
-  - name: Sydney Institute for Astronomy, School of Physics, University of Sydney, Camperdown, New South Wales, Australia
-    index: 11
-  - name: Stellar Astrophysics Centre, Department of Physics and Astronomy, Aarhus University, Aarhus, Denmark
-    index: 12
-  - name: Center for Space and Habitability, University of Bern, Bern, Switzerland
-    index: 13
   - name: Virtual Planetary Laboratory, University of Washington, Seattle, WA, USA
-    index: 14
-  - name: NASA Ames Research Center, Moffett Field, CA, USA
-    index: 15
-  - name: Bay Area Environmental Research Institute, Moffett Field, CA, USA
-    index: 16
-  - name: Department of Astrophysics, American Museum of Natural History, New York, NY, USA
-    index: 17
+    index: 2
+  - name: Department of Astronomy, University of Washington, University of Washington, Seattle, WA, USA
+    index: 3
+  - name: University of Maryland, Baltimore County, Baltimore, MD, USA
+    index: 4
+  - name: Department of Astrophysical Sciences, Princeton University, Princeton, NJ, USA
+    index: 5
   - name: Department of Physics, University of California, Santa Barbara, Santa Barbara, CA, USA
+    index: 6
+  - name: Department of Astronomy and Astrophysics, The Pennsylvania State University, University Park, PA, USA
+    index: 7
+  - name: Center for Exoplanets and Habitable Worlds, The Pennsylvania State University, University Park, PA, USA
+    index: 8
+  - name: Center for Astrostatistics, The Pennsylvania State University, University Park, PA, USA
+    index: 9
+  - name: Institute for Computational and Data Sciences, The Pennsylvania State University, University Park, PA, USA
+    index: 10
+  - name: Department of Astrophysics, American Museum of Natural History, New York, NY, USA
+    index: 11
+  - name: Department of Astronomy and Astrophysics, University of Chicago, Chicago, IL, USA
+    index: 12
+  - name: NASA Ames Research Center, Moffett Field, CA, USA
+    index: 13
+  - name: Bay Area Environmental Research Institute, Moffett Field, CA, USA
+    index: 14
+  - name: Sydney Institute for Astronomy, School of Physics, University of Sydney, Camperdown, New South Wales, Australia
+    index: 15
+  - name: Stellar Astrophysics Centre, Department of Physics and Astronomy, Aarhus University, Aarhus, Denmark
+    index: 16
+  - name: Center for Space and Habitability, University of Bern, Bern, Switzerland
+    index: 17
+  - name: Department of Astronomy, University of Maryland, College Park, MD, USA
     index: 18
 date: 23 April 2021
 bibliography: paper.bib
