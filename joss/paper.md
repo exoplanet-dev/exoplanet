@@ -16,9 +16,15 @@ authors:
   - name: Luke G. Bouma
     orcid: 0000-0002-0514-5538
     affiliation: 10
+   - name: Timothy D. Brandt
+    orcid: 0000-0003-2630-8073
+    affiliation: 18
   - name: Ian Czekala
     orcid: 0000-0002-1483-8811
     affiliation: "3,4,7,8"
+  - name: Trevor J. David
+    orcid: 0000-0001-6534-6246
+    affiliation: "1,17"
   - name: Jiayin Dong
     orcid: 0000-0002-3610-6953
     affiliation: "3,4"
@@ -78,6 +84,10 @@ affiliations:
     index: 15
   - name: Bay Area Environmental Research Institute, Moffett Field, CA, USA
     index: 16
+  - name: Department of Astrophysics, American Museum of Natural History, New York, NY, USA
+    index: 17
+  - name: Department of Physics, University of California, Santa Barbara, Santa Barbara, CA, USA
+    index: 18
 date: 23 April 2021
 bibliography: paper.bib
 ---
@@ -134,9 +144,10 @@ related.
 - `exoplanet-core`[^exoplanet-core] provides efficient, well-tested, and
   differentiable implementations of all of the exoplanet-specific operations
   that must be compiled for performance. These include an efficient solver for
-  Kepler's equation and limb darkened transit light curves [@agol20]. Besides the
-  implementation for `PyMC3` and `Theano`, `exoplanet-core` includes
-  implementations in `numpy` and `jax`.
+  Kepler's equation [based on the algorithm proposed by @raposo17] and limb
+  darkened transit light curves [@agol20]. Besides the implementation for
+  `PyMC3` and `Theano`, `exoplanet-core` includes implementations in `numpy` and
+  `jax`.
 - `celerite2`[^celerite2], an updated implementation of the _celerite_
   algorithm[^celerite] [@foremanmackey17; @foremanmackey18] for scalable
   Gaussian Process regression for time series data. Like `exoplanet-core`,
