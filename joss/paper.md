@@ -46,6 +46,9 @@ authors:
   - name: Brett M. Morris
     orcid: 0000-0003-2528-3409
     affiliation: 13
+  - name: Adrian M. Price-Whelan
+    orcid: 0000-0003-0872-7098
+    affiliation: 1
   - name: Arjun B. Savel
     orcid: 0000-0002-2454-768X
     affiliation: 9
