@@ -16,9 +16,15 @@ authors:
   - name: Luke G. Bouma
     orcid: 0000-0002-0514-5538
     affiliation: 10
+   - name: Timothy D. Brandt
+    orcid: 0000-0003-2630-8073
+    affiliation: 18
   - name: Ian Czekala
     orcid: 0000-0002-1483-8811
     affiliation: "3,4,7,8"
+  - name: Trevor J. David
+    orcid: 0000-0001-6534-6246
+    affiliation: "1,17"
   - name: Jiayin Dong
     orcid: 0000-0002-3610-6953
     affiliation: "3,4"
@@ -78,29 +84,32 @@ affiliations:
     index: 15
   - name: Bay Area Environmental Research Institute, Moffett Field, CA, USA
     index: 16
+  - name: Department of Astrophysics, American Museum of Natural History, New York, NY, USA
+    index: 17
+  - name: Department of Physics, University of California, Santa Barbara, Santa Barbara, CA, USA
+    index: 18
 date: 23 April 2021
 bibliography: paper.bib
 ---
 
 # Summary
 
-`exoplanet` is a toolkit for probabilistic modeling of time series data in
-astronomy with a focus on observations of exoplanets, using `PyMC3` [@pymc3].
+`exoplanet` is a toolkit for probabilistic modeling of astronomical time series
+data, with a focus on observations of exoplanets, using `PyMC3` [@pymc3].
 `PyMC3` is a flexible and high-performance model building language and inference
 engine that scales well to problems with a large number of parameters.
 `exoplanet` extends `PyMC3`’s modeling language to support many of the custom
-functions and distributions required when fitting exoplanet datasets or other
-exoplanet time series.
+functions and probability distributions required when fitting exoplanet datasets
+or other astronomical time series.
 
 While it has been used for other applications, such as the study of stellar
 variability [e.g., @gillen20; @medina20], the primary purpose of `exoplanet` is
 the characterization of exoplanets [e.g., @gilbert20; @plavchan20] or multiple
-star systems [e.g., @czekala21] using transit light curves, radial velocity time
-series, and/or astrometric time series. In particular, the typical use case
-would be to use one or more of these datasets to place constraints on the
-physical and orbital parameters of the system, such as planet mass or orbital
-period, while simultaneously taking into account the effects of stellar
-variability.
+star systems [e.g., @czekala21] using time series photometry, astrometry, and/or
+radial velocity. In particular, the typical use case would be to use one or more
+of these datasets to place constraints on the physical and orbital parameters of
+the system, such as planet mass or orbital period, while simultaneously taking
+into account the effects of stellar variability.
 
 # Statement of need
 
@@ -122,8 +131,8 @@ citations of the Zenodo record [@zenodo].
 # The _exoplanet_ software ecosystem
 
 Besides the primary `exoplanet` package, the _exoplanet_ ecosystem of projects
-includes several other libraries. This paper describes and is the primary
-reference for this full suite of packages. The following provides a short
+includes several other libraries. This paper describes, and is the primary
+reference for, this full suite of packages. The following provides a short
 description of each library within this ecosystem and discusses how they are
 related.
 
@@ -135,9 +144,10 @@ related.
 - `exoplanet-core`[^exoplanet-core] provides efficient, well-tested, and
   differentiable implementations of all of the exoplanet-specific operations
   that must be compiled for performance. These include an efficient solver for
-  Kepler's equation and limb darkened transit light curves [@agol20]. Besides the
-  implementation for `PyMC3` and `Theano`, `exoplanet-core` includes
-  implementations in `numpy` and `jax`.
+  Kepler's equation [based on the algorithm proposed by @raposo17] and limb
+  darkened transit light curves [@agol20]. Besides the implementation for
+  `PyMC3` and `Theano`, `exoplanet-core` includes implementations in `numpy` and
+  `jax`.
 - `celerite2`[^celerite2], an updated implementation of the _celerite_
   algorithm[^celerite] [@foremanmackey17; @foremanmackey18] for scalable
   Gaussian Process regression for time series data. Like `exoplanet-core`,
@@ -169,7 +179,7 @@ at [gallery.exoplanet.codes](https://gallery.exoplanet.codes) that includes more
 detailed example use cases for `exoplanet` and the other libraries described
 here. Like the tutorials on the documentation page, these case studies are
 automatically executed using GitHub Actions, but at a less regular cadence (once
-a week and when are new release of the `exoplanet` library is made) since the
+a week and when a new release of the `exoplanet` library is made) since the
 runtime is much longer.
 
 # Similar tools
@@ -202,7 +212,13 @@ differentiation framework used by `PyMC3`. This allows the use of modern
 inference algorithms such as No U-Turn Sampling [@hoffman14] or Automatic
 Differentiation Variational Inference [@kucukelbir17]. These algorithms can have
 some computational and conceptual advantages over inference methods that do not
-use gradients, especially for high-dimensional models.
+use gradients, especially for high-dimensional models.  The computation of gradients
+is also useful for model optimization; this is necessary when, say, searching
+for new exoplanets, mapping out degeneracies or multiple modes of a posterior,
+or estimating uncertainties from a Hessian.  Care has been taken to provide gradients
+which are numerically stable, and more accurate and faster to evaluate than
+finite-difference gradients which can be subject to significant numerical errors
+and require 2N computations of a model with N free parameters.
 
 # Acknowledgements
 
