@@ -56,7 +56,7 @@ affiliations:
     index: 4
   - name: Department of Astronomy, University of Washington, University of Washington, Seattle, WA, USA
     index: 5
-  - name: Department of Astronomy and Astrophysics, University of Chicago, Chicago, IL 60637, USA
+  - name: Department of Astronomy and Astrophysics, University of Chicago, Chicago, IL, USA
     index: 6
   - name: Center for Astrostatistics, The Pennsylvania State University, University Park, PA, USA
     index: 7
