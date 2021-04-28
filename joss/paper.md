@@ -59,7 +59,7 @@ affiliations:
     index: 2
   - name: Department of Astronomy, University of Washington, University of Washington, Seattle, WA, USA
     index: 3
-  - name: University of Maryland, Baltimore County, Baltimore, MD, USA
+  - name: Center for Space Sciences and Technology, University of Maryland, Baltimore County, Baltimore, MD, USA
     index: 4
   - name: Department of Astrophysical Sciences, Princeton University, Princeton, NJ, USA
     index: 5
