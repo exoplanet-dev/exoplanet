@@ -16,7 +16,7 @@ authors:
   - name: Luke G. Bouma
     orcid: 0000-0002-0514-5538
     affiliation: 10
-   - name: Timothy D. Brandt
+  - name: Timothy D. Brandt
     orcid: 0000-0003-2630-8073
     affiliation: 18
   - name: Ian Czekala
