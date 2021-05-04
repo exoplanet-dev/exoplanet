@@ -1,3 +1,12 @@
+0.5.0 (2021-05-04)
+++++++++++++++++++
+
+- Adds high-level, pure-Theano/Aesara implementation of ``RegularGridInterpolator`` to replace compiled version `#167 <https://github.com/exoplanet-dev/exoplanet/pull/167>`_
+- Moves compiled Ops to `exoplanet-core <https://github.com/exoplanet-dev/exoplanet-core>`_ making exoplanet a pure-Python package `#171 <https://github.com/exoplanet-dev/exoplanet/pull/171>`_
+- Moves `ReboundOp` and `ReboundOrbit` to `rebound-pymc3 <https://github.com/exoplanet-dev/rebound-pymc3>`_ `#166 <https://github.com/exoplanet-dev/exoplanet/pull/166>`_
+- Removes deprecated submodules (``gp``, ``optimize``, and ``sampling``) and base distributions (e.g. ``xo.Angle``) `#165 <https://github.com/exoplanet-dev/exoplanet/pull/165>`_
+
+
 0.4.5 (2021-03-15)
 ++++++++++++++++++
 
