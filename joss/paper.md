@@ -126,8 +126,8 @@ The packages in the _exoplanet_ ecosystem are designed to enable rigorous
 probabilistic inference with these large datasets and high-dimensional models by
 providing a high-performance and well-tested infrastructure for integrating
 these models with modern modeling frameworks such as `PyMC3`. Since its initial
-release at the end of 2018, `exoplanet` has been widely used with 58
-citations of the Zenodo record [@zenodo].
+release at the end of 2018, `exoplanet` has been widely used, with 64
+citations of the Zenodo record [@zenodo] so far.
 
 # The _exoplanet_ software ecosystem
 
@@ -149,16 +149,16 @@ related.
   darkened transit light curves [@agol20]. Besides the implementation for
   `PyMC3` and `Theano`, `exoplanet-core` includes implementations in `numpy` and
   `jax`.
-- `celerite2`[^celerite2], an updated implementation of the _celerite_
+- `celerite2`[^celerite2], is an updated implementation of the _celerite_
   algorithm[^celerite] [@foremanmackey17; @foremanmackey18] for scalable
   Gaussian Process regression for time series data. Like `exoplanet-core`,
   `celerite2` includes support for `numpy`, `jax`, and `PyMC3`, as well as some
   recent generalizations of the _celerite_ algorithm [@gordon20].
-- `pymc3-ext`[^pymc3-ext], a set of helper functions to make `PyMC3` more
-  amenable to the standard astronomical workflow. For example, it provides a
-  tuning schedule for `PyMC3`'s sampler [based on the method used by the `Stan`
-  project @carpenter17] that provides better performance on models with
-  correlated parameters.
+- `pymc3-ext`[^pymc3-ext], includes a set of helper functions to make `PyMC3`
+  more amenable to the typical astronomical data analysis workflow. For example,
+  it provides a tuning schedule for `PyMC3`'s sampler [based on the method used
+  by the `Stan` project @carpenter17] that provides better performance on models
+  with correlated parameters.
 - `rebound-pymc3`[^rebound-pymc3] provides an interface between _REBOUND_
   [@rein12], _REBOUNDx_ [@tamayo20], and `PyMC3` to enable inference with full
   N-body orbit integration.
@@ -179,9 +179,9 @@ Alongside these documentation pages, there is a parallel "Case Studies" website
 at [gallery.exoplanet.codes](https://gallery.exoplanet.codes) that includes more
 detailed example use cases for `exoplanet` and the other libraries described
 here. Like the tutorials on the documentation page, these case studies are
-automatically executed using GitHub Actions, but at a less regular cadence (once
-a week and when a new release of the `exoplanet` library is made) since the
-runtime is much longer.
+automatically executed using GitHub Actions, but at lower cadence (once a week
+and when a new release of the `exoplanet` library is made) since the runtime is
+much longer.
 
 # Similar tools
 
@@ -213,10 +213,10 @@ differentiation framework used by `PyMC3`. This allows the use of modern
 inference algorithms such as No U-Turn Sampling [@hoffman14] or Automatic
 Differentiation Variational Inference [@kucukelbir17]. These algorithms can have
 some computational and conceptual advantages over inference methods that do not
-use gradients, especially for high-dimensional models.  The computation of gradients
+use gradients, especially for high-dimensional models. The computation of gradients
 is also useful for model optimization; this is necessary when, say, searching
 for new exoplanets, mapping out degeneracies or multiple modes of a posterior,
-or estimating uncertainties from a Hessian.  Care has been taken to provide gradients
+or estimating uncertainties from a Hessian. Care has been taken to provide gradients
 which are numerically stable, and more accurate and faster to evaluate than
 finite-difference gradients which can be subject to significant numerical errors
 and require 2N computations of a model with N free parameters.
