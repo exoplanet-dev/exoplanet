@@ -1,0 +1,48 @@
+name: JOSS
+
+on:
+  push:
+    branches:
+      - main
+      - joss
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  joss:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Generate .tex
+        uses: docker://openjournals/paperdraft:latest
+        with:
+          args: joss/paper.md --defaults=metadata.yaml --to=latex --output=paper.tex
+        env:
+          GIT_SHA: $GITHUB_SHA
+          JOURNAL: joss
+
+      - name: Generate .pdf
+        uses: docker://openjournals/paperdraft:latest
+        with:
+          args: joss/paper.md --defaults=metadata.yaml
+        env:
+          GIT_SHA: $GITHUB_SHA
+          JOURNAL: joss
+
+      - name: Upload the generated files as an artifact
+        uses: actions/upload-artifact@v2
+        with:
+          path: joss
+          name: joss
+
+      - name: Deploy
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: peaceiris/actions-gh-pages@v3.8.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./joss
+          force_orphan: true

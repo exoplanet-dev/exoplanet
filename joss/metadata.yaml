@@ -1,0 +1,20 @@
+variables:
+  archive_doi: "TBD"
+  formatted_doi: "TBD"
+  repository: "https://github.com/exoplanet-dev/exoplanet"
+  doi_batch_id: "N/A"
+  editor_url: "https://example.com"
+  review_issue_url: "N/A"
+  paper_url: "NO PAPER URL"
+
+metadata:
+  logo_path: "figures/joss-logo.png"
+  citation_author: "Foreman-Mackey"
+  issue: "TBD"
+  page: "TBD"
+  volume: "TBD"
+  editor_name: "Pending Editor"
+  published: "N/A"
+  reviewers:
+    - "Pending Reviewers"
+  submitted: "N/A"
