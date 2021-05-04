@@ -10,8 +10,8 @@ number of parameters. *exoplanet* extends *PyMC3*'s language to support many of
 the custom functions and distributions required when fitting exoplanet datasets.
 These features include:
 
-* A fast and robust solver for Kepler's equation. * Scalable Gaussian Processes
-  using `celerite <https://celerite2.readthedocs.io>`_.
+* A fast and robust solver for Kepler's equation.
+* Scalable Gaussian Processes using `celerite <https://celerite2.readthedocs.io>`_.
 * Fast and accurate limb darkened light curves using `starry
   <https://rodluger.github.io/starry>`_.
 * Common reparameterizations for exoplanet-specific parameters like `limb
