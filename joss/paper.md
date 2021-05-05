@@ -40,7 +40,7 @@ authors:
   - name: Christina Hedges
     orcid: 0000-0002-3385-8391
     affiliation: "13,14"
-  - name: Daniel R Hey
+  - name: Daniel R. Hey
     orcid: 0000-0003-3244-5357
     affiliation: "15,16"
   - name: Brett M. Morris
