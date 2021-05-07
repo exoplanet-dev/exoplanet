@@ -147,8 +147,8 @@ related.
   that must be compiled for performance. These include an efficient solver for
   Kepler's equation [based on the algorithm proposed by @raposo17] and limb
   darkened transit light curves [@agol20]. Besides the implementation for
-  `PyMC3` and `Theano`, `exoplanet-core` includes implementations in `numpy` and
-  `jax`.
+  `PyMC3` and `Theano`, `exoplanet-core` includes implementations in `numpy`
+  [@numpy] and `jax` [@jax].
 - `celerite2`[^celerite2], is an updated implementation of the _celerite_
   algorithm[^celerite] [@foremanmackey17; @foremanmackey18] for scalable
   Gaussian Process regression for time series data. Like `exoplanet-core`,
@@ -227,8 +227,13 @@ We would like to thank the Astronomical Data Group at Flatiron for listening to
 every iteration of this project and for providing great feedback every step of
 the way.
 
+This research was partially conducted during the _Exostar19_ program at the
+_Kavli Institute for Theoretical Physics_ at UC Santa Barbara, which was
+supported in part by the National Science Foundation under Grant No. NSF
+PHY-1748958.
+
 Besides the software cited above, `exoplanet` is also built on top of `ArviZ`
-[@arviz], `AstroPy` [@astropy13; @astropy18], and `NumPy` [@numpy].
+[@arviz] and `AstroPy` [@astropy13; @astropy18].
 
 # References
 
