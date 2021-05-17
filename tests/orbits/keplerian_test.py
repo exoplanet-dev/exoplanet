@@ -15,7 +15,13 @@ from exoplanet.orbits.keplerian import (
 )
 from exoplanet.units import with_unit
 
+try:
+    import batman
+except ImportError:
+    batman = None
 
+
+@pytest.mark.skipif(batman is None, reason="batman is not installed")
 def test_sky_coords():
     from batman import _rsky
 
@@ -313,6 +319,7 @@ def test_in_transit_circ():
     assert np.all(inds == inds_circ)
 
 
+@pytest.mark.skipif(batman is None, reason="batman is not installed")
 def test_small_star():
     from batman import _rsky
 
