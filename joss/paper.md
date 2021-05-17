@@ -196,16 +196,16 @@ from a comprehensive list!) `EXOFAST` [@eastman13; @eastman19], `radvel`
 [@fulton18], `juliet` [@espinoza19], `exostriker` [@trifonov19], `PYANETI`
 [@barragan19], `allesfitter` [@guenther20], and `orbitize` [@blunt20]. Similar
 tools also exist for modeling observations of eclipsing binary systems,
-including `JKTEBOP` [@southworth04] and `eb` [@irwin11]. These packages all
-focus on providing a high-level interface for designing models and then
-executing a fit. `exoplanet`, however, is designed to be lower level and more
-conceptually similar to tools like `batman` [@kreidberg15], `PyTransit`
-[@parviainen15], `ldtk` [@parviainen15b], `ellc` [@maxted16], `starry`
-[@luger19], or `Limbdark.jl` [@agol20], which provide the building blocks for
-evaluating the models required for inference with exoplanet datasets. In fact,
-several of the higher-level packages listed above include these lower-level
-libraries as dependencies, and our hope is that `exoplanet` could provide the
-backend for future high-level libraries.
+including `JKTEBOP` [@southworth04], `eb` [@irwin11], and `PHOEBE` [@conroy20].
+These packages all focus on providing a high-level interface for designing
+models and then executing a fit. `exoplanet`, however, is designed to be lower
+level and more conceptually similar to tools like `batman` [@kreidberg15],
+`PyTransit` [@parviainen15], `ldtk` [@parviainen15b], `ellc` [@maxted16],
+`starry` [@luger19], or `Limbdark.jl` [@agol20], which provide the building
+blocks for evaluating the models required for inference with exoplanet datasets.
+In fact, several of the higher-level packages listed above include these
+lower-level libraries as dependencies, and our hope is that `exoplanet` could
+provide the backend for future high-level libraries.
 
 As emphasized in the title of this paper, the main selling point of `exoplanet`
 when compared to other tools in this space is that it supports differentiation
