@@ -147,8 +147,8 @@ related.
   that must be compiled for performance. These include an efficient solver for
   Kepler's equation [based on the algorithm proposed by @raposo17] and limb
   darkened transit light curves [@agol20]. Besides the implementation for
-  `PyMC3` and `Theano`, `exoplanet-core` includes implementations in `numpy`
-  [@numpy] and `jax` [@jax].
+  `PyMC3`, `exoplanet-core` includes implementations in `numpy` [@numpy] and
+  `jax` [@jax].
 - `celerite2`[^celerite2], is an updated implementation of the _celerite_
   algorithm[^celerite] [@foremanmackey17; @foremanmackey18] for scalable
   Gaussian Process regression for time series data. Like `exoplanet-core`,
@@ -157,8 +157,8 @@ related.
 - `pymc3-ext`[^pymc3-ext], includes a set of helper functions to make `PyMC3`
   more amenable to the typical astronomical data analysis workflow. For example,
   it provides a tuning schedule for `PyMC3`'s sampler [based on the method used
-  by the `Stan` project @carpenter17] that provides better performance on models
-  with correlated parameters.
+  by the `Stan` project and described by @carpenter17] that provides better
+  performance on models with correlated parameters.
 - `rebound-pymc3`[^rebound-pymc3] provides an interface between _REBOUND_
   [@rein12], _REBOUNDx_ [@tamayo20], and `PyMC3` to enable inference with full
   N-body orbit integration.
@@ -208,18 +208,19 @@ libraries.
 As emphasized in the title of this paper, the main selling point of `exoplanet`
 when compared to other tools in this space is that it supports differentiation
 of all components of the model and is designed to integrate seamlessly with the
-`aesara` [@aesara; formerly known as `Theano`, @theano] automatic
-differentiation framework used by `PyMC3`. This allows the use of modern
-inference algorithms such as No U-Turn Sampling [@hoffman14] or Automatic
-Differentiation Variational Inference [@kucukelbir17]. These algorithms can have
-some computational and conceptual advantages over inference methods that do not
-use gradients, especially for high-dimensional models. The computation of gradients
+`aesara` [@aesara] automatic differentiation framework used by `PyMC3`. It is
+worth noting that `aesara` was previously known as `Theano` [@theano], so these
+names are sometimes used interchangeably in the `PyMC3` or `exoplanet`
+documentation[^theano-aesara]. This allows the use of modern inference
+algorithms such as No U-Turn Sampling [@hoffman14] or Automatic Differentiation
+Variational Inference [@kucukelbir17]. These algorithms can have some
+computational and conceptual advantages over inference methods that do not use
+gradients, especially for high-dimensional models. The computation of gradients
 is also useful for model optimization; this is necessary when, say, searching
 for new exoplanets, mapping out degeneracies or multiple modes of a posterior,
-or estimating uncertainties from a Hessian. Care has been taken to provide gradients
-which are numerically stable, and more accurate and faster to evaluate than
-finite-difference gradients which can be subject to significant numerical errors
-and require 2N computations of a model with N free parameters.
+or estimating uncertainties from a Hessian. Care has been taken to provide
+gradients which are numerically stable, and more accurate and faster to evaluate
+than finite-difference gradients.
 
 # Acknowledgements
 
@@ -243,3 +244,4 @@ Besides the software cited above, `exoplanet` is also built on top of `ArviZ`
 [^celerite]: [https://celerite.readthedocs.io](https://celerite.readthedocs.io)
 [^pymc3-ext]: [https://github.com/exoplanet-dev/pymc3-ext](https://github.com/exoplanet-dev/pymc3-ext)
 [^rebound-pymc3]: [https://github.com/exoplanet-dev/rebound-pymc3](https://github.com/exoplanet-dev/rebound-pymc3)
+[^theano-aesara]: More information about this distinction is available at [https://docs.exoplanet.codes/en/stable/user/theano/](https://docs.exoplanet.codes/en/stable/user/theano/)
