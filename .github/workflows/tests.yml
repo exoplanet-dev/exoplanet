@@ -42,7 +42,7 @@ jobs:
           PYMC_VERSION: ${{ matrix.pymc-version }}
 
       - name: Combine and upload coverage
-        run: python -m coveralls
+        run: python -m coveralls --service=github
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_PARALLEL: true
