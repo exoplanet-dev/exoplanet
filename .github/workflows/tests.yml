@@ -46,6 +46,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_PARALLEL: true
+          COVERALLS_FLAG_NAME: py${{ matrix.python-version }}-pymc${{ matrix.pymc-version }}
 
   coverage:
     needs: tests
