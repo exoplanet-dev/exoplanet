@@ -19,6 +19,19 @@ relative_files = true
 parallel = true
 branch = true
 source = ["exoplanet"]
+omit = [
+  "*_test.py",
+  "*__init__*",
+  "src/exoplanet/gp.py",
+  "src/exoplanet/optim.py",
+  "src/exoplanet/interp.py",
+  "src/exoplanet/sampling.py",
+  "src/exoplanet/orbits/constants.py",
+  "src/exoplanet/light_curves/integrated.py",
+  "src/exoplanet/light_curves/interpolated.py",
+  "src/exoplanet/theano_ops/build_utils.py",
+  "src/exoplanet/theano_ops/interp/*"
+]
 
 [tool.coverage.paths]
 source = ["src", ".tox/*/site-packages"]
@@ -26,3 +39,10 @@ source = ["src", ".tox/*/site-packages"]
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
+exclude_lines = [
+  "raise NotImplementedError",
+  "except ImportError",
+  "pragma: no cover",
+  "def R_op",
+  "if verbose"
+]
