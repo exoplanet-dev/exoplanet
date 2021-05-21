@@ -42,11 +42,7 @@ jobs:
           PYMC_VERSION: ${{ matrix.pymc-version }}
 
       - name: Combine and upload coverage
-        run: |
-          set -xe
-          python -m coverage combine
-          python -m coverage xml
-          python -m coveralls
+        run: python -m coveralls
         env:
           COVERALLS_PARALLEL: true
 
