@@ -34,6 +34,7 @@ EXTRA_REQUIRE = {
     "test": [
         "scipy",
         "pytest",
+        "pytest-cov>=2.6.1",
         "coverage[toml]",
         "pytest-env",
         "batman-package",

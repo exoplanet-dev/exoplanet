@@ -17,6 +17,7 @@ known_third_party = ["astropy", "corner", "jupytext", "matplotlib", "nbconvert",
 [tool.coverage.run]
 parallel = true
 branch = true
+source = ["exoplanet"]
 omit = [
   "*_test.py",
   "*__init__*",
