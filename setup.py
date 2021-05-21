@@ -37,7 +37,6 @@ EXTRA_REQUIRE = {
         "pytest-cov>=2.6.1",
         "pytest-env",
         "batman-package",
-        "starry",
     ],
     "docs": [
         "sphinx>=1.7.5",
