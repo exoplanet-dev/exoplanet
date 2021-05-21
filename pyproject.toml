@@ -4,21 +4,6 @@ build-backend = "setuptools.build_meta"
 
 [tool.black]
 line-length = 79
-exclude = '''
-/(
-    \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-  | docs/tutorials
-)/
-'''
 
 [tool.isort]
 skip_glob = ["docs/tutorials/*.py"]
@@ -28,3 +13,16 @@ include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
 known_third_party = ["astropy", "corner", "jupytext", "matplotlib", "nbconvert", "nbformat", "numpy", "packaging", "pandas", "pkg_resources", "pymc3", "pytest", "requests", "scipy", "setuptools", "sphinx_typlog_theme", "theano"]
+
+[tool.coverage.run]
+relative_files = true
+parallel = true
+branch = true
+source = ["exoplanet"]
+
+[tool.coverage.paths]
+source = ["src", ".tox/*/site-packages"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
