@@ -15,7 +15,7 @@ use_parentheses = true
 known_third_party = ["astropy", "corner", "jupytext", "matplotlib", "nbconvert", "nbformat", "numpy", "packaging", "pandas", "pkg_resources", "pymc3", "pytest", "requests", "scipy", "setuptools", "sphinx_typlog_theme", "theano"]
 
 [tool.coverage.run]
-relative_files = true
+# relative_files = true
 parallel = true
 branch = true
 source = ["exoplanet"]

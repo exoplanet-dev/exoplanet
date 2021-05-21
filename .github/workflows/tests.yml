@@ -43,6 +43,7 @@ jobs:
 
       - name: Combine and upload coverage
         run: |
+          set -xe
           python -m coverage combine
           python -m coverage xml
           python -m coveralls
