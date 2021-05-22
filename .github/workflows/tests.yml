@@ -37,7 +37,7 @@ jobs:
           python -m pip install -U coveralls coverage[toml] tox tox-gh-actions
 
       - name: Run tests
-        run: python -m tox tests/citations_test.py
+        run: python -m tox
         env:
           PYMC_VERSION: ${{ matrix.pymc-version }}
 
