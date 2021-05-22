@@ -44,7 +44,7 @@ jobs:
       - name: Combine and upload coverage
         run: |
           python -m coverage combine
-          python -m coverage xml
+          python -m coverage xml -i
           python -m coveralls --service=github
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
