@@ -10,6 +10,9 @@
   <a href="https://docs.exoplanet.codes">
     <img src="https://readthedocs.org/projects/exoplanet/badge/?version=latest" alt="Docs">
   </a>
+  <a href="https://coveralls.io/github/exoplanet-dev/exoplanet?branch=main">
+    <img src="https://coveralls.io/repos/github/exoplanet-dev/exoplanet/badge.svg?branch=main" alt="Coverage">
+  </a>
 </p>
 
 # exoplanet
