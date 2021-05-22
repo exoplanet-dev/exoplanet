@@ -4,10 +4,8 @@ on:
   push:
     branches:
       - main
-      - joss
-  pull_request:
-    branches:
-      - main
+    paths:
+      - "joss/**"
 
 jobs:
   joss:

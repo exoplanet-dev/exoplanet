@@ -4,21 +4,6 @@ build-backend = "setuptools.build_meta"
 
 [tool.black]
 line-length = 79
-exclude = '''
-/(
-    \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-  | docs/tutorials
-)/
-'''
 
 [tool.isort]
 skip_glob = ["docs/tutorials/*.py"]
@@ -28,3 +13,29 @@ include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
 known_third_party = ["astropy", "corner", "jupytext", "matplotlib", "nbconvert", "nbformat", "numpy", "packaging", "pandas", "pkg_resources", "pymc3", "pytest", "requests", "scipy", "setuptools", "sphinx_typlog_theme", "theano"]
+
+[tool.coverage.run]
+parallel = true
+branch = true
+source = ["exoplanet"]
+omit = [
+  "*_test.py",
+  "*__init__*",
+  "*/exoplanet/exoplanet_version.py",
+  "*/exoplanet/orbits/constants.py",
+  "*/exoplanet/light_curves/integrated.py",
+  "*/exoplanet/light_curves/interpolated.py",
+]
+
+[tool.coverage.paths]
+source = ["src", "*/site-packages"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+  "raise NotImplementedError",
+  "except ImportError",
+  "pragma: no cover",
+  "def R_op",
+  "if verbose"
+]
