@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__all__ = [
-    "quad_limb_dark",
-    "radius_impact",
-    "impact_parameter",
-]
+__all__ = ["quad_limb_dark", "radius_impact", "impact_parameter"]
 
 import aesara_theano_fallback.tensor as tt
 import numpy as np
@@ -26,7 +22,6 @@ class QuadLimbDarkTransform(tr.Transform):
         sqrtq1 = tt.sqrt(q[0])
         twoq2 = 2 * q[1]
         u = tt.stack([sqrtq1 * twoq2, sqrtq1 * (1 - twoq2)])
-
         return u
 
     def forward(self, x):
@@ -46,8 +41,12 @@ class QuadLimbDarkTransform(tr.Transform):
 quad_limb_dark = QuadLimbDarkTransform()
 
 
-class RadiusImpactTransform(tr.Transform):
+class RadiusImpactTransform(tr.Transform):  # pragma: no cover
     """A reparameterization of the radius-impact parameter plane
+
+    .. note:: This transform introduces a non-uniform prior on the radius ratio
+              and its use is not recommended. Use the `ImpactParameter`
+              distribution instead.
 
     This is an implementation of `Espinoza (2018)
     <http://iopscience.iop.org/article/10.3847/2515-5172/aaef38/meta>`_
@@ -138,6 +137,12 @@ radius_impact = RadiusImpactTransform
 
 
 class ImpactParameterTransform(tr.LogOdds):
+    """A transform for a parameter specifying an impact parameter
+
+    Given a radius ratio parameter ``ror``, this will transform the impact
+    parameter into the range ``[0, 1+ror)`` while maintaining a uniform prior
+    on ``ror`` and, when ``b < 1 - ror``, a uniform prior on ``b``.
+    """
 
     name = "impact"
 

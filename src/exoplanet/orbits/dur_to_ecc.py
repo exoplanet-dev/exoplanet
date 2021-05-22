@@ -11,7 +11,9 @@ import pymc3 as pm
 from .keplerian import KeplerianOrbit, _get_consistent_inputs
 
 
-def duration_to_eccentricity(func, duration, ror, **kwargs):
+def duration_to_eccentricity(  # pragma: no cover
+    func, duration, ror, **kwargs
+):
     num_planets = kwargs.pop("num_planets", 1)
     orbit_type = kwargs.pop("orbit_type", KeplerianOrbit)
     name = kwargs.get("name", "dur_ecc")
