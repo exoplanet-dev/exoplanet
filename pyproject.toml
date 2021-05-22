@@ -21,10 +21,10 @@ source = ["exoplanet"]
 omit = [
   "*_test.py",
   "*__init__*",
-  "src/exoplanet/exoplanet_version.py",
-  "src/exoplanet/orbits/constants.py",
-  "src/exoplanet/light_curves/integrated.py",
-  "src/exoplanet/light_curves/interpolated.py",
+  "*/exoplanet/exoplanet_version.py",
+  "*/exoplanet/orbits/constants.py",
+  "*/exoplanet/light_curves/integrated.py",
+  "*/exoplanet/light_curves/interpolated.py",
 ]
 
 [tool.coverage.paths]
