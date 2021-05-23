@@ -22,7 +22,7 @@ def deprecation_warning(msg):
     warnings.warn(msg, category=DeprecationWarning, stacklevel=2)
 
 
-def deprecated(alternate=None):
+def deprecated(alternate=None):  # pragma: no cover
     def wrapper(func, alternate=alternate):
         msg = "'{0}' is deprecated.".format(func.__name__)
         if alternate is not None:
