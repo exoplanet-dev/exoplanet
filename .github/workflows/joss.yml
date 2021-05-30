@@ -44,3 +44,5 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./joss
           force_orphan: true
+          publish_branch: joss-compiled
+
