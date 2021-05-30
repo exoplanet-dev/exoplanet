@@ -70,7 +70,11 @@ Contents
    :maxdepth: 2
    :caption: Tutorials
 
+   tutorials/about.md
+   tutorials/why.md
    tutorials/intro-to-pymc3.md
+   tutorials/data-and-models.md
+   tutorials/light-delay.md
    Case studies <https://gallery.exoplanet.codes>
 
 

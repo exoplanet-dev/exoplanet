@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
-
 from pkg_resources import DistributionNotFound, get_distribution
 
 try:
@@ -20,31 +18,7 @@ extensions = [
     "myst_nb",
 ]
 
-autodoc_mock_imports = [
-    "numpy",
-    "scipy",
-    "astropy",
-    "pymc3",
-    "theano",
-    "aesara_theano_fallback",
-    "tqdm",
-]
-
-# RTDs-action
-if "GITHUB_TOKEN" in os.environ:
-    extensions.append("rtds_action")
-
-    rtds_action_github_repo = "exoplanet-dev/exoplanet"
-    rtds_action_path = "tutorials"
-    rtds_action_artifact_prefix = "notebooks-for-"
-    rtds_action_github_token = os.environ["GITHUB_TOKEN"]
-
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/3/", None),
-    "numpy": ("https://docs.scipy.org/doc/numpy/", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/reference/", None),
-    "astropy": ("http://docs.astropy.org/en/stable/", None),
-}
+myst_enable_extensions = ["dollarmath"]
 
 templates_path = ["_templates"]
 source_suffix = ".rst"
@@ -62,11 +36,13 @@ exclude_patterns = ["_build"]
 
 # HTML theme
 html_theme = "sphinx_book_theme"
+html_copy_source = True
+html_show_sourcelink = True
+html_sourcelink_suffix = ""
 html_title = "exoplanet"
 html_logo = "_static/logo.png"
 html_favicon = "_static/favicon.png"
 html_static_path = ["_static"]
-html_show_sourcelink = False
 html_theme_options = {
     "path_to_docs": "docs",
     "repository_url": "https://github.com/exoplanet-dev/exoplanet",
@@ -81,4 +57,5 @@ html_theme_options = {
     "use_download_button": True,
 }
 # jupyter_execute_notebooks = "off"
+jupyter_execute_notebooks = "cache"
 execution_timeout = -1

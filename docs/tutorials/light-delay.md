@@ -11,19 +11,16 @@ kernelspec:
   name: python3
 ---
 
-```{code-cell}
-:nbsphinx: hidden
-
-%matplotlib inline
-```
-
-```{code-cell}
-:nbsphinx: hidden
-
-%run notebook_setup
-```
-
 # Light travel time delay
+
+```{code-cell}
+:nbsphinx: hidden
+
+import exoplanet
+
+exoplanet.utils.docs_setup()
+print(f"exoplanet.__version__ = '{exoplanet.__version__}'")
+```
 
 A simple example showing the effects of light travel time delay on an edge-on planet in an orbit similar to that of Earth.
 
@@ -131,7 +128,7 @@ plt.plot(t, light_curve2, label="with delay")
 plt.xlabel("time [days]")
 plt.ylabel("relative flux")
 plt.legend(fontsize=10, loc="lower right")
-plt.title(
+_ = plt.title(
     "Light delay causes transits to occur 8.32 minutes early", fontsize=14
 )
 ```

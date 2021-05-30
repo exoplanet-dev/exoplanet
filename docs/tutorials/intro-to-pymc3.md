@@ -12,16 +12,14 @@ kernelspec:
   name: python3
 ---
 
+# A quick intro to PyMC3
+
 ```{code-cell}
 import exoplanet
 
 exoplanet.utils.docs_setup()
 print(f"exoplanet.__version__ = '{exoplanet.__version__}'")
 ```
-
-# A quick intro to PyMC3 for exoplaneteers
-
-+++
 
 Gradient-based inference methods (like [Hamiltonian Monte Carlo (HMC)](https://en.wikipedia.org/wiki/Hamiltonian_Monte_Carlo)) haven't been widely used in astrophysics, but they are the standard methods for probabilistic inference using Markov chain Monte Carlo (MCMC) in many other fields.
 *exoplanet* is designed to provide the building blocks for fitting many exoplanet datasets using this technology, and this tutorial presents some of the basic features of the [PyMC3](https://docs.pymc.io/) modeling language and inference engine.

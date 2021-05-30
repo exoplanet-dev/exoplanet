@@ -39,7 +39,7 @@ EXTRA_REQUIRE = {
         "batman-package",
     ],
     "docs": [
-        "sphinx>=1.7.5",
+        "sphinx>=2",
         "sphinx-book-theme",
         "rtds_action",
         "myst-nb",
