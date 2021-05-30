@@ -35,6 +35,7 @@ repos:
   rev: v1.11.2
   hooks:
   - id: jupytext
-    args: [--pipe, black, "docs/tutorials/*.md"]
+    include: "docs/tutorials/*.md"
+    args: [--pipe, black]
     additional_dependencies:
       - black
