@@ -11,11 +11,11 @@ kernelspec:
   name: python3
 ---
 
-# Why does this exist?
+# Reparameterization
 
 +++
 
-This section will try to motivate the point of exoplanet and gradient-based inference.
+Some tips and tricks for reparameterization
 
 ```{code-cell}
 

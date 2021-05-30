@@ -71,10 +71,11 @@ Contents
    :caption: Tutorials
 
    tutorials/about.md
-   tutorials/why.md
+   tutorials/autodiff.md
    tutorials/intro-to-pymc3.md
    tutorials/data-and-models.md
    tutorials/light-delay.md
+   tutorials/reparameterization.md
    Case studies <https://gallery.exoplanet.codes>
 
 
