@@ -53,12 +53,15 @@ an issue <https://github.com/exoplanet-dev/exoplanet/issues>`_ there.
    <https://github.com/exoplanet-dev/pymc3-ext>`_.
 
 
+Contents
+--------
+
 .. toctree::
    :maxdepth: 2
    :caption: User Guide
 
    user/install
-   tutorials/citation.ipynb
+   tutorials/citation.md
    user/theano
    user/api
    user/dev
@@ -67,11 +70,7 @@ an issue <https://github.com/exoplanet-dev/exoplanet/issues>`_ there.
    :maxdepth: 2
    :caption: Tutorials
 
-   tutorials/intro-to-pymc3.ipynb
-   tutorials/rv.ipynb
-   tutorials/transit.ipynb
-   tutorials/astrometric.ipynb
-   tutorials/light-delay.ipynb
+   tutorials/intro-to-pymc3.md
    Case studies <https://gallery.exoplanet.codes>
 
 
@@ -85,10 +84,6 @@ The source code is made available under the terms of the MIT license.
 If you make use of this code, please cite this package and its dependencies. You
 can find more information about how and what to cite in the `citation
 <tutorials/citation.ipynb>`_ documentation.
-
-These docs were made using `Sphinx <https://www.sphinx-doc.org>`_ and the
-`Typlog theme <https://github.com/typlog/sphinx-typlog-theme>`_. They are built
-and hosted on `Read the Docs <https://readthedocs.org>`_.
 
 
 Changelog

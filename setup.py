@@ -40,9 +40,9 @@ EXTRA_REQUIRE = {
     ],
     "docs": [
         "sphinx>=1.7.5",
-        "sphinx-typlog-theme",
+        "sphinx-book-theme",
         "rtds_action",
-        "nbsphinx",
+        "myst-nb",
         "ipython",
     ],
     "tutorials": [

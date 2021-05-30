@@ -1,30 +1,36 @@
-# ---
-# jupyter:
-#   jupytext:
-#     text_representation:
-#       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.7.1
-#   kernelspec:
-#     display_name: Python 3
-#     language: python
-#     name: python3
-# ---
+---
+jupytext:
+  text_representation:
+    extension: .md
+    format_name: myst
+    format_version: 0.13
+    jupytext_version: 1.11.2
+kernelspec:
+  display_name: Python 3
+  language: python
+  name: python3
+---
 
-# + nbsphinx="hidden"
-# %matplotlib inline
+```{code-cell}
+:nbsphinx: hidden
 
-# + nbsphinx="hidden"
-# %run notebook_setup
-# -
+%matplotlib inline
+```
 
-# # Transit fitting
+```{code-cell}
+:nbsphinx: hidden
 
-# *exoplanet* includes methods for computing the light curves transiting planets.
-# In its simplest form this can be used to evaluate a light curve like you would do with [batman](https://astro.uchicago.edu/~kreidberg/batman/), for example:
+%run notebook_setup
+```
 
-# +
+# Transit fitting
+
++++
+
+*exoplanet* includes methods for computing the light curves transiting planets.
+In its simplest form this can be used to evaluate a light curve like you would do with [batman](https://astro.uchicago.edu/~kreidberg/batman/), for example:
+
+```{code-cell}
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -48,27 +54,29 @@ plt.plot(t, light_curve, color="C0", lw=2)
 plt.ylabel("relative flux")
 plt.xlabel("time [days]")
 _ = plt.xlim(t.min(), t.max())
-# -
+```
 
-# But the real power comes from the fact that this is defined as a [Theano operation](https://aesara.readthedocs.io/en/latest/extending/index.html) so it can be combined with PyMC3 to do transit inference using Hamiltonian Monte Carlo.
-#
-# ## The transit model in PyMC3
-#
-# In this section, we will construct a simple transit fit model using *PyMC3* and then we will fit a two planet model to simulated data.
-# To start, let's randomly sample some periods and phases and then define the time sampling:
+But the real power comes from the fact that this is defined as a [Theano operation](https://aesara.readthedocs.io/en/latest/extending/index.html) so it can be combined with PyMC3 to do transit inference using Hamiltonian Monte Carlo.
 
+## The transit model in PyMC3
+
+In this section, we will construct a simple transit fit model using *PyMC3* and then we will fit a two planet model to simulated data.
+To start, let's randomly sample some periods and phases and then define the time sampling:
+
+```{code-cell}
 np.random.seed(123)
 periods = np.random.uniform(5, 20, 2)
 t0s = periods * np.random.rand(2)
 t = np.arange(0, 80, 0.02)
 yerr = 5e-4
+```
 
-# Then, define the parameters.
-# In this simple model, we'll just fit for the limb darkening parameters of the star, and the period, phase, impact parameter, and radius ratio of the planets (note: this is already 10 parameters and running MCMC to convergence using [emcee](https://emcee.readthedocs.io) would probably take at least an hour).
-# For the limb darkening, we'll use a quadratic law as parameterized by [Kipping (2013)](https://arxiv.org/abs/1308.0009).
-# This reparameterizations is implemented in *exoplanet* as custom *PyMC3* distribution :class:`exoplanet.distributions.QuadLimbDark`.
+Then, define the parameters.
+In this simple model, we'll just fit for the limb darkening parameters of the star, and the period, phase, impact parameter, and radius ratio of the planets (note: this is already 10 parameters and running MCMC to convergence using [emcee](https://emcee.readthedocs.io) would probably take at least an hour).
+For the limb darkening, we'll use a quadratic law as parameterized by [Kipping (2013)](https://arxiv.org/abs/1308.0009).
+This reparameterizations is implemented in *exoplanet* as custom *PyMC3* distribution :class:`exoplanet.distributions.QuadLimbDark`.
 
-# +
+```{code-cell}
 import pymc3 as pm
 import pymc3_ext as pmx
 
@@ -125,10 +133,11 @@ with pm.Model() as model:
     # Fit for the maximum a posteriori parameters given the simuated
     # dataset
     map_soln = pmx.optimize(start=model.test_point)
-# -
+```
 
-# Now we can plot the simulated data and the maximum a posteriori model to make sure that our initialization looks ok.
+Now we can plot the simulated data and the maximum a posteriori model to make sure that our initialization looks ok.
 
+```{code-cell}
 plt.plot(t, y, ".k", ms=4, label="data")
 for i, l in enumerate("bc"):
     plt.plot(
@@ -139,12 +148,14 @@ plt.ylabel("relative flux")
 plt.xlabel("time [days]")
 plt.legend(fontsize=10)
 _ = plt.title("map model")
+```
 
-# ## Sampling
-#
-# Now, let's sample from the posterior defined by this model.
-# As usual, there are strong covariances between some of the parameters so we'll use `pmx.sample` from [pymc3-ext](https://github.com/exoplanet-dev/pymc3-ext).
+## Sampling
 
+Now, let's sample from the posterior defined by this model.
+As usual, there are strong covariances between some of the parameters so we'll use `pmx.sample` from [pymc3-ext](https://github.com/exoplanet-dev/pymc3-ext).
+
+```{code-cell}
 np.random.seed(42)
 with model:
     trace = pmx.sample(
@@ -155,24 +166,29 @@ with model:
         chains=2,
         target_accept=0.9,
     )
+```
 
-# After sampling, it's important that we assess convergence.
-# We can do that using the `pymc3.summary` function:
+After sampling, it's important that we assess convergence.
+We can do that using the `pymc3.summary` function:
 
+```{code-cell}
 import arviz as az
+```
 
+```{code-cell}
 with model:
     summary = az.summary(
         trace, var_names=["period", "t0", "r", "b", "u", "mean"]
     )
 summary
+```
 
-# That looks pretty good!
-# Fitting this without *exoplanet* would have taken a lot more patience.
-#
-# Now we can also look at the [corner plot](https://corner.readthedocs.io) of some of that parameters of interest:
+That looks pretty good!
+Fitting this without *exoplanet* would have taken a lot more patience.
 
-# +
+Now we can also look at the [corner plot](https://corner.readthedocs.io) of some of that parameters of interest:
+
+```{code-cell}
 import corner
 
 truth = dict(
@@ -186,12 +202,13 @@ _ = corner.corner(
     var_names=["period", "r"],
     truths=truth,
 )
-# -
+```
 
-# ## Phase plots
-#
-# Like in the [Radial velocity fitting](./rv.ipynb) tutorial, we can make plots of the model predictions for each planet.
+## Phase plots
 
+Like in the [Radial velocity fitting](./rv.ipynb) tutorial, we can make plots of the model predictions for each planet.
+
+```{code-cell}
 for n, letter in enumerate("bc"):
     plt.figure()
 
@@ -238,14 +255,19 @@ for n, letter in enumerate("bc"):
     plt.ylabel("relative flux")
     plt.title("planet {0}".format(letter))
     plt.xlim(-0.3, 0.3)
+```
 
-# ## Citations
-#
-# As described in the [Citing exoplanet & its dependencies](./citation.ipynb) tutorial, we can use :func:`exoplanet.citations.get_citations_for_model` to construct an acknowledgement and BibTeX listing that includes the relevant citations for this model.
-# This is especially important here because we have used quite a few model components that should be cited.
+## Citations
 
+As described in the [Citing exoplanet & its dependencies](./citation.ipynb) tutorial, we can use :func:`exoplanet.citations.get_citations_for_model` to construct an acknowledgement and BibTeX listing that includes the relevant citations for this model.
+This is especially important here because we have used quite a few model components that should be cited.
+
+```{code-cell}
 with model:
     txt, bib = xo.citations.get_citations_for_model()
 print(txt)
+```
 
+```{code-cell}
 print("\n".join(bib.splitlines()[:10]) + "\n...")
+```

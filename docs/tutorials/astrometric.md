@@ -1,34 +1,40 @@
-# ---
-# jupyter:
-#   jupytext:
-#     text_representation:
-#       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.10.3
-#   kernelspec:
-#     display_name: Python 3
-#     language: python
-#     name: python3
-# ---
+---
+jupytext:
+  text_representation:
+    extension: .md
+    format_name: myst
+    format_version: 0.13
+    jupytext_version: 1.11.2
+kernelspec:
+  display_name: Python 3
+  language: python
+  name: python3
+---
 
-# + nbsphinx="hidden"
-# %matplotlib inline
+```{code-cell}
+:nbsphinx: hidden
 
-# + nbsphinx="hidden"
-# %run notebook_setup
-# -
+%matplotlib inline
+```
 
-# # Astrometric fitting
+```{code-cell}
+:nbsphinx: hidden
 
-# In this tutorial we'll walk through the simplest astrometric example with `exoplanet` and then explain how to build up a more complicated example with parallax measurements. For our dataset, we'll use astrometric and radial velocity observations of a binary star system.
-#
-# Astrometric observations usually consist of measurements of the separation and position angle of the secondary star (or directly imaged exoplanet), relative to the primary star as a function of time. The simplest astrometric orbit (in terms of number of parameters), describes the orbit using a semi-major axis `a_ang` measured in *arcseconds*, since the distance to the system is assumed to be unknown. We'll work through this example first, then introduce the extra constraints provided by parallax information.
-#
-# ## Data
-# First, let's load and examine the data. We'll use the astrometric measurements of HR 466 (HD 10009) as compiled by [Pourbaix 1998](https://ui.adsabs.harvard.edu/#abs/1998A&AS..131..377P/abstract). The speckle observations are originally from [Hartkopf et al. 1996](https://ui.adsabs.harvard.edu/#abs/1996AJ....111..370H/abstract).
+%run notebook_setup
+```
 
-# +
+# Astrometric fitting
+
++++
+
+In this tutorial we'll walk through the simplest astrometric example with `exoplanet` and then explain how to build up a more complicated example with parallax measurements. For our dataset, we'll use astrometric and radial velocity observations of a binary star system.
+
+Astrometric observations usually consist of measurements of the separation and position angle of the secondary star (or directly imaged exoplanet), relative to the primary star as a function of time. The simplest astrometric orbit (in terms of number of parameters), describes the orbit using a semi-major axis `a_ang` measured in *arcseconds*, since the distance to the system is assumed to be unknown. We'll work through this example first, then introduce the extra constraints provided by parallax information.
+
+## Data
+First, let's load and examine the data. We'll use the astrometric measurements of HR 466 (HD 10009) as compiled by [Pourbaix 1998](https://ui.adsabs.harvard.edu/#abs/1998A&AS..131..377P/abstract). The speckle observations are originally from [Hartkopf et al. 1996](https://ui.adsabs.harvard.edu/#abs/1996AJ....111..370H/abstract).
+
+```{code-cell}
 from astropy.io import ascii
 from astropy.time import Time
 
@@ -57,11 +63,11 @@ astro_data = astro_data_full[ind]
 astro_yrs = astro_data["date"]
 astro_dates.format = "jd"
 astro_jds = astro_dates[ind].value
-# -
+```
 
-# Many of these measurements in this heterogeneous dataset do not have reported error measurements. For these, we assume a modest uncertainty of $1^\circ$ in position angle and $0.01^{\prime\prime}$ in separation for the sake of specifying something, but we'll include a jitter term for both of these measurements as well. The scatter in points around the final solution will be a decent guide of what the measurement uncertainties actually were.
+Many of these measurements in this heterogeneous dataset do not have reported error measurements. For these, we assume a modest uncertainty of $1^\circ$ in position angle and $0.01^{\prime\prime}$ in separation for the sake of specifying something, but we'll include a jitter term for both of these measurements as well. The scatter in points around the final solution will be a decent guide of what the measurement uncertainties actually were.
 
-# +
+```{code-cell}
 import numpy as np
 
 astro_data["rho_err"][astro_data["rho_err"].mask == True] = 0.01
@@ -78,17 +84,17 @@ theta_data = np.ascontiguousarray(astro_data["PA"] * deg, dtype=float)
 theta_data[theta_data > np.pi] -= 2 * np.pi
 
 theta_err = np.ascontiguousarray(astro_data["PA_err"] * deg)  # radians
-# -
+```
 
-# ## Astrometric conventions
-#
-# The conventions describing the orientation of the orbits are described in detail in the *exoplanet* paper; we summarize them briefly here. Generally, we follow the conventions from Pourbaix et al. 1998, which are a consistent set conforming to the right-hand-rule and the conventions of the visual binary field, where the ascending node is that where the secondary is *receeding* from the observer (without radial velocity information, there is a $\pi$ degeneracy in which node is ascending, and so common practice in the literature is to report a value in the range $[0,\pi]$). The orbital inclination ranges from $[0, \pi$]. $i = 0$ describes a face-on orbit rotating counter-clockwise on the sky plane, while $i=\pi$ describes a face-on orbit rotating clockwise on the sky. $i = \pi/2$ is an edge-on orbit.
-#
-# The observer frame $X$, $Y$, $Z$ is oriented on the sky such that $+Z$ points towards the observer, $X$ is the north axis, and $Y$ is the east axis. *All* angles are measured in radians, and the position angle is returned in the range $[-\pi, \pi]$, which is the degrees east of north (be sure to check your data is in this format too!) The radial velocity is still defined such that a positive radial velocity corresponds to motion away from the observer.
-#
-# In an astrometric-only orbit, it is common practice in the field to report $\omega = \omega_\mathrm{secondary}$, whereas with an RV orbit it is generally common practice to report $\omega = \omega_\mathrm{primary}$. The result is that unless the authors specify what they're using, in a joint astrometric-RV orbit there is an ambiguity to which $\omega$ the authors mean, since $\omega_\mathrm{primary} = \omega_\mathrm{secondary} + \pi$. To standardize this across the *exoplanet* package, in all orbits (including astrometric-only) $\omega = \omega_\mathrm{primary}$.
+## Astrometric conventions
 
-# +
+The conventions describing the orientation of the orbits are described in detail in the *exoplanet* paper; we summarize them briefly here. Generally, we follow the conventions from Pourbaix et al. 1998, which are a consistent set conforming to the right-hand-rule and the conventions of the visual binary field, where the ascending node is that where the secondary is *receeding* from the observer (without radial velocity information, there is a $\pi$ degeneracy in which node is ascending, and so common practice in the literature is to report a value in the range $[0,\pi]$). The orbital inclination ranges from $[0, \pi$]. $i = 0$ describes a face-on orbit rotating counter-clockwise on the sky plane, while $i=\pi$ describes a face-on orbit rotating clockwise on the sky. $i = \pi/2$ is an edge-on orbit.
+
+The observer frame $X$, $Y$, $Z$ is oriented on the sky such that $+Z$ points towards the observer, $X$ is the north axis, and $Y$ is the east axis. *All* angles are measured in radians, and the position angle is returned in the range $[-\pi, \pi]$, which is the degrees east of north (be sure to check your data is in this format too!) The radial velocity is still defined such that a positive radial velocity corresponds to motion away from the observer.
+
+In an astrometric-only orbit, it is common practice in the field to report $\omega = \omega_\mathrm{secondary}$, whereas with an RV orbit it is generally common practice to report $\omega = \omega_\mathrm{primary}$. The result is that unless the authors specify what they're using, in a joint astrometric-RV orbit there is an ambiguity to which $\omega$ the authors mean, since $\omega_\mathrm{primary} = \omega_\mathrm{secondary} + \pi$. To standardize this across the *exoplanet* package, in all orbits (including astrometric-only) $\omega = \omega_\mathrm{primary}$.
+
+```{code-cell}
 import matplotlib.pyplot as plt
 
 # Make a plot of the astrometric data on the sky
@@ -103,11 +109,11 @@ ax.set_xlabel(r"$\Delta \alpha \cos \delta$ ['']")
 ax.invert_xaxis()
 ax.plot(0, 0, "k*")
 ax.set_aspect("equal", "datalim")
-# -
+```
 
-# The plot on the sky is helpful to look at, but the "raw" measurements are the values of $\rho$ (separation) and $\theta$ (also called P.A., position angle) that we listed in our data table, and that the measurement uncertainties live on these values as nice Gaussians. So, to visualize this space more clearly, we can plot $\rho$ vs. time and P.A. vs. time.
+The plot on the sky is helpful to look at, but the "raw" measurements are the values of $\rho$ (separation) and $\theta$ (also called P.A., position angle) that we listed in our data table, and that the measurement uncertainties live on these values as nice Gaussians. So, to visualize this space more clearly, we can plot $\rho$ vs. time and P.A. vs. time.
 
-# +
+```{code-cell}
 fig, ax = plt.subplots(nrows=2, sharex=True)
 ax[0].errorbar(astro_yrs, rho_data, yerr=rho_err, fmt=".k", lw=1, ms=5)
 ax[0].set_ylabel(r'$\rho\,$ ["]')
@@ -115,16 +121,17 @@ ax[0].set_ylabel(r'$\rho\,$ ["]')
 ax[1].errorbar(astro_yrs, theta_data, yerr=theta_err, fmt=".k", lw=1, ms=5)
 ax[1].set_ylabel(r"P.A. [radians]")
 _ = ax[1].set_xlabel("time [years]")
-# -
+```
 
-# ## Fitting the astrometric orbit with *exoplanet*
-#
-# To get started, let's import the relative packages from *exoplanet*, plot up a preliminary orbit from the literature, and then sample to find the best parameters.
+## Fitting the astrometric orbit with *exoplanet*
 
-# + active=""
-# .. note:: Orbits in *exoplanet* generally specify the semi-major axis in units of solar radii `R_sun`. For transits and RV orbits, you usually have enough external information (e.g., estimate of stellar mass from spectral type) to put a physical scale onto the orbit. For the most basic of astrometric orbits without parallax information, however, this information can be lacking and thus it makes sense to fit for the semi-major axis in units of `arcseconds`. But, `exoplanet` is modeling a real orbit (where semi-major axis is in units of `R_sun`), so we do need to at least provide a fake parallax to convert from arcseconds to `R_sun.`
+To get started, let's import the relative packages from *exoplanet*, plot up a preliminary orbit from the literature, and then sample to find the best parameters.
 
-# +
+```{raw-cell}
+.. note:: Orbits in *exoplanet* generally specify the semi-major axis in units of solar radii `R_sun`. For transits and RV orbits, you usually have enough external information (e.g., estimate of stellar mass from spectral type) to put a physical scale onto the orbit. For the most basic of astrometric orbits without parallax information, however, this information can be lacking and thus it makes sense to fit for the semi-major axis in units of `arcseconds`. But, `exoplanet` is modeling a real orbit (where semi-major axis is in units of `R_sun`), so we do need to at least provide a fake parallax to convert from arcseconds to `R_sun.`
+```
+
+```{code-cell}
 import pymc3 as pm
 import pymc3_ext as pmx
 
@@ -194,11 +201,11 @@ ax[1].errorbar(astro_jds, theta_data, yerr=theta_err, fmt=".k", lw=1, ms=5)
 ax[1].plot(t, theta, color="C0", lw=1)
 ax[1].set_ylabel(r"P.A. [radians]")
 _ = ax[1].set_xlabel("time [JD]")
-# -
+```
 
-# Now that we have an initial orbit, we can set the model up using PyMC3 to do inference.
+Now that we have an initial orbit, we can set the model up using PyMC3 to do inference.
 
-# +
+```{code-cell}
 yr = 365.25
 
 # for predicted orbits
@@ -309,11 +316,11 @@ def get_model(parallax=None):
 
 
 model, map_soln = get_model()
-# -
+```
 
-# Now that we have a maximum a posteriori estimate of the parameters, let's take a look at the results to make sure that they seem reasonable.
+Now that we have a maximum a posteriori estimate of the parameters, let's take a look at the results to make sure that they seem reasonable.
 
-# +
+```{code-cell}
 ekw = dict(fmt=".k", lw=0.5)
 
 fig, ax = plt.subplots(nrows=4, sharex=True, figsize=(6, 8))
@@ -344,10 +351,11 @@ ax[3].errorbar(
 
 ax[3].set_xlim(t_fine[0], t_fine[-1])
 _ = ax[0].set_title("map orbit")
-# -
+```
 
-# Now let's sample the posterior.
+Now let's sample the posterior.
 
+```{code-cell}
 np.random.seed(1234)
 with model:
     trace = pmx.sample(
@@ -358,10 +366,11 @@ with model:
         chains=2,
         target_accept=0.9,
     )
+```
 
-# First we can check the convergence for some of the key parameters.
+First we can check the convergence for some of the key parameters.
 
-# +
+```{code-cell}
 import arviz as az
 
 with model:
@@ -370,23 +379,23 @@ with model:
         var_names=["P", "tperi", "a_ang", "omega", "Omega", "incl", "ecc"],
     )
 summary
-# -
+```
 
-# That looks pretty good.
-# Now here's a corner plot showing the covariances between parameters.
+That looks pretty good.
+Now here's a corner plot showing the covariances between parameters.
 
-# +
+```{code-cell}
 import corner
 
 _ = corner.corner(
     trace, var_names=["P", "tperi", "a_ang", "omega", "Omega", "incl", "ecc"]
 )
-# -
+```
 
-# Finally, we can plot the posterior constraints on $\rho$ and $\theta$.
-# This figure is much like the one for the MAP solution above, but this time the orange is a contour (not a line) showing the 68% credible region for the model.
+Finally, we can plot the posterior constraints on $\rho$ and $\theta$.
+This figure is much like the one for the MAP solution above, but this time the orange is a contour (not a line) showing the 68% credible region for the model.
 
-# +
+```{code-cell}
 ekw = dict(fmt=".k", lw=0.5)
 
 fig, ax = plt.subplots(nrows=2, sharex=True, figsize=(6, 6))
@@ -410,22 +419,27 @@ ax[1].fill_between(t_fine, q[0], q[1], color="C1", alpha=0.8, lw=0)
 
 ax[-1].set_xlim(t_fine[0], t_fine[-1])
 _ = ax[0].set_title("posterior inferences")
-# -
+```
 
-# As we can see from the narrow range of orbits (the orange swath appears like a thin line), the orbit is actually highly constrained by the astrometry.
-# We also see two outlier epochs in the vicinity of 2445000 - 2447000, since adjacent epochs seem to be right on the orbit.
-# It's likely the uncertainties were not estimated correctly for these, and the simplistic jitter model we implemented isn't sophisticated to apply more weight to only these discrepant points.
+As we can see from the narrow range of orbits (the orange swath appears like a thin line), the orbit is actually highly constrained by the astrometry.
+We also see two outlier epochs in the vicinity of 2445000 - 2447000, since adjacent epochs seem to be right on the orbit.
+It's likely the uncertainties were not estimated correctly for these, and the simplistic jitter model we implemented isn't sophisticated to apply more weight to only these discrepant points.
 
-# ## Including parallax
-#
-# While this is encouraging that we fit an astrometric orbit, a simple astrometric fit to just $\rho$ and $\theta$ isn't actually that physically satisfying, since many of the orbital parameters simply have to do with the orientation relative to us ($i$, $\omega$, and $\Omega$). The only truly intrinsic parameters are $P$ and $e$. To learn more about some of the physical parameters, such as the total mass of the system, we'd like to incorporate distance information to put a physical scale to the problem.
-#
-# The *Gaia* DR2 parallax is $\varpi = 24.05 \pm 0.45$ mas.
-#
-# We can use exactly the same model as above with only an added parallax constraint:
++++
 
+## Including parallax
+
+While this is encouraging that we fit an astrometric orbit, a simple astrometric fit to just $\rho$ and $\theta$ isn't actually that physically satisfying, since many of the orbital parameters simply have to do with the orientation relative to us ($i$, $\omega$, and $\Omega$). The only truly intrinsic parameters are $P$ and $e$. To learn more about some of the physical parameters, such as the total mass of the system, we'd like to incorporate distance information to put a physical scale to the problem.
+
+The *Gaia* DR2 parallax is $\varpi = 24.05 \pm 0.45$ mas.
+
+We can use exactly the same model as above with only an added parallax constraint:
+
+```{code-cell}
 plx_model, plx_map_soln = get_model(parallax=[24.05, 0.45])
+```
 
+```{code-cell}
 np.random.seed(5432)
 with plx_model:
     plx_trace = pmx.sample(
@@ -436,9 +450,11 @@ with plx_model:
         chains=2,
         target_accept=0.9,
     )
+```
 
-# Check the convergence diagnostics.
+Check the convergence diagnostics.
 
+```{code-cell}
 with model:
     summary = az.summary(
         plx_trace,
@@ -455,17 +471,24 @@ with model:
         ],
     )
 summary
+```
 
-# And make the corner plot for the physical parameters.
+And make the corner plot for the physical parameters.
 
+```{code-cell}
 _ = corner.corner(plx_trace, var_names=["P", "tperi", "a", "ecc", "M_tot"])
+```
 
-# ## Citations
-#
-# As described in the [Citing exoplanet & its dependencies](./citation.ipynb) tutorial, we can use :func:`exoplanet.citations.get_citations_for_model` to construct an acknowledgment and BibTeX listing that includes the relevant citations for this model.
+## Citations
 
+As described in the [Citing exoplanet & its dependencies](./citation.ipynb) tutorial, we can use :func:`exoplanet.citations.get_citations_for_model` to construct an acknowledgment and BibTeX listing that includes the relevant citations for this model.
+
+```{code-cell}
 with model:
     txt, bib = xo.citations.get_citations_for_model()
 print(txt)
+```
 
+```{code-cell}
 print("\n".join(bib.splitlines()[:10]) + "\n...")
+```

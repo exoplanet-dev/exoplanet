@@ -30,3 +30,11 @@ repos:
   rev: v0.2.0
   hooks:
   - id: black_nbconvert
+
+- repo: https://github.com/mwouts/jupytext
+  rev: v1.11.2
+  hooks:
+  - id: jupytext
+    args: [--pipe, black, "docs/tutorials/*.md"]
+    additional_dependencies:
+      - black

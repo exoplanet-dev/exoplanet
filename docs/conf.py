@@ -2,11 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-import re
 
-import nbsphinx
-import sphinx_typlog_theme
-from nbsphinx import markdown2rst as original_markdown2rst
 from pkg_resources import DistributionNotFound, get_distribution
 
 try:
@@ -15,37 +11,13 @@ except DistributionNotFound:
     __version__ = "unknown version"
 
 
-def setup(app):
-    app.add_css_file("css/exoplanet.css?v=2020-01-15")
-
-
-# nbsphinx hacks
-nbsphinx.RST_TEMPLATE = nbsphinx.RST_TEMPLATE.replace(
-    "{%- if width %}", "{%- if 0 %}"
-).replace("{%- if height %}", "{%- if 0 %}")
-
-
-def subber(m):
-    return m.group(0).replace("``", "`")
-
-
-prog = re.compile(r":(.+):``(.+)``")
-
-
-def markdown2rst(text):
-    return prog.sub(subber, original_markdown2rst(text))
-
-
-nbsphinx.markdown2rst = markdown2rst
-
-
 # General stuff
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinx.ext.mathjax",
-    "nbsphinx",
+    "myst_nb",
 ]
 
 autodoc_mock_imports = [
@@ -87,21 +59,26 @@ version = __version__
 release = __version__
 
 exclude_patterns = ["_build"]
-pygments_style = "sphinx"
 
 # HTML theme
-html_favicon = "_static/logo.png"
-html_theme = "exoplanet"
-html_theme_path = ["_themes", sphinx_typlog_theme.get_path()]
-html_theme_options = {"logo": "logo.png", "color": "#F55826"}
-html_sidebars = {
-    "**": ["logo.html", "globaltoc.html", "relations.html", "searchbox.html"]
-}
+html_theme = "sphinx_book_theme"
+html_title = "exoplanet"
+html_logo = "_static/logo.png"
+html_favicon = "_static/favicon.png"
 html_static_path = ["_static"]
-
-# Get the git branch name
-branch_name = os.environ.get("SOURCE_BRANCH_NAME", "master")
-html_context = dict(
-    this_branch=branch_name,
-    this_version="latest" if branch_name == "master" else branch_name,
-)
+html_show_sourcelink = False
+html_theme_options = {
+    "path_to_docs": "docs",
+    "repository_url": "https://github.com/exoplanet-dev/exoplanet",
+    "repository_branch": "main",
+    "launch_buttons": {
+        "binderhub_url": "https://mybinder.org",
+        "notebook_interface": "jupyterlab",
+    },
+    "use_edit_page_button": True,
+    "use_issues_button": True,
+    "use_repository_button": True,
+    "use_download_button": True,
+}
+# jupyter_execute_notebooks = "off"
+execution_timeout = -1
