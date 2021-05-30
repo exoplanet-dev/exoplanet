@@ -46,7 +46,7 @@ an issue <https://github.com/exoplanet-dev/exoplanet/issues>`_ there.
 
    📈 For more information about scalable Gaussian Processes in PyMC3 (this was
    previously implemented as part of *exoplanet*), see the `celerite2 documentation
-   page <httsp://celerite2.readthedocs.io>`_.
+   page <https://celerite2.readthedocs.io>`_.
 
    👉 For helper functions and PyMC3 extras that used to be implemented as part of
    *exoplanet*, see the `pymc3-ext project
@@ -57,7 +57,7 @@ Contents
 --------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: User Guide
 
    user/install
@@ -65,9 +65,10 @@ Contents
    user/theano
    user/api
    user/dev
+   changes.rst
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Tutorials
 
    tutorials/about.md
@@ -89,9 +90,3 @@ The source code is made available under the terms of the MIT license.
 If you make use of this code, please cite this package and its dependencies. You
 can find more information about how and what to cite in the `citation
 <tutorials/citation.ipynb>`_ documentation.
-
-
-Changelog
----------
-
-.. include:: ../HISTORY.rst

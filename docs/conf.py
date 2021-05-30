@@ -43,6 +43,7 @@ html_title = "exoplanet"
 html_logo = "_static/logo.png"
 html_favicon = "_static/favicon.png"
 html_static_path = ["_static"]
+html_css_files = ["exoplanet.css"]
 html_theme_options = {
     "path_to_docs": "docs",
     "repository_url": "https://github.com/exoplanet-dev/exoplanet",
