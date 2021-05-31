@@ -45,4 +45,3 @@ jobs:
           publish_dir: ./joss
           force_orphan: true
           publish_branch: joss-compiled
-
