@@ -18,5 +18,12 @@ kernelspec:
 This section will try to motivate the point of exoplanet, gradient-based inference, and intro to autodiff.
 
 ```{code-cell}
+import exoplanet
+
+exoplanet.utils.docs_setup()
+print(f"exoplanet.__version__ = '{exoplanet.__version__}'")
+```
+
+```{code-cell}
 
 ```
