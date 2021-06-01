@@ -7,4 +7,4 @@ dependencies:
   - pymc3
   - pip
   - pip:
-      - .[docs]
+      - ..[docs]
