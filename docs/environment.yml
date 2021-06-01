@@ -4,7 +4,10 @@ channels:
   - conda-forge
 dependencies:
   - python=3.9
-  - pymc3
+  - gcc_linux-64
+  - gxx_linux-64
+  - numpy
+  - scipy
   - pip
   - pip:
       - ..[docs]
