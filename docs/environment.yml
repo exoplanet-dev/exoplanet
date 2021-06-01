@@ -1,0 +1,10 @@
+name: rtds
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.9
+  - pymc3
+  - pip
+  - pip:
+      - .[docs]
