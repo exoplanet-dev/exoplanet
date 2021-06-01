@@ -44,8 +44,6 @@ EXTRA_REQUIRE = {
         "rtds_action",
         "myst-nb",
         "ipython",
-    ],
-    "tutorials": [
         "jupytext>1.7.0",
         "jupyter",
         "nbconvert",

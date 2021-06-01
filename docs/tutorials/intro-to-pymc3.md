@@ -344,7 +344,7 @@ Now let's sample the posterior starting from our MAP estimate (here we're using 
 ```{code-cell}
 with model:
     trace = pmx.sample(
-        draws=2000,
+        draws=1000,
         tune=1000,
         start=map_params,
         chains=2,
