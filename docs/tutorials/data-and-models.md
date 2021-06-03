@@ -232,8 +232,9 @@ import aesara_theano_fallback.tensor as tt
 
 # Create a dummy dataset
 random = np.random.default_rng(1234)
+t_plot = np.linspace(0, 50, 500)
 t = np.sort(random.uniform(0, 50, 20))
-rv_err = 0.01 + np.zeros_like(t)
+rv_err = 0.5 + np.zeros_like(t)
 rv_obs = 5.0 * np.sin(2 * np.pi * t / 10.0) + np.sqrt(
     0.05 ** 2 + rv_err ** 2
 ) * random.normal(size=len(t))
@@ -279,6 +280,11 @@ with pm.Model():
     err = tt.sqrt(rv_err ** 2 + tt.exp(2 * log_jitter))
     pm.Normal("obs", mu=rv_model, sigma=rv_err, observed=rv_obs)
 
+    # We'll also track the model just for plotting purposes
+    pm.Deterministic(
+        "rv_plot", zero_point + orbit.get_radial_velocity(t_plot, K=semiamp)
+    )
+
     soln = pmx.optimize(vars=[plus, minus, ecc])
     soln = pmx.optimize(soln)
     trace = pmx.sample(
@@ -290,7 +296,19 @@ with pm.Model():
         return_inferencedata=True,
     )
 
-az.summary(trace)
+# Plot the results
+rv_plot = trace.posterior["rv_plot"].values
+q16, q50, q84 = np.percentile(rv_plot, [16, 50, 84], axis=(0, 1))
+plt.errorbar(t, rv_obs, yerr=rv_err, fmt="+k", label="data")
+plt.plot(t_plot, q50)
+plt.fill_between(t_plot, q16, q84, alpha=0.3, label="posterior")
+plt.xlim(0, 50)
+plt.legend(fontsize=12, loc=2)
+plt.xlabel("time [days]")
+plt.ylabel("radial velocity [m/s]")
+plt.title("radial velocity inference")
+
+az.summary(trace, var_names=["^(?!rv_plot).*"], filter_vars="regex")
 ```
 
 Instead of using `semiamp` as a parameter, we could have passed `m_planet` and `incl` as parameters to `KeplerianOrbit` and fit the physical orbit.
@@ -310,6 +328,7 @@ The typical {class}`exoplanet.orbits.KeplerianOrbit` definition for and astromet
 
 ```{code-cell}
 random = np.random.default_rng(5678)
+t_plot = np.linspace(0, 22 * 365.25, 500)
 t = np.sort(random.uniform(0.0, 22 * 365.25, 45))
 rho_err = random.uniform(0.05, 0.1, len(t))
 theta_err = random.uniform(0.05, 0.1, len(t))
@@ -372,6 +391,11 @@ with pm.Model():
     )
     pm.Normal("theta_obs", mu=theta_diff, sd=theta_err, observed=0.0)
 
+    # We'll also track the model just for plotting purposes
+    rho_plot, theta_plot = orbit.get_relative_angles(t_plot)
+    pm.Deterministic("rho_plot", rho_plot)
+    pm.Deterministic("theta_plot", theta_plot)
+
     trace = pmx.sample(
         tune=1000,
         draws=1000,
@@ -381,7 +405,30 @@ with pm.Model():
         return_inferencedata=True,
     )
 
-az.summary(trace)
+# Plot the results
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8), sharex=True)
+
+q16, q50, q84 = np.percentile(
+    trace.posterior["rho_plot"].values, [16, 50, 84], axis=(0, 1)
+)
+ax1.errorbar(t, rho_obs, yerr=rho_err, fmt="+k", label="data")
+ax1.plot(t_plot, q50)
+ax1.fill_between(t_plot, q16, q84, alpha=0.3, label="posterior")
+ax1.set_ylabel(r"$\rho$ [arcsec]")
+
+q16, q50, q84 = np.percentile(
+    trace.posterior["theta_plot"].values, [16, 50, 84], axis=(0, 1)
+)
+ax2.errorbar(t, theta_obs, yerr=rho_err, fmt="+k", label="data")
+ax2.plot(t_plot, q50)
+ax2.fill_between(t_plot, q16, q84, alpha=0.3, label="posterior")
+ax2.set_xlim(t_plot.min(), t_plot.max())
+ax2.legend(fontsize=12, loc=2)
+ax2.set_ylabel(r"$\theta$ [radians]")
+ax2.set_xlabel("time [days]")
+
+# Compute the convergence stats
+az.summary(trace, var_names=["^(?!.*_plot).*"], filter_vars="regex")
 ```
 
 In this example, the units of `a` are arcseconds, but the {func}`exoplanet.orbits.KeplerianOrbit.get_relative_angles` function accepts a parallax argument if you have a constraint on the parallax of the system.
