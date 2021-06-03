@@ -18,7 +18,7 @@ extensions = [
     "myst_nb",
 ]
 
-myst_enable_extensions = ["dollarmath"]
+myst_enable_extensions = ["dollarmath", "colon_fence"]
 
 templates_path = ["_templates"]
 source_suffix = ".rst"

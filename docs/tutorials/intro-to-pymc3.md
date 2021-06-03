@@ -12,6 +12,8 @@ kernelspec:
   name: python3
 ---
 
+(intro-to-pymc3)=
+
 # A quick intro to PyMC3
 
 ```{code-cell}
@@ -181,7 +183,7 @@ $$
 
 for the eccentric anomaly $E$ given some mean anomaly $M$ and eccentricity $e$.
 There are commonly accepted methods of solving this equation using [Newton's method](https://en.wikipedia.org/wiki/Newton%27s_method), but if we want to expose that to PyMC3, we have to define a [custom Theano operation](https://aesara.readthedocs.io/en/latest/extending/index.html) with a custom gradient.
-I won't go into the details of the math (because [I blogged about it](https://dfm.io/posts/stan-c++/)) and I won't go into the details of the implementation (because [you can take a look at it on GitHub](https://github.com/exoplanet-dev/exoplanet/tree/main/exoplanet/theano_ops/kepler.py)).
+I won't go into the details of the math (because [I blogged about it](https://dfm.io/posts/stan-c++/)) and I won't go into the details of the implementation.
 So, for this tutorial, we'll use the custom Kepler solver that is implemented as part of *exoplanet* and fit the publicly available radial velocity observations of the famous exoplanetary system 51 Peg using PyMC3.
 
 First, we need to download the data from the exoplanet archive:

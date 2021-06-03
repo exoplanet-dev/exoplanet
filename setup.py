@@ -47,6 +47,7 @@ EXTRA_REQUIRE = {
         "corner",
         "lightkurve",
         "pymc3-ext>=0.1.0",
+        "emcee",
     ],
 }
 

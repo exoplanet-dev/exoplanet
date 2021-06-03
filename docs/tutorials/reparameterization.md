@@ -11,6 +11,8 @@ kernelspec:
   name: python3
 ---
 
+(reparameterization)=
+
 # Reparameterization
 
 +++
