@@ -306,7 +306,6 @@ plt.xlim(0, 50)
 plt.legend(fontsize=12, loc=2)
 plt.xlabel("time [days]")
 plt.ylabel("radial velocity [m/s]")
-plt.title("radial velocity inference")
 
 az.summary(trace, var_names=["^(?!rv_plot).*"], filter_vars="regex")
 ```
@@ -440,7 +439,89 @@ If you provide parallax as an argument, `a` should be provided in the usual unit
 
 ## Transits, occultations, and eclipses
 
-+++
+`exoplanet` has built in support for evaluating quadratically limb darkened light curve models using the algorithm from [Agol et al. (2020)](https://arxiv.org/abs/1908.03222).
+If you need flexible surface models or higher order limb darkening, check out the [`starry` package](https://starry.readthedocs.io) which also integrates with `PyMC3`.
+
+Transit and occultation modeling is one of the primary applications of `exoplanet` so there are quite a few options (including transit timing variations, detached eclipsing binary modeling, and much more) that are highlighted on the [Case Studies](https://gallery.exoplanet.codes) page.
+But, a bread-and-butter transit model implemented in `exoplanet` might look something like the following:
+
+```{code-cell}
+random = np.random.default_rng(123)
+num_transits = 4
+t = np.arange(0, 35, 0.02)
+yerr = 5e-4
+
+with pm.Model():
+
+    # The baseline flux
+    mean = pm.Normal("mean", mu=0.0, sigma=1.0)
+
+    # Often the best parameterization is actually in terms of the
+    # times of two reference transits rather than t0 and period
+    t0 = pm.Normal("t0", mu=4.35, sigma=1.0)
+    t1 = pm.Normal("t1", mu=33.2, sigma=1.0)
+    period = pm.Deterministic("period", (t1 - t0) / num_transits)
+
+    # The Kipping (2013) parameterization for quadratic limb darkening
+    # paramters
+    u = xo.distributions.QuadLimbDark("u", testval=np.array([0.3, 0.2]))
+
+    # The radius ratio and impact parameter; these parameters can
+    # introduce pretty serious covariances and are ripe for
+    # reparameterization
+    log_r = pm.Normal("log_r", mu=np.log(0.04), sigma=2.0)
+    r = pm.Deterministic("r", tt.exp(log_r))
+    b = xo.distributions.ImpactParameter("b", ror=r, testval=0.35)
+
+    # Set up a Keplerian orbit for the planets
+    orbit = xo.orbits.KeplerianOrbit(period=period, t0=t0, b=b)
+
+    # Compute the model light curve using starry
+    light_curve = (
+        xo.LimbDarkLightCurve(u[0], u[1]).get_light_curve(
+            orbit=orbit, r=r, t=t
+        )[:, 0]
+        + mean
+    )
+
+    # Here we track the value of the model light curve for plotting
+    # purposes
+    pm.Deterministic("light_curve", light_curve)
+
+    # ================================================== #
+    # Simulate data from the model for testing           #
+    # You should remove the following lines in your code #
+    # ================================================== #
+    y = pmx.eval_in_model(light_curve)
+    y += yerr * random.normal(size=len(y))
+    # =============== end simulated data =============== #
+
+    # The likelihood function assuming known Gaussian uncertainty
+    pm.Normal("obs", mu=light_curve, sd=yerr, observed=y)
+
+    trace = pmx.sample(
+        tune=1000,
+        draws=1000,
+        cores=2,
+        chains=2,
+        return_inferencedata=True,
+    )
+
+# Plot the results
+q16, q50, q84 = np.percentile(
+    trace.posterior["light_curve"].values, [16, 50, 84], axis=(0, 1)
+)
+plt.plot(t, y, ".k", ms=2, label="data")
+plt.plot(t, q50)
+plt.fill_between(t, q16, q84, alpha=0.3, label="posterior")
+plt.xlim(0.0, 35)
+plt.legend(fontsize=12, loc=3)
+plt.xlabel("time [days]")
+plt.ylabel("relative flux")
+
+# Compute the convergence stats
+az.summary(trace, var_names=["^(?!light_curve).*"], filter_vars="regex")
+```
 
 (data-and-models/combining)=
 
