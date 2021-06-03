@@ -218,17 +218,184 @@ For example, if the orbit is defined using the period $P$, the semi-major axis $
 
 +++
 
+(data-and-models/rvs)=
+
 ## Radial velocities
 
+A {class}`exoplanet.orbits.KeplerianOrbit` can be used to compute the expected radial velocity time series for a given set of parameters.
+One typical parameterization for a radial velocity fit would look something like this:
+
+```{code-cell}
+import arviz as az
+import pymc3_ext as pmx
+import aesara_theano_fallback.tensor as tt
+
+# Create a dummy dataset
+random = np.random.default_rng(1234)
+t = np.sort(random.uniform(0, 50, 20))
+rv_err = 0.01 + np.zeros_like(t)
+rv_obs = 5.0 * np.sin(2 * np.pi * t / 10.0) + np.sqrt(
+    0.05 ** 2 + rv_err ** 2
+) * random.normal(size=len(t))
+
+with pm.Model():
+
+    # Period, semi-amplitude, and eccentricity
+    log_period = pm.Normal("log_period", mu=np.log(10.0), sigma=1.0)
+    period = pm.Deterministic("period", tt.exp(log_period))
+    log_semiamp = pm.Normal("log_semiamp", mu=np.log(5.0), sd=2.0)
+    semiamp = pm.Deterministic("semiamp", tt.exp(log_semiamp))
+    ecc = pm.Uniform("ecc", lower=0, upper=1)
+
+    # At low eccentricity, omega and the phase of periastron (phi) are
+    # correlated so it can be best to fit in (omega ± phi) / 2
+    plus = pmx.Angle("plus")
+    minus = pmx.Angle("minus")
+    phi = pm.Deterministic("phi", plus + minus)
+    omega = pm.Deterministic("omega", plus - minus)
+
+    # For non-zero eccentricity, it can sometimes be better to use
+    # sqrt(e)*sin(omega) and sqrt(e)*cos(omega) as your parameters:
+    #
+    #     ecs = pmx.UnitDisk("ecs", testval=0.01 * np.ones(2))
+    #     ecc = pm.Deterministic("ecc", tt.sum(ecs ** 2, axis=0))
+    #     omega = pm.Deterministic("omega", tt.arctan2(ecs[1], ecs[0]))
+    #     phi = pmx.Angle("phi")
+
+    # Jitter & the system mean velocity offset
+    log_jitter = pm.Normal("log_jitter", mu=np.log(0.05), sd=5.0)
+    zero_point = pm.Normal("zero_point", mu=0, sd=10.0)
+
+    # Then we define the orbit
+    tperi = pm.Deterministic("tperi", period * phi / (2 * np.pi))
+    orbit = xo.orbits.KeplerianOrbit(
+        period=period, t_periastron=tperi, ecc=ecc, omega=omega
+    )
+
+    # And define the RV model
+    rv_model = zero_point + orbit.get_radial_velocity(t, K=semiamp)
+
+    # Finally add in the observation model
+    err = tt.sqrt(rv_err ** 2 + tt.exp(2 * log_jitter))
+    pm.Normal("obs", mu=rv_model, sigma=rv_err, observed=rv_obs)
+
+    soln = pmx.optimize(vars=[plus, minus, ecc])
+    soln = pmx.optimize(soln)
+    trace = pmx.sample(
+        tune=1000,
+        draws=1000,
+        cores=2,
+        chains=2,
+        start=soln,
+        return_inferencedata=True,
+    )
+
+az.summary(trace)
+```
+
+Instead of using `semiamp` as a parameter, we could have passed `m_planet` and `incl` as parameters to `KeplerianOrbit` and fit the physical orbit.
+Similarly, if we we doing a joint fit with a transit light curve (see {ref}`data-and-models/combining` below) we could have parameterized in terms of `t0` (the time of a reference transit) instead of the phase of periastron.
+
+As mentioned in the comments above and discussed in {ref}`reparameterization`, the performance of these fits can be problem specific and depend on the choice of parameters.
+Therefore it is often worthwhile experimenting with different parameterizations, but this can be a good place to start for radial velocity-only fits.
+
 +++
+
+(data-and-models/astrometry)=
+
+## Astrometry
+
+Astrometric observations usually consist of measurements of the separation and position angle of the secondary star (or directly imaged exoplanet), relative to the primary star as a function of time, but `exoplanet` could also be used to model the motion of the center of light for and unresolved orbit.
+The typical {class}`exoplanet.orbits.KeplerianOrbit` definition for and astrometric dataset will be similar to a radial velocity fit:
+
+```{code-cell}
+random = np.random.default_rng(5678)
+t = np.sort(random.uniform(0.0, 22 * 365.25, 45))
+rho_err = random.uniform(0.05, 0.1, len(t))
+theta_err = random.uniform(0.05, 0.1, len(t))
+
+with pm.Model():
+
+    # Period, semi-major axis, eccentricity, and t0
+    log_period = pm.Normal("log_period", mu=np.log(25.0 * 365.25), sigma=1.0)
+    period = pm.Deterministic("period", tt.exp(log_period))
+    log_a = pm.Normal("log_a", mu=np.log(0.3), sd=2.0)
+    a = pm.Deterministic("a", tt.exp(log_a))
+    ecc = pm.Uniform("ecc", lower=0, upper=1)
+    tperi = pm.Normal("tperi", mu=3500.0, sigma=1000.0)
+
+    # For astrometric orbits, a good choice of parameterization can be
+    # (Omega ± omega) / 2
+    plus = pmx.Angle("plus")
+    minus = pmx.Angle("minus")
+    Omega = pm.Deterministic("Omega", plus + minus)
+    omega = pm.Deterministic("omega", plus - minus)
+
+    # We'll use a uniform prior on cos(incl)
+    cos_incl = pm.Uniform("cos_incl", lower=-1.0, upper=1.0, testval=0.3)
+    incl = pm.Deterministic("incl", tt.arccos(cos_incl))
+
+    # Then we define the orbit
+    orbit = xo.orbits.KeplerianOrbit(
+        a=a,
+        t_periastron=tperi,
+        period=period,
+        incl=incl,
+        ecc=ecc,
+        omega=omega,
+        Omega=Omega,
+    )
+
+    # And define the RV model
+    rho_model, theta_model = orbit.get_relative_angles(t)
+
+    # ================================================== #
+    # Simulate data from the model for testing           #
+    # You should remove the following lines in your code #
+    # ================================================== #
+    rho_obs, theta_obs = pmx.eval_in_model([rho_model, theta_model])
+    rho_obs += rho_err * random.normal(size=len(t))
+    theta_obs += theta_err * random.normal(size=len(t))
+    # =============== end simulated data =============== #
+
+    # Define the observation model this is simple for rho:
+    pm.Normal("rho_obs", mu=rho_model, sd=rho_err, observed=rho_obs)
+
+    # But we want to be cognizant of the fact that theta wraps so the following
+    # is equivalent to
+    #
+    #   pm.Normal("obs_theta", mu=theta_model, observed=theta_obs, sd=theta_err)
+    #
+    # but takes into account the wrapping
+    theta_diff = tt.arctan2(
+        tt.sin(theta_model - theta_obs), tt.cos(theta_model - theta_obs)
+    )
+    pm.Normal("theta_obs", mu=theta_diff, sd=theta_err, observed=0.0)
+
+    trace = pmx.sample(
+        tune=1000,
+        draws=1000,
+        cores=2,
+        chains=2,
+        target_accept=0.95,
+        return_inferencedata=True,
+    )
+
+az.summary(trace)
+```
+
+In this example, the units of `a` are arcseconds, but the {func}`exoplanet.orbits.KeplerianOrbit.get_relative_angles` function accepts a parallax argument if you have a constraint on the parallax of the system.
+If you provide parallax as an argument, `a` should be provided in the usual units of Solar radii.
+
++++
+
+(data-and-models/transits)=
 
 ## Transits, occultations, and eclipses
 
 +++
 
-## Astrometry
-
-+++
+(data-and-models/combining)=
 
 ## Combining datasets
 
