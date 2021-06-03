@@ -476,7 +476,9 @@ with pm.Model():
     # Set up a Keplerian orbit for the planets
     orbit = xo.orbits.KeplerianOrbit(period=period, t0=t0, b=b)
 
-    # Compute the model light curve using starry
+    # Compute the model light curve; note that we index using `[:, 0]`
+    # since `get_light_curve` returns an object with the shape
+    # `(n_times, n_planets)`
     light_curve = (
         xo.LimbDarkLightCurve(u[0], u[1]).get_light_curve(
             orbit=orbit, r=r, t=t

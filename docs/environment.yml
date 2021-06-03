@@ -1,7 +1,6 @@
 name: rtds
 channels:
   - defaults
-  - conda-forge
 dependencies:
   - python=3.9
   - gcc_linux-64
