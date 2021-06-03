@@ -124,7 +124,9 @@ with pm.Model() as model:
     pm.Normal("x", shape=50)
 
     # Run a fake chain just to get everything to compile
-    pm.sample(tune=1, draws=1, return_inferencedata=True, progressbar=False)
+    pm.sample(
+        tune=1, draws=1, chains=1, return_inferencedata=True, progressbar=False
+    )
 
     # Run and time the sampling
     start = time.time()
@@ -179,7 +181,7 @@ print(
 So, in this case, PyMC3 is a few order of magnitude more efficient.
 As your models get more complex (in terms of computational cost, number of parameters, and the geometry of your parameter space), your mileage might vary, but my experience is that using `PyMC3` is almost always a good idea if you can!
 
-:::{note}
+:::{tip}
 If you find that your model is not sampling well, this is almost always caused by **parameterization issues** and you'll probably get drastically better performance with some reparameterization.
 See {ref}`reparameterization` for some tips and tricks.
 :::
