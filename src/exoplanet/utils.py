@@ -60,6 +60,8 @@ def docs_setup():
 
     logger = logging.getLogger("theano.gof.compilelock")
     logger.setLevel(logging.ERROR)
+    logger = logging.getLogger("theano.tensor.opt")
+    logger.setLevel(logging.ERROR)
     logger = logging.getLogger("exoplanet")
     logger.setLevel(logging.DEBUG)
 
