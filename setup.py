@@ -39,20 +39,15 @@ EXTRA_REQUIRE = {
         "batman-package",
     ],
     "docs": [
-        "sphinx>=1.7.5",
-        "sphinx-typlog-theme",
-        "rtds_action",
-        "nbsphinx",
-        "ipython",
-    ],
-    "tutorials": [
-        "jupytext>1.7.0",
-        "jupyter",
-        "nbconvert",
+        "sphinx-book-theme"
+        " @ git+https://github.com/executablebooks/sphinx-book-theme.git"
+        "@cf5338cd20f155f1976a7b9ba351a86917a12983",
+        "myst-nb",
         "matplotlib",
         "corner",
         "lightkurve",
         "pymc3-ext>=0.1.0",
+        "emcee",
     ],
 }
 

@@ -3,13 +3,10 @@ version: 2
 submodules:
   include: all
 
-python:
-  version: 3.7
-  install:
-    - method: pip
-      path: .
-      extra_requirements:
-        - docs
+conda:
+  environment: docs/environment.yml
 
 sphinx:
+  configuration: docs/conf.py
+  fail_on_warning: true
   builder: dirhtml
