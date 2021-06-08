@@ -529,6 +529,23 @@ az.summary(trace, var_names=["^(?!light_curve).*"], filter_vars="regex")
 
 ## Combining datasets
 
+Since `exoplanet` is built on top of `PyMC3`, it has the capacity to support essentially arbitrariliy complicated models.
+This means that you can share parameters or fit multiple datasets however you want.
+We won't go into too many details about this here, but you can see some examples on the [Case Studies](https://gallery.exoplanet.codes) of joint transit/radial velocity fits, or inferences based on datasets from multiple instruments.
+
+The basic idea behind how to simultaneously fit multiple datasets is that you'll need to define the relationship between the datasets (perhaps share parameters or a shared `KeplerianOrbit`) and then you'll include the likelihood for each dataset in your model.
+In all of the above examples, we had a line like
+
+```python
+pm.Normal("obs", mu=rv_model, sigma=rv_err, observed=rv_obs)
+```
+
+in all of our models.
+This defines a Gaussian likelihood conditioned on the `observed` data.
+To combine datasets, you can simply add multiple lines like this (one for each dataset) and, behind the scenes, `PyMC3` will multiply these likelihoods (or actually add their logarithms) as it should.
+
+For more concrete examples, check out the [Case Studies](https://gallery.exoplanet.codes) and (if that's not sufficient) feel free to start [a "discussion" on the GitHub repository](https://github.com/exoplanet-dev/exoplanet/discussions) asking for help.
+
 ```{code-cell}
 
 ```

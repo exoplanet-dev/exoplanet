@@ -78,6 +78,7 @@ Contents
    tutorials/light-delay.md
    tutorials/reparameterization.md
    Case studies <https://gallery.exoplanet.codes>
+   celerite2 <https://celerite2.readthedocs.io>
 
 
 License & attribution
