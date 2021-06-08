@@ -50,7 +50,7 @@ html_theme_options = {
     "repository_branch": "main",
     "launch_buttons": {
         "binderhub_url": "https://mybinder.org",
-        "notebook_interface": "jupyterlab",
+        "notebook_interface": "classic",
     },
     "use_edit_page_button": True,
     "use_issues_button": True,
