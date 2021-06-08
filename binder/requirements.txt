@@ -1,0 +1,8 @@
+jupyterlab>=3.0
+jupytext
+matplotlib
+corner
+lightkurve
+pymc3-ext>=0.1.0
+emcee
+.
