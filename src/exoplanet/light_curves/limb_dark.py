@@ -161,6 +161,8 @@ class LimbDarkLightCurve:
         r = tt.reshape(r, (r.size,))
         t = as_tensor_variable(t)
 
+        # If use_in_transit, we should only evaluate the model at times where
+        # at least one planet is transiting
         if use_in_transit:
             transit_model = tt.shape_padleft(
                 tt.zeros_like(r), t.ndim
@@ -168,6 +170,7 @@ class LimbDarkLightCurve:
             inds = orbit.in_transit(t, r=r, texp=texp, light_delay=light_delay)
             t = t[inds]
 
+        # Handle exposure time integration
         if texp is None:
             tgrid = t
             rgrid = tt.shape_padleft(r, tgrid.ndim) + tt.shape_padright(
@@ -208,6 +211,8 @@ class LimbDarkLightCurve:
                 tt.zeros_like(tgrid), 1
             )
 
+        # Evalute the coordinates of the transiting body in the plane of the
+        # sky
         coords = orbit.get_relative_position(tgrid, light_delay=light_delay)
         b = tt.sqrt(coords[0] ** 2 + coords[1] ** 2)
         b = tt.reshape(b, rgrid.shape)

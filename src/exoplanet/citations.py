@@ -50,7 +50,8 @@ def get_citations_for_model(model=None, width=79):
 
     txt = (
         r"This research made use of \textsf{{exoplanet}} "
-        r"\citep{{exoplanet}} and its dependencies \citep{{{0}}}."
+        r"\citep{{exoplanet:joss, exoplanet:zenodo}} and its dependencies "
+        r"\citep{{{0}}}."
     )
     txt = txt.format(", ".join(sorted(cite)))
     txt = textwrap.wrap(txt, width=width)
@@ -60,9 +61,30 @@ def get_citations_for_model(model=None, width=79):
 
 CITATIONS = {
     "exoplanet": (
-        ("exoplanet",),
+        ("exoplanet:joss", "exoplanet:zenodo"),
         r"""
-@misc{exoplanet,
+@article{exoplanet:joss,
+       author = {{Foreman-Mackey}, Daniel and {Luger}, Rodrigo and {Agol}, Eric
+                and {Barclay}, Thomas and {Bouma}, Luke G. and {Brandt},
+                Timothy D. and {Czekala}, Ian and {David}, Trevor J. and
+                {Dong}, Jiayin and {Gilbert}, Emily A. and {Gordon}, Tyler A.
+                and {Hedges}, Christina and {Hey}, Daniel R. and {Morris},
+                Brett M. and {Price-Whelan}, Adrian M. and {Savel}, Arjun B.},
+        title = "{exoplanet: Gradient-based probabilistic inference for
+                  exoplanet data \& other astronomical time series}",
+      journal = {arXiv e-prints},
+         year = 2021,
+        month = may,
+          eid = {arXiv:2105.01994},
+        pages = {arXiv:2105.01994},
+archivePrefix = {arXiv},
+       eprint = {2105.01994},
+ primaryClass = {astro-ph.IM},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/2021arXiv210501994F},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@misc{exoplanet:zenodo,
   author = {Daniel Foreman-Mackey and Arjun Savel and Rodrigo Luger  and
             Eric Agol and Ian Czekala and Adrian Price-Whelan and
             Christina Hedges and Emily Gilbert and Luke Bouma and Tom Barclay
@@ -333,9 +355,9 @@ publisher={PeerJ Inc.}
         r"""
 @ARTICLE{rebound,
        author = {{Rein}, H. and {Liu}, S. -F.},
-        title = "{REBOUND: an open-source multi-purpose N-body code for collisional dynamics}",
+        title = "{REBOUND: an open-source multi-purpose N-body code for
+                 collisional dynamics}",
       journal = {\aap},
-     keywords = {methods: numerical, planets and satellites: rings, protoplanetary disks, Astrophysics - Earth and Planetary Astrophysics, Astrophysics - Instrumentation and Methods for Astrophysics, Mathematics - Dynamical Systems, Physics - Computational Physics},
          year = 2012,
         month = jan,
        volume = {537},
@@ -355,9 +377,10 @@ archivePrefix = {arXiv},
         r"""
 @ARTICLE{reboundias15,
        author = {{Rein}, Hanno and {Spiegel}, David S.},
-        title = "{IAS15: a fast, adaptive, high-order integrator for gravitational dynamics, accurate to machine precision over a billion orbits}",
+        title = "{IAS15: a fast, adaptive, high-order integrator for
+                  gravitational dynamics, accurate to machine precision over a
+                  billion orbits}",
       journal = {\mnras},
-     keywords = {gravitation, methods: numerical, planets and satellites: dynamical evolution and stability, Astrophysics - Earth and Planetary Astrophysics, Astrophysics - Instrumentation and Methods for Astrophysics, Astrophysics - Solar and Stellar Astrophysics, Mathematics - Numerical Analysis},
          year = 2015,
         month = jan,
        volume = {446},
@@ -397,14 +420,16 @@ author = {{Van Eylen}, Vincent and {Albrecht}, Simon and {Huang}, Xu and
         ("exoplanet:reboundx",),
         r"""
 @article{tamayo2020reboundx,
-  title={REBOUNDx: a library for adding conservative and dissipative forces to otherwise symplectic N-body integrations},
-  author={Tamayo, Daniel and Rein, Hanno and Shi, Pengshuai and Hernandez, David M},
-  journal={Monthly Notices of the Royal Astronomical Society},
-  volume={491},
-  number={2},
-  pages={2885--2901},
-  year={2020},
-  publisher={Oxford University Press}
+   title  = {REBOUNDx: a library for adding conservative and dissipative forces
+             to otherwise symplectic N-body integrations},
+  author  = {Tamayo, Daniel and Rein, Hanno and Shi, Pengshuai and Hernandez,
+             David M},
+ journal  = {Monthly Notices of the Royal Astronomical Society},
+  volume  = {491},
+  number  = {2},
+   pages  = {2885--2901},
+    year  = {2020},
+publisher = {Oxford University Press}
 }
 """,
     ),
