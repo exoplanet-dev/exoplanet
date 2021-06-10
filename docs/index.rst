@@ -63,6 +63,7 @@ Contents
    user/install
    tutorials/citation.md
    user/theano
+   user/multiprocessing
    user/api
    user/dev
    changes.rst
