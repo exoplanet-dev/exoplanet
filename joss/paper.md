@@ -183,6 +183,14 @@ automatically executed using GitHub Actions, but at lower cadence (once a week
 and when a new release of the `exoplanet` library is made) since the runtime is
 much longer.
 
+![Some examples of datasets fit using `exoplanet`. The full analyses behind
+these examples are available on the "Case Studies" page as Jupyter notebooks.
+(left) A fit to the light curves of a transiting exoplanet observed by two
+different space-based photometric surveys: Kepler and TESS. (right) The phase
+folded radial velocity time series for an exoplanet observed from different
+observatories with different instruments, fit simultaneously using `exoplanet`.
+\label{fig:figure}](figures/figure.png)
+
 # Similar tools
 
 There is a rich ecosystem of tooling available for inference with models such as
