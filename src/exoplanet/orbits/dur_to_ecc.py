@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 
+"""This module has an EXPERIMENTAL and UNTESTED implementation of analytic
+marginalizion over eccentricity as a function of transit duration (since the
+mapping is not 1-to-1). The implementation as written probably DOES NOT WORK,
+but I've (DFM) left it here for my own future reference. Feel free to ping me
+if you're interested in what's going on here!"""
+
 __all__ = ["duration_to_eccentricity"]
 
 from itertools import product

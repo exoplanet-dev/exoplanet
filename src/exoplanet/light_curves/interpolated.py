@@ -7,6 +7,19 @@ import numpy as np
 
 
 def interp(n, x, xmin, xmax, dx, func):
+    """One-dimensional regularly spaced cubic interpolation
+
+    Args:
+        n (int): The axis of the output that should be interpolated
+        x (tensor): The x coordinates where the model should be evaluated
+        xmin (scalar): The first coordinate in the grid
+        xmax (scalar): The last coordinate in the grid
+        dx (scalar): The grid spacing
+        func (callable): The function that should be interpolated
+
+    Returns:
+        y: The function ``func`` interpolated to the coordinates ``x``
+    """
     xp = tt.arange(xmin - dx, xmax + 2.5 * dx, dx)
     yp = func(xp)
 
@@ -26,6 +39,14 @@ def interp(n, x, xmin, xmax, dx, func):
 
 
 class InterpolatedLightCurve:
+    """This light curve object is an EXPERIMENTAL and UNTESTED interface for
+    pre-computing transit light curves on a grid and then interpolating this
+    model onto the observed datapoints. This can improve the computational
+    cost of a light curve model, especially when the dataset is large or the
+    planet is short period. WARNING: You should only use this at your own risk
+    if you know what you're doing!
+    """
+
     def __init__(
         self, base_light_curve, num_phase, num_planets=None, **kwargs
     ):
