@@ -1,11 +1,8 @@
 <p align="center">
-  <img width="50" src="https://raw.githubusercontent.com/exoplanet-dev/exoplanet/main/docs/_static/logo.png">
+  <img width="240" src="https://raw.githubusercontent.com/exoplanet-dev/exoplanet/main/docs/_static/logo.png">
   <br><br>
   <a href="https://github.com/exoplanet-dev/exoplanet/actions/workflows/tests.yml">
     <img src="https://github.com/exoplanet-dev/exoplanet/actions/workflows/tests.yml/badge.svg" alt="Tests">
-  </a>
-  <a href="https://github.com/exoplanet-dev/exoplanet/actions/workflows/tutorials.yml">
-    <img src="https://github.com/exoplanet-dev/exoplanet/actions/workflows/tutorials.yml/badge.svg" alt="Tutorials">
   </a>
   <a href="https://docs.exoplanet.codes">
     <img src="https://readthedocs.org/projects/exoplanet/badge/?version=latest" alt="Docs">
