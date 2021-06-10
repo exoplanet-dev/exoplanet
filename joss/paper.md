@@ -147,8 +147,8 @@ related.
   that must be compiled for performance. These include an efficient solver for
   Kepler's equation [based on the algorithm proposed by @raposo17] and limb
   darkened transit light curves [@agol20]. Besides the implementation for
-  `PyMC3` and `Theano`, `exoplanet-core` includes implementations in `numpy`
-  [@numpy] and `jax` [@jax].
+  `PyMC3`, `exoplanet-core` includes implementations in `numpy` [@numpy] and
+  `jax` [@jax].
 - `celerite2`[^celerite2], is an updated implementation of the _celerite_
   algorithm[^celerite] [@foremanmackey17; @foremanmackey18] for scalable
   Gaussian Process regression for time series data. Like `exoplanet-core`,
@@ -157,8 +157,8 @@ related.
 - `pymc3-ext`[^pymc3-ext], includes a set of helper functions to make `PyMC3`
   more amenable to the typical astronomical data analysis workflow. For example,
   it provides a tuning schedule for `PyMC3`'s sampler [based on the method used
-  by the `Stan` project @carpenter17] that provides better performance on models
-  with correlated parameters.
+  by the `Stan` project and described by @carpenter17] that provides better
+  performance on models with correlated parameters.
 - `rebound-pymc3`[^rebound-pymc3] provides an interface between _REBOUND_
   [@rein12], _REBOUNDx_ [@tamayo20], and `PyMC3` to enable inference with full
   N-body orbit integration.
@@ -183,6 +183,14 @@ automatically executed using GitHub Actions, but at lower cadence (once a week
 and when a new release of the `exoplanet` library is made) since the runtime is
 much longer.
 
+![Some examples of datasets fit using `exoplanet`. The full analyses behind
+these examples are available on the "Case Studies" page as Jupyter notebooks.
+(left) A fit to the light curves of a transiting exoplanet observed by two
+different space-based photometric surveys: Kepler and TESS. (right) The phase
+folded radial velocity time series for an exoplanet observed from different
+observatories with different instruments, fit simultaneously using `exoplanet`.
+\label{fig:figure}](figures/figure.png)
+
 # Similar tools
 
 There is a rich ecosystem of tooling available for inference with models such as
@@ -194,32 +202,35 @@ context.
 Some of the most popular tools in this space include (and note that this is far
 from a comprehensive list!) `EXOFAST` [@eastman13; @eastman19], `radvel`
 [@fulton18], `juliet` [@espinoza19], `exostriker` [@trifonov19], `PYANETI`
-[@barragan19], `allesfitter` [@guenther20], and `orbitize` [@blunt20]. These
-packages all focus on providing a high-level interface for designing models and
-then executing a fit. `exoplanet`, however, is designed to be lower level and
-more conceptually similar to tools like `batman` [@kreidberg15], `PyTransit`
-[@parviainen15], `ellc` [@maxted16], `starry` [@luger19], or `Limbdark.jl`
-[@agol20], which provide the building blocks for evaluating the models required
-for inference with exoplanet datasets. In fact, several of the higher-level
-packages listed above include these lower-level libraries as dependencies, and
-our hope is that `exoplanet` could provide the backend for future high-level
-libraries.
+[@barragan19], `allesfitter` [@guenther20], and `orbitize` [@blunt20]. Similar
+tools also exist for modeling observations of eclipsing binary systems,
+including `JKTEBOP` [@southworth04], `eb` [@irwin11], and `PHOEBE` [@conroy20].
+These packages all focus on providing a high-level interface for designing
+models and then executing a fit. `exoplanet`, however, is designed to be lower
+level and more conceptually similar to tools like `batman` [@kreidberg15],
+`PyTransit` [@parviainen15], `ldtk` [@parviainen15b], `ellc` [@maxted16],
+`starry` [@luger19], or `Limbdark.jl` [@agol20], which provide the building
+blocks for evaluating the models required for inference with exoplanet datasets.
+In fact, several of the higher-level packages listed above include these
+lower-level libraries as dependencies, and our hope is that `exoplanet` could
+provide the backend for future high-level libraries.
 
 As emphasized in the title of this paper, the main selling point of `exoplanet`
 when compared to other tools in this space is that it supports differentiation
 of all components of the model and is designed to integrate seamlessly with the
-`aesara` [@aesara; formerly known as `Theano`, @theano] automatic
-differentiation framework used by `PyMC3`. This allows the use of modern
-inference algorithms such as No U-Turn Sampling [@hoffman14] or Automatic
-Differentiation Variational Inference [@kucukelbir17]. These algorithms can have
-some computational and conceptual advantages over inference methods that do not
-use gradients, especially for high-dimensional models. The computation of gradients
+`aesara` [@aesara] automatic differentiation framework used by `PyMC3`. It is
+worth noting that `aesara` was previously known as `Theano` [@theano], so these
+names are sometimes used interchangeably in the `PyMC3` or `exoplanet`
+documentation[^theano-aesara]. This allows the use of modern inference
+algorithms such as No U-Turn Sampling [@hoffman14] or Automatic Differentiation
+Variational Inference [@kucukelbir17]. These algorithms can have some
+computational and conceptual advantages over inference methods that do not use
+gradients, especially for high-dimensional models. The computation of gradients
 is also useful for model optimization; this is necessary when, say, searching
 for new exoplanets, mapping out degeneracies or multiple modes of a posterior,
-or estimating uncertainties from a Hessian. Care has been taken to provide gradients
-which are numerically stable, and more accurate and faster to evaluate than
-finite-difference gradients which can be subject to significant numerical errors
-and require 2N computations of a model with N free parameters.
+or estimating uncertainties from a Hessian. Care has been taken to provide
+gradients which are numerically stable, and more accurate and faster to evaluate
+than finite-difference gradients.
 
 # Acknowledgements
 
@@ -243,3 +254,4 @@ Besides the software cited above, `exoplanet` is also built on top of `ArviZ`
 [^celerite]: [https://celerite.readthedocs.io](https://celerite.readthedocs.io)
 [^pymc3-ext]: [https://github.com/exoplanet-dev/pymc3-ext](https://github.com/exoplanet-dev/pymc3-ext)
 [^rebound-pymc3]: [https://github.com/exoplanet-dev/rebound-pymc3](https://github.com/exoplanet-dev/rebound-pymc3)
+[^theano-aesara]: More information about this distinction is available at [https://docs.exoplanet.codes/en/stable/user/theano/](https://docs.exoplanet.codes/en/stable/user/theano/)
