@@ -181,7 +181,9 @@ detailed example use cases for `exoplanet` and the other libraries described
 here. Like the tutorials on the documentation page, these case studies are
 automatically executed using GitHub Actions, but at lower cadence (once a week
 and when a new release of the `exoplanet` library is made) since the runtime is
-much longer.
+much longer. \autoref{fig:figure} shows the results of two example case studies
+demonstrating some of the potential use cases of the `exoplanet` software
+ecosystem.
 
 ![Some examples of datasets fit using `exoplanet`. The full analyses behind
 these examples are available on the "Case Studies" page as Jupyter notebooks.

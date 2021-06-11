@@ -104,7 +104,7 @@ In the following sections, we will go through some of the specific ways that you
 
 ## Orbital conventions
 
-These orbits are specified specified with respect to a single central body (generally the most massive body) and then a system of non-interacting bodies orbiting the central.
+These orbits are specified with respect to a single central body (generally the most massive body) and then a system of non-interacting bodies orbiting the central.
 This is a good parameterization for exoplanetary systems and binary stars, but it is sometimes not sufficient for systems with multiple massive bodies where the interactions will be important to the dynamics.
 
 We follow a set of internally consistent orbital conventions that also attempts to respect as many of the established conventions of the stellar and exoplanetary fields as possible.
