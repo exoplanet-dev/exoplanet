@@ -40,8 +40,8 @@ EXTRA_REQUIRE = {
     ],
     "docs": [
         "sphinx-book-theme"
-        " @ git+https://github.com/executablebooks/sphinx-book-theme.git"
-        "@cf5338cd20f155f1976a7b9ba351a86917a12983",
+        " @ git+https://github.com/dfm/sphinx-book-theme.git"
+        "@fix-outdir",
         "myst-nb",
         "matplotlib",
         "corner",
