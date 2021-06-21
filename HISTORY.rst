@@ -1,23 +1,30 @@
+0.5.1 (2021-06-21)
+++++++++++++++++++
+
+- Adds support for testing using tox (`#197 <https://github.com/exoplanet-dev/exoplanet/pull/197>`_)
+- Updates documentation, tutorials, and case studies for JOSS review (`#186 <https://github.com/exoplanet-dev/exoplanet/pull/186>`_ and `#200 <https://github.com/exoplanet-dev/exoplanet/pull/200>`_)
+
+
 0.5.0 (2021-05-04)
 ++++++++++++++++++
 
-- Adds high-level, pure-Theano/Aesara implementation of ``RegularGridInterpolator`` to replace compiled version `#167 <https://github.com/exoplanet-dev/exoplanet/pull/167>`_
-- Moves compiled Ops to `exoplanet-core <https://github.com/exoplanet-dev/exoplanet-core>`_ making exoplanet a pure-Python package `#171 <https://github.com/exoplanet-dev/exoplanet/pull/171>`_
-- Moves `ReboundOp` and `ReboundOrbit` to `rebound-pymc3 <https://github.com/exoplanet-dev/rebound-pymc3>`_ `#166 <https://github.com/exoplanet-dev/exoplanet/pull/166>`_
-- Removes deprecated submodules (``gp``, ``optimize``, and ``sampling``) and base distributions (e.g. ``xo.Angle``) `#165 <https://github.com/exoplanet-dev/exoplanet/pull/165>`_
+- Adds high-level, pure-Theano/Aesara implementation of ``RegularGridInterpolator`` to replace compiled version (`#167 <https://github.com/exoplanet-dev/exoplanet/pull/167>`_)
+- Moves compiled Ops to `exoplanet-core <https://github.com/exoplanet-dev/exoplanet-core>`_ making exoplanet a pure-Python package (`#171 <https://github.com/exoplanet-dev/exoplanet/pull/171>`_)
+- Moves `ReboundOp` and `ReboundOrbit` to `rebound-pymc3 <https://github.com/exoplanet-dev/rebound-pymc3>`_ (`#166 <https://github.com/exoplanet-dev/exoplanet/pull/166>`_)
+- Removes deprecated submodules (``gp``, ``optimize``, and ``sampling``) and base distributions (e.g. ``xo.Angle``) (`#165 <https://github.com/exoplanet-dev/exoplanet/pull/165>`_)
 
 
 0.4.5 (2021-03-15)
 ++++++++++++++++++
 
-- Adds support for recent versions of PyMC3 built on Aesara `#150 <https://github.com/exoplanet-dev/exoplanet/pull/150>`_
-- Fixes bug in `SimpleTransitOrbit` contact point calculation `#148 <https://github.com/exoplanet-dev/exoplanet/pull/148>`_
+- Adds support for recent versions of PyMC3 built on Aesara (`#150 <https://github.com/exoplanet-dev/exoplanet/pull/150>`_)
+- Fixes bug in `SimpleTransitOrbit` contact point calculation (`#148 <https://github.com/exoplanet-dev/exoplanet/pull/148>`_)
 
 
 0.4.4 (2021-01-04)
 ++++++++++++++++++
 
-- Adds support for relativistic orbits using REBOUNDx `#98 <https://github.com/exoplanet-dev/exoplanet/pull/98>`_
+- Adds support for relativistic orbits using REBOUNDx (`#98 <https://github.com/exoplanet-dev/exoplanet/pull/98>`_)
 
 
 0.4.3 (2020-12-08)
@@ -35,7 +42,7 @@
 0.4.1 (2020-11-15)
 ++++++++++++++++++
 
-- Fixes pickling error when sampling in parallel `#120 <https://github.com/exoplanet-dev/exoplanet/pull/120>`_
+- Fixes pickling error when sampling in parallel (`#120 <https://github.com/exoplanet-dev/exoplanet/pull/120>`_)
 
 
 0.4.0 (2020-10-05)

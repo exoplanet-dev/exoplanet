@@ -87,10 +87,10 @@ archivePrefix = {arXiv},
 @misc{exoplanet:zenodo,
   author = {Daniel Foreman-Mackey and Arjun Savel and Rodrigo Luger  and
             Eric Agol and Ian Czekala and Adrian Price-Whelan and
-            Christina Hedges and Emily Gilbert and Luke Bouma and Tom Barclay
-            and Timothy D. Brandt},
-   title = {exoplanet-dev/exoplanet v0.5.0},
-   month = may,
+            Christina Hedges and Emily Gilbert and Luke Bouma
+            and Timothy D. Brandt and Tom Barclay},
+   title = {exoplanet-dev/exoplanet v0.5.1},
+   month = jun,
     year = 2021,
      doi = {10.5281/zenodo.1998447},
      url = {https://doi.org/10.5281/zenodo.1998447}
