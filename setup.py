@@ -39,9 +39,7 @@ EXTRA_REQUIRE = {
         "batman-package",
     ],
     "docs": [
-        "sphinx-book-theme"
-        " @ git+https://github.com/dfm/sphinx-book-theme.git"
-        "@fix-outdir",
+        "sphinx-book-theme",
         "myst-nb",
         "matplotlib",
         "corner",

@@ -10,3 +10,4 @@ dependencies:
   - pip
   - pip:
       - ..[docs]
+      - "sphinx-book-theme @ git+https://github.com/dfm/sphinx-book-theme.git@fix-outdir"
