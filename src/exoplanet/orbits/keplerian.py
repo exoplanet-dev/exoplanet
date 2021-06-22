@@ -16,8 +16,8 @@ from astropy import units as u
 from exoplanet_core.pymc import ops
 
 from ..citations import add_citations_to_model
-from ..units import has_unit, to_unit
-from ..utils import as_tensor_variable
+from ..units import has_unit, to_unit, with_unit
+from ..utils import as_tensor_variable, deprecation_warning
 from .constants import G_grav, au_per_R_sun, c_light, gcc_per_sun
 
 
@@ -90,10 +90,20 @@ class KeplerianOrbit:
         rho_star=None,
         ror=None,
         model=None,
-        contact_points_kwargs=None,
         **kwargs
     ):
         add_citations_to_model(self.__citations__, model=model)
+
+        if "m_planet_units" in kwargs:
+            deprecation_warning(
+                "'m_planet_units' is deprecated; Use `with_unit` instead"
+            )
+            m_planet = with_unit(m_planet, kwargs.pop("m_planet_units"))
+        if "rho_star_units" in kwargs:
+            deprecation_warning(
+                "'rho_star_units' is deprecated; Use `with_unit` instead"
+            )
+            rho_star = with_unit(rho_star, kwargs.pop("rho_star_units"))
 
         self.jacobians = defaultdict(lambda: defaultdict(None))
 
