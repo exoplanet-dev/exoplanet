@@ -1,15 +1,15 @@
 variables:
-  archive_doi: "10.5281/zenodo.5006965"
+  archive_doi: "https://doi.org/10.5281/zenodo.5006965"
   formatted_doi: "10.21105/joss.03285"
   repository: "https://github.com/exoplanet-dev/exoplanet"
   doi_batch_id: "0dedac9c1d1144b256106ae0297c1495"
   editor_url: "https://arfon.org"
   review_issue_url: "https://github.com/openjournals/joss-reviews/issues/3285"
-  paper_url: "NO PAPER URL"
+  paper_url: "https://joss.theoj.org/papers/10.21105/joss.03285"
 
 metadata:
   logo_path: "figures/joss-logo.png"
-  citation_author: "Foreman-Mackey"
+  citation_author: "Foreman-Mackey et al."
   issue: "6"
   page: "3285"
   volume: "62"
