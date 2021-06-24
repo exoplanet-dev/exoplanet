@@ -97,7 +97,7 @@ bibliography: paper.bib
 
 `exoplanet` is a toolkit for probabilistic modeling of astronomical time series
 data, with a focus on observations of exoplanets, using `PyMC3` [@pymc3].
-`PyMC3` is a flexible and high-performance model building language and inference
+`PyMC3` is a flexible and high-performance model-building language and inference
 engine that scales well to problems with a large number of parameters.
 `exoplanet` extends `PyMC3`’s modeling language to support many of the custom
 functions and probability distributions required when fitting exoplanet datasets
@@ -105,8 +105,8 @@ or other astronomical time series.
 
 While it has been used for other applications, such as the study of stellar
 variability [e.g., @gillen20; @medina20], the primary purpose of `exoplanet` is
-the characterization of exoplanets [e.g., @gilbert20; @plavchan20] or multiple
-star systems [e.g., @czekala21] using time series photometry, astrometry, and/or
+the characterization of exoplanets [e.g., @gilbert20; @plavchan20] or multiple-star
+systems [e.g., @czekala21] using time-series photometry, astrometry, and/or
 radial velocity. In particular, the typical use case would be to use one or more
 of these datasets to place constraints on the physical and orbital parameters of
 the system, such as planet mass or orbital period, while simultaneously taking
@@ -114,7 +114,7 @@ into account the effects of stellar variability.
 
 # Statement of need
 
-Time domain astronomy is a priority of the observational astronomical community,
+Time-domain astronomy is a priority of the observational astronomical community,
 with huge survey datasets currently available and more forthcoming. Within this
 research domain, there is significant investment into the discovery and
 characterization of exoplanets, planets orbiting stars other than our Sun. These
@@ -141,7 +141,7 @@ related.
   of many special functions required for exoplanet data analysis. These include
   the spherical geometry for computing orbits, some exoplanet-specific
   distributions for eccentricity [@kipping13b; @vaneylen19] and limb darkening
-  [@kipping13], and exposure-time integrated limb darkened transit light curves.
+  [@kipping13], and exposure-time integrated limb-darkened transit light curves.
 - `exoplanet-core`[^exoplanet-core] provides efficient, well-tested, and
   differentiable implementations of all of the exoplanet-specific operations
   that must be compiled for performance. These include an efficient solver for
@@ -188,8 +188,8 @@ ecosystem.
 ![Some examples of datasets fit using `exoplanet`. The full analyses behind
 these examples are available on the "Case Studies" page as Jupyter notebooks.
 (left) A fit to the light curves of a transiting exoplanet observed by two
-different space-based photometric surveys: Kepler and TESS. (right) The phase
-folded radial velocity time series for an exoplanet observed from different
+different space-based photometric surveys: Kepler and TESS. (right) The phase-folded
+radial velocity time series for an exoplanet observed from different
 observatories with different instruments, fit simultaneously using `exoplanet`.
 \label{fig:figure}](figures/figure.png)
 
@@ -208,7 +208,7 @@ from a comprehensive list!) `EXOFAST` [@eastman13; @eastman19], `radvel`
 tools also exist for modeling observations of eclipsing binary systems,
 including `JKTEBOP` [@southworth04], `eb` [@irwin11], and `PHOEBE` [@conroy20].
 These packages all focus on providing a high-level interface for designing
-models and then executing a fit. `exoplanet`, however, is designed to be lower
+models and then executing a fit. In contrast, `exoplanet` is designed to be lower
 level and more conceptually similar to tools like `batman` [@kreidberg15],
 `PyTransit` [@parviainen15], `ldtk` [@parviainen15b], `ellc` [@maxted16],
 `starry` [@luger19], or `Limbdark.jl` [@agol20], which provide the building
