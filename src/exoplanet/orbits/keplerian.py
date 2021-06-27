@@ -233,10 +233,10 @@ class KeplerianOrbit:
             self.cos_incl = tt.cos(self.incl)
             self.b = self.cos_incl / self.dcosidb
         elif duration is not None:
-            if self.ecc is None:
-                raise ValueError(
-                    "fitting with duration only works for eccentric orbits"
-                )
+            # This assertion should never be hit because of the first
+            # conditional in this method, but let's keep it here anyways
+            assert self.ecc is not None
+
             self.duration = as_tensor_variable(to_unit(duration, u.day))
             c = tt.sin(np.pi * self.duration * incl_factor / self.period)
             c2 = c * c
