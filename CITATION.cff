@@ -1,0 +1,55 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Foreman-Mackey
+    given-names: Daniel
+    orcid: https://orcid.org/0000-0002-9328-5652
+  - family-names: Luger
+    given-names: Rodrigo
+    orcid: https://orcid.org/0000-0002-0296-3826
+  - family-names: Agol
+    given-names: Eric
+    orcid: https://orcid.org/0000-0002-0802-9145
+  - family-names: Barclay
+    given-names: Thomas
+    orcid: https://orcid.org/0000-0001-7139-2724
+  - family-names: Bouma
+    given-names: Luke G.
+    orcid: https://orcid.org/0000-0002-0514-5538
+  - family-names: Brandt
+    given-names: Timothy D.
+    orcid: https://orcid.org/0000-0003-2630-8073
+  - family-names: Czekala
+    given-names: Ian
+    orcid: https://orcid.org/0000-0002-1483-8811
+  - family-names: David
+    given-names: Trevor J.
+    orcid: https://orcid.org/0000-0001-6534-6246
+  - family-names: Dong
+    given-names: Jiayin
+    orcid: https://orcid.org/0000-0002-3610-6953
+  - family-names: Gilbert
+    given-names: Emily A.
+    orcid: https://orcid.org/0000-0002-0388-8004
+  - family-names: Gordon
+    given-names: Tyler A.
+    orcid: https://orcid.org/0000-0001-5253-1987
+  - family-names: Hedges
+    given-names: Christina
+    orcid: https://orcid.org/0000-0002-3385-8391
+  - family-names: Hey
+    given-names: Daniel R.
+    orcid: https://orcid.org/0000-0003-3244-5357
+  - family-names: Morris
+    given-names: Brett M.
+    orcid: https://orcid.org/0000-0003-2528-3409
+  - family-names: Price-Whelan
+    given-names: Adrian M.
+    orcid: https://orcid.org/0000-0003-0872-7098
+  - family-names: Savel
+    given-names: Arjun B.
+    orcid: https://orcid.org/0000-0002-2454-768X
+title: "exoplanet: Gradient-based probabilistic inference for exoplanet data & other astronomical time series"
+version: "0.5.1"
+doi: "10.5281/zenodo.1998447"
+date-released: 2021-06-21
