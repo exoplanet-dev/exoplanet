@@ -706,7 +706,8 @@ def test_jacobians():
     
     
 def test_relative_angles():
-    #test seperation and position angle with Earth and Sun
+    
+    #test separation and position angle with Earth and Sun
     p_earth=365.256
     t = np.linspace(0, 1000, 1000)
     m_earth = 1.*3.00273e-6 #units m_sun
@@ -739,8 +740,9 @@ def test_relative_angles():
     assert np.allclose(theta_earth[:int(p_earth/2)], theta_star_earth[int(p_earth/2):int(p_earth)-1], atol=0.2)
 
 
-
-    #test seperation with Jupiter and Sun
+    ########################################
+    ########################################
+    #test separation with Jupiter and Sun
     p_jup=4327.631
     t = np.linspace(0, 10000, 10000)
     m_jup = 317.83*3.00273e-6 #units m_sun
