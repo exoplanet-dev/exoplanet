@@ -566,9 +566,9 @@ class KeplerianOrbit:
         theta = tt.squeeze(tt.arctan2(Y, X))  # radians between [-pi, pi]
 
         return (rho, theta)
-    
-    
-    
+
+
+
     def get_star_relative_angles(self, t, parallax=None, light_delay=False):
     """The stars' relative position to the star in the sky plane, in
     separation, position angle coordinates.
