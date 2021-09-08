@@ -742,7 +742,7 @@ def test_relative_angles():
 
     ########################################
     ########################################
-    #test separation with Jupiter and Sun
+    #test separation and position angle with Jupiter and Sun
     p_jup=4327.631
     t = np.linspace(0, 10000, 10000)
     m_jup = 317.83*3.00273e-6 #units m_sun
