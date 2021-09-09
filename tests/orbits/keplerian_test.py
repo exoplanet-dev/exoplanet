@@ -720,7 +720,7 @@ def test_relative_angles():
         omega=np.radians(102.9),
         Omega=np.radians(0.0),
         incl=np.radians(45.0),
-        m_planet=m_earth
+        m_planet=m_earth,
     )
 
     rho_star_earth, theta_star_earth = theano.function(
@@ -741,7 +741,7 @@ def test_relative_angles():
     assert np.allclose(
         theta_earth[: int(p_earth / 2)],
         theta_star_earth[int(p_earth / 2) : int(p_earth) - 1],
-        atol=0.2
+        atol=0.2,
     )
 
     ########################################
@@ -759,7 +759,7 @@ def test_relative_angles():
         omega=np.radians(274.3) - 2 * np.pi,
         Omega=np.radians(100.4),
         incl=np.radians(45.0),
-        m_planet=m_jup
+        m_planet=m_jup,
     )
 
     rho_star_jup, theta_star_jup = theano.function(
@@ -780,5 +780,5 @@ def test_relative_angles():
     assert np.allclose(
         theta_jup[: int(p_jup / 2)],
         theta_star_jup[int(p_jup / 2) : int(p_jup) - 1],
-        atol=0.2
+        atol=0.2,
     )
