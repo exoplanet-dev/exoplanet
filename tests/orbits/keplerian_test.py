@@ -737,12 +737,14 @@ def test_relative_angles():
     assert np.isclose(rho_earth_diff, 3.0813126e-02)
     assert np.isclose(rho_star_earth_diff, 9.2523221e-08)
 
-    # make sure planet and star position angle closely mirrors each other
+
+    # make sure planet and star position angle are the same relative to each other
     assert np.allclose(
-        theta_earth[: int(p_earth / 2)],
-        theta_star_earth[int(p_earth / 2) : int(p_earth) - 1],
-        atol=0.2,
+        theta_earth,
+        theta_star_earth
     )
+
+
 
     ########################################
     ########################################
@@ -753,7 +755,7 @@ def test_relative_angles():
     orbit_jup = KeplerianOrbit(
         m_star=1.0,
         r_star=1.0,
-        t0=2000,
+        t0=0.5,
         period=p_jup,
         ecc=0.0484,
         omega=np.radians(274.3) - 2 * np.pi,
@@ -769,16 +771,15 @@ def test_relative_angles():
         [], orbit_jup.get_relative_angles(t, parallax=0.1)
     )()
 
-    rho_star_earth_diff = np.max(rho_star_jup) - np.min(rho_star_jup)
-    rho_earth_diff = np.max(rho_jup) - np.min(rho_jup)
+    rho_star_jup_diff = np.max(rho_star_jup) - np.min(rho_star_jup)
+    rho_jup_diff = np.max(rho_jup) - np.min(rho_jup)
 
     # make sure amplitude of separation is correct for star and planet motion
     assert np.isclose(rho_jup_diff, 1.7190731e-01)
     assert np.isclose(rho_star_jup_diff, 1.6390463e-04)
 
-    # make sure planet and star position angle closely mirrors each other
+    # make sure planet and star position angle are the same relative to each other
     assert np.allclose(
-        theta_jup[: int(p_jup / 2)],
-        theta_star_jup[int(p_jup / 2) : int(p_jup) - 1],
-        atol=0.2,
+        theta_jup,
+        theta_star_jup
     )
