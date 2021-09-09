@@ -579,7 +579,7 @@ class KeplerianOrbit:
                 False.
         Returns:
             The separation (arcseconds) and position angle (radians,
-            measured east of north) of the planet relative to the star.
+            measured east of north) of the star relative to the planet.
         """
         X, Y, Z = self._get_position(
             -self.a_star, t, parallax, light_delay=light_delay
