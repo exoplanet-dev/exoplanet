@@ -724,10 +724,10 @@ def test_relative_angles():
     )
 
     rho_star_earth, theta_star_earth = theano.function(
-        [], orbit_earth._get_star_relative_angles(t, parallax=0.1)
+        [], orbit_earth.get_star_relative_angles(t, parallax=0.1)
     )()
     rho_earth, theta_earth = theano.function(
-        [], orbit_earth._get_relative_angles(t, parallax=0.1)
+        [], orbit_earth.get_relative_angles(t, parallax=0.1)
     )()
 
     rho_star_earth_diff = np.max(rho_star_earth) - np.min(rho_star_earth)
@@ -763,10 +763,10 @@ def test_relative_angles():
     )
 
     rho_star_jup, theta_star_jup = theano.function(
-        [], orbit_jup._get_star_relative_angles(t, parallax=0.1)
+        [], orbit_jup.get_star_relative_angles(t, parallax=0.1)
     )()
     rho_jup, theta_jup = theano.function(
-        [], orbit_jup._get_relative_angles(t, parallax=0.1)
+        [], orbit_jup.get_relative_angles(t, parallax=0.1)
     )()
 
     rho_star_earth_diff = np.max(rho_star_jup) - np.min(rho_star_jup)
