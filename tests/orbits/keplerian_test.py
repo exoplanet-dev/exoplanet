@@ -737,14 +737,8 @@ def test_relative_angles():
     assert np.isclose(rho_earth_diff, 3.0813126e-02)
     assert np.isclose(rho_star_earth_diff, 9.2523221e-08)
 
-
     # make sure planet and star position angle are the same relative to each other
-    assert np.allclose(
-        theta_earth,
-        theta_star_earth
-    )
-
-
+    assert np.allclose(theta_earth, theta_star_earth)
 
     ########################################
     ########################################
@@ -779,7 +773,4 @@ def test_relative_angles():
     assert np.isclose(rho_star_jup_diff, 1.6390463e-04)
 
     # make sure planet and star position angle are the same relative to each other
-    assert np.allclose(
-        theta_jup,
-        theta_star_jup
-    )
+    assert np.allclose(theta_jup, theta_star_jup)
