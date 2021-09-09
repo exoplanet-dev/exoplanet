@@ -581,8 +581,8 @@ class KeplerianOrbit:
             The separation (arcseconds) and position angle (radians,
             measured east of north) of the planet relative to the star.
         """
-        X, Y, Z = self.get_star_position(
-            -self.a, t, parallax, light_delay=light_delay
+        X, Y, Z = self._get_position(
+            -self.a_star, t, parallax, light_delay=light_delay
         )
 
         # calculate rho and theta
