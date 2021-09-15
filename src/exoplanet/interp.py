@@ -4,8 +4,8 @@ __all__ = ["regular_grid_interp", "RegularGridInterpolator"]
 
 import itertools
 
-import numpy as np
 import aesara_theano_fallback.tensor as tt
+import numpy as np
 
 from .utils import as_tensor_variable
 
@@ -89,4 +89,6 @@ class RegularGridInterpolator:
                 should be evaluated. This must have the shape
                 ``(ntest, ndim)``.
         """
-        return regular_grid_interp(self.points, self.values, t, fill_value=self.fill_value)
+        return regular_grid_interp(
+            self.points, self.values, t, fill_value=self.fill_value
+        )
