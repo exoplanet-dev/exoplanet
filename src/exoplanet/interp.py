@@ -39,11 +39,11 @@ def regular_grid_interp(points, values, coords, *, fill_value=None):
     # Find where the points should be inserted
     indices = []
     norm_distances = []
-    out_of_bounds = tt.zeros_like(values)
+    out_of_bounds = tt.zeros(coords.shape[:-1], dtype=bool)
     for n, grid in enumerate(points):
         x = coords[..., n]
         i = tt.extra_ops.searchsorted(grid, x) - 1
-        out_of_bounds |= (i < 0) | (i >= points.shape[0])
+        out_of_bounds |= (i < 0) | (i >= grid.shape[0] - 1)
         i = tt.clip(i, 0, grid.shape[0] - 2)
         indices.append(i)
         norm_distances.append((x - grid[i]) / (grid[i + 1] - grid[i]))
