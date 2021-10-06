@@ -128,7 +128,9 @@ class LimbDarkLightCurve:
                 ``r_star``. This should have a shape that is consistent with
                 the coordinates returned by ``orbit``. In general, this means
                 that it should probably be a scalar or a vector with one entry
-                for each body in ``orbit``.
+                for each body in ``orbit``. Note that this is a different
+                quantity than the planet-to-star radius ratio; do not confuse
+                the two!
             t (tensor): The times where the light curve should be evaluated.
             texp (Optional[tensor]): The exposure time of each observation.
                 This can be a scalar or a tensor with the same shape as ``t``.
