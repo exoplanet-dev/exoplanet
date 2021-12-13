@@ -2,6 +2,9 @@
 
 __all__ = ["SecondaryEclipseLightCurve"]
 
+import numpy as np
+from theano.tensor import cos
+
 from ..utils import as_tensor_variable
 from .limb_dark import LimbDarkLightCurve
 
@@ -42,6 +45,8 @@ class SecondaryEclipseLightCurve:
         order=0,
         use_in_transit=None,
         light_delay=False,
+        reflected=False,
+        lag=0,
     ):
         r = as_tensor_variable(r)
         orbit2 = orbit._flip(r)
@@ -68,5 +73,12 @@ class SecondaryEclipseLightCurve:
 
         k = r / orbit.r_star
         flux_ratio = self.surface_brightness_ratio * k ** 2
+        if reflected:
+            phase = (t - orbit2.t0) / orbit2.period % 1
+            phase_curve = cos(2 * phase * np.pi + lag)[:, None]
+            lc2_w_phase_curve = (lc2) + phase_curve * 0 ** (-lc2)
+            return (lc1 + lc2_w_phase_curve * flux_ratio + flux_ratio) / (
+                1 + flux_ratio
+            )
 
         return (lc1 + flux_ratio * lc2) / (1 + flux_ratio)
