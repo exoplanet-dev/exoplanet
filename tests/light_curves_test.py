@@ -170,6 +170,7 @@ def test_contact_bug():
 
 
 def test_small_star():
+    pytest.importorskip("batman.transitmodel")
     from batman.transitmodel import TransitModel, TransitParams
 
     u_star = [0.2, 0.1]
