@@ -26,7 +26,7 @@ def test_simple():
     )
 
     x, y, z = theano.function([], orbit.get_planet_position(t))()
-    b_val = np.sqrt(x ** 2 + y ** 2)
+    b_val = np.sqrt(x**2 + y**2)
     m = (b_val <= r_star) & (z > 0)
 
     assert np.all(m == m0)

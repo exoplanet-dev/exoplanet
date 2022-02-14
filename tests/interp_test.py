@@ -10,7 +10,7 @@ from exoplanet.interp import RegularGridInterpolator
 
 def test_basic():
     def f(x, y, z):
-        return 2 * x ** 3 + 3 * y ** 2 - z
+        return 2 * x**3 + 3 * y**2 - z
 
     x = np.linspace(1, 4, 11)
     y = np.linspace(4, 7, 22)
@@ -29,7 +29,7 @@ def test_basic():
 
 def test_fill_value():
     def f(x, y, z):
-        return 2 * x ** 3 + 3 * y ** 2 - z
+        return 2 * x**3 + 3 * y**2 - z
 
     x = np.linspace(1, 4, 11)
     y = np.linspace(4, 7, 22)

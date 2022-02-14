@@ -26,12 +26,12 @@ class QuadLimbDarkTransform(tr.Transform):
 
     def forward(self, x):
         usum = tt.sum(x, axis=0)
-        q = tt.stack([usum ** 2, 0.5 * x[0] / usum])
+        q = tt.stack([usum**2, 0.5 * x[0] / usum])
         return tt.log(q) - tt.log(1 - q)
 
     def forward_val(self, x, point=None):
         usum = np.sum(x, axis=0)
-        q = np.array([usum ** 2, 0.5 * x[0] / usum])
+        q = np.array([usum**2, 0.5 * x[0] / usum])
         return np.log(q) - np.log(1 - q)
 
     def jacobian_det(self, y):

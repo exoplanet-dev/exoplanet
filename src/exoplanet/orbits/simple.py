@@ -31,7 +31,7 @@ class SimpleTransitOrbit:
         self.r_star = as_tensor_variable(r_star)
 
         self._b_norm = self.b * self.r_star
-        x2 = r_star ** 2 * ((1 + ror) ** 2 - b ** 2)
+        x2 = r_star**2 * ((1 + ror) ** 2 - b**2)
         self.speed = 2 * np.sqrt(x2) / duration
 
         self._half_period = 0.5 * self.period
@@ -97,7 +97,7 @@ class SimpleTransitOrbit:
         if r is None:
             tol = 0.5 * self.duration
         else:
-            x = (r + self.r_star) ** 2 - self._b_norm ** 2
+            x = (r + self.r_star) ** 2 - self._b_norm**2
             tol = tt.sqrt(x) / self.speed
         if texp is not None:
             tol += 0.5 * texp

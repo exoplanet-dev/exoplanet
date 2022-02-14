@@ -164,7 +164,7 @@ class KeplerianOrbit:
                 * (self.a / self.r_star) ** 2
                 * daordtau
                 * gcc_per_sun
-                / (G_grav * self.period ** 2)
+                / (G_grav * self.period**2)
             )
 
         self.K0 = self.n * self.a / self.m_total
@@ -207,7 +207,7 @@ class KeplerianOrbit:
             )
             self.M0 = E0 - self.ecc * tt.sin(E0)
 
-            ome2 = 1 - self.ecc ** 2
+            ome2 = 1 - self.ecc**2
             self.K0 /= tt.sqrt(ome2)
             incl_factor = (1 + self.ecc * self.sin_omega) / ome2
 
@@ -243,17 +243,17 @@ class KeplerianOrbit:
             aor = self.a_planet / self.r_star
             esinw = self.ecc * self.sin_omega
             self.b = tt.sqrt(
-                (aor ** 2 * c2 - 1)
+                (aor**2 * c2 - 1)
                 / (
-                    c2 * esinw ** 2
+                    c2 * esinw**2
                     + 2 * c2 * esinw
                     + c2
-                    - self.ecc ** 4
-                    + 2 * self.ecc ** 2
+                    - self.ecc**4
+                    + 2 * self.ecc**2
                     - 1
                 )
             )
-            self.b *= 1 - self.ecc ** 2
+            self.b *= 1 - self.ecc**2
             self.cos_incl = self.dcosidb * self.b
             self.incl = tt.arccos(self.cos_incl)
         else:
@@ -338,7 +338,7 @@ class KeplerianOrbit:
             r = 1.0
             vx, vy, vz = self._rotate_vector(-self.K0 * sinf, self.K0 * cosf)
         else:
-            r = (1.0 - self.ecc ** 2) / (1 + self.ecc * cosf)
+            r = (1.0 - self.ecc**2) / (1 + self.ecc * cosf)
             vx, vy, vz = self._rotate_vector(
                 -self.K0 * sinf, self.K0 * (cosf + self.ecc)
             )
@@ -398,7 +398,7 @@ class KeplerianOrbit:
         if self.ecc is None:
             r = a
         else:
-            r = a * (1.0 - self.ecc ** 2) / (1 + self.ecc * cosf)
+            r = a * (1.0 - self.ecc**2) / (1 + self.ecc * cosf)
 
         if parallax is not None:
             # convert r into arcseconds
@@ -432,8 +432,8 @@ class KeplerianOrbit:
             vamp = angvel * a
             vz = vamp * self.sin_incl * cosf
         else:
-            r = a * (1.0 - self.ecc ** 2) / (1 + self.ecc * cosf)
-            vamp = angvel * a / tt.sqrt(1 - self.ecc ** 2)
+            r = a * (1.0 - self.ecc**2) / (1 + self.ecc * cosf)
+            vamp = angvel * a / tt.sqrt(1 - self.ecc**2)
             cwf = self.cos_omega * cosf - self.sin_omega * sinf
             vz = vamp * self.sin_incl * (self.ecc * self.cos_omega + cwf)
 
@@ -441,7 +441,7 @@ class KeplerianOrbit:
         x, y, z = self._rotate_vector(r * cosf, r * sinf)
 
         # Component of the acceleration in the z direction
-        az = -(angvel ** 2) * (a / r) ** 3 * z
+        az = -(angvel**2) * (a / r) ** 3 * z
 
         # Compute the time delay at the **retarded** position, accounting
         # for the instantaneous velocity and acceleration of the body.
@@ -454,7 +454,7 @@ class KeplerianOrbit:
                 (1 + vz / c_light)
                 - tt.sqrt(
                     (1 + vz / c_light) * (1 + vz / c_light)
-                    - 2 * az * (z0 - z) / c_light ** 2
+                    - 2 * az * (z0 - z) / c_light**2
                 )
             ),
         )
@@ -562,7 +562,7 @@ class KeplerianOrbit:
         )
 
         # calculate rho and theta
-        rho = tt.squeeze(tt.sqrt(X ** 2 + Y ** 2))  # arcsec
+        rho = tt.squeeze(tt.sqrt(X**2 + Y**2))  # arcsec
         theta = tt.squeeze(tt.arctan2(Y, X))  # radians between [-pi, pi]
 
         return (rho, theta)
@@ -678,10 +678,10 @@ class KeplerianOrbit:
         sinf, cosf = self._get_true_anomaly(t)
         K = self.K0 * m
         if self.ecc is None:
-            factor = -(K ** 2) / a
+            factor = -(K**2) / a
         else:
             factor = (
-                K ** 2 * (self.ecc * cosf + 1) ** 2 / (a * (self.ecc ** 2 - 1))
+                K**2 * (self.ecc * cosf + 1) ** 2 / (a * (self.ecc**2 - 1))
             )
         return self._rotate_vector(factor * cosf, factor * sinf)
 
@@ -833,14 +833,14 @@ def get_aor_from_transit_duration(duration, period, b, ror=None):
     """
     if ror is None:
         ror = as_tensor_variable(0.0)
-    b2 = b ** 2
+    b2 = b**2
     opk2 = (1 + ror) ** 2
     phi = np.pi * duration / period
     sinp = tt.sin(phi)
     cosp = tt.cos(phi)
-    num = tt.sqrt(opk2 - b2 * cosp ** 2)
+    num = tt.sqrt(opk2 - b2 * cosp**2)
     aor = num / sinp
-    grad = np.pi * cosp * (b2 - opk2) / (num * period * sinp ** 2)
+    grad = np.pi * cosp * (b2 - opk2) / (num * period * sinp**2)
     return aor, grad
 
 
@@ -878,11 +878,11 @@ def _get_consistent_inputs(a, period, rho_star, r_star, m_star, m_planet):
             r_star = as_tensor_variable(to_unit(r_star, u.R_sun))
 
         # Compute the implied mass via Kepler's 3rd law
-        m_tot = 4 * np.pi * np.pi * a ** 3 / (G_grav * period ** 2)
+        m_tot = 4 * np.pi * np.pi * a**3 / (G_grav * period**2)
 
         # Compute the implied density
         m_star = m_tot - m_planet
-        vol_star = 4 * np.pi * r_star ** 3 / 3.0
+        vol_star = 4 * np.pi * r_star**3 / 3.0
         rho_star = m_star / vol_star
         implied_rho_star = True
 
@@ -902,7 +902,7 @@ def _get_consistent_inputs(a, period, rho_star, r_star, m_star, m_planet):
     if rho_star is not None and not implied_rho_star:
         if has_unit(rho_star):
             rho_star = as_tensor_variable(
-                to_unit(rho_star, u.M_sun / u.R_sun ** 3)
+                to_unit(rho_star, u.M_sun / u.R_sun**3)
             )
         else:
             rho_star = as_tensor_variable(rho_star) / gcc_per_sun
@@ -913,16 +913,16 @@ def _get_consistent_inputs(a, period, rho_star, r_star, m_star, m_planet):
 
     # Work out the stellar parameters
     if rho_star is None:
-        rho_star = 3 * m_star / (4 * np.pi * r_star ** 3)
+        rho_star = 3 * m_star / (4 * np.pi * r_star**3)
     elif r_star is None:
         r_star = (3 * m_star / (4 * np.pi * rho_star)) ** (1 / 3)
     elif m_star is None:
-        m_star = 4 * np.pi * r_star ** 3 * rho_star / 3.0
+        m_star = 4 * np.pi * r_star**3 * rho_star / 3.0
 
     # Work out the planet parameters
     if a is None:
         a = (
-            G_grav * (m_star + m_planet) * period ** 2 / (4 * np.pi ** 2)
+            G_grav * (m_star + m_planet) * period**2 / (4 * np.pi**2)
         ) ** (1.0 / 3)
     elif period is None:
         period = (

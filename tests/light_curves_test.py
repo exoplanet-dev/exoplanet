@@ -262,7 +262,7 @@ def test_singular_points():
 def _check_quad(u, b, depth, ror):
     u1 = u[0]
     u2 = u[1]
-    mu = np.sqrt(1 - b ** 2)
+    mu = np.sqrt(1 - b**2)
     expect = np.sqrt(
         depth
         * (1 - u1 / 3 - u2 / 6)
@@ -296,7 +296,7 @@ def test_secondary_eclipse():
 
     s = 0.3
     ror = 0.08
-    f = ror ** 2 * s
+    f = ror**2 * s
     lc = SecondaryEclipseLightCurve(u1, u2, s)
 
     t = np.linspace(-6.435, 10.4934, 5000)
