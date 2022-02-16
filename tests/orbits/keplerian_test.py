@@ -46,7 +46,7 @@ def test_sky_coords():
     )
     func = theano.function([], orbit.get_relative_position(t))
     x, y, z = func()
-    r = np.sqrt(x ** 2 + y ** 2)
+    r = np.sqrt(x**2 + y**2)
 
     # Make sure that the in-transit impact parameter matches batman
     assert np.allclose(r_batman[m], r[m], atol=2e-5)
@@ -343,7 +343,7 @@ def test_small_star():
 
     func = theano.function([], orbit.get_relative_position(t))
     x, y, z = func()
-    r = np.sqrt(x ** 2 + y ** 2)
+    r = np.sqrt(x**2 + y**2)
 
     # Make sure that the in-transit impact parameter matches batman
     assert np.allclose(r_batman[m], r[m], atol=2e-5)
@@ -390,7 +390,7 @@ def test_consistent_coords():
 
     # calculate Mtot from a, P
     Mtot = (
-        (4 * np.pi ** 2 * (a * u.au) ** 3 / (c.G * (P * u.day) ** 2))
+        (4 * np.pi**2 * (a * u.au) ** 3 / (c.G * (P * u.day) ** 2))
         .to(u.M_sun)
         .value
     )
@@ -480,7 +480,7 @@ def test_get_consistent_inputs():
     ) = _get_consistent_inputs(
         a3,
         None,
-        with_unit(rho_star3, u.g / u.cm ** 3),
+        with_unit(rho_star3, u.g / u.cm**3),
         r_star3,
         None,
         m_planet3,
@@ -633,13 +633,13 @@ def test_get_aor_from_transit_duration():
         ),
     ]:
         x, y, z = orbit.get_planet_position(0.5 * duration)
-        assert np.allclose(tt.sqrt(x ** 2 + y ** 2).eval(), r_star * (1 + ror))
+        assert np.allclose(tt.sqrt(x**2 + y**2).eval(), r_star * (1 + ror))
 
         x, y, z = orbit.get_planet_position(-0.5 * duration)
-        assert np.allclose(tt.sqrt(x ** 2 + y ** 2).eval(), r_star * (1 + ror))
+        assert np.allclose(tt.sqrt(x**2 + y**2).eval(), r_star * (1 + ror))
 
         x, y, z = orbit.get_planet_position(period + 0.5 * duration)
-        assert np.allclose(tt.sqrt(x ** 2 + y ** 2).eval(), r_star * (1 + ror))
+        assert np.allclose(tt.sqrt(x**2 + y**2).eval(), r_star * (1 + ror))
 
 
 @pytest.mark.filterwarnings("error::UserWarning")

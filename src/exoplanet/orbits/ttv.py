@@ -111,10 +111,10 @@ class TTVOrbit(KeplerianOrbit):
                 # A convoluted version of linear regression; don't ask
                 N = times.shape[0]
                 sumx = tt.sum(inds)
-                sumx2 = tt.sum(inds ** 2)
+                sumx2 = tt.sum(inds**2)
                 sumy = tt.sum(times)
                 sumxy = tt.sum(inds * times)
-                denom = N * sumx2 - sumx ** 2
+                denom = N * sumx2 - sumx**2
                 slope = (N * sumxy - sumx * sumy) / denom
                 intercept = (sumx2 * sumy - sumx * sumxy) / denom
                 expect = intercept + inds * slope

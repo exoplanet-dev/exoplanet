@@ -90,8 +90,8 @@ class LimbDarkLightCurve:
         b = as_tensor_variable(b)
         delta = as_tensor_variable(delta)
         f0 = 1 - 2 * self.u1 / 6.0 - 2 * self.u2 / 12.0
-        arg = 1 - tt.sqrt(1 - b ** 2)
-        f = 1 - self.u1 * arg - self.u2 * arg ** 2
+        arg = 1 - tt.sqrt(1 - b**2)
+        f = 1 - self.u1 * arg - self.u2 * arg**2
         factor = f0 / f
         ror = tt.sqrt(delta * factor)
         if not jac:

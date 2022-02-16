@@ -35,7 +35,7 @@ def interp(n, x, xmin, xmax, dx, func):
 
     inds = tt.cast(tt.floor((x - xmin) / dx), "int64")
     x0 = (x - xp[inds + 1]) / dx
-    return a0[inds] + a1[inds] * x0 + a2[inds] * x0 ** 2 + a3[inds] * x0 ** 3
+    return a0[inds] + a1[inds] * x0 + a2[inds] * x0**2 + a3[inds] * x0**3
 
 
 class InterpolatedLightCurve:
