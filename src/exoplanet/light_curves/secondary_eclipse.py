@@ -67,6 +67,6 @@ class SecondaryEclipseLightCurve:
         )
 
         k = r / orbit.r_star
-        flux_ratio = self.surface_brightness_ratio * k ** 2
+        flux_ratio = self.surface_brightness_ratio * k**2
 
         return (lc1 + flux_ratio * lc2) / (1 + flux_ratio)

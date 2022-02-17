@@ -90,8 +90,8 @@ class LimbDarkLightCurve:
         b = as_tensor_variable(b)
         delta = as_tensor_variable(delta)
         f0 = 1 - 2 * self.u1 / 6.0 - 2 * self.u2 / 12.0
-        arg = 1 - tt.sqrt(1 - b ** 2)
-        f = 1 - self.u1 * arg - self.u2 * arg ** 2
+        arg = 1 - tt.sqrt(1 - b**2)
+        f = 1 - self.u1 * arg - self.u2 * arg**2
         factor = f0 / f
         ror = tt.sqrt(delta * factor)
         if not jac:
@@ -128,7 +128,9 @@ class LimbDarkLightCurve:
                 ``r_star``. This should have a shape that is consistent with
                 the coordinates returned by ``orbit``. In general, this means
                 that it should probably be a scalar or a vector with one entry
-                for each body in ``orbit``.
+                for each body in ``orbit``. Note that this is a different
+                quantity than the planet-to-star radius ratio; do not confuse
+                the two!
             t (tensor): The times where the light curve should be evaluated.
             texp (Optional[tensor]): The exposure time of each observation.
                 This can be a scalar or a tensor with the same shape as ``t``.

@@ -37,17 +37,17 @@ def duration_to_eccentricity(
     a, period, rho_star, r_star, m_star, m_planet = inputs
     b = kwargs.get("b", 0.0)
     s = tt.sin(kwargs["omega"])
-    umax_inv = tt.switch(tt.lt(s, 0), tt.sqrt(1 - s ** 2), 1.0)
+    umax_inv = tt.switch(tt.lt(s, 0), tt.sqrt(1 - s**2), 1.0)
 
     const = (
-        period * tt.shape_padright(r_star) * tt.sqrt((1 + ror) ** 2 - b ** 2)
+        period * tt.shape_padright(r_star) * tt.sqrt((1 + ror) ** 2 - b**2)
     )
     const /= np.pi * a
 
     u = duration / const
 
-    e1 = -s * u ** 2 / ((s * u) ** 2 + 1)
-    e2 = tt.sqrt((s ** 2 - 1) * u ** 2 + 1) / ((s * u) ** 2 + 1)
+    e1 = -s * u**2 / ((s * u) ** 2 + 1)
+    e2 = tt.sqrt((s**2 - 1) * u**2 + 1) / ((s * u) ** 2 + 1)
 
     models = []
     logjacs = []
@@ -63,7 +63,7 @@ def duration_to_eccentricity(
         logjac = tt.switch(
             tt.all(valid_ecc),
             tt.sum(
-                0.5 * tt.log(1 - ecc ** 2)
+                0.5 * tt.log(1 - ecc**2)
                 + 2 * tt.log(s * ecc + 1)
                 - tt.log(tt.abs_(s + ecc))
                 - tt.log(const)

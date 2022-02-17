@@ -68,7 +68,7 @@ def estimate_semi_amplitude(periods, x, y, yerr=None, t0s=None):
     if yerr is None:
         ivar = np.ones_like(y)
     else:
-        ivar = 1.0 / yerr ** 2
+        ivar = 1.0 / yerr**2
 
     periods = u.Quantity(np.atleast_1d(periods), unit=u.day)
     if t0s is not None:
@@ -149,9 +149,9 @@ def find_peaks(freq, power, max_peaks=0):
         peaks.append(
             dict(
                 index=i + 1,
-                log_power=w[2] + 0.5 * freq0 ** 2 / sigma2,
+                log_power=w[2] + 0.5 * freq0**2 / sigma2,
                 period=1.0 / freq0,
-                period_uncert=np.sqrt(sigma2 / freq0 ** 4),
+                period_uncert=np.sqrt(sigma2 / freq0**4),
             )
         )
     if max_peaks:

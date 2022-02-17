@@ -36,7 +36,6 @@ EXTRA_REQUIRE = {
         "pytest",
         "coverage[toml]",
         "pytest-env",
-        "batman-package",
     ],
     "docs": [
         "sphinx-book-theme",

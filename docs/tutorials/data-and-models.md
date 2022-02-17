@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.11.4
+    jupytext_version: 1.13.7
 kernelspec:
   display_name: Python 3
   language: python
@@ -236,7 +236,7 @@ t_plot = np.linspace(0, 50, 500)
 t = np.sort(random.uniform(0, 50, 20))
 rv_err = 0.5 + np.zeros_like(t)
 rv_obs = 5.0 * np.sin(2 * np.pi * t / 10.0) + np.sqrt(
-    0.05 ** 2 + rv_err ** 2
+    0.05**2 + rv_err**2
 ) * random.normal(size=len(t))
 
 with pm.Model():
@@ -277,7 +277,7 @@ with pm.Model():
     rv_model = zero_point + orbit.get_radial_velocity(t, K=semiamp)
 
     # Finally add in the observation model
-    err = tt.sqrt(rv_err ** 2 + tt.exp(2 * log_jitter))
+    err = tt.sqrt(rv_err**2 + tt.exp(2 * log_jitter))
     pm.Normal("obs", mu=rv_model, sigma=rv_err, observed=rv_obs)
 
     # We'll also track the model just for plotting purposes
