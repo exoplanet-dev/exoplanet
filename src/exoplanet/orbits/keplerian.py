@@ -586,7 +586,7 @@ class KeplerianOrbit:
         )
 
         # calculate rho and theta
-        rho = tt.squeeze(tt.sqrt(X ** 2 + Y ** 2))  # arcsec
+        rho = tt.squeeze(tt.sqrt(X**2 + Y**2))  # arcsec
         theta = tt.squeeze(tt.arctan2(Y, X))  # radians between [-pi, pi]
 
         return (rho, theta)
