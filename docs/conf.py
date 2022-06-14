@@ -58,5 +58,5 @@ html_theme_options = {
     "use_download_button": True,
 }
 # jupyter_execute_notebooks = "off"
-jupyter_execute_notebooks = "cache"
-execution_timeout = -1
+nb_execution_mode = "cache"
+nb_execution_timeout = -1
