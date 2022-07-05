@@ -22,7 +22,7 @@ repos:
     exclude: docs/tutorials
 
 - repo: https://github.com/psf/black
-  rev: "22.3.0"
+  rev: "22.6.0"
   hooks:
   - id: black
 
@@ -32,7 +32,7 @@ repos:
   - id: black_nbconvert
 
 - repo: https://github.com/mwouts/jupytext
-  rev: v1.13.8
+  rev: v1.14.0
   hooks:
   - id: jupytext
     files: |
