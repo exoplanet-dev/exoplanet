@@ -58,7 +58,11 @@ def docs_setup():
 
     logger = logging.getLogger("theano.gof.compilelock")
     logger.setLevel(logging.ERROR)
-    logger = logging.getLogger("theano.tensor.opt")
+    logger = logging.getLogger("aesara.tensor.opt")
+    logger.setLevel(logging.ERROR)
+    logger = logging.getLogger("aesara.tensor.blas")
+    logger.setLevel(logging.ERROR)
+    logger = logging.getLogger("matplotlib.font_manager")
     logger.setLevel(logging.ERROR)
     logger = logging.getLogger("exoplanet")
     logger.setLevel(logging.DEBUG)

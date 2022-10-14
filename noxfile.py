@@ -1,4 +1,6 @@
 import nox
+import tempfile
+from pathlib import Path
 
 ALL_PYTHON_VS = ["3.8", "3.9", "3.10"]
 
@@ -26,3 +28,22 @@ def test_pymc(session):
 def lint(session):
     session.install("pre-commit")
     session.run("pre-commit", "run", "--all-files", *session.posargs)
+
+
+@nox.session
+def docs(session):
+    session.install(".[docs]")
+    session.install("sphinx")
+    session.run(
+        "sphinx-build",
+        "--color",
+        "-W",
+        "-b",
+        "dirhtml",
+        "-d",
+        str(session.cache_dir / "doctrees"),
+        "docs",
+        str(session.cache_dir / "dirhtml"),
+        *session.posargs
+    )
+    session.run("open", session.cache_dir)
