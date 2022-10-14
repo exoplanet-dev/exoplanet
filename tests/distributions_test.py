@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from scipy.stats import beta, halfnorm, kstest, rayleigh
 
-from exoplanet.compat import pm
+from exoplanet.compat import pm, USING_PYMC3
 from exoplanet.distributions import (
     impact_parameter,
     kipping13,
@@ -17,11 +17,13 @@ class _Base:
     random_seed = 20160911
 
     def _sample(self, **kwargs):
-        logger = logging.getLogger("pymc3")
+        logger = logging.getLogger("pymc3" if USING_PYMC3 else "pymc")
         logger.propagate = False
         logger.setLevel(logging.ERROR)
         kwargs["draws"] = kwargs.get("draws", 1000)
         kwargs["progressbar"] = kwargs.get("progressbar", False)
+        if USING_PYMC3:
+            kwargs["return_inferencedata"] = True
         return pm.sample(**kwargs)
 
     def _model(self, **kwargs):
@@ -35,18 +37,15 @@ class TestEccentricity(_Base):
     def test_kipping13(self):
         with self._model() as model:
             dist = kipping13("ecc", shape=(5, 2))
-            assert "ecc_alpha" in model.named_vars
-            assert "ecc_beta" in model.named_vars
-
-            # Test random sampling
-            samples = dist.random(size=100)
-            assert np.shape(samples) == (100, 5, 2)
-
-            assert np.all((0 <= samples) & (samples <= 1))
-
+            if USING_PYMC3:
+                assert "ecc_alpha" in model.named_vars
+                assert "ecc_beta" in model.named_vars
+            else:
+                assert "ecc::alpha" in model.named_vars
+                assert "ecc::beta" in model.named_vars
             trace = self._sample()
 
-        ecc = trace["ecc"]
+        ecc = trace.posterior["ecc"].values
         assert np.all((0 <= ecc) & (ecc <= 1))
 
     def test_kipping13_all(self):
@@ -54,7 +53,7 @@ class TestEccentricity(_Base):
             kipping13("ecc", fixed=True, shape=2)
             trace = self._sample()
 
-        ecc = trace["ecc"].flatten()
+        ecc = trace.posterior["ecc"].values.flatten()
         assert np.all((0 <= ecc) & (ecc <= 1))
 
         cdf = lambda x: beta.cdf(x, 1.12, 3.09)  # NOQA
@@ -66,7 +65,7 @@ class TestEccentricity(_Base):
             kipping13("ecc", fixed=True, long=True, shape=3)
             trace = self._sample()
 
-        ecc = trace["ecc"].flatten()
+        ecc = trace.posterior["ecc"].values.flatten()
         assert np.all((0 <= ecc) & (ecc <= 1))
 
         cdf = lambda x: beta.cdf(x, 1.12, 3.09)  # NOQA
@@ -78,7 +77,7 @@ class TestEccentricity(_Base):
             kipping13("ecc", fixed=True, long=False, shape=4)
             trace = self._sample()
 
-        ecc = trace["ecc"].flatten()
+        ecc = trace.posterior["ecc"].values.flatten()
         assert np.all((0 <= ecc) & (ecc <= 1))
 
         cdf = lambda x: beta.cdf(x, 0.697, 3.27)  # NOQA
@@ -94,7 +93,7 @@ class TestEccentricity(_Base):
             kipping13("ecc", **kwargs)
             trace = self._sample()
 
-        ecc = trace["ecc"].flatten()
+        ecc = trace.posterior["ecc"].values.flatten()
         assert np.all(
             (kwargs.get("lower", 0.0) <= ecc)
             & (ecc <= kwargs.get("upper", 1.0))
@@ -106,18 +105,17 @@ class TestEccentricity(_Base):
             dist = vaneylen19("ecc", shape=(5, 2), **kwargs)
 
             if not kwargs.get("fixed", False):
-                assert "ecc_sigma_gauss" in model.named_vars
-                assert "ecc_sigma_rayleigh" in model.named_vars
-                assert "ecc_frac" in model.named_vars
-
-            # Test random sampling
-            samples = dist.random(size=100)
-            assert np.shape(samples) == (100, 5, 2)
-            assert np.all((0 <= samples) & (samples <= 1))
-
+                if USING_PYMC3:
+                    assert "ecc_sigma_gauss" in model.named_vars
+                    assert "ecc_sigma_rayleigh" in model.named_vars
+                    assert "ecc_frac" in model.named_vars
+                else:
+                    assert "ecc::sigma_gauss" in model.named_vars
+                    assert "ecc::sigma_rayleigh" in model.named_vars
+                    assert "ecc::frac" in model.named_vars
             trace = self._sample()
 
-        ecc = trace["ecc"]
+        ecc = trace.posterior["ecc"].values
         assert np.all((0 <= ecc) & (ecc <= 1))
 
     def test_vaneylen19_single(self):
@@ -125,7 +123,7 @@ class TestEccentricity(_Base):
             vaneylen19("ecc", fixed=True, multi=False, shape=2)
             trace = self._sample()
 
-        ecc = trace["ecc"].flatten()
+        ecc = trace.posterior["ecc"].values.flatten()
         assert np.all((0 <= ecc) & (ecc <= 1))
 
         f = 0.76
@@ -141,7 +139,7 @@ class TestEccentricity(_Base):
             vaneylen19("ecc", fixed=True, multi=True, shape=3)
             trace = self._sample()
 
-        ecc = trace["ecc"].flatten()
+        ecc = trace.posterior["ecc"].values.flatten()
         assert np.all((0 <= ecc) & (ecc <= 1))
 
         f = 0.08
@@ -161,7 +159,7 @@ class TestEccentricity(_Base):
             vaneylen19("ecc", **kwargs)
             trace = self._sample()
 
-        ecc = trace["ecc"].flatten()
+        ecc = trace.posterior["ecc"].values.flatten()
         assert np.all(
             (kwargs.get("lower", 0.0) <= ecc)
             & (ecc <= kwargs.get("upper", 1.0))
@@ -176,8 +174,8 @@ class TestPhysical(_Base):
             quad_limb_dark("u")
             trace = self._sample()
 
-        u1 = trace["u"][:, 0]
-        u2 = trace["u"][:, 1]
+        u1 = trace.posterior["u"].values[..., 0].flatten()
+        u2 = trace.posterior["u"].values[..., 1].flatten()
 
         # Make sure that the physical constraints are satisfied
         assert np.all(u1 + u2 < 1)
@@ -197,15 +195,17 @@ class TestPhysical(_Base):
         lower = 0.1
         upper = 1.0
         with self._model():
-            ror = pm.Uniform("ror", lower=lower, upper=upper, shape=(5, 2))
-            impact_parameter("b", ror)
+            r = pm.Uniform("r", lower=lower, upper=upper, shape=(5, 2))
+            impact_parameter("b", r)
             trace = self._sample()
 
-        u = trace["ror"]
-        u = np.reshape(u, (len(u), -1))
+        u = trace.posterior["r"].values
+        u = np.reshape(u, u.shape[:2] + (-1,))
         cdf = lambda x: np.clip((x - lower) / (upper - lower), 0, 1)  # NOQA
-        for i in range(u.shape[1]):
-            s, p = kstest(u[:, i], cdf)
+        for i in range(u.shape[-1]):
+            s, p = kstest(u[..., i].flatten(), cdf)
             assert s < 0.05
 
-        assert np.all(trace["b"] <= 1 + trace["ror"])
+        assert np.all(
+            trace.posterior["b"].values <= 1 + trace.posterior["r"].values
+        )

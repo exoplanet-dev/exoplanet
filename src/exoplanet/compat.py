@@ -30,6 +30,8 @@ if USING_PYMC3:
     from theano import tensor as tensor
     from theano.ifelse import ifelse as ifelse
 
+    tensor.abs = tensor.abs_
+
     try:
         from theano.assert_op import Assert as Assert
     except ImportError:
