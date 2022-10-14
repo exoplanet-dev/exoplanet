@@ -10,16 +10,17 @@ from collections import defaultdict
 import numpy as np
 from astropy import units as u
 
-from exoplanet.compat import ops, tensor as at, ifelse
 from exoplanet.citations import add_citations_to_model
-from exoplanet.units import has_unit, to_unit, with_unit
-from exoplanet.utils import as_tensor_variable, deprecation_warning
+from exoplanet.compat import ifelse, ops
+from exoplanet.compat import tensor as at
 from exoplanet.orbits.constants import (
     G_grav,
     au_per_R_sun,
     c_light,
     gcc_per_sun,
 )
+from exoplanet.units import has_unit, to_unit, with_unit
+from exoplanet.utils import as_tensor_variable, deprecation_warning
 
 
 class KeplerianOrbit:

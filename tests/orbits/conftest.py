@@ -1,6 +1,7 @@
 # ref: https://github.com/pymc-devs/pymc3/blob/master/pymc3/tests/conftest.py
 
 import pytest
+
 from exoplanet.compat import change_flags
 
 

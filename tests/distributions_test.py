@@ -6,10 +6,10 @@ from scipy.stats import beta, halfnorm, kstest, rayleigh
 
 from exoplanet.compat import pm
 from exoplanet.distributions import (
-    kipping13,
-    vaneylen19,
     impact_parameter,
+    kipping13,
     quad_limb_dark,
+    vaneylen19,
 )
 
 

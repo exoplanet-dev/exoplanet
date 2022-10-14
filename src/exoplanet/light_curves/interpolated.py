@@ -1,7 +1,8 @@
 __all__ = ["InterpolatedLightCurve"]
 
-from exoplanet.compat import tensor as at
 import numpy as np
+
+from exoplanet.compat import tensor as at
 
 
 def interp(n, x, xmin, xmax, dx, func):

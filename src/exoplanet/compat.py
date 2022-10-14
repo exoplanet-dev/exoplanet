@@ -25,7 +25,6 @@ else:
 
 if USING_PYMC3:
     from exoplanet_core.pymc3 import ops as ops
-
     from theano import function as function
     from theano import grad as grad
     from theano import tensor as tensor
@@ -46,12 +45,11 @@ if USING_PYMC3:
         from theano.configparser import change_flags as change_flags
 
 else:
-    from exoplanet_core.pymc4 import ops as ops
-
     from aesara import function as function
     from aesara import grad as grad
     from aesara import tensor as tensor
-    from aesara.ifelse import ifelse as ifelse
     from aesara.configparser import change_flags
-    from aesara.raise_op import Assert as Assert
     from aesara.gradient import verify_grad as verify_grad
+    from aesara.ifelse import ifelse as ifelse
+    from aesara.raise_op import Assert as Assert
+    from exoplanet_core.pymc4 import ops as ops

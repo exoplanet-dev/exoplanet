@@ -1,7 +1,7 @@
 __all__ = ["test_basic"]
 
-from exoplanet.compat import pm
 from exoplanet.citations import CITATIONS, get_citations_for_model
+from exoplanet.compat import pm
 from exoplanet.light_curves import LimbDarkLightCurve
 
 

@@ -2,8 +2,9 @@ __all__ = ["LimbDarkLightCurve"]
 
 import numpy as np
 
-from exoplanet.compat import ops, tensor as at, Assert
 from exoplanet.citations import add_citations_to_model
+from exoplanet.compat import Assert, ops
+from exoplanet.compat import tensor as at
 from exoplanet.utils import as_tensor_variable, deprecation_warning
 
 

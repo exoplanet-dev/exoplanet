@@ -4,7 +4,8 @@ import pytest
 from astropy.constants import c
 from scipy.optimize import minimize
 
-from exoplanet.compat import tensor as at, function, grad
+from exoplanet.compat import function, grad
+from exoplanet.compat import tensor as at
 from exoplanet.orbits.keplerian import (
     KeplerianOrbit,
     _get_consistent_inputs,
