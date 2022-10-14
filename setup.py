@@ -30,13 +30,13 @@ EXTRA_REQUIRE = {
     "extras": ["pymc3-ext>=0.1.0", "celerite2>=0.2.0"],
     "test": ["scipy", "pytest", "pytest-env"],
     "docs": [
+        "pymc>=4.0.0",
         "sphinx-book-theme",
         "myst-nb",
         "ipython",
         "matplotlib",
         "corner",
         "lightkurve",
-        "pymc3-ext>=0.1.0",
         "emcee",
     ],
 }
