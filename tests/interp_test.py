@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import numpy as np
 from scipy.interpolate import (
     RegularGridInterpolator as SpRegularGridInterpolator,

@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-
 __all__ = ["test_basic"]
 
-import pymc3 as pm
-
+from exoplanet.compat import pm
 from exoplanet.citations import CITATIONS, get_citations_for_model
 from exoplanet.light_curves import LimbDarkLightCurve
 

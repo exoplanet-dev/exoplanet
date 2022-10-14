@@ -1,14 +1,10 @@
-# -*- coding: utf-8 -*-
-
 __all__ = ["LimbDarkLightCurve"]
 
-import aesara_theano_fallback.tensor as tt
 import numpy as np
-from aesara_theano_fallback import aesara as theano
-from exoplanet_core.pymc3 import ops
 
-from ..citations import add_citations_to_model
-from ..utils import as_tensor_variable, deprecation_warning
+from exoplanet.compat import ops, tensor as at, Assert
+from exoplanet.citations import add_citations_to_model
+from exoplanet.utils import as_tensor_variable, deprecation_warning
 
 
 def get_cl(u1, u2):
@@ -18,13 +14,13 @@ def get_cl(u1, u2):
     c1 = u1 + 2 * u2
     c2 = -0.25 * u2
     norm = np.pi * (c0 + c1 / 1.5)
-    return tt.stack([c0, c1, c2]) / norm
+    return at.stack([c0, c1, c2]) / norm
 
 
 def quad_limbdark_light_curve(c, b, r):
     b = as_tensor_variable(b)
     r = as_tensor_variable(r)
-    return tt.dot(ops.quad_solution_vector(b, r), c) - 1.0
+    return at.dot(ops.quad_solution_vector(b, r), c) - 1.0
 
 
 class LimbDarkLightCurve:
@@ -55,12 +51,12 @@ class LimbDarkLightCurve:
                 "use `starry` for more flexibility"
             )
             try:
-                assert_op = theano.assert_op.Assert(msg)
+                assert_op = Assert(msg)
             except AttributeError:
-                assert_op = tt.opt.Assert(msg)
+                assert_op = at.opt.Assert(msg)
             u1 = as_tensor_variable(u1)
             u1 = assert_op(
-                u1, tt.and_(tt.eq(u1.ndim, 1), tt.eq(u1.shape[0], 2))
+                u1, at.and_(at.eq(u1.ndim, 1), at.eq(u1.shape[0], 2))
             )
 
             self.u1 = u1[0]
@@ -90,14 +86,14 @@ class LimbDarkLightCurve:
         b = as_tensor_variable(b)
         delta = as_tensor_variable(delta)
         f0 = 1 - 2 * self.u1 / 6.0 - 2 * self.u2 / 12.0
-        arg = 1 - tt.sqrt(1 - b**2)
+        arg = 1 - at.sqrt(1 - b**2)
         f = 1 - self.u1 * arg - self.u2 * arg**2
         factor = f0 / f
-        ror = tt.sqrt(delta * factor)
+        ror = at.sqrt(delta * factor)
         if not jac:
-            return tt.reshape(ror, b.shape)
+            return at.reshape(ror, b.shape)
         drorddelta = 0.5 * factor / ror
-        return tt.reshape(ror, b.shape), tt.reshape(drorddelta, b.shape)
+        return at.reshape(ror, b.shape), at.reshape(drorddelta, b.shape)
 
     def get_light_curve(
         self,
@@ -160,23 +156,23 @@ class LimbDarkLightCurve:
         )
 
         r = as_tensor_variable(r)
-        r = tt.reshape(r, (r.size,))
+        r = at.reshape(r, (r.size,))
         t = as_tensor_variable(t)
 
         # If use_in_transit, we should only evaluate the model at times where
         # at least one planet is transiting
         if use_in_transit:
-            transit_model = tt.shape_padleft(
-                tt.zeros_like(r), t.ndim
-            ) + tt.shape_padright(tt.zeros_like(t), r.ndim)
+            transit_model = at.shape_padleft(
+                at.zeros_like(r), t.ndim
+            ) + at.shape_padright(at.zeros_like(t), r.ndim)
             inds = orbit.in_transit(t, r=r, texp=texp, light_delay=light_delay)
             t = t[inds]
 
         # Handle exposure time integration
         if texp is None:
             tgrid = t
-            rgrid = tt.shape_padleft(r, tgrid.ndim) + tt.shape_padright(
-                tt.zeros_like(tgrid), r.ndim
+            rgrid = at.shape_padleft(r, tgrid.ndim) + at.shape_padright(
+                at.zeros_like(tgrid), r.ndim
             )
         else:
             texp = as_tensor_variable(texp)
@@ -203,33 +199,33 @@ class LimbDarkLightCurve:
                 dt = texp * dt
             else:
                 if use_in_transit:
-                    dt = tt.shape_padright(texp[inds]) * dt
+                    dt = at.shape_padright(texp[inds]) * dt
                 else:
-                    dt = tt.shape_padright(texp) * dt
-            tgrid = tt.shape_padright(t) + dt
+                    dt = at.shape_padright(texp) * dt
+            tgrid = at.shape_padright(t) + dt
 
             # Madness to get the shapes to work out...
-            rgrid = tt.shape_padleft(r, tgrid.ndim) + tt.shape_padright(
-                tt.zeros_like(tgrid), 1
+            rgrid = at.shape_padleft(r, tgrid.ndim) + at.shape_padright(
+                at.zeros_like(tgrid), 1
             )
 
         # Evalute the coordinates of the transiting body in the plane of the
         # sky
         coords = orbit.get_relative_position(tgrid, light_delay=light_delay)
-        b = tt.sqrt(coords[0] ** 2 + coords[1] ** 2)
-        b = tt.reshape(b, rgrid.shape)
-        los = tt.reshape(coords[2], rgrid.shape)
+        b = at.sqrt(coords[0] ** 2 + coords[1] ** 2)
+        b = at.reshape(b, rgrid.shape)
+        los = at.reshape(coords[2], rgrid.shape)
 
         lc = self._compute_light_curve(
             b / orbit.r_star, rgrid / orbit.r_star, los / orbit.r_star
         )
 
         if texp is not None:
-            stencil = tt.shape_padright(tt.shape_padleft(stencil, t.ndim), 1)
-            lc = tt.sum(stencil * lc, axis=t.ndim)
+            stencil = at.shape_padright(at.shape_padleft(stencil, t.ndim), 1)
+            lc = at.sum(stencil * lc, axis=t.ndim)
 
         if use_in_transit:
-            transit_model = tt.set_subtensor(transit_model[inds], lc)
+            transit_model = at.set_subtensor(transit_model[inds], lc)
             return transit_model
         else:
             return lc
@@ -250,6 +246,6 @@ class LimbDarkLightCurve:
         """
         b = as_tensor_variable(b)
         if los is None:
-            los = tt.ones_like(b)
+            los = at.ones_like(b)
         lc = quad_limbdark_light_curve(self.c, b, r)
-        return tt.switch(tt.gt(los, 0), lc, tt.zeros_like(lc))
+        return at.switch(at.gt(los, 0), lc, at.zeros_like(lc))

@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
-
 __all__ = ["add_citations_to_model", "CITATIONS"]
 
 import logging
 import textwrap
 
-import pymc3 as pm
+from exoplanet.compat import pm
 
 
 def add_citations_to_model(citations, model=None):

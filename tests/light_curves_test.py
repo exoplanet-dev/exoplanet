@@ -1,13 +1,17 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
-import aesara_theano_fallback.tensor as tt
 import numpy as np
 import pytest
-from aesara_theano_fallback import aesara as theano
+
 from packaging import version
 
+from exoplanet.compat import (
+    tensor as at,
+    change_flags,
+    verify_grad,
+    function,
+    grad,
+)
 from exoplanet.light_curves import (
     LimbDarkLightCurve,
     SecondaryEclipseLightCurve,
@@ -49,32 +53,28 @@ def test_light_curve_grad(caplog):
         u[0], u[1]
     )._compute_light_curve(b, r)
 
-    with theano.configparser.change_flags(compute_test_value="off"):
+    with change_flags(compute_test_value="off"):
         with caplog.at_level(logging.DEBUG, logger="theano.gof.cmodule"):
-            theano.gradient.verify_grad(
-                lc, [u_val, b_val, r_val], rng=np.random
-            )
+            verify_grad(lc, [u_val, b_val, r_val], rng=np.random)
 
 
 def test_vector_params():
-    u = tt.vector()
+    u = at.vector()
     u.tag.test_value = u_val = np.array([0.3, 0.2])
     b = np.linspace(-1.5, 1.5, 20)
     r = 0.1 + np.zeros_like(b)
 
     with pytest.warns(DeprecationWarning, match=r"vector of limb darkening"):
-        lc1 = theano.function(
-            [u], LimbDarkLightCurve(u)._compute_light_curve(b, r)
-        )(u_val)
-    lc2 = theano.function(
+        lc1 = function([u], LimbDarkLightCurve(u)._compute_light_curve(b, r))(
+            u_val
+        )
+    lc2 = function(
         [u], LimbDarkLightCurve(u[0], u[1])._compute_light_curve(b, r)
     )(u_val)
     np.testing.assert_allclose(lc1, lc2)
 
     with pytest.raises(AssertionError):
-        theano.function(
-            [], LimbDarkLightCurve([0.3])._compute_light_curve(b, r)
-        )()
+        function([], LimbDarkLightCurve([0.3])._compute_light_curve(b, r))()
 
 
 def test_in_transit():
@@ -96,14 +96,14 @@ def test_in_transit():
     lc = LimbDarkLightCurve(u[0], u[1])
     model1 = lc.get_light_curve(r=r, orbit=orbit, t=t)
     model2 = lc.get_light_curve(r=r, orbit=orbit, t=t, use_in_transit=False)
-    vals = theano.function([], [model1, model2])()
+    vals = function([], [model1, model2])()
     assert np.allclose(*vals)
 
     model1 = lc.get_light_curve(r=r, orbit=orbit, t=t, texp=0.1)
     model2 = lc.get_light_curve(
         r=r, orbit=orbit, t=t, texp=0.1, use_in_transit=False
     )
-    vals = theano.function([], [model1, model2])()
+    vals = function([], [model1, model2])()
     assert np.allclose(*vals)
 
 
@@ -135,7 +135,7 @@ def test_variable_texp():
         use_in_transit=False,
         texp=texp0 + np.zeros_like(t),
     )
-    vals = theano.function([], [model1, model2])()
+    vals = function([], [model1, model2])()
     assert np.allclose(*vals)
 
     model1 = lc.get_light_curve(r=r, orbit=orbit, t=t, texp=texp0)
@@ -146,7 +146,7 @@ def test_variable_texp():
         texp=texp0 + np.zeros_like(t),
         use_in_transit=False,
     )
-    vals = theano.function([], [model1, model2])()
+    vals = function([], [model1, model2])()
     assert np.allclose(*vals)
 
 
@@ -203,7 +203,7 @@ def test_small_star():
 
     model1 = lc.get_light_curve(r=r_pl, orbit=orbit, t=t)
     model2 = lc.get_light_curve(r=r_pl, orbit=orbit, t=t, use_in_transit=False)
-    vals = theano.function([], [model1, model2])()
+    vals = function([], [model1, model2])()
     assert np.allclose(*vals)
 
     params = TransitParams()
@@ -224,13 +224,13 @@ def test_small_star():
 
 def test_singular_points():
     u = np.array([0.2, 0.3])
-    b = tt.vector()
+    b = at.vector()
     b.tag.test_value = np.array([0.5])
-    r = tt.vector()
+    r = at.vector()
     r.tag.test_value = np.array([0.1])
     lc = LimbDarkLightCurve(u[0], u[1])
     f = lc._compute_light_curve(b, r)
-    func = theano.function([b, r], f)
+    func = function([b, r], f)
 
     def compare(b_val, r_val, b_eps, r_eps):
         """
@@ -281,10 +281,10 @@ def test_approx_transit_depth():
         (np.array([0.1, 0.9]), np.array([0.1, 0.5])),
         (np.array([0.1, 0.9, 0.3]), np.array([0.1, 0.5, 0.0234])),
     ]:
-        dv = tt.as_tensor_variable(delta)
+        dv = at.as_tensor_variable(delta)
         ror, jac = lc.get_ror_from_approx_transit_depth(dv, b, jac=True)
         _check_quad(u, b, delta, ror.eval())
-        assert np.allclose(theano.grad(tt.sum(ror), dv).eval(), jac.eval())
+        assert np.allclose(grad(at.sum(ror), dv).eval(), jac.eval())
 
 
 def test_secondary_eclipse():

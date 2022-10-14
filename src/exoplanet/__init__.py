@@ -1,14 +1,10 @@
-# -*- coding: utf-8 -*-
-
-__all__ = ["__version__", "distributions", "orbits", "interp"]
-
-from . import distributions, interp, orbits
-from .citations import CITATIONS
-from .distributions import *  # NOQA
-from .estimators import *  # NOQA
-from .exoplanet_version import __version__
-from .light_curves import *  # NOQA
-from .utils import *  # NOQA
+from exoplanet import distributions as distributions, interp as interp, orbits as orbits
+from exoplanet.citations import CITATIONS as CITATIONS
+from exoplanet.distributions import *  # NOQA
+from exoplanet.estimators import *  # NOQA
+from exoplanet.exoplanet_version import __version__ as __version__
+from exoplanet.light_curves import *  # NOQA
+from exoplanet.utils import *  # NOQA
 
 __bibtex__ = __citation__ = CITATIONS["exoplanet"][1]
 __uri__ = "https://docs.exoplanet.codes"
