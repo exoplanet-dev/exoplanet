@@ -4,7 +4,7 @@ import pytest
 from astropy.constants import c
 from scipy.optimize import minimize
 
-from exoplanet.compat import function, grad
+from exoplanet.compat import function, grad, change_flags
 from exoplanet.compat import tensor as at
 from exoplanet.orbits.keplerian import (
     KeplerianOrbit,
@@ -89,45 +89,46 @@ def test_center_of_mass():
 
 
 def test_velocity():
-    t_tensor = at.dvector()
-    t = np.linspace(0, 100, 1000)
-    m_planet = 0.1
-    m_star = 1.3
-    orbit = KeplerianOrbit(
-        m_star=m_star,
-        r_star=1.0,
-        t0=0.5,
-        period=100.0,
-        ecc=0.1,
-        omega=0.5,
-        Omega=1.0,
-        incl=0.25 * np.pi,
-        m_planet=m_planet,
-    )
+    with change_flags(compute_test_value="off"):
+        t_tensor = at.dvector()
+        t = np.linspace(0, 100, 1000)
+        m_planet = 0.1
+        m_star = 1.3
+        orbit = KeplerianOrbit(
+            m_star=m_star,
+            r_star=1.0,
+            t0=0.5,
+            period=100.0,
+            ecc=0.1,
+            omega=0.5,
+            Omega=1.0,
+            incl=0.25 * np.pi,
+            m_planet=m_planet,
+        )
 
-    star_pos = orbit.get_star_position(t_tensor)
-    star_vel = function([], orbit.get_star_velocity(t))()
-    star_vel_expect = np.empty_like(star_vel)
-    for i in range(3):
-        g = grad(at.sum(star_pos[i]), t_tensor)
-        star_vel_expect[i] = function([t_tensor], g)(t)
-    assert np.allclose(star_vel, star_vel_expect)
+        star_pos = orbit.get_star_position(t_tensor)
+        star_vel = function([], orbit.get_star_velocity(t))()
+        star_vel_expect = np.empty_like(star_vel)
+        for i in range(3):
+            g = grad(at.sum(star_pos[i]), t_tensor)
+            star_vel_expect[i] = function([t_tensor], g)(t)
+        assert np.allclose(star_vel, star_vel_expect)
 
-    planet_pos = orbit.get_planet_position(t_tensor)
-    planet_vel = function([], orbit.get_planet_velocity(t))()
-    planet_vel_expect = np.empty_like(planet_vel)
-    for i in range(3):
-        g = grad(at.sum(planet_pos[i]), t_tensor)
-        planet_vel_expect[i] = function([t_tensor], g)(t)
-    assert np.allclose(planet_vel, planet_vel_expect)
+        planet_pos = orbit.get_planet_position(t_tensor)
+        planet_vel = function([], orbit.get_planet_velocity(t))()
+        planet_vel_expect = np.empty_like(planet_vel)
+        for i in range(3):
+            g = grad(at.sum(planet_pos[i]), t_tensor)
+            planet_vel_expect[i] = function([t_tensor], g)(t)
+        assert np.allclose(planet_vel, planet_vel_expect)
 
-    pos = orbit.get_relative_position(t_tensor)
-    vel = np.array(function([], orbit.get_relative_velocity(t))())
-    vel_expect = np.empty_like(vel)
-    for i in range(3):
-        g = grad(at.sum(pos[i]), t_tensor)
-        vel_expect[i] = function([t_tensor], g)(t)
-    assert np.allclose(vel, vel_expect)
+        pos = orbit.get_relative_position(t_tensor)
+        vel = np.array(function([], orbit.get_relative_velocity(t))())
+        vel_expect = np.empty_like(vel)
+        for i in range(3):
+            g = grad(at.sum(pos[i]), t_tensor)
+            vel_expect[i] = function([t_tensor], g)(t)
+        assert np.allclose(vel, vel_expect)
 
 
 def test_radial_velocity():
@@ -154,44 +155,45 @@ def test_radial_velocity():
 
 
 def test_acceleration():
-    t_tensor = at.dvector()
-    t = np.linspace(0, 100, 1000)
-    m_planet = 0.1
-    m_star = 1.3
-    orbit = KeplerianOrbit(
-        m_star=m_star,
-        r_star=1.0,
-        t0=0.5,
-        period=100.0,
-        ecc=0.1,
-        omega=0.5,
-        incl=0.25 * np.pi,
-        m_planet=m_planet,
-    )
+    with change_flags(compute_test_value="off"):
+        t_tensor = at.dvector()
+        t = np.linspace(0, 100, 1000)
+        m_planet = 0.1
+        m_star = 1.3
+        orbit = KeplerianOrbit(
+            m_star=m_star,
+            r_star=1.0,
+            t0=0.5,
+            period=100.0,
+            ecc=0.1,
+            omega=0.5,
+            incl=0.25 * np.pi,
+            m_planet=m_planet,
+        )
 
-    star_vel = orbit.get_star_velocity(t_tensor)
-    star_acc = function([], orbit.get_star_acceleration(t))()
-    star_acc_expect = np.empty_like(star_acc)
-    for i in range(3):
-        g = grad(at.sum(star_vel[i]), t_tensor)
-        star_acc_expect[i] = function([t_tensor], g)(t)
-    assert np.allclose(star_acc, star_acc_expect)
+        star_vel = orbit.get_star_velocity(t_tensor)
+        star_acc = function([], orbit.get_star_acceleration(t))()
+        star_acc_expect = np.empty_like(star_acc)
+        for i in range(3):
+            g = grad(at.sum(star_vel[i]), t_tensor)
+            star_acc_expect[i] = function([t_tensor], g)(t)
+        assert np.allclose(star_acc, star_acc_expect)
 
-    planet_vel = orbit.get_planet_velocity(t_tensor)
-    planet_acc = function([], orbit.get_planet_acceleration(t))()
-    planet_acc_expect = np.empty_like(planet_acc)
-    for i in range(3):
-        g = grad(at.sum(planet_vel[i]), t_tensor)
-        planet_acc_expect[i] = function([t_tensor], g)(t)
-    assert np.allclose(planet_acc, planet_acc_expect)
+        planet_vel = orbit.get_planet_velocity(t_tensor)
+        planet_acc = function([], orbit.get_planet_acceleration(t))()
+        planet_acc_expect = np.empty_like(planet_acc)
+        for i in range(3):
+            g = grad(at.sum(planet_vel[i]), t_tensor)
+            planet_acc_expect[i] = function([t_tensor], g)(t)
+        assert np.allclose(planet_acc, planet_acc_expect)
 
-    vel = orbit.get_relative_velocity(t_tensor)
-    acc = function([], orbit.get_relative_acceleration(t))()
-    acc_expect = np.empty_like(acc)
-    for i in range(3):
-        g = grad(at.sum(vel[i]), t_tensor)
-        acc_expect[i] = function([t_tensor], g)(t)
-    assert np.allclose(acc, acc_expect)
+        vel = orbit.get_relative_velocity(t_tensor)
+        acc = function([], orbit.get_relative_acceleration(t))()
+        acc_expect = np.empty_like(acc)
+        for i in range(3):
+            g = grad(at.sum(vel[i]), t_tensor)
+            acc_expect[i] = function([t_tensor], g)(t)
+        assert np.allclose(acc, acc_expect)
 
 
 def test_flip():
@@ -500,66 +502,67 @@ def test_get_consistent_inputs():
 
 
 def test_light_delay():
-    # Instantiate the orbit
-    m_star = at.scalar()
-    period = at.scalar()
-    ecc = at.scalar()
-    omega = at.scalar()
-    Omega = at.scalar()
-    incl = at.scalar()
-    m_planet = at.scalar()
-    t = at.scalar()
-    orbit = KeplerianOrbit(
-        m_star=m_star,
-        r_star=1.0,
-        t0=0.0,
-        period=period,
-        ecc=ecc,
-        omega=omega,
-        Omega=Omega,
-        incl=incl,
-        m_planet=m_planet,
-    )
-
-    # True position
-    get_position = function(
-        [t, m_star, period, ecc, omega, Omega, incl, m_planet],
-        orbit.get_planet_position([t], light_delay=False),
-    )
-
-    # Retarded position
-    get_retarded_position = function(
-        [t, m_star, period, ecc, omega, Omega, incl, m_planet],
-        orbit.get_planet_position([t], light_delay=True),
-    )
-
-    # Retarded position (numerical)
-    def get_exact_retarded_position(t, *args):
-        def loss(params):
-            (ti,) = params
-            xr, yr, zr = get_position(ti, *args)
-            delay = (zr * u.Rsun / c).to(u.day).value
-            return (ti - delay - t) ** 2
-
-        tr = minimize(loss, t).x[0]
-        return get_position(tr, *args)
-
-    # Compare for 100 different orbits
-    np.random.seed(13)
-    for i in range(100):
-        m_star = 0.1 + np.random.random() * 1.9
-        period = np.random.random() * 500
-        ecc = np.random.random()
-        omega = np.random.random() * 2 * np.pi
-        Omega = np.random.random() * 2 * np.pi
-        incl = np.random.random() * 0.5 * np.pi
-        m_planet = np.random.random()
-        t = np.random.random() * period
-        args = (m_star, period, ecc, omega, Omega, incl, m_planet)
-        assert np.allclose(
-            np.reshape(get_retarded_position(t, *args), (-1,)),
-            np.reshape(get_exact_retarded_position(t, *args), (-1,)),
+    with change_flags(compute_test_value="off"):
+        # Instantiate the orbit
+        m_star = at.scalar()
+        period = at.scalar()
+        ecc = at.scalar()
+        omega = at.scalar()
+        Omega = at.scalar()
+        incl = at.scalar()
+        m_planet = at.scalar()
+        t = at.scalar()
+        orbit = KeplerianOrbit(
+            m_star=m_star,
+            r_star=1.0,
+            t0=0.0,
+            period=period,
+            ecc=ecc,
+            omega=omega,
+            Omega=Omega,
+            incl=incl,
+            m_planet=m_planet,
         )
+
+        # True position
+        get_position = function(
+            [t, m_star, period, ecc, omega, Omega, incl, m_planet],
+            orbit.get_planet_position([t], light_delay=False),
+        )
+
+        # Retarded position
+        get_retarded_position = function(
+            [t, m_star, period, ecc, omega, Omega, incl, m_planet],
+            orbit.get_planet_position([t], light_delay=True),
+        )
+
+        # Retarded position (numerical)
+        def get_exact_retarded_position(t, *args):
+            def loss(params):
+                (ti,) = params
+                xr, yr, zr = get_position(ti, *args)
+                delay = (zr * u.Rsun / c).to(u.day).value
+                return (ti - delay - t) ** 2
+
+            tr = minimize(loss, t).x[0]
+            return get_position(tr, *args)
+
+        # Compare for 100 different orbits
+        np.random.seed(13)
+        for i in range(100):
+            m_star = 0.1 + np.random.random() * 1.9
+            period = np.random.random() * 500
+            ecc = np.random.random()
+            omega = np.random.random() * 2 * np.pi
+            Omega = np.random.random() * 2 * np.pi
+            incl = np.random.random() * 0.5 * np.pi
+            m_planet = np.random.random()
+            t = np.random.random() * period
+            args = (m_star, period, ecc, omega, Omega, incl, m_planet)
+            assert np.allclose(
+                np.reshape(get_retarded_position(t, *args), (-1,)),
+                np.reshape(get_exact_retarded_position(t, *args), (-1,)),
+            )
 
 
 def test_light_delay_shape_two_planets_vector_t():

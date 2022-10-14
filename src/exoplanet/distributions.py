@@ -71,7 +71,9 @@ def impact_parameter(name, ror, **kwargs):
     ror = as_tensor_variable(ror)
     kwargs["shape"] = shape = kwargs.pop("shape", ror.shape)
     bhat = kwargs.pop("initval", kwargs.pop("testval", 0.5))
-    bhat = at.broadcast_to(bhat, shape)
+    bhat = (
+        bhat + at.zeros(shape) if USING_PYMC3 else at.broadcast_to(bhat, shape)
+    )
     kwargs["lower"] = 0.0
     kwargs["upper"] = 1.0
     norm = pm.Uniform(
