@@ -195,10 +195,36 @@ class TestPhysical(_Base):
     def test_impact(self):
         lower = 0.1
         upper = 1.0
+        shape = (5, 2)
         with self._model():
-            r = pm.Uniform("r", lower=lower, upper=upper, shape=(5, 2))
+            r = pm.Uniform("r", lower=lower, upper=upper, shape=shape)
+            impact_parameter("b", r, shape=shape)
+            trace = self._sample()
+
+        u = trace.posterior["r"].values
+        u = np.reshape(u, u.shape[:2] + (-1,))
+        cdf = lambda x: np.clip((x - lower) / (upper - lower), 0, 1)  # NOQA
+        for i in range(u.shape[-1]):
+            s, p = kstest(u[..., i].flatten(), cdf)
+            assert s < 0.05
+
+        assert np.all(
+            trace.posterior["b"].values <= 1 + trace.posterior["r"].values
+        )
+
+    @pytest.mark.skipif(
+        USING_PYMC3, reason="Automatic shape inference doesn't work in PyMC3"
+    )
+    def test_impact_shape_inference(self):
+        lower = 0.1
+        upper = 1.0
+        shape = (5, 2)
+        with self._model():
+            r = pm.Uniform("r", lower=lower, upper=upper, shape=shape)
             impact_parameter("b", r)
             trace = self._sample()
+
+        assert trace.posterior["b"].values.shape[-2:] == shape
 
         u = trace.posterior["r"].values
         u = np.reshape(u, u.shape[:2] + (-1,))

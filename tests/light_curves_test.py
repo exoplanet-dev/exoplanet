@@ -2,7 +2,6 @@ import logging
 
 import numpy as np
 import pytest
-from packaging import version
 
 from exoplanet.compat import change_flags, function, grad
 from exoplanet.compat import tensor as at
@@ -27,11 +26,12 @@ def test_light_curve():
     lc = LimbDarkLightCurve(u_val[0], u_val[1])
     evaluated = lc._compute_light_curve(b_val, r_val).eval()
 
-    if version.parse(starry.__version__) < version.parse("0.9.9"):
-        m = starry.Map(lmax=len(u_val))
-        m[:] = u_val
-        expect = m.flux(xo=b_val, ro=r_val) - 1
-    else:
+    # Currently, if we're testing with starry theano _will_ be installed; no
+    # need for a compatibility layer
+    import theano
+
+    flags = theano.config.gcc__cxxflags
+    with change_flags(gcc__cxxflags=flags + " -fexceptions"):
         m = starry.Map(udeg=len(u_val))
         m[1:] = u_val
         expect = m.flux(xo=b_val, ro=r_val[0]).eval() - 1
