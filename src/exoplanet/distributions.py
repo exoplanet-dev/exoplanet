@@ -9,9 +9,9 @@ __all__ = [
 
 import numpy as np
 
+from exoplanet.utils import as_tensor_variable
 from exoplanet.citations import add_citations_to_model
-from exoplanet.compat import USING_PYMC3, pm
-from exoplanet.compat import tensor as at
+from exoplanet.compat import USING_PYMC3, pm, tensor as at
 
 
 def with_initval(val, **kwargs):
@@ -68,11 +68,15 @@ def quad_limb_dark(name, **kwargs):
 
 
 def impact_parameter(name, ror, **kwargs):
-    b = kwargs.pop("initval", kwargs.pop("testval", 0.5))
+    ror = as_tensor_variable(ror)
+    kwargs["shape"] = shape = kwargs.pop("shape", ror.shape)
+    bhat = kwargs.pop("initval", kwargs.pop("testval", 0.5))
+    bhat = at.broadcast_to(bhat, shape)
     kwargs["lower"] = 0.0
     kwargs["upper"] = 1.0
     norm = pm.Uniform(
-        f"{name}_impact_parameter__", **with_initval(b / (1 + ror), **kwargs)
+        f"{name}_impact_parameter__",
+        **with_initval(bhat / (1 + ror), **kwargs),
     )
     return pm.Deterministic(name, norm * (1 + ror))
 
@@ -134,22 +138,34 @@ def kipping13(
         else:
             # Marginalize over the uncertainty on the parameters of the beta
             with pm.Model(name=name):
-                bounded_normal = pm.Bound(pm.Normal, lower=0)
-                alpha = bounded_normal(
-                    "alpha", mu=alpha_mu, sd=alpha_sd, **with_initval(alpha_mu)
+                alpha = _truncate(
+                    "alpha",
+                    pm.Normal,
+                    lower=0,
+                    mu=alpha_mu,
+                    sigma=alpha_sd,
+                    **with_initval(alpha_mu),
                 )
-                beta = bounded_normal(
-                    "beta", mu=beta_mu, sd=beta_sd, **with_initval(beta_mu)
+                beta = _truncate(
+                    "beta",
+                    pm.Normal,
+                    lower=0,
+                    mu=beta_mu,
+                    sigma=beta_sd,
+                    **with_initval(beta_mu),
                 )
 
         # Allow for upper and lower bounds
         if lower is not None or upper is not None:
-            dist = pm.Bound(
+            return _truncate(
+                name,
                 pm.Beta,
                 lower=0.0 if lower is None else lower,
                 upper=1.0 if upper is None else upper,
+                alpha=alpha,
+                beta=beta,
+                **kwargs,
             )
-            return dist(name, alpha=alpha, beta=beta, **kwargs)
 
         return pm.Beta(name, alpha=alpha, beta=beta, **kwargs)
 
@@ -216,21 +232,30 @@ def vaneylen19(
                 frac = frac_mu
             else:
 
-                bounded_normal = pm.Bound(pm.Normal, lower=0)
-                sigma_gauss = bounded_normal(
+                sigma_gauss = _truncate(
                     "sigma_gauss",
+                    pm.Normal,
+                    lower=0,
                     mu=sigma_gauss_mu,
-                    sd=sigma_gauss_sd,
+                    sigma=sigma_gauss_sd,
                     **with_initval(sigma_gauss_mu),
                 )
-                sigma_rayleigh = bounded_normal(
+                sigma_rayleigh = _truncate(
                     "sigma_rayleigh",
+                    pm.Normal,
+                    lower=0,
                     mu=sigma_rayleigh_mu,
-                    sd=sigma_rayleigh_sd,
+                    sigma=sigma_rayleigh_sd,
                     **with_initval(sigma_rayleigh_mu),
                 )
-                frac = pm.Bound(pm.Normal, lower=0, upper=1)(
-                    "frac", mu=frac_mu, sd=frac_sd, **with_initval(frac_mu)
+                frac = _truncate(
+                    "frac",
+                    pm.Normal,
+                    lower=0,
+                    upper=1,
+                    mu=frac_mu,
+                    sigma=frac_sd,
+                    **with_initval(frac_mu),
                 )
 
             gauss = pm.HalfNormal.dist(sigma=sigma_gauss)
@@ -241,9 +266,24 @@ def vaneylen19(
             pm.Potential(
                 "prior",
                 pm.math.logaddexp(
-                    at.log(1 - frac) + gauss.logp(ecc),
-                    at.log(frac) + rayleigh.logp(ecc),
+                    at.log(1 - frac) + _logp(gauss, ecc),
+                    at.log(frac) + _logp(rayleigh, ecc),
                 ),
             )
 
         return ecc
+
+
+def _logp(rv, x):
+    if USING_PYMC3:
+        return rv.logp(x)
+    return pm.logp(rv, x)
+
+
+def _truncate(name, dist, *, lower=None, upper=None, **kwargs):
+    if USING_PYMC3:
+        return pm.Bound(dist, lower=lower, upper=upper)(name, **kwargs)
+    initval = kwargs.pop("initval", None)
+    return pm.Truncated(
+        name, dist.dist(**kwargs), lower=lower, upper=upper, initval=initval
+    )
