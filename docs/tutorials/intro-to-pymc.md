@@ -5,7 +5,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.0
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -16,7 +16,7 @@ kernelspec:
 
 # A quick intro to PyMC
 
-```{code-cell} ipython3
+```{code-cell}
 import exoplanet
 
 exoplanet.utils.docs_setup()
@@ -39,7 +39,7 @@ So. Let's do that with PyMC.
 To start, we'll generate some fake data using a linear model.
 Feel free to change the random number seed to try out a different dataset.
 
-```{code-cell} ipython3
+```{code-cell}
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -102,7 +102,7 @@ This is the way that a model like this is often defined in statistics and it wil
 Now, let's implement this model in PyMC.
 The documentation for the distributions available in PyMC's modeling language can be [found here](https://www.pymc.io/projects/docs/en/stable/api/distributions.html) and these will come in handy as you go on to write your own models.
 
-```{code-cell} ipython3
+```{code-cell}
 import pymc as pm
 
 with pm.Model() as model:
@@ -124,9 +124,7 @@ with pm.Model() as model:
 
     # This is how you will sample the model. Take a look at the
     # docs to see that other parameters that are available.
-    trace = pm.sample(
-        draws=1000, tune=1000, chains=2, cores=2
-    )
+    trace = pm.sample(draws=1000, tune=1000, chains=2, cores=2)
 ```
 
 Now since we now have samples, let's make some diagnostic plots.
@@ -135,7 +133,7 @@ In this plot, you'll see the marginalized distribution for each parameter on the
 In each panel, you should see two lines with different colors.
 These are the results of different independent chains and if the results are substantially different in the different chains then there is probably something going wrong.
 
-```{code-cell} ipython3
+```{code-cell}
 import arviz as az
 
 _ = az.plot_trace(trace, var_names=["m", "b", "logs"])
@@ -148,13 +146,13 @@ In this table, some of the key columns to look at are the columns starting with 
 1. The `ess_*` columns show an estimate of the number of effective (or independent) samples for that parameter. In this case, the `ess` should probably be around 500 per chain (there should have been 2 chains run).
 2. `Rhat` shows the [Gelman–Rubin statistic](https://docs.pymc.io/api/diagnostics.html#pymc3.diagnostics.gelman_rubin) and it should be close to 1.
 
-```{code-cell} ipython3
+```{code-cell}
 az.summary(trace, var_names=["m", "b", "logs"])
 ```
 
 The last diagnostic plot that we'll make here is the [corner plot made using corner.py](https://corner.readthedocs.io).
 
-```{code-cell} ipython3
+```{code-cell}
 import corner
 
 _ = corner.corner(
@@ -188,7 +186,7 @@ So, for this tutorial, we'll use the custom Kepler solver that is implemented as
 
 First, we need to download the data from the exoplanet archive:
 
-```{code-cell} ipython3
+```{code-cell}
 import requests
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -242,7 +240,7 @@ There's a lot going on, so I want to point out a few things to pay attention to:
 4. Similarly, at the end of the model definition, we compute the RV curve for a single orbit on a fine grid. This can be very useful for diagnosing fits gone wrong.
 5. For parameters that specify angles (like $\omega$, called `w` in the model below), it can be inefficient to sample in the angle directly because of the fact that the value wraps around at $2\pi$. Instead, it can be better to sample the unit vector specified by the angle or as a parameter in a unit disk, when combined with eccentricity. There are some helper functions like {func}`exoplanet.distributions.angle` and {func}`exoplanet.distributions.unit_disk` to help with this.
 
-```{code-cell} ipython3
+```{code-cell}
 import aesara.tensor as at
 import exoplanet as xo
 
@@ -264,7 +262,7 @@ with pm.Model() as model:
     #  h = sqrt(e) * sin(w)
     #  k = sqrt(e) * cos(w)
     h, k = xo.unit_disk("h", "k", initval=np.array([0.01, 0.01]))
-    e = pm.Deterministic("e", h ** 2 + k ** 2)
+    e = pm.Deterministic("e", h**2 + k**2)
     w = pm.Deterministic("w", at.arctan2(k, h))
 
     rv0 = pm.Normal("rv0", mu=0.0, sigma=10.0, initval=0.0)
@@ -305,7 +303,7 @@ This is useful here because MCMC is not designed to *find* the maximum of the po
 The performance of all MCMC methods can be really bad when the initialization isn't good (especially when some parameters are very well constrained).
 To find the maximum a posteriori parameters using PyMC, you can use the [`find_MAP` function](https://www.pymc.io/projects/docs/en/stable/api/generated/pymc.find_MAP.html):
 
-```{code-cell} ipython3
+```{code-cell}
 with model:
     map_params = pm.find_MAP()
 ```
@@ -317,7 +315,7 @@ If this doesn't look good, try adjusting the initial guesses for the parameters 
 
 **Exercise:** Try changing the initial guesses for the parameters (as specified by the `initval` argument) and see how sensitive the results are to these values. Are there some parameters that are less important? Why is this?
 
-```{code-cell} ipython3
+```{code-cell}
 fig, axes = plt.subplots(2, 1, figsize=(8, 8))
 
 period = map_params["P"]
@@ -341,7 +339,7 @@ plt.tight_layout()
 
 Now let's sample the posterior starting from our MAP estimate:
 
-```{code-cell} ipython3
+```{code-cell}
 with model:
     trace = pm.sample(
         draws=1000,
@@ -358,7 +356,7 @@ As above, it's always a good idea to take a look at the summary statistics for t
 If everything went as planned, there should be more than 1000 effective samples per chain and the Rhat values should be close to 1.
 (Not too bad for about 30 seconds of run time!)
 
-```{code-cell} ipython3
+```{code-cell}
 az.summary(
     trace,
     var_names=["logK", "logP", "phi", "e", "w", "rv0", "rvtrend"],
@@ -367,7 +365,7 @@ az.summary(
 
 Similarly, we can make the corner plot again for this model.
 
-```{code-cell} ipython3
+```{code-cell}
 _ = corner.corner(trace, var_names=["K", "P", "e", "w"])
 ```
 
@@ -377,7 +375,7 @@ As above, the top plot shows the raw observations as black error bars and the RV
 But, this time, the blue line is actually composed of 25 lines that are samples from the posterior over trends that are consistent with the data.
 In the bottom panel, the orange lines indicate the same 25 posterior samples for the RV curve of one orbit.
 
-```{code-cell} ipython3
+```{code-cell}
 fig, axes = plt.subplots(2, 1, figsize=(8, 8))
 
 period = map_params["P"]
@@ -406,6 +404,6 @@ axes[1].set_ylim(-110, 110)
 plt.tight_layout()
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 
 ```
