@@ -21,7 +21,7 @@ def test_pymc(session):
     session.run("pytest", "-v", *session.posargs)
 
 
-@nox.session
+@nox.session(python=ALL_PYTHON_VS)
 def lint(session):
     session.install("pre-commit")
     session.run("pre-commit", "run", "--all-files", *session.posargs)
