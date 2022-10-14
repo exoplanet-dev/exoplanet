@@ -9,9 +9,10 @@ __all__ = [
 
 import numpy as np
 
-from exoplanet.utils import as_tensor_variable
 from exoplanet.citations import add_citations_to_model
-from exoplanet.compat import USING_PYMC3, pm, tensor as at
+from exoplanet.compat import USING_PYMC3, pm
+from exoplanet.compat import tensor as at
+from exoplanet.utils import as_tensor_variable
 
 
 def with_initval(val, **kwargs):
