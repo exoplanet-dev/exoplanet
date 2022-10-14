@@ -2,16 +2,11 @@ import logging
 
 import numpy as np
 import pytest
-
 from packaging import version
 
-from exoplanet.compat import (
-    tensor as at,
-    change_flags,
-    verify_grad,
-    function,
-    grad,
-)
+from exoplanet.compat import change_flags, function, grad
+from exoplanet.compat import tensor as at
+from exoplanet.compat import verify_grad
 from exoplanet.light_curves import (
     LimbDarkLightCurve,
     SecondaryEclipseLightCurve,

@@ -3,8 +3,8 @@ __all__ = ["TTVOrbit", "compute_expected_transit_times"]
 import numpy as np
 
 from exoplanet.compat import tensor as at
-from exoplanet.utils import as_tensor_variable
 from exoplanet.orbits.keplerian import KeplerianOrbit
+from exoplanet.utils import as_tensor_variable
 
 
 def compute_expected_transit_times(min_time, max_time, period, t0):

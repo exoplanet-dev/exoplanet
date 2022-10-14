@@ -1,4 +1,6 @@
-from exoplanet import distributions as distributions, interp as interp, orbits as orbits
+from exoplanet import distributions as distributions
+from exoplanet import interp as interp
+from exoplanet import orbits as orbits
 from exoplanet.citations import CITATIONS as CITATIONS
 from exoplanet.distributions import *  # NOQA
 from exoplanet.estimators import *  # NOQA

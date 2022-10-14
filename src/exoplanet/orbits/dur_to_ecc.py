@@ -10,7 +10,8 @@ from itertools import product
 
 import numpy as np
 
-from exoplanet.compat import pm, tensor as at
+from exoplanet.compat import pm
+from exoplanet.compat import tensor as at
 from exoplanet.orbits.keplerian import KeplerianOrbit, _get_consistent_inputs
 
 
