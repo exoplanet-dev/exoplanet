@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
-
 __all__ = ["SimpleTransitOrbit"]
 
-import aesara_theano_fallback.tensor as tt
 import numpy as np
 
-from ..utils import as_tensor_variable
+from exoplanet.compat import tensor as at
+from exoplanet.utils import as_tensor_variable
 
 
 class SimpleTransitOrbit:
@@ -38,7 +36,7 @@ class SimpleTransitOrbit:
         self._ref_time = self.t0 - self._half_period
 
     def get_star_position(self, t, light_delay=False):
-        nothing = tt.zeros_like(as_tensor_variable(t))
+        nothing = at.zeros_like(as_tensor_variable(t))
         return nothing, nothing, nothing
 
     def get_planet_position(self, t, light_delay=False):
@@ -59,12 +57,12 @@ class SimpleTransitOrbit:
             raise NotImplementedError(
                 "Light travel time delay is not implemented for simple orbits"
             )
-        dt = tt.mod(tt.shape_padright(t) - self._ref_time, self.period)
+        dt = at.mod(at.shape_padright(t) - self._ref_time, self.period)
         dt -= self._half_period
-        x = tt.squeeze(self.speed * dt)
-        y = tt.squeeze(self._b_norm + tt.zeros_like(dt))
-        m = tt.abs_(dt) < 0.5 * self.duration
-        z = tt.squeeze(m * 1.0 - (~m) * 1.0)
+        x = at.squeeze(self.speed * dt)
+        y = at.squeeze(self._b_norm + at.zeros_like(dt))
+        m = at.abs(dt) < 0.5 * self.duration
+        z = at.squeeze(m * 1.0 - (~m) * 1.0)
         return x, y, z
 
     def get_planet_velocity(self, t):
@@ -92,14 +90,14 @@ class SimpleTransitOrbit:
             raise NotImplementedError(
                 "Light travel time delay is not implemented for simple orbits"
             )
-        dt = tt.mod(tt.shape_padright(t) - self._ref_time, self.period)
+        dt = at.mod(at.shape_padright(t) - self._ref_time, self.period)
         dt -= self._half_period
         if r is None:
             tol = 0.5 * self.duration
         else:
             x = (r + self.r_star) ** 2 - self._b_norm**2
-            tol = tt.sqrt(x) / self.speed
+            tol = at.sqrt(x) / self.speed
         if texp is not None:
             tol += 0.5 * texp
-        mask = tt.any(tt.abs_(dt) < tol, axis=-1)
-        return tt.arange(t.size)[mask]
+        mask = at.any(at.abs(dt) < tol, axis=-1)
+        return at.arange(t.size)[mask]
