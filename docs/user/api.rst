@@ -44,8 +44,10 @@ Distributions
 Physical distributions
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: exoplanet.distributions.QuadLimbDark
-.. autoclass:: exoplanet.distributions.ImpactParameter
+.. autofunction:: exoplanet.distributions.angle
+.. autofunction:: exoplanet.distributions.unit_disk
+.. autofunction:: exoplanet.distributions.quad_limb_dark
+.. autofunction:: exoplanet.distributions.impact_parameter
 
 Eccentricity distributions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

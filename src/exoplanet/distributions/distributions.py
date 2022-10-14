@@ -9,6 +9,18 @@ from exoplanet.utils import as_tensor_variable
 
 
 def angle(name, *, regularization=10.0, **kwargs):
+    """An angle constrained to be in the range -pi to pi
+
+    The actual sampling is performed in the two dimensional vector space
+    proportional to ``(sin(theta), cos(theta))`` so that the sampler doesn't see
+    a discontinuity at pi.
+
+    The regularization parameter can be used to improve sampling performance
+    when the value of the angle is well constrained. It removes prior mass near
+    the origin in the sampling space, which can lead to bad geometry when the
+    angle is poorly constrained, but better performance when it is. The default
+    value of ``10.0`` is a good starting point.
+    """
     initval = kwargs.pop("initval", kwargs.pop("testval", 0.0))
     x1 = pm.Normal(
         f"{name}_angle1__", **_with_initval(np.sin(initval), **kwargs)
@@ -18,13 +30,28 @@ def angle(name, *, regularization=10.0, **kwargs):
     )
     if regularization is not None:
         pm.Potential(
-            f"_{name}_regularization",
+            f"{name}_regularization",
             regularization * at.log(x1**2 + x2**2),
         )
     return pm.Deterministic(name, at.arctan2(x1, x2))
 
 
 def unit_disk(name_x, name_y, **kwargs):
+    """Two dimensional parameters constrained to live within the unit disk
+
+    This returns two distributions whose sum of squares will be in the range
+    ``[0, 1)``. For example, in this code block:
+
+    .. code-block:: python
+
+        x, y = unit_disk("x", "y") radius_sq = x**2 + y**2
+
+    the tensor ``radius_sq`` will always have a value in the range ``[0, 1)``.
+
+    Args:
+        name_x: The name of the first distribution.
+        name_y: The name of the second distribution.
+    """
     initval = kwargs.pop("initval", kwargs.pop("testval", [0.0, 0.0]))
     kwargs["lower"] = -1.0
     kwargs["upper"] = 1.0
@@ -39,6 +66,12 @@ def unit_disk(name_x, name_y, **kwargs):
 
 
 def quad_limb_dark(name, **kwargs):
+    """An uninformative prior for quadratic limb darkening parameters
+
+    This is an implementation of the `Kipping (2013)
+    <https://arxiv.org/abs/1308.0009>`_ reparameterization of the two-parameter
+    limb darkening model to allow for efficient and uninformative sampling.
+    """
     add_citations_to_model(("kipping13",), kwargs.get("model", None))
 
     u = kwargs.pop("initval", kwargs.pop("testval", [np.sqrt(0.5), 0.0]))
@@ -58,6 +91,14 @@ def quad_limb_dark(name, **kwargs):
 
 
 def impact_parameter(name, ror, **kwargs):
+    """The impact parameter distribution for a transiting planet
+
+    Args:
+        ror: A scalar, tensor, or PyMC3 distribution representing the radius
+            ratio between the planet and star. Conditioned on a value of
+            ``ror``, this will be uniformly distributed between ``0`` and
+            ``1+ror``.
+    """
     ror = as_tensor_variable(ror)
     bhat = kwargs.pop("initval", kwargs.pop("testval", 0.5))
     if not USING_PYMC3:
