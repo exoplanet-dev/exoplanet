@@ -1,4 +1,3 @@
-from exoplanet import distributions as distributions
 from exoplanet import interp as interp
 from exoplanet import orbits as orbits
 from exoplanet.citations import CITATIONS as CITATIONS
