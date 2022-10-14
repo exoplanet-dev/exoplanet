@@ -24,6 +24,7 @@ class _Base:
         kwargs["progressbar"] = kwargs.get("progressbar", False)
         if USING_PYMC3:
             kwargs["return_inferencedata"] = True
+            kwargs["compute_convergence_checks"] = False
         return pm.sample(**kwargs)
 
     def _model(self, **kwargs):
