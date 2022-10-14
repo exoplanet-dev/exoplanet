@@ -42,8 +42,10 @@ jobs:
 
       - name: Run tests
         run: |
-          python -m nox --non-interactive --error-on-missing-interpreter \
-            --session ${{ matrix.session }}-${{ matrix.python-version }}
+          python -m nox --non-interactive \
+            --error-on-missing-interpreter \
+            --python ${{ matrix.python-version }} \
+            --session ${{ matrix.session }}
 
   build:
     runs-on: ubuntu-latest
