@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 __all__ = [
     "logger",
     "as_tensor_variable",
@@ -12,13 +10,13 @@ import logging
 import warnings
 from functools import wraps
 
-from aesara_theano_fallback import aesara as theano
+from exoplanet.compat import tensor
 
 logger = logging.getLogger("exoplanet")
 
 
 def as_tensor_variable(x, dtype="float64", **kwargs):
-    t = theano.tensor.as_tensor_variable(x, **kwargs)
+    t = tensor.as_tensor_variable(x, **kwargs)
     if dtype is None:
         return t
     return t.astype(dtype)

@@ -12,7 +12,6 @@ multi_line_output = 3
 include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
-known_third_party = ["astropy", "corner", "jupytext", "matplotlib", "nbconvert", "nbformat", "numpy", "packaging", "pandas", "pkg_resources", "pymc3", "pytest", "requests", "scipy", "setuptools", "sphinx_typlog_theme", "theano"]
 
 [tool.coverage.run]
 parallel = true
@@ -37,5 +36,5 @@ exclude_lines = [
   "except ImportError",
   "pragma: no cover",
   "def R_op",
-  "if verbose"
+  "if verbose",
 ]

@@ -1,19 +1,16 @@
-# -*- coding: utf-8 -*-
-
 import logging
-from collections import namedtuple
 
-import aesara_theano_fallback.tensor as tt
 import numpy as np
-import pymc3 as pm
 import pytest
-from pymc3.tests.test_distributions import R, Unit, Vector
-from pymc3.tests.test_transforms import check_transform, get_values
 from scipy.stats import beta, halfnorm, kstest, rayleigh
 
-from exoplanet.distributions import transforms as tr
-from exoplanet.distributions.eccentricity import kipping13, vaneylen19
-from exoplanet.distributions.physical import ImpactParameter, QuadLimbDark
+from exoplanet.compat import pm
+from exoplanet.distributions import (
+    kipping13,
+    vaneylen19,
+    impact_parameter,
+    quad_limb_dark,
+)
 
 
 class _Base:
@@ -176,16 +173,7 @@ class TestPhysical(_Base):
 
     def test_quad_limb_dark(self):
         with self._model():
-            dist = QuadLimbDark("u", shape=2)
-
-            # Test random sampling
-            samples = dist.random(size=100)
-            assert np.shape(samples) == (100, 2)
-
-            logp = QuadLimbDark.dist(shape=2).logp(samples).eval().flatten()
-            assert np.all(np.isfinite(logp))
-            assert np.allclose(logp[0], logp)
-
+            quad_limb_dark("u")
             trace = self._sample()
 
         u1 = trace["u"][:, 0]
@@ -210,13 +198,7 @@ class TestPhysical(_Base):
         upper = 1.0
         with self._model():
             ror = pm.Uniform("ror", lower=lower, upper=upper, shape=(5, 2))
-            dist = ImpactParameter("b", ror=ror)
-
-            # Test random sampling
-            samples = dist.random(size=100)
-            assert np.shape(samples) == (100, 5, 2)
-            assert np.all((0 <= samples) & (samples <= 1 + upper))
-
+            impact_parameter("b", ror)
             trace = self._sample()
 
         u = trace["ror"]
@@ -227,28 +209,3 @@ class TestPhysical(_Base):
             assert s < 0.05
 
         assert np.all(trace["b"] <= 1 + trace["ror"])
-
-
-def test_quad_limb_dark_transform():
-    values = get_values(
-        tr.quad_limb_dark,
-        Vector(R, 2),
-        constructor=tt.vector,
-        test=np.array([0.0, 0.0]),
-    )
-    domain = namedtuple("Domain", ["vals"])(values)
-    check_transform(
-        tr.quad_limb_dark,
-        domain,
-        constructor=tt.vector,
-        test=np.array([0.0, 0.0]),
-    )
-
-
-def test_impact_parameter_transform():
-    ror = np.float64(0.03)
-    check_transform(
-        tr.impact_parameter(ror),
-        Unit * (1 + ror),
-        test=0.5,
-    )

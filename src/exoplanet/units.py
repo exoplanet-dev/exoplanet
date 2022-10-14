@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-
 __all__ = ["with_unit", "has_unit", "to_unit"]
 
-from .utils import as_tensor_variable
+from exoplanet.utils import as_tensor_variable
 
 UNIT_ATTR_NAME = "__exoplanet_unit__"
 

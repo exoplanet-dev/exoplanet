@@ -1,12 +1,79 @@
-# -*- coding: utf-8 -*-
+__all__ = [
+    "angle",
+    "unit_disk",
+    "quad_limb_dark",
+    "impact_parameter",
+    "kipping13",
+    "vaneylen19",
+]
 
-__all__ = ["kipping13", "vaneylen19"]
-
-import aesara_theano_fallback.tensor as tt
 import numpy as np
-import pymc3 as pm
 
-from ..citations import add_citations_to_model
+from exoplanet.compat import pm, tensor as at, USING_PYMC3
+from exoplanet.citations import add_citations_to_model
+
+
+def with_initval(val, **kwargs):
+    if USING_PYMC3:
+        return dict(kwargs, testval=val)
+    return dict(kwargs, initval=val)
+
+
+def angle(name, *, regularization=10.0, **kwargs):
+    initval = kwargs.pop("initval", kwargs.pop("testval", 0.0))
+    x1 = pm.Normal(
+        f"{name}_angle1__", **with_initval(np.sin(initval), **kwargs)
+    )
+    x2 = pm.Normal(
+        f"{name}_angle2__", **with_initval(np.cos(initval), **kwargs)
+    )
+    if regularization is not None:
+        pm.Potential(
+            f"_{name}_regularization",
+            regularization * at.log(x1**2 + x2**2),
+        )
+    return pm.Deterministic(name, at.arctan2(x1, x2))
+
+
+def unit_disk(name_x, name_y, **kwargs):
+    initval = kwargs.pop("initval", kwargs.pop("testval", [0.0, 0.0]))
+    kwargs["lower"] = -1.0
+    kwargs["upper"] = 1.0
+    x1 = pm.Uniform(name_x, **with_initval(initval[0], **kwargs))
+    x2 = pm.Uniform(
+        f"{name_y}_unit_disk__",
+        **with_initval(initval[1] * np.sqrt(1 - initval[0] ** 2), **kwargs),
+    )
+    norm = at.sqrt(1 - x1**2)
+    pm.Potential(f"{name_y}_jacobian", at.log(norm))
+    return x1, pm.Deterministic(name_y, x2 * norm)
+
+
+def quad_limb_dark(name, **kwargs):
+    u = kwargs.pop("initval", kwargs.pop("testval", [np.sqrt(0.5), 0.0]))
+    u1 = u[0]
+    u2 = u[1]
+    kwargs["lower"] = 0.0
+    kwargs["upper"] = 1.0
+    q1 = pm.Uniform(f"{name}_q1__", **with_initval((u1 + u2) ** 2, **kwargs))
+    q2 = pm.Uniform(
+        f"{name}_q2__", **with_initval(0.5 * u1 / (u1 + u2), **kwargs)
+    )
+    sqrtq1 = at.sqrt(q1)
+    twoq2 = 2 * q2
+    return pm.Deterministic(
+        name, at.stack([sqrtq1 * twoq2, sqrtq1 * (1 - twoq2)], axis=0)
+    )
+
+
+def impact_parameter(name, ror, **kwargs):
+    b = kwargs.pop("initval", kwargs.pop("testval", 0.5))
+    kwargs["lower"] = 0.0
+    kwargs["upper"] = 1.0
+    norm = pm.Uniform(
+        f"{name}_impact_parameter__", **with_initval(b / (1 + ror), **kwargs)
+    )
+    return pm.Deterministic(name, norm * (1 + ror))
 
 
 def kipping13(
@@ -68,10 +135,10 @@ def kipping13(
             with pm.Model(name=name):
                 bounded_normal = pm.Bound(pm.Normal, lower=0)
                 alpha = bounded_normal(
-                    "alpha", mu=alpha_mu, sd=alpha_sd, testval=alpha_mu
+                    "alpha", mu=alpha_mu, sd=alpha_sd, **with_initval(alpha_mu)
                 )
                 beta = bounded_normal(
-                    "beta", mu=beta_mu, sd=beta_sd, testval=beta_mu
+                    "beta", mu=beta_mu, sd=beta_sd, **with_initval(beta_mu)
                 )
 
         # Allow for upper and lower bounds
@@ -151,16 +218,16 @@ def vaneylen19(
                     "sigma_gauss",
                     mu=sigma_gauss_mu,
                     sd=sigma_gauss_sd,
-                    testval=sigma_gauss_mu,
+                    **with_initval(sigma_gauss_mu),
                 )
                 sigma_rayleigh = bounded_normal(
                     "sigma_rayleigh",
                     mu=sigma_rayleigh_mu,
                     sd=sigma_rayleigh_sd,
-                    testval=sigma_rayleigh_mu,
+                    **with_initval(sigma_rayleigh_mu),
                 )
                 frac = pm.Bound(pm.Normal, lower=0, upper=1)(
-                    "frac", mu=frac_mu, sd=frac_sd, testval=frac_mu
+                    "frac", mu=frac_mu, sd=frac_sd, **with_initval(frac_mu)
                 )
 
             gauss = pm.HalfNormal.dist(sigma=sigma_gauss)
@@ -171,8 +238,8 @@ def vaneylen19(
             pm.Potential(
                 "prior",
                 pm.math.logaddexp(
-                    tt.log(1 - frac) + gauss.logp(ecc),
-                    tt.log(frac) + rayleigh.logp(ecc),
+                    at.log(1 - frac) + gauss.logp(ecc),
+                    at.log(frac) + rayleigh.logp(ecc),
                 ),
             )
 
