@@ -23,10 +23,10 @@ def angle(name, *, regularization=10.0, **kwargs):
     """
     initval = kwargs.pop("initval", kwargs.pop("testval", 0.0))
     x1 = pm.Normal(
-        f"{name}_angle1__", **_with_initval(np.sin(initval), **kwargs)
+        f"__{name}_angle1", **_with_initval(np.sin(initval), **kwargs)
     )
     x2 = pm.Normal(
-        f"{name}_angle2__", **_with_initval(np.cos(initval), **kwargs)
+        f"__{name}_angle2", **_with_initval(np.cos(initval), **kwargs)
     )
     if regularization is not None:
         pm.Potential(
@@ -57,7 +57,7 @@ def unit_disk(name_x, name_y, **kwargs):
     kwargs["upper"] = 1.0
     x1 = pm.Uniform(name_x, **_with_initval(initval[0], **kwargs))
     x2 = pm.Uniform(
-        f"{name_y}_unit_disk__",
+        f"__{name_y}_unit_disk",
         **_with_initval(initval[1] * np.sqrt(1 - initval[0] ** 2), **kwargs),
     )
     norm = at.sqrt(1 - x1**2)
@@ -79,9 +79,9 @@ def quad_limb_dark(name, **kwargs):
     u2 = u[1]
     kwargs["lower"] = 0.0
     kwargs["upper"] = 1.0
-    q1 = pm.Uniform(f"{name}_q1__", **_with_initval((u1 + u2) ** 2, **kwargs))
+    q1 = pm.Uniform(f"__{name}_q1", **_with_initval((u1 + u2) ** 2, **kwargs))
     q2 = pm.Uniform(
-        f"{name}_q2__", **_with_initval(0.5 * u1 / (u1 + u2), **kwargs)
+        f"__{name}_q2", **_with_initval(0.5 * u1 / (u1 + u2), **kwargs)
     )
     sqrtq1 = at.sqrt(q1)
     twoq2 = 2 * q2
@@ -107,7 +107,7 @@ def impact_parameter(name, ror, **kwargs):
     kwargs["lower"] = 0.0
     kwargs["upper"] = 1.0
     norm = pm.Uniform(
-        f"{name}_impact_parameter__",
+        f"__{name}_impact_parameter",
         **_with_initval(bhat / (1 + ror), **kwargs),
     )
     return pm.Deterministic(name, norm * (1 + ror))

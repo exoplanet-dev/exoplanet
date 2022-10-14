@@ -10,9 +10,7 @@ from exoplanet.compat import tensor as at
 def kipping13(
     name, fixed=False, long=None, lower=None, upper=None, model=None, **kwargs
 ):
-    """The beta eccentricity distribution fit by Kipping (2013)
-
-    The beta distribution parameters fit by `Kipping (2013b)
+    """The beta distribution parameters fit by `Kipping (2013b)
     <https://arxiv.org/abs/1306.4982>`_.
 
     Args:
