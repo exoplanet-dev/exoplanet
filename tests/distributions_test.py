@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from scipy.stats import beta, halfnorm, kstest, rayleigh
 
-from exoplanet.compat import pm, USING_PYMC3
+from exoplanet.compat import USING_PYMC3, pm
 from exoplanet.distributions import (
     impact_parameter,
     kipping13,
