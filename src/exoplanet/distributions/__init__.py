@@ -11,9 +11,9 @@ __all__ = [
 from exoplanet.distributions import eccentricity
 from exoplanet.distributions.distributions import (
     angle,
-    unit_disk,
     impact_parameter,
     quad_limb_dark,
+    unit_disk,
 )
 
 # For backwards compatibility, define wrappers for the old Distribution-based
