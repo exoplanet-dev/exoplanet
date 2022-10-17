@@ -8,7 +8,7 @@ from exoplanet.compat import tensor as at
 
 
 def kipping13(
-    name, fixed=False, long=None, lower=None, upper=None, model=None, **kwargs
+    name, fixed=True, long=None, lower=None, upper=None, model=None, **kwargs
 ):
     """The beta distribution parameters fit by `Kipping (2013b)
     <https://arxiv.org/abs/1306.4982>`_.
@@ -68,7 +68,7 @@ def kipping13(
                     lower=0,
                     mu=alpha_mu,
                     sigma=alpha_sd,
-                    **_with_initval(alpha_mu),
+                    **_with_initval(initval=alpha_mu),
                 )
                 beta = _truncate(
                     "beta",
@@ -76,19 +76,24 @@ def kipping13(
                     lower=0,
                     mu=beta_mu,
                     sigma=beta_sd,
-                    **_with_initval(beta_mu),
+                    **_with_initval(initval=beta_mu),
                 )
 
         # Allow for upper and lower bounds
         if lower is not None or upper is not None:
+            lower = 0.0 if lower is None else lower
+            upper = 1.0 if upper is None else upper
+            kwargs["initval"] = kwargs.pop(
+                "initval", kwargs.pop("testval", 0.5 * (lower + upper))
+            )
             return _truncate(
                 name,
                 pm.Beta,
-                lower=0.0 if lower is None else lower,
-                upper=1.0 if upper is None else upper,
+                lower=lower,
+                upper=upper,
                 alpha=alpha,
                 beta=beta,
-                **kwargs,
+                **_with_initval(**kwargs),
             )
 
         return pm.Beta(name, alpha=alpha, beta=beta, **kwargs)
@@ -96,7 +101,7 @@ def kipping13(
 
 def vaneylen19(
     name,
-    fixed=False,
+    fixed=True,
     multi=False,
     lower=None,
     upper=None,
@@ -162,7 +167,7 @@ def vaneylen19(
                     lower=0,
                     mu=sigma_gauss_mu,
                     sigma=sigma_gauss_sd,
-                    **_with_initval(sigma_gauss_mu),
+                    **_with_initval(initval=sigma_gauss_mu),
                 )
                 sigma_rayleigh = _truncate(
                     "sigma_rayleigh",
@@ -170,7 +175,7 @@ def vaneylen19(
                     lower=0,
                     mu=sigma_rayleigh_mu,
                     sigma=sigma_rayleigh_sd,
-                    **_with_initval(sigma_rayleigh_mu),
+                    **_with_initval(initval=sigma_rayleigh_mu),
                 )
                 frac = _truncate(
                     "frac",
@@ -179,7 +184,7 @@ def vaneylen19(
                     upper=1,
                     mu=frac_mu,
                     sigma=frac_sd,
-                    **_with_initval(frac_mu),
+                    **_with_initval(initval=frac_mu),
                 )
 
             gauss = pm.HalfNormal.dist(sigma=sigma_gauss)
@@ -198,7 +203,8 @@ def vaneylen19(
         return ecc
 
 
-def _with_initval(val, **kwargs):
+def _with_initval(**kwargs):
+    val = kwargs.pop("initval", kwargs.pop("testval", None))
     if USING_PYMC3:
         return dict(kwargs, testval=val)
     return dict(kwargs, initval=val)
@@ -212,8 +218,10 @@ def _logp(rv, x):
 
 def _truncate(name, dist, *, lower=None, upper=None, **kwargs):
     if USING_PYMC3:
-        return pm.Bound(dist, lower=lower, upper=upper)(name, **kwargs)
-    initval = kwargs.pop("initval", None)
+        return pm.Bound(dist, lower=lower, upper=upper)(
+            name, **_with_initval(**kwargs)
+        )
+    initval = kwargs.pop("initval", kwargs.pop("testval", None))
     return pm.Truncated(
         name, dist.dist(**kwargs), lower=lower, upper=upper, initval=initval
     )
