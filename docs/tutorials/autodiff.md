@@ -6,7 +6,7 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.14.1
 kernelspec:
-  display_name: Python 3
+  display_name: Python 3 (ipykernel)
   language: python
   name: python3
 ---
@@ -35,8 +35,8 @@ There are times when providing your AD framework with a custom implementation an
 
 ## Automatic differentation in Theano/Aesara
 
-Let's start by giving a quick taste for how AD works in the context of `PyMC3` and `exoplanet`.
-`PyMC3` is built on top of a library called `Aesara` (formerly `Theano`, see {ref}`theano`) that was designed for AD and fast linear algebra in the context of neural networks.
+Let's start by giving a quick taste for how AD works in the context of `PyMC` and `exoplanet`.
+`PyMC` is built on top of a library called `Aesara` (formerly `Theano`, see {ref}`theano`) that was designed for AD and fast linear algebra in the context of neural networks.
 The learning curve can be steep because your code ends up looking a little different from the usual way you would write Python code.
 (If you're looking for something more "Pythonic", [JAX](https://github.com/google/jax) might be a good alternative, but for our purposes we'll stick with `Aesara`.)
 In `Aesara`, you start be defining the *relationships* between variables and then ask to evaluate a variable using this "graph".
@@ -59,8 +59,8 @@ $$
 ```{code-cell}
 import numpy as np
 import matplotlib.pyplot as plt
-from aesara_theano_fallback import aesara
-import aesara_theano_fallback.tensor as at
+import aesara
+import aesara.tensor as at
 
 # Define the relationship between two variables x and y=f(x)
 x_ = at.vector("x")
@@ -111,9 +111,8 @@ We're not going to do a systematic study of the relative performance of differen
 import time
 import emcee
 import logging
-import pymc3 as pm
+import pymc as pm
 import arviz as az
-import pymc3_ext as pmx
 
 # Make PyMC3 less noisy just for this example!
 logger = logging.getLogger("pymc3")
@@ -142,6 +141,7 @@ with pm.Model() as model:
 
     # Compute the cost per sample
     pymc_per_eff = pymc_time / np.mean(az.summary(pymc_trace)["ess_bulk"])
+
 
 # Then sample the same model using emcee
 func = pmx.get_theano_function_for_var(model.logpt, model=model)
