@@ -15,11 +15,10 @@ from exoplanet.distributions.distributions import (
     quad_limb_dark,
     unit_disk,
 )
+from exoplanet.utils import deprecated
 
 # For backwards compatibility, define wrappers for the old Distribution-based
 # versions of these functions
-from exoplanet.utils import deprecated
-
 ImpactParameter = deprecated(
     alternate="exoplanet.distributions.impact_parameter"
 )(impact_parameter)
