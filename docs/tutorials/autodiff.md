@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.0
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -15,7 +15,7 @@ kernelspec:
 
 # Automatic differentation & gradient-based inference
 
-```{code-cell} ipython3
+```{code-cell}
 import exoplanet
 
 exoplanet.utils.docs_setup()
@@ -56,7 +56,7 @@ $$
 \frac{\mathrm{d}y}{\mathrm{d}x} = \frac{2\,\pi}{3}\,\exp\left[\sin\left(\frac{2\,\pi\,x}{3}\right)\right]\,\cos\left(\frac{2\,\pi\,x}{3}\right)
 $$
 
-```{code-cell} ipython3
+```{code-cell}
 import numpy as np
 import matplotlib.pyplot as plt
 import aesara
@@ -107,7 +107,7 @@ But, the point of `exoplanet` is that it integrates with `PyMC3` which provides 
 Take a look at {ref}`intro-to-pymc3` for some specific introductory examples of using `PyMC3` for MCMC, but the general motivation for using `PyMC3` (instead of [emcee](https://emcee.readthedocs.io) or [dynesty](https://dynesty.readthedocs.io), for example) is that it can be far more computationally efficient (per effective sample), especially when your model has more than a couple of parameters.
 We're not going to do a systematic study of the relative performance of different methods because that is fraught and can be problem specific, but let's look at another very artificial example where we compare the performance of sampling a 50-dimensional Gaussian using `PyMC3` and [`emcee`](https://emcee.readthedocs.io).
 
-```{code-cell} ipython3
+```{code-cell}
 import time
 import emcee
 import logging
@@ -169,7 +169,7 @@ After running these chains, we can compare the relative performance (remember th
 To compare the performance of different MCMC samplers, the best metric is the computational cost per effective sample (for the parameter/function that you most care about).
 In this case, we'll look at the total runtime (including burn-in) divided by an estaimte of the the mean effective sample size across all 50 dimensions (lower is better):
 
-```{code-cell} ipython3
+```{code-cell}
 print(
     f"For PyMC3, the runtime per effective sample is: {pymc_per_eff * 1e3:.2f} ms"
 )
@@ -186,6 +186,6 @@ If you find that your model is not sampling well, this is almost always caused b
 See {ref}`reparameterization` for some tips and tricks.
 :::
 
-```{code-cell} ipython3
+```{code-cell}
 
 ```
