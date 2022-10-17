@@ -21,6 +21,7 @@ class _Base:
         logger.setLevel(logging.ERROR)
         kwargs["draws"] = kwargs.get("draws", 1000)
         kwargs["progressbar"] = kwargs.get("progressbar", False)
+        kwargs["random_seed"] = kwargs.get("random_seed", self.random_seed)
         if USING_PYMC3:
             kwargs["return_inferencedata"] = True
             kwargs["compute_convergence_checks"] = False
@@ -36,7 +37,7 @@ class TestEccentricity(_Base):
 
     def test_kipping13(self):
         with self._model() as model:
-            dist = kipping13("ecc", shape=(5, 2))
+            kipping13("ecc", fixed=False, shape=(5, 2))
             if USING_PYMC3:
                 assert "ecc_alpha" in model.named_vars
                 assert "ecc_beta" in model.named_vars
@@ -99,12 +100,12 @@ class TestEccentricity(_Base):
             & (ecc <= kwargs.get("upper", 1.0))
         )
 
-    @pytest.mark.parametrize("kwargs", [dict(), dict(multi=True)])
+    @pytest.mark.parametrize("kwargs", [dict(fixed=False), dict(multi=True)])
     def test_vaneylen19(self, kwargs):
         with self._model() as model:
-            dist = vaneylen19("ecc", shape=(5, 2), **kwargs)
+            vaneylen19("ecc", shape=(5, 2), **kwargs)
 
-            if not kwargs.get("fixed", False):
+            if not kwargs.get("fixed", True):
                 if USING_PYMC3:
                     assert "ecc_sigma_gauss" in model.named_vars
                     assert "ecc_sigma_rayleigh" in model.named_vars
