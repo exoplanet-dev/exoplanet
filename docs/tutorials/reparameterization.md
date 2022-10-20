@@ -30,6 +30,6 @@ For angles it can sometimes be better to parameterize in terms of sums or differ
 
 As I learn more general advice for reparameterization of `exoplanet` models, I'll try to keep this page updated, but in the meantime, feel free to start [a "discussion" on the GitHub repository](https://github.com/exoplanet-dev/exoplanet/discussions) if you discover a particularly good or tricky parameterization problem.
 
-```{code-cell} ipython3
+```{code-cell}
 
 ```
