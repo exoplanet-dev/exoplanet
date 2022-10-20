@@ -3,7 +3,7 @@ __all__ = ["add_citations_to_model", "CITATIONS"]
 import logging
 import textwrap
 
-from exoplanet.compat import pm, USING_PYMC3
+from exoplanet.compat import USING_PYMC3, pm
 
 
 def add_citations_to_model(citations, model=None):
