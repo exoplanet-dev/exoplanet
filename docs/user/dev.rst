@@ -87,8 +87,8 @@ information there about how to contribute.
 3. **Theano/Aesara ops**: ``exoplanet`` comes bundled with a set of custom ops
 that are implemented in the `exoplanet-core project
 <https://github.com/exoplanet-dev/exoplanet-core>`_. As a user, hopefully you'll
-rarely interact with these directly and we haven't put a lot of work into making
-them user friendly, but if you are interested in diving in, feel free to ask
+rarely interact with these directly, and we haven't put a lot of work into making
+them user-friendly, but if you are interested in diving in, feel free to ask
 questions on GitHub or via email.
 
 

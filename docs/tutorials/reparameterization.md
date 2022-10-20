@@ -4,9 +4,9 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.1
+    jupytext_version: 1.14.0
 kernelspec:
-  display_name: Python 3
+  display_name: Python 3 (ipykernel)
   language: python
   name: python3
 ---
@@ -17,8 +17,8 @@ kernelspec:
 
 +++
 
-One thing that you'll often find when using `exoplanet` (and `PyMC3` or other libraries for gradient-based inference) is that performance of your inference can be quite sensitive to the parameterization of your problem.
-For example, you might see warnings from `PyMC3` telling you to consider reparameterizing your model (because of divergences) or (worse!) you might find that sampling is unreasonably slow or the number of effective samples is very small.
+One thing that you'll often find when using `exoplanet` (and `PyMC` or other libraries for gradient-based inference) is that performance of your inference can be quite sensitive to the parameterization of your problem.
+For example, you might see warnings from `PyMC` telling you to consider reparameterizing your model (because of divergences) or (worse!) you might find that sampling is unreasonably slow or the number of effective samples is very small.
 These issues can almost always be solved by investigating any sources of non-linear degeneracies between parameters in your model or heavy tails in the posterior density.
 
 [The Stan User's Guide](https://mc-stan.org/docs/2_27/stan-users-guide/reparameterization-section.html) includes some general advice about reparameterization that can be a useful place to start, but I've found that the best choices tend to be pretty problem specific.
@@ -30,6 +30,6 @@ For angles it can sometimes be better to parameterize in terms of sums or differ
 
 As I learn more general advice for reparameterization of `exoplanet` models, I'll try to keep this page updated, but in the meantime, feel free to start [a "discussion" on the GitHub repository](https://github.com/exoplanet-dev/exoplanet/discussions) if you discover a particularly good or tricky parameterization problem.
 
-```{code-cell}
+```{code-cell} ipython3
 
 ```

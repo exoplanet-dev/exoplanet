@@ -13,10 +13,10 @@ The recommended method of installing *exoplanet* is with `pip
 
 .. code-block:: bash
 
-    python -m pip install -U exoplanet
+    python -m pip install -U "exoplanet[pymc]"
 
-If you want to install some recommended extras (`pymc3-ext
-<https://github.com/exoplanet-dev/pymc3-ext>`_ and `celerite2
+If you want to install some recommended extras (`pymc-ext
+<https://github.com/exoplanet-dev/pymc-ext>`_ and `celerite2
 <https://celerite2.readthedocs.io>`_), you can use the following, or just follow
 the instructions on the relevant documentation pages:
 
@@ -28,10 +28,26 @@ Both of these installation methods will install the required dependencies:
 
 - `numpy <https://numpy.org>`_
 - `astropy <https://www.astropy.org>`_
-- `pymc3 <https://docs.pymc.io>`_
+- `pymc <https://www.pymc.io>`_
 - `exoplanet-core <https://github.com/exoplanet-dev/exoplanet-core>`_
-- `aesara-theano-fallback <https://github.com/exoplanet-dev/aesara-theano-fallback>`_
 
+Compatibility with PyMC3
+------------------------
+
+Although now updated to work with ``PyMC`` version 4, ``exoplanet`` is still
+backwards compatible with ``PyMC3``. To install the ``PyMC3`` compatible version
+of ``exoplanet``, use the following command:
+
+.. code-block:: bash
+
+    python -m pip install -U "exoplanet[pymc3]"
+
+or first install ``PyMC3`` (however you want) and then ``exoplanet`` without any
+extras:
+
+.. code-block:: bash
+
+    python -m pip install -U exoplanet
 
 Using conda
 -----------
