@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.0
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -21,7 +21,7 @@ In order to make sure that you can easily give credit where credit is due, we ha
 
 For example, you might compute a quadratically limb darkened light curve using `starry` (via the {class}`exoplanet.LimbDarkLightCurve` class):
 
-```{code-cell} ipython3
+```{code-cell}
 import pymc as pm
 import exoplanet as xo
 
@@ -43,16 +43,16 @@ The {func}`exoplanet.citations.get_citations_for_model` function would generate 
 
 The first output from {func}`exoplanet.citations.get_citations_for_model` gives the acknowledgment text:
 
-```{code-cell} ipython3
+```{code-cell}
 print(txt)
 ```
 
 And the second output is a string with BibTeX entries for each of the citations in the acknowledgment text:
 
-```{code-cell} ipython3
+```{code-cell}
 print(bib.split("\n\n")[0] + "\n\n...")
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 
 ```
