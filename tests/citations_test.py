@@ -14,7 +14,7 @@ def test_basic():
     with pm.Model() as model:
         LimbDarkLightCurve(0.5, 0.2)
         txt, bib = get_citations_for_model()
-    for k in ["exoplanet", "theano", "pymc3", "starry"]:
+    for k in ["exoplanet", "starry"]:
         assert all(v in bib for v in CITATIONS[k][0])
         assert CITATIONS[k][1] in bib
 

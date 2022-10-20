@@ -1,11 +1,11 @@
 ---
 jupytext:
-  encoding: '# -*- coding: utf-8 -*-'
+  encoding: "# -*- coding: utf-8 -*-"
   text_representation:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.1
+    jupytext_version: 1.14.0
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -16,7 +16,7 @@ kernelspec:
 
 # A quick intro to PyMC
 
-```{code-cell}
+```{code-cell} ipython3
 import exoplanet
 
 exoplanet.utils.docs_setup()
@@ -24,7 +24,7 @@ print(f"exoplanet.__version__ = '{exoplanet.__version__}'")
 ```
 
 Gradient-based inference methods (like [Hamiltonian Monte Carlo (HMC)](https://en.wikipedia.org/wiki/Hamiltonian_Monte_Carlo)) haven't been widely used in astrophysics, but they are the standard methods for probabilistic inference using Markov chain Monte Carlo (MCMC) in many other fields.
-*exoplanet* is designed to provide the building blocks for fitting many exoplanet datasets using this technology, and this tutorial presents some of the basic features of the [PyMC](https://docs.pymc.io/) modeling language and inference engine.
+_exoplanet_ is designed to provide the building blocks for fitting many exoplanet datasets using this technology, and this tutorial presents some of the basic features of the [PyMC](https://docs.pymc.io/) modeling language and inference engine.
 The [documentation for PyMC](https://docs.pymc.io/) includes many other tutorials that you should check out to get more familiar with the features that are available.
 
 In this tutorial, we will go through two simple examples of fitting some data using PyMC.
@@ -39,7 +39,7 @@ So. Let's do that with PyMC.
 To start, we'll generate some fake data using a linear model.
 Feel free to change the random number seed to try out a different dataset.
 
-```{code-cell}
+```{code-cell} ipython3
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -102,7 +102,7 @@ This is the way that a model like this is often defined in statistics and it wil
 Now, let's implement this model in PyMC.
 The documentation for the distributions available in PyMC's modeling language can be [found here](https://www.pymc.io/projects/docs/en/stable/api/distributions.html) and these will come in handy as you go on to write your own models.
 
-```{code-cell}
+```{code-cell} ipython3
 import pymc as pm
 
 with pm.Model() as model:
@@ -133,7 +133,7 @@ In this plot, you'll see the marginalized distribution for each parameter on the
 In each panel, you should see two lines with different colors.
 These are the results of different independent chains and if the results are substantially different in the different chains then there is probably something going wrong.
 
-```{code-cell}
+```{code-cell} ipython3
 import arviz as az
 
 _ = az.plot_trace(trace, var_names=["m", "b", "logs"])
@@ -144,15 +144,15 @@ This is implemented in PyMC as the "summary" function.
 In this table, some of the key columns to look at are the columns starting with `ess_` and `Rhat`.
 
 1. The `ess_*` columns show an estimate of the number of effective (or independent) samples for that parameter. In this case, the `ess` should probably be around 500 per chain (there should have been 2 chains run).
-2. `Rhat` shows the [Gelman–Rubin statistic](https://docs.pymc.io/api/diagnostics.html#pymc3.diagnostics.gelman_rubin) and it should be close to 1.
+2. `Rhat` shows the Gelman–Rubin statistic, and it should be close to 1.
 
-```{code-cell}
+```{code-cell} ipython3
 az.summary(trace, var_names=["m", "b", "logs"])
 ```
 
 The last diagnostic plot that we'll make here is the [corner plot made using corner.py](https://corner.readthedocs.io).
 
-```{code-cell}
+```{code-cell} ipython3
 import corner
 
 _ = corner.corner(
@@ -172,7 +172,7 @@ _ = corner.corner(
 While the above example was cute, it doesn't really fully exploit the power of PyMC and it doesn't really show some of the real issues that you will face when you use PyMC as an astronomer.
 To get a better sense of how you might use PyMC in Real Life™, let's take a look at a more realistic example: fitting a Keplerian orbit to radial velocity observations.
 
-One of the key aspects of this problem that I want to highlight is the fact that PyMC (and the underlying model building framework [Theano (recently renamed to Aesara)](https://aesara.readthedocs.io/)) don't have out-of-the-box support for the root-finding that is required to solve Kepler's equation.
+One of the key aspects of this problem that I want to highlight is the fact that PyMC (and the underlying model-building framework [Aesara](https://aesara.readthedocs.io/)) don't have out-of-the-box support for the root-finding that is required to solve Kepler's equation.
 As part of the process of computing a Keplerian RV model, we must solve the equation:
 
 $$
@@ -182,11 +182,11 @@ $$
 for the eccentric anomaly $E$ given some mean anomaly $M$ and eccentricity $e$.
 There are commonly accepted methods of solving this equation using [Newton's method](https://en.wikipedia.org/wiki/Newton%27s_method), but if we want to expose that to PyMC, we have to define a [custom Aesara operation](https://aesara.readthedocs.io/en/latest/extending/index.html) with a custom gradient.
 I won't go into the details of the math (because [I blogged about it](https://dfm.io/posts/stan-c++/)) and I won't go into the details of the implementation.
-So, for this tutorial, we'll use the custom Kepler solver that is implemented as part of *exoplanet* and fit the publicly available radial velocity observations of the famous exoplanetary system 51 Peg using PyMC.
+So, for this tutorial, we'll use the custom Kepler solver that is implemented as part of _exoplanet_ and fit the publicly available radial velocity observations of the famous exoplanetary system 51 Peg using PyMC.
 
 First, we need to download the data from the exoplanet archive:
 
-```{code-cell}
+```{code-cell} ipython3
 import requests
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -234,13 +234,13 @@ Some of this will look familiar after the Hello World example, but things are a 
 Take a minute to take a look through this and see if you can follow it.
 There's a lot going on, so I want to point out a few things to pay attention to:
 
-1. All of the mathematical operations (for example `exp` and `sqrt`) are being performed using Theano/Aesara (see {ref}`theano`) instead of NumPy.
+1. All of the mathematical operations (for example `exp` and `sqrt`) are being performed using [Aesara](https://aesara.readthedocs.io) instead of NumPy.
 2. All of the parameters have initial guesses provided. This is an example where this makes a big difference because some of the parameters (like period) are very tightly constrained.
 3. Some of the lines are wrapped in `Deterministic` distributions. This can be useful because it allows us to track values as the chain progresses even if they're not parameters. For example, after sampling, we will have a sample for `bkg` (the background RV trend) for each step in the chain. This can be especially useful for making plots of the results.
 4. Similarly, at the end of the model definition, we compute the RV curve for a single orbit on a fine grid. This can be very useful for diagnosing fits gone wrong.
 5. For parameters that specify angles (like $\omega$, called `w` in the model below), it can be inefficient to sample in the angle directly because of the fact that the value wraps around at $2\pi$. Instead, it can be better to sample the unit vector specified by the angle or as a parameter in a unit disk, when combined with eccentricity. There are some helper functions like {func}`exoplanet.distributions.angle` and {func}`exoplanet.distributions.unit_disk` to help with this.
 
-```{code-cell}
+```{code-cell} ipython3
 import aesara.tensor as at
 import exoplanet as xo
 
@@ -299,11 +299,11 @@ with pm.Model() as model:
 ```
 
 In this case, I've found that it is useful to first optimize the parameters to find the "maximum a posteriori" (MAP) parameters and then start the sampler from there.
-This is useful here because MCMC is not designed to *find* the maximum of the posterior; it's just meant to sample the shape of the posterior.
-The performance of all MCMC methods can be really bad when the initialization isn't good (especially when some parameters are very well constrained).
+This is useful here because MCMC is not designed to _find_ the maximum of the posterior; it's just meant to sample the shape of the posterior.
+The performance of all MCMC methods can be really bad when the initialization isn't good (especially when some parameters are very well-constrained).
 To find the maximum a posteriori parameters using PyMC, you can use the [`find_MAP` function](https://www.pymc.io/projects/docs/en/stable/api/generated/pymc.find_MAP.html):
 
-```{code-cell}
+```{code-cell} ipython3
 with model:
     map_params = pm.find_MAP()
 ```
@@ -315,7 +315,7 @@ If this doesn't look good, try adjusting the initial guesses for the parameters 
 
 **Exercise:** Try changing the initial guesses for the parameters (as specified by the `initval` argument) and see how sensitive the results are to these values. Are there some parameters that are less important? Why is this?
 
-```{code-cell}
+```{code-cell} ipython3
 fig, axes = plt.subplots(2, 1, figsize=(8, 8))
 
 period = map_params["P"]
@@ -339,7 +339,7 @@ plt.tight_layout()
 
 Now let's sample the posterior starting from our MAP estimate:
 
-```{code-cell}
+```{code-cell} ipython3
 with model:
     trace = pm.sample(
         draws=1000,
@@ -356,7 +356,7 @@ As above, it's always a good idea to take a look at the summary statistics for t
 If everything went as planned, there should be more than 1000 effective samples per chain and the Rhat values should be close to 1.
 (Not too bad for about 30 seconds of run time!)
 
-```{code-cell}
+```{code-cell} ipython3
 az.summary(
     trace,
     var_names=["logK", "logP", "phi", "e", "w", "rv0", "rvtrend"],
@@ -365,7 +365,7 @@ az.summary(
 
 Similarly, we can make the corner plot again for this model.
 
-```{code-cell}
+```{code-cell} ipython3
 _ = corner.corner(trace, var_names=["K", "P", "e", "w"])
 ```
 
@@ -375,7 +375,7 @@ As above, the top plot shows the raw observations as black error bars and the RV
 But, this time, the blue line is actually composed of 25 lines that are samples from the posterior over trends that are consistent with the data.
 In the bottom panel, the orange lines indicate the same 25 posterior samples for the RV curve of one orbit.
 
-```{code-cell}
+```{code-cell} ipython3
 fig, axes = plt.subplots(2, 1, figsize=(8, 8))
 
 period = map_params["P"]
@@ -404,6 +404,6 @@ axes[1].set_ylim(-110, 110)
 plt.tight_layout()
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 
 ```

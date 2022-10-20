@@ -6,10 +6,10 @@ UNIT_ATTR_NAME = "__exoplanet_unit__"
 
 
 def with_unit(obj, unit):
-    """Decorate a Theano tensor with Astropy units
+    """Decorate an Aesara tensor with Astropy units
 
     Args:
-        obj: The Theano tensor
+        obj: The Aesara tensor
         unit (astropy.Unit): The units for this object
 
     Raises:
@@ -29,14 +29,14 @@ def has_unit(obj):
 
 
 def to_unit(obj, target):
-    """Convert a Theano tensor with units to a target set of units
+    """Convert an Aesara tensor with units to a target set of units
 
     Args:
-        obj: The Theano tensor
+        obj: The Aesara tensor
         target (astropy.Unit): The target units
 
     Returns:
-        A Theano tensor in the right units
+        A Aesara tensor in the right units
 
     """
     if not has_unit(obj):

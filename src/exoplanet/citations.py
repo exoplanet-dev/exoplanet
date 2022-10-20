@@ -3,7 +3,7 @@ __all__ = ["add_citations_to_model", "CITATIONS"]
 import logging
 import textwrap
 
-from exoplanet.compat import pm
+from exoplanet.compat import pm, USING_PYMC3
 
 
 def add_citations_to_model(citations, model=None):
@@ -19,7 +19,7 @@ def add_citations_to_model(citations, model=None):
 
 
 def get_citations_for_model(model=None, width=79):
-    """Get the citations for the components used an exoplanet PyMC3
+    """Get the citations for the components used an exoplanet PyMC model
 
     Returns: The acknowledgement text for exoplanet and its dependencies and a
     string containing the BibTeX entries for the citations in the
@@ -31,18 +31,15 @@ def get_citations_for_model(model=None, width=79):
         logging.warning("no citations registered with model")
         return "", ""
 
-    cite = (
-        list(CITATIONS["pymc3"][0])
-        + list(CITATIONS["theano"][0])
-        + list(CITATIONS["arviz"][0])
-    )
+    cite = list(CITATIONS["arviz"][0])
     bib = [
         CITATIONS["exoplanet"][1],
-        CITATIONS["pymc3"][1],
-        CITATIONS["theano"][1],
         CITATIONS["arviz"][1],
     ]
-    for k, v in model.__citations__.items():
+    if USING_PYMC3:
+        cite += list(CITATIONS["pymc3"][0]) + list(CITATIONS["theano"][0])
+        bib = [CITATIONS["pymc3"][1], CITATIONS["theano"][1]]
+    for _, v in model.__citations__.items():
         cite += list(v[0])
         bib.append(v[1])
 

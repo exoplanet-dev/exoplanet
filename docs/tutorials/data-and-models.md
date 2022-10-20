@@ -15,7 +15,7 @@ kernelspec:
 
 # Data & models
 
-```{code-cell}
+```{code-cell} ipython3
 import exoplanet
 
 exoplanet.utils.docs_setup()
@@ -23,7 +23,7 @@ print(f"exoplanet.__version__ = '{exoplanet.__version__}'")
 ```
 
 This tutorial provides an overview of the kinds of datasets that `exoplanet` has been designed to model.
-It's worth noting that this is certainly not a comprehensive list and `exoplanet` is designed to be *low-level* library that can be built on top of to support new use cases.
+It's worth noting that this is certainly not a comprehensive list and `exoplanet` is designed to be _low-level_ library that can be built on top of to support new use cases.
 
 :::{tip}
 For real world use cases and examples, check out the [Case Studies](https://gallery.exoplanet.codes) page.
@@ -40,7 +40,7 @@ These orbits are parameterized by orbital elements, and one of the primary uses 
 Given a `KeplerianOrbit`, users of `exoplanet` can evaluate things like the positions and velocities of all the bodies as a function of time.
 For example, here's how you could define an orbit with a single body and plot the orbits:
 
-```{code-cell}
+```{code-cell} ipython3
 import numpy as np
 import matplotlib.pyplot as plt
 import exoplanet as xo
@@ -63,7 +63,7 @@ vx, vy, vz = orbit.get_star_velocity(t)
 
 # Plot the coordinates
 # Note the use of `.eval()` throughout since the coordinates are all
-# Aesara/Theano objects
+# Aesara objects
 fig, axes = plt.subplots(2, 1, figsize=(8, 8), sharex=True)
 ax = axes[0]
 ax.plot(t, x.eval(), label="x")
@@ -83,10 +83,10 @@ _ = ax.legend(fontsize=10, loc=1)
 ```
 
 The key feture of `exoplanet` is that all of the parameters to a `KeplerianOrbit` can be `PyMC` variables.
-This means that these elements are now something that you can *infer*.
+This means that these elements are now something that you can _infer_.
 For example, if we want to fit for the orbital period, we can define a `PyMC` model like the following:
 
-```{code-cell}
+```{code-cell} ipython3
 import pymc as pm
 
 with pm.Model():
@@ -140,8 +140,8 @@ $$
 
 We choose to orient the $\hat{\boldsymbol{X}}$ unit vector in the north direction, $\hat{\boldsymbol{Y}}$ in the east direction, and $\hat{\boldsymbol{Z}}$ towards the observer. Under this convention, the inclination of an orbit is defined by the dot-product of the orbital angular momentum vector with $\hat{\boldsymbol{Z}}$, conforming to the common astrometric convention that a zero inclination ($i = 0$) orbit is face-on, with the test body orbiting in a counter-clockwise manner around the primary body.
 
-In the stellar and exoplanetary fields, there is less agreement on which  segment of the line of nodes is defined as the *ascending* node.
-We choose to define the ascending node as the point where the orbiting body crosses the plane of the sky moving *away* from the observer (i.e., crossing from $Z > 0$ to $Z< 0$).
+In the stellar and exoplanetary fields, there is less agreement on which segment of the line of nodes is defined as the _ascending_ node.
+We choose to define the ascending node as the point where the orbiting body crosses the plane of the sky moving _away_ from the observer (i.e., crossing from $Z > 0$ to $Z< 0$).
 This convention has historically been the choice of the visual binary field; the opposite convention occasionally appears in exoplanet and planetary studies.
 
 To implement the transformation from perifocal frame to observer frame, we consider the rotation matrices
@@ -164,7 +164,7 @@ $$
     \end{array}\right].
 $$
 
-which result in a *clockwise* rotation of the axes, as defined using the right hand rule.
+which result in a _clockwise_ rotation of the axes, as defined using the right hand rule.
 
 This means when we look down the $z$-axis, for a positive angle $\phi$, it would be as if the $x$ and $y$ axes rotated clockwise.
 In order to find out what defines counter-clockwise when considering the other rotations, we look to the right hand rule and cross products of the axes unit vectors.
@@ -207,11 +207,11 @@ The third physical parameter can always be computed using the other two so `exop
 
 The orbits are then typically defined by (check out the docstring {class}`exoplanet.orbits.KeplerianOrbit` for all the options):
 
-* the period $P$ or semi-major axis $a$ of the orbit,
-* the time of conjunction $t_0$ or time of periastron passage $t_\mathrm{p}$,
-* the planet's radius $R_\mathrm{pl}$ and mass $M_\mathrm{pl}$,
-* the eccentricity $e$, argument of periastron $\omega$ and the longitude of ascending node $\Omega$, and
-* the inclination of the orbital plane $i$ or the impact parameter $b$.
+- the period $P$ or semi-major axis $a$ of the orbit,
+- the time of conjunction $t_0$ or time of periastron passage $t_\mathrm{p}$,
+- the planet's radius $R_\mathrm{pl}$ and mass $M_\mathrm{pl}$,
+- the eccentricity $e$, argument of periastron $\omega$ and the longitude of ascending node $\Omega$, and
+- the inclination of the orbital plane $i$ or the impact parameter $b$.
 
 A `KeplerianOrbit` object in `exoplanet` will always be fully specified.
 For example, if the orbit is defined using the period $P$, the semi-major axis $a$ will be computed using Kepler's third law.
@@ -225,8 +225,9 @@ For example, if the orbit is defined using the period $P$, the semi-major axis $
 A {class}`exoplanet.orbits.KeplerianOrbit` can be used to compute the expected radial velocity time series for a given set of parameters.
 One typical parameterization for a radial velocity fit would look something like this:
 
-```{code-cell}
+```{code-cell} ipython3
 import arviz as az
+import pymc_ext as pmx
 import aesara.tensor as at
 
 # Create a dummy dataset
@@ -244,12 +245,12 @@ with pm.Model():
     period = pm.Deterministic("period", at.exp(log_period))
     log_semiamp = pm.Normal("log_semiamp", mu=np.log(5.0), sigma=2.0)
     semiamp = pm.Deterministic("semiamp", at.exp(log_semiamp))
-    ecc = pm.Uniform("ecc", lower=0, upper=1)
+    ecc = pm.Uniform("ecc", lower=0, upper=0.5, initval=0.01)
 
     # At low eccentricity, omega and the phase of periastron (phi) are
     # correlated so it can be best to fit in (omega ± phi) / 2
-    plus = xo.angle("plus")
-    minus = xo.angle("minus")
+    plus = pmx.angle("plus")
+    minus = pmx.angle("minus")
     phi = pm.Deterministic("phi", plus + minus)
     omega = pm.Deterministic("omega", plus - minus)
 
@@ -280,22 +281,23 @@ with pm.Model():
 
     # We'll also track the model just for plotting purposes
     pm.Deterministic(
-        "rv_plot", zero_point + orbit.get_radial_velocity(t_plot, K=semiamp)
+        "__rv_plot", zero_point + orbit.get_radial_velocity(t_plot, K=semiamp)
     )
 
-    soln = pm.find_MAP(vars=[plus, minus, ecc])
-    soln = pm.find_MAP(soln)
+    soln = pmx.optimize(vars=[plus, minus])
+    soln = pmx.optimize(soln)
     trace = pm.sample(
         tune=1000,
         draws=1000,
         cores=2,
         chains=2,
         start=soln,
+        target_accept=0.9,
         init="adapt_full",
     )
 
 # Plot the results
-rv_plot = trace.posterior["rv_plot"].values
+rv_plot = trace.posterior["__rv_plot"].values
 q16, q50, q84 = np.percentile(rv_plot, [16, 50, 84], axis=(0, 1))
 plt.errorbar(t, rv_obs, yerr=rv_err, fmt="+k", label="data")
 plt.plot(t_plot, q50)
@@ -305,7 +307,7 @@ plt.legend(fontsize=12, loc=2)
 plt.xlabel("time [days]")
 plt.ylabel("radial velocity [m/s]")
 
-az.summary(trace, var_names=["^(?!rv_plot).*"], filter_vars="regex")
+az.summary(trace, var_names=["^(?!__).*"], filter_vars="regex")
 ```
 
 Instead of using `semiamp` as a parameter, we could have passed `m_planet` and `incl` as parameters to `KeplerianOrbit` and fit the physical orbit.
@@ -323,7 +325,7 @@ Therefore it is often worthwhile experimenting with different parameterizations,
 Astrometric observations usually consist of measurements of the separation and position angle of the secondary star (or directly imaged exoplanet), relative to the primary star as a function of time, but `exoplanet` could also be used to model the motion of the center of light for and unresolved orbit.
 The typical {class}`exoplanet.orbits.KeplerianOrbit` definition for and astrometric dataset will be similar to a radial velocity fit:
 
-```{code-cell}
+```{code-cell} ipython3
 random = np.random.default_rng(5678)
 t_plot = np.linspace(0, 22 * 365.25, 500)
 t = np.sort(random.uniform(0.0, 22 * 365.25, 45))
@@ -341,8 +343,8 @@ with pm.Model():
 
     # For astrometric orbits, a good choice of parameterization can be
     # (Omega ± omega) / 2
-    plus = xo.angle("plus")
-    minus = xo.angle("minus")
+    plus = pmx.angle("plus")
+    minus = pmx.angle("minus")
     Omega = pm.Deterministic("Omega", plus + minus)
     omega = pm.Deterministic("omega", plus - minus)
 
@@ -368,9 +370,7 @@ with pm.Model():
     # Simulate data from the model for testing           #
     # You should remove the following lines in your code #
     # ================================================== #
-    rho_obs, theta_obs = pm.compile_fn([rho_model, theta_model])(
-        model.test_point
-    )
+    rho_obs, theta_obs = pmx.eval_in_model([rho_model, theta_model])
     rho_obs += rho_err * random.normal(size=len(t))
     theta_obs += theta_err * random.normal(size=len(t))
     # =============== end simulated data =============== #
@@ -387,12 +387,12 @@ with pm.Model():
     theta_diff = at.arctan2(
         at.sin(theta_model - theta_obs), at.cos(theta_model - theta_obs)
     )
-    pm.Normal("theta_obs", mu=theta_diff, sigma=theta_err, observed=0.0)
+    pm.Normal("theta_obs", mu=theta_diff, sigma=theta_err, observed=np.zeros_like(theta_obs))
 
     # We'll also track the model just for plotting purposes
     rho_plot, theta_plot = orbit.get_relative_angles(t_plot)
-    pm.Deterministic("rho_plot", rho_plot)
-    pm.Deterministic("theta_plot", theta_plot)
+    pm.Deterministic("__rho_plot", rho_plot)
+    pm.Deterministic("__theta_plot", theta_plot)
 
     trace = pm.sample(
         tune=1000,
@@ -407,7 +407,7 @@ with pm.Model():
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8), sharex=True)
 
 q16, q50, q84 = np.percentile(
-    trace.posterior["rho_plot"].values, [16, 50, 84], axis=(0, 1)
+    trace.posterior["__rho_plot"].values, [16, 50, 84], axis=(0, 1)
 )
 ax1.errorbar(t, rho_obs, yerr=rho_err, fmt="+k", label="data")
 ax1.plot(t_plot, q50)
@@ -415,7 +415,7 @@ ax1.fill_between(t_plot, q16, q84, alpha=0.3, label="posterior")
 ax1.set_ylabel(r"$\rho$ [arcsec]")
 
 q16, q50, q84 = np.percentile(
-    trace.posterior["theta_plot"].values, [16, 50, 84], axis=(0, 1)
+    trace.posterior["__theta_plot"].values, [16, 50, 84], axis=(0, 1)
 )
 ax2.errorbar(t, theta_obs, yerr=rho_err, fmt="+k", label="data")
 ax2.plot(t_plot, q50)
@@ -426,7 +426,7 @@ ax2.set_ylabel(r"$\theta$ [radians]")
 ax2.set_xlabel("time [days]")
 
 # Compute the convergence stats
-az.summary(trace, var_names=["^(?!.*_plot).*"], filter_vars="regex")
+az.summary(trace, var_names=["^(?!__).*"], filter_vars="regex")
 ```
 
 In this example, the units of `a` are arcseconds, but the {func}`exoplanet.orbits.KeplerianOrbit.get_relative_angles` function accepts a parallax argument if you have a constraint on the parallax of the system.
@@ -444,7 +444,7 @@ If you need flexible surface models or higher order limb darkening, check out th
 Transit and occultation modeling is one of the primary applications of `exoplanet` so there are quite a few options (including transit timing variations, detached eclipsing binary modeling, and much more) that are highlighted on the [Case Studies](https://gallery.exoplanet.codes) page.
 But, a bread-and-butter transit model implemented in `exoplanet` might look something like the following:
 
-```{code-cell}
+```{code-cell} ipython3
 random = np.random.default_rng(123)
 num_transits = 4
 t = np.arange(0, 35, 0.02)
@@ -462,14 +462,14 @@ with pm.Model():
 
     # The Kipping (2013) parameterization for quadratic limb darkening
     # paramters
-    u = xo.distributions.QuadLimbDark("u", testval=np.array([0.3, 0.2]))
+    u = xo.distributions.quad_limb_dark("u", testval=np.array([0.3, 0.2]))
 
     # The radius ratio and impact parameter; these parameters can
     # introduce pretty serious covariances and are ripe for
     # reparameterization
     log_r = pm.Normal("log_r", mu=np.log(0.04), sigma=2.0)
     r = pm.Deterministic("r", at.exp(log_r))
-    b = xo.distributions.ImpactParameter("b", ror=r, testval=0.35)
+    b = xo.distributions.impact_parameter("b", r, testval=0.35)
 
     # Set up a Keplerian orbit for the planets
     orbit = xo.orbits.KeplerianOrbit(period=period, t0=t0, b=b)
@@ -486,13 +486,13 @@ with pm.Model():
 
     # Here we track the value of the model light curve for plotting
     # purposes
-    pm.Deterministic("light_curve", light_curve)
+    pm.Deterministic("__light_curve", light_curve)
 
     # ================================================== #
     # Simulate data from the model for testing           #
     # You should remove the following lines in your code #
     # ================================================== #
-    y = pm.compile_fn(light_curve)(model.test_point)
+    y = pmx.eval_in_model(light_curve)
     y += yerr * random.normal(size=len(y))
     # =============== end simulated data =============== #
 
@@ -505,7 +505,7 @@ with pm.Model():
 
 # Plot the results
 q16, q50, q84 = np.percentile(
-    trace.posterior["light_curve"].values, [16, 50, 84], axis=(0, 1)
+    trace.posterior["__light_curve"].values, [16, 50, 84], axis=(0, 1)
 )
 plt.plot(t, y, ".k", ms=2, label="data")
 plt.plot(t, q50)
@@ -516,7 +516,7 @@ plt.xlabel("time [days]")
 plt.ylabel("relative flux")
 
 # Compute the convergence stats
-az.summary(trace, var_names=["^(?!light_curve).*"], filter_vars="regex")
+az.summary(trace, var_names=["^(?!__).*"], filter_vars="regex")
 ```
 
 (data-and-models/combining)=
@@ -540,6 +540,6 @@ To combine datasets, you can simply add multiple lines like this (one for each d
 
 For more concrete examples, check out the [Case Studies](https://gallery.exoplanet.codes) and (if that's not sufficient) feel free to start [a "discussion" on the GitHub repository](https://github.com/exoplanet-dev/exoplanet/discussions) asking for help.
 
-```{code-cell}
+```{code-cell} ipython3
 
 ```
