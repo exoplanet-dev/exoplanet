@@ -3,10 +3,10 @@ exoplanet
 
 *exoplanet* is a toolkit for probabilistic modeling of time series data in
 astronomy with a focus on observations of `exoplanets
-<https://en.wikipedia.org/wiki/Exoplanet>`_, using `PyMC3
-<https://docs.pymc.io>`_. *PyMC3* is a flexible and high-performance model
+<https://en.wikipedia.org/wiki/Exoplanet>`_, using `PyMC
+<https://www.pymc.io>`_. *PyMC* is a flexible and high-performance model
 building language and inference engine that scales well to problems with a large
-number of parameters. *exoplanet* extends *PyMC3*'s language to support many of
+number of parameters. *exoplanet* extends *PyMC*'s language to support many of
 the custom functions and distributions required when fitting exoplanet datasets.
 These features include:
 
@@ -44,13 +44,13 @@ an issue <https://github.com/exoplanet-dev/exoplanet/issues>`_ there.
    🖼 For more in depth examples of *exoplanet* used for more realistic problems,
    go to the `Case studies page <https://gallery.exoplanet.codes>`_.
 
-   📈 For more information about scalable Gaussian Processes in PyMC3 (this was
+   📈 For more information about scalable Gaussian Processes in PyMC (this was
    previously implemented as part of *exoplanet*), see the `celerite2 documentation
    page <https://celerite2.readthedocs.io>`_.
 
-   👉 For helper functions and PyMC3 extras that used to be implemented as part of
-   *exoplanet*, see the `pymc3-ext project
-   <https://github.com/exoplanet-dev/pymc3-ext>`_.
+   👉 For helper functions and PyMC extras that used to be implemented as part of
+   *exoplanet*, see the `pymc-ext project
+   <https://github.com/exoplanet-dev/pymc-ext>`_.
 
 
 Contents
@@ -62,7 +62,6 @@ Contents
 
    user/install
    tutorials/citation.md
-   user/theano
    user/multiprocessing
    user/api
    user/dev
@@ -74,7 +73,7 @@ Contents
 
    tutorials/about.md
    tutorials/autodiff.md
-   tutorials/intro-to-pymc3.md
+   tutorials/intro-to-pymc.md
    tutorials/data-and-models.md
    tutorials/light-delay.md
    tutorials/reparameterization.md

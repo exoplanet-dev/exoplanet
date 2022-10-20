@@ -49,7 +49,6 @@ def docs_setup():
 
     import matplotlib.pyplot as plt
 
-    # Remove when Theano is updated
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     warnings.filterwarnings("ignore", category=FutureWarning)
 
