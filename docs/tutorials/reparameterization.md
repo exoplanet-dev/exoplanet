@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.0
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -30,6 +30,6 @@ For angles it can sometimes be better to parameterize in terms of sums or differ
 
 As I learn more general advice for reparameterization of `exoplanet` models, I'll try to keep this page updated, but in the meantime, feel free to start [a "discussion" on the GitHub repository](https://github.com/exoplanet-dev/exoplanet/discussions) if you discover a particularly good or tricky parameterization problem.
 
-```{code-cell} ipython3
+```{code-cell}
 
 ```

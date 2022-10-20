@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.0
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -21,7 +21,7 @@ For more in-depth tutorials with real-world applications and real data, check ou
 
 At the top of each tutorial, you'll find a cell like the following that indicates the version of `exoplanet` that was used to generate the tutorial:
 
-```{code-cell} ipython3
+```{code-cell}
 import exoplanet
 
 exoplanet.utils.docs_setup()
@@ -32,6 +32,6 @@ That cell also includes a call to the `exoplanet.utils.docs_setup` function that
 
 To execute a tutorial on your own, you can click on the buttons at the top right or this page to launch the notebook using [Binder](https://mybinder.org) or download the `.ipynb` file directly.
 
-```{code-cell} ipython3
+```{code-cell}
 
 ```
