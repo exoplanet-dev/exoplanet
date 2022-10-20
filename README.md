@@ -30,7 +30,7 @@ Read the full documentation at [docs.exoplanet.codes](https://docs.exoplanet.cod
 The quickest way to get started is to use [pip](https://pip.pypa.io):
 
 ```bash
-python -m pip install exoplanet
+python -m pip install "exoplanet[pymc]"
 ```
 
 Note that you will need Python (>=3.6) installed for this to work, but then this
