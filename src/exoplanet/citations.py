@@ -38,7 +38,7 @@ def get_citations_for_model(model=None, width=79):
     ]
     if USING_PYMC3:
         cite += list(CITATIONS["pymc3"][0]) + list(CITATIONS["theano"][0])
-        bib = [CITATIONS["pymc3"][1], CITATIONS["theano"][1]]
+        bib += [CITATIONS["pymc3"][1], CITATIONS["theano"][1]]
     for _, v in model.__citations__.items():
         cite += list(v[0])
         bib.append(v[1])
