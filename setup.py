@@ -41,6 +41,7 @@ EXTRA_REQUIRE = {
     "docs": [
         "sphinx-book-theme",
         "myst-nb",
+        "ipython",
         "matplotlib",
         "corner",
         "lightkurve",
