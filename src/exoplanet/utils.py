@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 __all__ = [
     "logger",
     "as_tensor_variable",
@@ -12,13 +10,13 @@ import logging
 import warnings
 from functools import wraps
 
-from aesara_theano_fallback import aesara as theano
+from exoplanet.compat import tensor
 
 logger = logging.getLogger("exoplanet")
 
 
 def as_tensor_variable(x, dtype="float64", **kwargs):
-    t = theano.tensor.as_tensor_variable(x, **kwargs)
+    t = tensor.as_tensor_variable(x, **kwargs)
     if dtype is None:
         return t
     return t.astype(dtype)
@@ -51,7 +49,6 @@ def docs_setup():
 
     import matplotlib.pyplot as plt
 
-    # Remove when Theano is updated
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -60,7 +57,11 @@ def docs_setup():
 
     logger = logging.getLogger("theano.gof.compilelock")
     logger.setLevel(logging.ERROR)
-    logger = logging.getLogger("theano.tensor.opt")
+    logger = logging.getLogger("aesara.tensor.opt")
+    logger.setLevel(logging.ERROR)
+    logger = logging.getLogger("aesara.tensor.blas")
+    logger.setLevel(logging.ERROR)
+    logger = logging.getLogger("matplotlib.font_manager")
     logger.setLevel(logging.ERROR)
     logger = logging.getLogger("exoplanet")
     logger.setLevel(logging.DEBUG)

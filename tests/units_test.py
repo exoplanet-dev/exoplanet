@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import astropy.units as u
 import numpy as np
 

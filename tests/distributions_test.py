@@ -1,30 +1,30 @@
-# -*- coding: utf-8 -*-
-
 import logging
-from collections import namedtuple
 
-import aesara_theano_fallback.tensor as tt
 import numpy as np
-import pymc3 as pm
 import pytest
-from pymc3.tests.test_distributions import R, Unit, Vector
-from pymc3.tests.test_transforms import check_transform, get_values
 from scipy.stats import beta, halfnorm, kstest, rayleigh
 
-from exoplanet.distributions import transforms as tr
+from exoplanet.compat import USING_PYMC3, pm
+from exoplanet.distributions.distributions import (
+    impact_parameter,
+    quad_limb_dark,
+)
 from exoplanet.distributions.eccentricity import kipping13, vaneylen19
-from exoplanet.distributions.physical import ImpactParameter, QuadLimbDark
 
 
 class _Base:
     random_seed = 20160911
 
     def _sample(self, **kwargs):
-        logger = logging.getLogger("pymc3")
+        logger = logging.getLogger("pymc3" if USING_PYMC3 else "pymc")
         logger.propagate = False
         logger.setLevel(logging.ERROR)
         kwargs["draws"] = kwargs.get("draws", 1000)
         kwargs["progressbar"] = kwargs.get("progressbar", False)
+        kwargs["random_seed"] = kwargs.get("random_seed", self.random_seed)
+        if USING_PYMC3:
+            kwargs["return_inferencedata"] = True
+            kwargs["compute_convergence_checks"] = False
         return pm.sample(**kwargs)
 
     def _model(self, **kwargs):
@@ -37,19 +37,16 @@ class TestEccentricity(_Base):
 
     def test_kipping13(self):
         with self._model() as model:
-            dist = kipping13("ecc", shape=(5, 2))
-            assert "ecc_alpha" in model.named_vars
-            assert "ecc_beta" in model.named_vars
-
-            # Test random sampling
-            samples = dist.random(size=100)
-            assert np.shape(samples) == (100, 5, 2)
-
-            assert np.all((0 <= samples) & (samples <= 1))
-
+            kipping13("ecc", fixed=False, shape=(5, 2))
+            if USING_PYMC3:
+                assert "ecc_alpha" in model.named_vars
+                assert "ecc_beta" in model.named_vars
+            else:
+                assert "ecc::alpha" in model.named_vars
+                assert "ecc::beta" in model.named_vars
             trace = self._sample()
 
-        ecc = trace["ecc"]
+        ecc = trace.posterior["ecc"].values
         assert np.all((0 <= ecc) & (ecc <= 1))
 
     def test_kipping13_all(self):
@@ -57,7 +54,7 @@ class TestEccentricity(_Base):
             kipping13("ecc", fixed=True, shape=2)
             trace = self._sample()
 
-        ecc = trace["ecc"].flatten()
+        ecc = trace.posterior["ecc"].values.flatten()
         assert np.all((0 <= ecc) & (ecc <= 1))
 
         cdf = lambda x: beta.cdf(x, 1.12, 3.09)  # NOQA
@@ -69,7 +66,7 @@ class TestEccentricity(_Base):
             kipping13("ecc", fixed=True, long=True, shape=3)
             trace = self._sample()
 
-        ecc = trace["ecc"].flatten()
+        ecc = trace.posterior["ecc"].values.flatten()
         assert np.all((0 <= ecc) & (ecc <= 1))
 
         cdf = lambda x: beta.cdf(x, 1.12, 3.09)  # NOQA
@@ -81,7 +78,7 @@ class TestEccentricity(_Base):
             kipping13("ecc", fixed=True, long=False, shape=4)
             trace = self._sample()
 
-        ecc = trace["ecc"].flatten()
+        ecc = trace.posterior["ecc"].values.flatten()
         assert np.all((0 <= ecc) & (ecc <= 1))
 
         cdf = lambda x: beta.cdf(x, 0.697, 3.27)  # NOQA
@@ -97,30 +94,29 @@ class TestEccentricity(_Base):
             kipping13("ecc", **kwargs)
             trace = self._sample()
 
-        ecc = trace["ecc"].flatten()
+        ecc = trace.posterior["ecc"].values.flatten()
         assert np.all(
             (kwargs.get("lower", 0.0) <= ecc)
             & (ecc <= kwargs.get("upper", 1.0))
         )
 
-    @pytest.mark.parametrize("kwargs", [dict(), dict(multi=True)])
+    @pytest.mark.parametrize("kwargs", [dict(fixed=False), dict(multi=True)])
     def test_vaneylen19(self, kwargs):
         with self._model() as model:
-            dist = vaneylen19("ecc", shape=(5, 2), **kwargs)
+            vaneylen19("ecc", shape=(5, 2), **kwargs)
 
-            if not kwargs.get("fixed", False):
-                assert "ecc_sigma_gauss" in model.named_vars
-                assert "ecc_sigma_rayleigh" in model.named_vars
-                assert "ecc_frac" in model.named_vars
-
-            # Test random sampling
-            samples = dist.random(size=100)
-            assert np.shape(samples) == (100, 5, 2)
-            assert np.all((0 <= samples) & (samples <= 1))
-
+            if not kwargs.get("fixed", True):
+                if USING_PYMC3:
+                    assert "ecc_sigma_gauss" in model.named_vars
+                    assert "ecc_sigma_rayleigh" in model.named_vars
+                    assert "ecc_frac" in model.named_vars
+                else:
+                    assert "ecc::sigma_gauss" in model.named_vars
+                    assert "ecc::sigma_rayleigh" in model.named_vars
+                    assert "ecc::frac" in model.named_vars
             trace = self._sample()
 
-        ecc = trace["ecc"]
+        ecc = trace.posterior["ecc"].values
         assert np.all((0 <= ecc) & (ecc <= 1))
 
     def test_vaneylen19_single(self):
@@ -128,7 +124,7 @@ class TestEccentricity(_Base):
             vaneylen19("ecc", fixed=True, multi=False, shape=2)
             trace = self._sample()
 
-        ecc = trace["ecc"].flatten()
+        ecc = trace.posterior["ecc"].values.flatten()
         assert np.all((0 <= ecc) & (ecc <= 1))
 
         f = 0.76
@@ -144,7 +140,7 @@ class TestEccentricity(_Base):
             vaneylen19("ecc", fixed=True, multi=True, shape=3)
             trace = self._sample()
 
-        ecc = trace["ecc"].flatten()
+        ecc = trace.posterior["ecc"].values.flatten()
         assert np.all((0 <= ecc) & (ecc <= 1))
 
         f = 0.08
@@ -164,7 +160,7 @@ class TestEccentricity(_Base):
             vaneylen19("ecc", **kwargs)
             trace = self._sample()
 
-        ecc = trace["ecc"].flatten()
+        ecc = trace.posterior["ecc"].values.flatten()
         assert np.all(
             (kwargs.get("lower", 0.0) <= ecc)
             & (ecc <= kwargs.get("upper", 1.0))
@@ -176,20 +172,11 @@ class TestPhysical(_Base):
 
     def test_quad_limb_dark(self):
         with self._model():
-            dist = QuadLimbDark("u", shape=2)
-
-            # Test random sampling
-            samples = dist.random(size=100)
-            assert np.shape(samples) == (100, 2)
-
-            logp = QuadLimbDark.dist(shape=2).logp(samples).eval().flatten()
-            assert np.all(np.isfinite(logp))
-            assert np.allclose(logp[0], logp)
-
+            quad_limb_dark("u")
             trace = self._sample()
 
-        u1 = trace["u"][:, 0]
-        u2 = trace["u"][:, 1]
+        u1 = trace.posterior["u"].values[..., 0].flatten()
+        u2 = trace.posterior["u"].values[..., 1].flatten()
 
         # Make sure that the physical constraints are satisfied
         assert np.all(u1 + u2 < 1)
@@ -208,47 +195,44 @@ class TestPhysical(_Base):
     def test_impact(self):
         lower = 0.1
         upper = 1.0
+        shape = (5, 2)
         with self._model():
-            ror = pm.Uniform("ror", lower=lower, upper=upper, shape=(5, 2))
-            dist = ImpactParameter("b", ror=ror)
-
-            # Test random sampling
-            samples = dist.random(size=100)
-            assert np.shape(samples) == (100, 5, 2)
-            assert np.all((0 <= samples) & (samples <= 1 + upper))
-
+            r = pm.Uniform("r", lower=lower, upper=upper, shape=shape)
+            impact_parameter("b", r, shape=shape)
             trace = self._sample()
 
-        u = trace["ror"]
-        u = np.reshape(u, (len(u), -1))
+        u = trace.posterior["r"].values
+        u = np.reshape(u, u.shape[:2] + (-1,))
         cdf = lambda x: np.clip((x - lower) / (upper - lower), 0, 1)  # NOQA
-        for i in range(u.shape[1]):
-            s, p = kstest(u[:, i], cdf)
+        for i in range(u.shape[-1]):
+            s, p = kstest(u[..., i].flatten(), cdf)
             assert s < 0.05
 
-        assert np.all(trace["b"] <= 1 + trace["ror"])
+        assert np.all(
+            trace.posterior["b"].values <= 1 + trace.posterior["r"].values
+        )
 
-
-def test_quad_limb_dark_transform():
-    values = get_values(
-        tr.quad_limb_dark,
-        Vector(R, 2),
-        constructor=tt.vector,
-        test=np.array([0.0, 0.0]),
+    @pytest.mark.skipif(
+        USING_PYMC3, reason="Automatic shape inference doesn't work in PyMC3"
     )
-    domain = namedtuple("Domain", ["vals"])(values)
-    check_transform(
-        tr.quad_limb_dark,
-        domain,
-        constructor=tt.vector,
-        test=np.array([0.0, 0.0]),
-    )
+    def test_impact_shape_inference(self):
+        lower = 0.1
+        upper = 1.0
+        shape = (5, 2)
+        with self._model():
+            r = pm.Uniform("r", lower=lower, upper=upper, shape=shape)
+            impact_parameter("b", r)
+            trace = self._sample()
 
+        assert trace.posterior["b"].values.shape[-2:] == shape
 
-def test_impact_parameter_transform():
-    ror = np.float64(0.03)
-    check_transform(
-        tr.impact_parameter(ror),
-        Unit * (1 + ror),
-        test=0.5,
-    )
+        u = trace.posterior["r"].values
+        u = np.reshape(u, u.shape[:2] + (-1,))
+        cdf = lambda x: np.clip((x - lower) / (upper - lower), 0, 1)  # NOQA
+        for i in range(u.shape[-1]):
+            s, p = kstest(u[..., i].flatten(), cdf)
+            assert s < 0.05
+
+        assert np.all(
+            trace.posterior["b"].values <= 1 + trace.posterior["r"].values
+        )

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 __all__ = [
     "estimate_semi_amplitude",
     "estimate_minimum_mass",

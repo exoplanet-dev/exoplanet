@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 import numpy as np
 import pytest
-from aesara_theano_fallback import aesara as theano
 
+from exoplanet.compat import function
 from exoplanet.light_curves import LimbDarkLightCurve
 from exoplanet.orbits import KeplerianOrbit, SimpleTransitOrbit
 
@@ -25,7 +23,7 @@ def test_simple():
         period=period, duration=duration, t0=t0, b=b, r_star=r_star
     )
 
-    x, y, z = theano.function([], orbit.get_planet_position(t))()
+    x, y, z = function([], orbit.get_planet_position(t))()
     b_val = np.sqrt(x**2 + y**2)
     m = (b_val <= r_star) & (z > 0)
 
@@ -35,7 +33,7 @@ def test_simple():
     assert np.all(b_val[in_transit] <= r_star)
     assert np.all(z[in_transit] > 0)
 
-    x, y, z = theano.function([], orbit.get_star_position(t))()
+    x, y, z = function([], orbit.get_star_position(t))()
     assert np.allclose(x, 0.0)
     assert np.allclose(y, 0.0)
     assert np.allclose(z, 0.0)

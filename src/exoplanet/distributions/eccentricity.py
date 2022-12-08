@@ -1,20 +1,16 @@
-# -*- coding: utf-8 -*-
-
 __all__ = ["kipping13", "vaneylen19"]
 
-import aesara_theano_fallback.tensor as tt
 import numpy as np
-import pymc3 as pm
 
-from ..citations import add_citations_to_model
+from exoplanet.citations import add_citations_to_model
+from exoplanet.compat import USING_PYMC3, pm
+from exoplanet.compat import tensor as at
 
 
 def kipping13(
-    name, fixed=False, long=None, lower=None, upper=None, model=None, **kwargs
+    name, fixed=True, long=None, lower=None, upper=None, model=None, **kwargs
 ):
-    """The beta eccentricity distribution fit by Kipping (2013)
-
-    The beta distribution parameters fit by `Kipping (2013b)
+    """The beta distribution parameters fit by `Kipping (2013b)
     <https://arxiv.org/abs/1306.4982>`_.
 
     Args:
@@ -66,29 +62,46 @@ def kipping13(
         else:
             # Marginalize over the uncertainty on the parameters of the beta
             with pm.Model(name=name):
-                bounded_normal = pm.Bound(pm.Normal, lower=0)
-                alpha = bounded_normal(
-                    "alpha", mu=alpha_mu, sd=alpha_sd, testval=alpha_mu
+                alpha = _truncate(
+                    "alpha",
+                    pm.Normal,
+                    lower=0,
+                    mu=alpha_mu,
+                    sigma=alpha_sd,
+                    **_with_initval(initval=alpha_mu),
                 )
-                beta = bounded_normal(
-                    "beta", mu=beta_mu, sd=beta_sd, testval=beta_mu
+                beta = _truncate(
+                    "beta",
+                    pm.Normal,
+                    lower=0,
+                    mu=beta_mu,
+                    sigma=beta_sd,
+                    **_with_initval(initval=beta_mu),
                 )
 
         # Allow for upper and lower bounds
         if lower is not None or upper is not None:
-            dist = pm.Bound(
-                pm.Beta,
-                lower=0.0 if lower is None else lower,
-                upper=1.0 if upper is None else upper,
+            lower = 0.0 if lower is None else lower
+            upper = 1.0 if upper is None else upper
+            kwargs["initval"] = kwargs.pop(
+                "initval", kwargs.pop("testval", 0.5 * (lower + upper))
             )
-            return dist(name, alpha=alpha, beta=beta, **kwargs)
+            return _truncate(
+                name,
+                pm.Beta,
+                lower=lower,
+                upper=upper,
+                alpha=alpha,
+                beta=beta,
+                **_with_initval(**kwargs),
+            )
 
         return pm.Beta(name, alpha=alpha, beta=beta, **kwargs)
 
 
 def vaneylen19(
     name,
-    fixed=False,
+    fixed=True,
     multi=False,
     lower=None,
     upper=None,
@@ -148,21 +161,30 @@ def vaneylen19(
                 frac = frac_mu
             else:
 
-                bounded_normal = pm.Bound(pm.Normal, lower=0)
-                sigma_gauss = bounded_normal(
+                sigma_gauss = _truncate(
                     "sigma_gauss",
+                    pm.Normal,
+                    lower=0,
                     mu=sigma_gauss_mu,
-                    sd=sigma_gauss_sd,
-                    testval=sigma_gauss_mu,
+                    sigma=sigma_gauss_sd,
+                    **_with_initval(initval=sigma_gauss_mu),
                 )
-                sigma_rayleigh = bounded_normal(
+                sigma_rayleigh = _truncate(
                     "sigma_rayleigh",
+                    pm.Normal,
+                    lower=0,
                     mu=sigma_rayleigh_mu,
-                    sd=sigma_rayleigh_sd,
-                    testval=sigma_rayleigh_mu,
+                    sigma=sigma_rayleigh_sd,
+                    **_with_initval(initval=sigma_rayleigh_mu),
                 )
-                frac = pm.Bound(pm.Normal, lower=0, upper=1)(
-                    "frac", mu=frac_mu, sd=frac_sd, testval=frac_mu
+                frac = _truncate(
+                    "frac",
+                    pm.Normal,
+                    lower=0,
+                    upper=1,
+                    mu=frac_mu,
+                    sigma=frac_sd,
+                    **_with_initval(initval=frac_mu),
                 )
 
             gauss = pm.HalfNormal.dist(sigma=sigma_gauss)
@@ -173,9 +195,33 @@ def vaneylen19(
             pm.Potential(
                 "prior",
                 pm.math.logaddexp(
-                    tt.log(1 - frac) + gauss.logp(ecc),
-                    tt.log(frac) + rayleigh.logp(ecc),
+                    at.log(1 - frac) + _logp(gauss, ecc),
+                    at.log(frac) + _logp(rayleigh, ecc),
                 ),
             )
 
         return ecc
+
+
+def _with_initval(**kwargs):
+    val = kwargs.pop("initval", kwargs.pop("testval", None))
+    if USING_PYMC3:
+        return dict(kwargs, testval=val)
+    return dict(kwargs, initval=val)
+
+
+def _logp(rv, x):
+    if USING_PYMC3:
+        return rv.logp(x)
+    return pm.logp(rv, x)
+
+
+def _truncate(name, dist, *, lower=None, upper=None, **kwargs):
+    if USING_PYMC3:
+        return pm.Bound(dist, lower=lower, upper=upper)(
+            name, **_with_initval(**kwargs)
+        )
+    initval = kwargs.pop("initval", kwargs.pop("testval", None))
+    return pm.Truncated(
+        name, dist.dist(**kwargs), lower=lower, upper=upper, initval=initval
+    )

@@ -1,13 +1,9 @@
-# -*- coding: utf-8 -*-
-
 __all__ = ["regular_grid_interp", "RegularGridInterpolator"]
 
 import itertools
 
-import aesara_theano_fallback.tensor as tt
-import numpy as np
-
-from .utils import as_tensor_variable
+from exoplanet.compat import tensor as at
+from exoplanet.utils import as_tensor_variable
 
 
 def regular_grid_interp(points, values, coords, *, fill_value=None):
@@ -39,24 +35,24 @@ def regular_grid_interp(points, values, coords, *, fill_value=None):
     # Find where the points should be inserted
     indices = []
     norm_distances = []
-    out_of_bounds = tt.zeros(coords.shape[:-1], dtype=bool)
+    out_of_bounds = at.zeros(coords.shape[:-1], dtype=bool)
     for n, grid in enumerate(points):
         x = coords[..., n]
-        i = tt.extra_ops.searchsorted(grid, x) - 1
+        i = at.extra_ops.searchsorted(grid, x) - 1
         out_of_bounds |= (i < 0) | (i >= grid.shape[0] - 1)
-        i = tt.clip(i, 0, grid.shape[0] - 2)
+        i = at.clip(i, 0, grid.shape[0] - 2)
         indices.append(i)
         norm_distances.append((x - grid[i]) / (grid[i + 1] - grid[i]))
 
-    result = tt.zeros(tuple(coords.shape[:-1]) + tuple(values.shape[ndim:]))
+    result = at.zeros(tuple(coords.shape[:-1]) + tuple(values.shape[ndim:]))
     for edge_indices in itertools.product(*((i, i + 1) for i in indices)):
-        weight = tt.ones(coords.shape[:-1])
+        weight = at.ones(coords.shape[:-1])
         for ei, i, yi in zip(edge_indices, indices, norm_distances):
-            weight *= tt.where(tt.eq(ei, i), 1 - yi, yi)
+            weight *= at.where(at.eq(ei, i), 1 - yi, yi)
         result += values[edge_indices] * weight
 
     if fill_value is not None:
-        result = tt.switch(out_of_bounds, fill_value, result)
+        result = at.switch(out_of_bounds, fill_value, result)
 
     return result
 
