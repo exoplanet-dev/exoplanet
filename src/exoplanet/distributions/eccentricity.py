@@ -141,13 +141,11 @@ def vaneylen19(
         )
 
         with pm.Model(name=name):
-
             if fixed:
                 sigma_gauss = sigma_gauss_mu
                 sigma_rayleigh = sigma_rayleigh_mu
                 frac = frac_mu
             else:
-
                 bounded_normal = pm.Bound(pm.Normal, lower=0)
                 sigma_gauss = bounded_normal(
                     "sigma_gauss",

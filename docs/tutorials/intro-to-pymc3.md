@@ -106,7 +106,6 @@ The documentation for the distributions available in PyMC3's modeling language c
 import pymc3 as pm
 
 with pm.Model() as model:
-
     # Define the priors on each parameter:
     m = pm.Uniform("m", lower=-5, upper=5)
     b = pm.Uniform("b", lower=-5, upper=5)
@@ -249,7 +248,6 @@ import aesara_theano_fallback.tensor as tt
 import exoplanet as xo
 
 with pm.Model() as model:
-
     # Parameters
     logK = pm.Uniform(
         "logK",
