@@ -240,7 +240,6 @@ rv_obs = 5.0 * np.sin(2 * np.pi * t / 10.0) + np.sqrt(
 ) * random.normal(size=len(t))
 
 with pm.Model():
-
     # Period, semi-amplitude, and eccentricity
     log_period = pm.Normal("log_period", mu=np.log(10.0), sigma=1.0)
     period = pm.Deterministic("period", tt.exp(log_period))
@@ -333,7 +332,6 @@ rho_err = random.uniform(0.05, 0.1, len(t))
 theta_err = random.uniform(0.05, 0.1, len(t))
 
 with pm.Model():
-
     # Period, semi-major axis, eccentricity, and t0
     log_period = pm.Normal("log_period", mu=np.log(25.0 * 365.25), sigma=1.0)
     period = pm.Deterministic("period", tt.exp(log_period))
@@ -452,7 +450,6 @@ t = np.arange(0, 35, 0.02)
 yerr = 5e-4
 
 with pm.Model():
-
     # The baseline flux
     mean = pm.Normal("mean", mu=0.0, sigma=1.0)
 
