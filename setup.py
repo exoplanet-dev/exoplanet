@@ -25,12 +25,11 @@ CLASSIFIERS = [
 ]
 INSTALL_REQUIRES = ["exoplanet-core>=0.2.0", "astropy>=3.1"]
 EXTRA_REQUIRE = {
-    "pymc": ["pymc>=4.0.0"],
     "pymc3": ["pymc3>=3.9", "numpy<1.22", "aesara-theano-fallback>=0.0.2", "xarray<2023.10.0"],
-    "extras": ["pymc>=4.0.0", "pymc-ext>=1.0.0", "celerite2>=0.2.0"],
+    "extras": ["pymc>=4.0.0,<5.0.0", "pymc-ext>=1.0.0", "celerite2>=0.2.0"],
     "test": ["scipy", "pytest", "pytest-env"],
     "docs": [
-        "pymc>=4.0.0",
+        "pymc>=4.0.0,<5.0.0",
         "pymc-ext>=1.0.0",
         "sphinx-book-theme",
         "myst-nb",
