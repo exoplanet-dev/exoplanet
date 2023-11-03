@@ -33,14 +33,14 @@ Using AD to evaluate the gradients of your model will generally be faster, more 
 There are times when providing your AD framework with a custom implementation and/or differentation rule for a particular function is beneficial in terms of cost and stability.
 `exoplanet` is designed to provide these custom implementations only where it is useful (e.g. solving Kepler's equation or evaluating limb-darkened light curves) and then rely on the existing AD toolkit elsewhere.
 
-## Automatic differentiation in Aesara
+## Automatic differentiation in PyTensor
 
 Let's start by giving a quick taste for how AD works in the context of `PyMC` and `exoplanet`.
-`PyMC` is built on top of a library called `Aesara` that was designed for AD and fast linear algebra in the context of neural networks.
+`PyMC` is built on top of a library called `PyTensor`, a fork of the now unmaintained Theano library that was designed for AD and fast linear algebra in the context of neural networks.
 The learning curve can be steep because your code ends up looking a little different from the usual way you would write Python code.
-(If you're looking for something more "Pythonic", [JAX](https://github.com/google/jax) might be a good alternative, but for our purposes, we'll stick with `Aesara`.)
-In `Aesara`, you start by defining the _relationships_ between variables and then ask to evaluate a variable using this "graph".
-This might seem a little counterintuitive, and you hopefully won't have to worry about this too much, but it can be a handy workflow because `Aesara` will compile and optimize your model in the background (generally making it faster).
+(If you're looking for something more "Pythonic", [JAX](https://github.com/google/jax) might be a good alternative, but for our purposes, we'll stick with `PyTensor`.)
+In `PyTensor`, you start by defining the _relationships_ between variables and then ask to evaluate a variable using this "graph".
+This might seem a little counterintuitive, and you hopefully won't have to worry about this too much, but it can be a handy workflow because `PyTensor` will compile and optimize your model in the background (generally making it faster).
 This structure allows us to evaluate the derivative of some variable with respect to another.
 
 Here's a simple example where we define a relationship between two variables `x` and `y`:
@@ -59,20 +59,20 @@ $$
 ```{code-cell}
 import numpy as np
 import matplotlib.pyplot as plt
-import aesara
-import aesara.tensor as at
+import pytensor
+import pytensor.tensor as pt
 
 # Define the relationship between two variables x and y=f(x)
-x_ = at.vector("x")
-y_ = at.exp(at.sin(2 * np.pi * x_ / 3.0))
+x_ = pt.vector("x")
+y_ = pt.exp(pt.sin(2 * np.pi * x_ / 3.0))
 
-# Here aesara will compile a function to evaluate y
-func = aesara.function([x_], y_)
+# Here pytensor will compile a function to evaluate y
+func = pytensor.function([x_], y_)
 
 # Request the gradient of y with respect to x
 # Note the call to `sum`. This is a bit of a cheat since by
-# default Aesara only computes gradients of a *scalar* function
-grad = aesara.function([x_], aesara.grad(at.sum(y_), x_))
+# default pytensor only computes gradients of a *scalar* function
+grad = pytensor.function([x_], pytensor.grad(pt.sum(y_), x_))
 
 # Plot the function and its derivative
 x = np.linspace(-3, 3, 500)
@@ -100,7 +100,7 @@ In particular, I think that you'll probably pretty regularly find yourself exper
 ## Gradient-based inference
 
 Now that we have a way of easily evaluating the derivatives of scalar functions, we have a wide array of new inference algorithms at our disposal.
-For example, if we use Aesara to evaluate our log probability function, we could pass the value and gradient to [`scipy.optimize.minimize`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html) in order to find the maximum likelihood or maximum a posteriori parameters.
+For example, if we use PyTensor to evaluate our log probability function, we could pass the value and gradient to [`scipy.optimize.minimize`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html) in order to find the maximum likelihood or maximum a posteriori parameters.
 But, the point of `exoplanet` is that it integrates with `PyMC` which provides implementations of various gradient-based Markov chain Monte Carlo (MCMC) methods like [Hamiltonian Monte Carlo](https://en.wikipedia.org/wiki/Hamiltonian_Monte_Carlo) and [No U-Turn Sampling](https://arxiv.org/abs/1111.4246).
 `PyMC` also supports gradient-based methods for [variational inference](https://en.wikipedia.org/wiki/Variational_Bayesian_methods), but (so far) `exoplanet` had mostly been used for MCMC.
 

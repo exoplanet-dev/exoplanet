@@ -84,7 +84,7 @@ computational run time. These can be found in the `case studies
 <https://github.com/exoplanet-dev/case-studies>`_ repo and there is more
 information there about how to contribute.
 
-3. **Theano/Aesara ops**: ``exoplanet`` comes bundled with a set of custom ops
+3. **Theano/PyTensor ops**: ``exoplanet`` comes bundled with a set of custom ops
 that are implemented in the `exoplanet-core project
 <https://github.com/exoplanet-dev/exoplanet-core>`_. As a user, hopefully you'll
 rarely interact with these directly, and we haven't put a lot of work into making
