@@ -45,22 +45,21 @@ def deprecated(alternate=None):  # pragma: no cover
 def docs_setup():
     """Set some environment variables and ignore some warnings for the docs"""
     import logging
-    import warnings
 
+    # TODO: Remove?
+    # import warnings
     import matplotlib.pyplot as plt
 
-    # TODO: Check if still needed
-    warnings.filterwarnings("ignore", category=DeprecationWarning)
-    warnings.filterwarnings("ignore", category=FutureWarning)
-
+    # TODO: Remove? None of these warnings in the docs (did not check case studies yet)
+    # warnings.filterwarnings("ignore", category=DeprecationWarning)
+    # warnings.filterwarnings("ignore", category=FutureWarning)
     # Remove when arviz is updated
-    # TODO: Check if still needed
-    warnings.filterwarnings("ignore", category=UserWarning)
+    # TODO: Remove? Only warning left is from PyMC about QuadPotentialFullAdapt
+    # warnings.filterwarnings("ignore", category=UserWarning)
 
     logger = logging.getLogger("theano.gof.compilelock")
     logger.setLevel(logging.ERROR)
-    # TODO: No longer exists, find replacement
-    logger = logging.getLogger("pytensor.tensor.opt")
+    logger = logging.getLogger("pytensor.tensor.rewriting")
     logger.setLevel(logging.ERROR)
     logger = logging.getLogger("pytensor.tensor.blas")
     logger.setLevel(logging.ERROR)
