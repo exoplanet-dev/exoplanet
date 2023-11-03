@@ -47,11 +47,13 @@ if USING_PYMC3:
         from theano.configparser import change_flags as change_flags
 
 else:
-    from aesara import function as function
-    from aesara import grad as grad
-    from aesara import tensor as tensor
-    from aesara.configparser import change_flags
-    from aesara.gradient import verify_grad as verify_grad
-    from aesara.ifelse import ifelse as ifelse
-    from aesara.raise_op import Assert as Assert
-    from exoplanet_core.pymc4 import ops as ops
+    import pytensor
+    from pytensor import function as function
+    from pytensor import grad as grad
+    from pytensor import tensor as tensor
+
+    change_flags = pytensor.config.change_flags
+    from exoplanet_core.pymc import ops as ops
+    from pytensor.gradient import verify_grad as verify_grad
+    from pytensor.ifelse import ifelse as ifelse
+    from pytensor.raise_op import Assert as Assert

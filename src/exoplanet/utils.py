@@ -49,17 +49,20 @@ def docs_setup():
 
     import matplotlib.pyplot as plt
 
+    # TODO: Check if still needed
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     warnings.filterwarnings("ignore", category=FutureWarning)
 
     # Remove when arviz is updated
+    # TODO: Check if still needed
     warnings.filterwarnings("ignore", category=UserWarning)
 
     logger = logging.getLogger("theano.gof.compilelock")
     logger.setLevel(logging.ERROR)
-    logger = logging.getLogger("aesara.tensor.opt")
+    # TODO: No longer exists, find replacement
+    logger = logging.getLogger("pytensor.tensor.opt")
     logger.setLevel(logging.ERROR)
-    logger = logging.getLogger("aesara.tensor.blas")
+    logger = logging.getLogger("pytensor.tensor.blas")
     logger.setLevel(logging.ERROR)
     logger = logging.getLogger("matplotlib.font_manager")
     logger.setLevel(logging.ERROR)

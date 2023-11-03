@@ -4,7 +4,7 @@ import numpy as np
 
 from exoplanet.citations import add_citations_to_model
 from exoplanet.compat import USING_PYMC3, pm
-from exoplanet.compat import tensor as at
+from exoplanet.compat import tensor as pt
 
 
 def kipping13(
@@ -193,8 +193,8 @@ def vaneylen19(
             pm.Potential(
                 "prior",
                 pm.math.logaddexp(
-                    at.log(1 - frac) + _logp(gauss, ecc),
-                    at.log(frac) + _logp(rayleigh, ecc),
+                    pt.log(1 - frac) + _logp(gauss, ecc),
+                    pt.log(frac) + _logp(rayleigh, ecc),
                 ),
             )
 

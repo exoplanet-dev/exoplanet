@@ -4,7 +4,7 @@ import numpy as np
 
 from exoplanet.citations import add_citations_to_model
 from exoplanet.compat import USING_PYMC3, pm
-from exoplanet.compat import tensor as at
+from exoplanet.compat import tensor as pt
 from exoplanet.utils import as_tensor_variable
 
 
@@ -31,9 +31,9 @@ def angle(name, *, regularization=10.0, **kwargs):
     if regularization is not None:
         pm.Potential(
             f"{name}_regularization",
-            regularization * at.log(x1**2 + x2**2),
+            regularization * pt.log(x1**2 + x2**2),
         )
-    return pm.Deterministic(name, at.arctan2(x1, x2))
+    return pm.Deterministic(name, pt.arctan2(x1, x2))
 
 
 def unit_disk(name_x, name_y, **kwargs):
@@ -62,8 +62,8 @@ def unit_disk(name_x, name_y, **kwargs):
             initval=initval[1] * np.sqrt(1 - initval[0] ** 2), **kwargs
         ),
     )
-    norm = at.sqrt(1 - x1**2)
-    pm.Potential(f"{name_y}_jacobian", at.log(norm))
+    norm = pt.sqrt(1 - x1**2)
+    pm.Potential(f"{name_y}_jacobian", pt.log(norm))
     return x1, pm.Deterministic(name_y, x2 * norm)
 
 
@@ -87,10 +87,10 @@ def quad_limb_dark(name, **kwargs):
     q2 = pm.Uniform(
         f"__{name}_q2", **_with_initval(initval=0.5 * u1 / (u1 + u2), **kwargs)
     )
-    sqrtq1 = at.sqrt(q1)
+    sqrtq1 = pt.sqrt(q1)
     twoq2 = 2 * q2
     return pm.Deterministic(
-        name, at.stack([sqrtq1 * twoq2, sqrtq1 * (1 - twoq2)], axis=0)
+        name, pt.stack([sqrtq1 * twoq2, sqrtq1 * (1 - twoq2)], axis=0)
     )
 
 
@@ -98,7 +98,7 @@ def impact_parameter(name, ror, **kwargs):
     """The impact parameter distribution for a transiting planet
 
     Args:
-        ror: A scalar, tensor, or PyMC3 distribution representing the radius
+        ror: A scalar, tensor, or PyMC (3 or 5+) distribution representing the radius
             ratio between the planet and star. Conditioned on a value of
             ``ror``, this will be uniformly distributed between ``0`` and
             ``1+ror``.
@@ -107,7 +107,7 @@ def impact_parameter(name, ror, **kwargs):
     bhat = kwargs.pop("initval", kwargs.pop("testval", 0.5))
     if not USING_PYMC3:
         shape = kwargs.setdefault("shape", ror.shape)
-        bhat = at.broadcast_to(bhat, shape)
+        bhat = pt.broadcast_to(bhat, shape)
     kwargs["lower"] = 0.0
     kwargs["upper"] = 1.0
     norm = pm.Uniform(

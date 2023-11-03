@@ -5,7 +5,7 @@ from astropy.constants import c
 from scipy.optimize import minimize
 
 from exoplanet.compat import change_flags, function, grad
-from exoplanet.compat import tensor as at
+from exoplanet.compat import tensor as pt
 from exoplanet.orbits.keplerian import (
     KeplerianOrbit,
     _get_consistent_inputs,
@@ -90,7 +90,7 @@ def test_center_of_mass():
 
 def test_velocity():
     with change_flags(compute_test_value="off"):
-        t_tensor = at.dvector()
+        t_tensor = pt.dvector()
         t = np.linspace(0, 100, 1000)
         m_planet = 0.1
         m_star = 1.3
@@ -110,7 +110,7 @@ def test_velocity():
         star_vel = function([], orbit.get_star_velocity(t))()
         star_vel_expect = np.empty_like(star_vel)
         for i in range(3):
-            g = grad(at.sum(star_pos[i]), t_tensor)
+            g = grad(pt.sum(star_pos[i]), t_tensor)
             star_vel_expect[i] = function([t_tensor], g)(t)
         assert np.allclose(star_vel, star_vel_expect)
 
@@ -118,7 +118,7 @@ def test_velocity():
         planet_vel = function([], orbit.get_planet_velocity(t))()
         planet_vel_expect = np.empty_like(planet_vel)
         for i in range(3):
-            g = grad(at.sum(planet_pos[i]), t_tensor)
+            g = grad(pt.sum(planet_pos[i]), t_tensor)
             planet_vel_expect[i] = function([t_tensor], g)(t)
         assert np.allclose(planet_vel, planet_vel_expect)
 
@@ -126,7 +126,7 @@ def test_velocity():
         vel = np.array(function([], orbit.get_relative_velocity(t))())
         vel_expect = np.empty_like(vel)
         for i in range(3):
-            g = grad(at.sum(pos[i]), t_tensor)
+            g = grad(pt.sum(pos[i]), t_tensor)
             vel_expect[i] = function([t_tensor], g)(t)
         assert np.allclose(vel, vel_expect)
 
@@ -156,7 +156,7 @@ def test_radial_velocity():
 
 def test_acceleration():
     with change_flags(compute_test_value="off"):
-        t_tensor = at.dvector()
+        t_tensor = pt.dvector()
         t = np.linspace(0, 100, 1000)
         m_planet = 0.1
         m_star = 1.3
@@ -175,7 +175,7 @@ def test_acceleration():
         star_acc = function([], orbit.get_star_acceleration(t))()
         star_acc_expect = np.empty_like(star_acc)
         for i in range(3):
-            g = grad(at.sum(star_vel[i]), t_tensor)
+            g = grad(pt.sum(star_vel[i]), t_tensor)
             star_acc_expect[i] = function([t_tensor], g)(t)
         assert np.allclose(star_acc, star_acc_expect)
 
@@ -183,7 +183,7 @@ def test_acceleration():
         planet_acc = function([], orbit.get_planet_acceleration(t))()
         planet_acc_expect = np.empty_like(planet_acc)
         for i in range(3):
-            g = grad(at.sum(planet_vel[i]), t_tensor)
+            g = grad(pt.sum(planet_vel[i]), t_tensor)
             planet_acc_expect[i] = function([t_tensor], g)(t)
         assert np.allclose(planet_acc, planet_acc_expect)
 
@@ -191,7 +191,7 @@ def test_acceleration():
         acc = function([], orbit.get_relative_acceleration(t))()
         acc_expect = np.empty_like(acc)
         for i in range(3):
-            g = grad(at.sum(vel[i]), t_tensor)
+            g = grad(pt.sum(vel[i]), t_tensor)
             acc_expect[i] = function([t_tensor], g)(t)
         assert np.allclose(acc, acc_expect)
 
@@ -369,7 +369,7 @@ def test_impact():
     )
     coords = orbit.get_relative_position(t0)
     assert np.allclose(
-        (at.sqrt(coords[0] ** 2 + coords[1] ** 2) / r_star).eval(), b
+        (pt.sqrt(coords[0] ** 2 + coords[1] ** 2) / r_star).eval(), b
     )
     assert coords[2].eval() > 0
 
@@ -504,14 +504,14 @@ def test_get_consistent_inputs():
 def test_light_delay():
     with change_flags(compute_test_value="off"):
         # Instantiate the orbit
-        m_star = at.scalar()
-        period = at.scalar()
-        ecc = at.scalar()
-        omega = at.scalar()
-        Omega = at.scalar()
-        incl = at.scalar()
-        m_planet = at.scalar()
-        t = at.scalar()
+        m_star = pt.scalar()
+        period = pt.scalar()
+        ecc = pt.scalar()
+        omega = pt.scalar()
+        Omega = pt.scalar()
+        incl = pt.scalar()
+        m_planet = pt.scalar()
+        t = pt.scalar()
         orbit = KeplerianOrbit(
             m_star=m_star,
             r_star=1.0,
@@ -615,7 +615,7 @@ def test_get_aor_from_transit_duration():
     ror = 0.06
     r_star = 0.7
 
-    dv = at.as_tensor_variable(duration)
+    dv = pt.as_tensor_variable(duration)
     aor, jac = get_aor_from_transit_duration(dv, period, b, ror)
 
     assert np.allclose(grad(aor, dv).eval(), jac.eval())
@@ -634,13 +634,13 @@ def test_get_aor_from_transit_duration():
         ),
     ]:
         x, y, z = orbit.get_planet_position(0.5 * duration)
-        assert np.allclose(at.sqrt(x**2 + y**2).eval(), r_star * (1 + ror))
+        assert np.allclose(pt.sqrt(x**2 + y**2).eval(), r_star * (1 + ror))
 
         x, y, z = orbit.get_planet_position(-0.5 * duration)
-        assert np.allclose(at.sqrt(x**2 + y**2).eval(), r_star * (1 + ror))
+        assert np.allclose(pt.sqrt(x**2 + y**2).eval(), r_star * (1 + ror))
 
         x, y, z = orbit.get_planet_position(period + 0.5 * duration)
-        assert np.allclose(at.sqrt(x**2 + y**2).eval(), r_star * (1 + ror))
+        assert np.allclose(pt.sqrt(x**2 + y**2).eval(), r_star * (1 + ror))
 
 
 @pytest.mark.filterwarnings("error::UserWarning")
@@ -668,7 +668,7 @@ def test_jacobians():
     ror = 0.06
     r_star = 0.7
 
-    dv = at.as_tensor_variable(duration)
+    dv = pt.as_tensor_variable(duration)
     orbit = KeplerianOrbit(
         period=period, t0=0.0, b=b, duration=dv, r_star=r_star, ror=ror
     )
@@ -689,7 +689,7 @@ def test_jacobians():
         grad(orbit.rho_star, dv).eval(),
     )
 
-    bv = at.as_tensor_variable(b)
+    bv = pt.as_tensor_variable(b)
     orbit = KeplerianOrbit(
         period=period, t0=0.0, b=bv, a=orbit.a, r_star=r_star, ror=ror
     )

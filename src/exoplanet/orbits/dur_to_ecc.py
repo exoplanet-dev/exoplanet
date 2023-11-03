@@ -11,7 +11,7 @@ from itertools import product
 import numpy as np
 
 from exoplanet.compat import pm
-from exoplanet.compat import tensor as at
+from exoplanet.compat import tensor as pt
 from exoplanet.orbits.keplerian import KeplerianOrbit, _get_consistent_inputs
 
 
@@ -34,16 +34,18 @@ def duration_to_eccentricity(
     )
     a, period, rho_star, r_star, m_star, m_planet = inputs
     b = kwargs.get("b", 0.0)
-    s = at.sin(kwargs["omega"])
-    umax_inv = at.switch(at.lt(s, 0), at.sqrt(1 - s**2), 1.0)
+    s = pt.sin(kwargs["omega"])
+    umax_inv = pt.switch(pt.lt(s, 0), pt.sqrt(1 - s**2), 1.0)
 
-    const = period * at.shape_padright(r_star) * at.sqrt((1 + ror) ** 2 - b**2)
+    const = (
+        period * pt.shape_padright(r_star) * pt.sqrt((1 + ror) ** 2 - b**2)
+    )
     const /= np.pi * a
 
     u = duration / const
 
     e1 = -s * u**2 / ((s * u) ** 2 + 1)
-    e2 = at.sqrt((s**2 - 1) * u**2 + 1) / ((s * u) ** 2 + 1)
+    e2 = pt.sqrt((s**2 - 1) * u**2 + 1) / ((s * u) ** 2 + 1)
 
     models = []
     logjacs = []
@@ -52,38 +54,38 @@ def duration_to_eccentricity(
         labels, signs = zip(*args)
 
         # Compute the eccentricity branch
-        ecc = at.stack([e1[i] + signs[i] * e2[i] for i in range(num_planets)])
+        ecc = pt.stack([e1[i] + signs[i] * e2[i] for i in range(num_planets)])
 
         # Work out the Jacobian
-        valid_ecc = at.and_(at.lt(ecc, 1.0), at.ge(ecc, 0.0))
-        logjac = at.switch(
-            at.all(valid_ecc),
-            at.sum(
-                0.5 * at.log(1 - ecc**2)
-                + 2 * at.log(s * ecc + 1)
-                - at.log(at.abs(s + ecc))
-                - at.log(const)
+        valid_ecc = pt.and_(pt.lt(ecc, 1.0), pt.ge(ecc, 0.0))
+        logjac = pt.switch(
+            pt.all(valid_ecc),
+            pt.sum(
+                0.5 * pt.log(1 - ecc**2)
+                + 2 * pt.log(s * ecc + 1)
+                - pt.log(pt.abs(s + ecc))
+                - pt.log(const)
             ),
             -np.inf,
         )
-        ecc = at.switch(valid_ecc, ecc, at.zeros_like(ecc))
+        ecc = pt.switch(valid_ecc, ecc, pt.zeros_like(ecc))
 
         # Create a sub-model to capture this component
         with pm.Model(name="dur_ecc_" + "_".join(labels)) as model:
             pm.Deterministic("ecc", ecc)
             orbit = orbit_type(ecc=ecc, **kwargs)
-            logprob = at.sum(func(orbit))
+            logprob = pt.sum(func(orbit))
 
         models.append(model)
         logjacs.append(logjac)
         logprobs.append(logprob)
 
     # Compute the marginalized likelihood
-    logjacs = at.stack(logjacs)
-    logprobs = at.stack(logprobs)
-    logprob = at.switch(
-        at.gt(1.0 / u, umax_inv),
-        at.sum(pm.logsumexp(logprobs + logjacs)),
+    logjacs = pt.stack(logjacs)
+    logprobs = pt.stack(logprobs)
+    logprob = pt.switch(
+        pt.gt(1.0 / u, umax_inv),
+        pt.sum(pm.logsumexp(logprobs + logjacs)),
         -np.inf,
     )
     pm.Potential(name + "_logp", logprob)
@@ -92,11 +94,11 @@ def duration_to_eccentricity(
 
     # Loop over models and compute the marginalized values for all the
     # parameters and deterministics
-    norm = at.sum(pm.logsumexp(logjacs))
-    logw = at.switch(
-        at.gt(1.0 / u, umax_inv),
+    norm = pt.sum(pm.logsumexp(logjacs))
+    logw = pt.switch(
+        pt.gt(1.0 / u, umax_inv),
         logjacs - norm,
-        -np.inf + at.zeros_like(logjacs),
+        -np.inf + pt.zeros_like(logjacs),
     )
     pm.Deterministic(name + "_logw", logw)
     for k in models[0].named_vars.keys():
@@ -104,7 +106,7 @@ def duration_to_eccentricity(
         pm.Deterministic(
             name,
             sum(
-                at.exp(logw[i]) * model.named_vars[model.name + "_" + name]
+                pt.exp(logw[i]) * model.named_vars[model.name + "_" + name]
                 for i, model in enumerate(models)
             ),
         )
