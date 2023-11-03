@@ -2,7 +2,7 @@ __all__ = ["TTVOrbit", "compute_expected_transit_times"]
 
 import numpy as np
 
-from exoplanet.compat import tensor as at
+from exoplanet.compat import tensor as pt
 from exoplanet.orbits.keplerian import KeplerianOrbit
 from exoplanet.utils import as_tensor_variable
 
@@ -80,11 +80,11 @@ class TTVOrbit(KeplerianOrbit):
             self.ttvs = [as_tensor_variable(ttv, ndim=1) for ttv in ttvs]
             if transit_inds is None:
                 self.transit_inds = [
-                    at.arange(ttv.shape[0]) for ttv in self.ttvs
+                    pt.arange(ttv.shape[0]) for ttv in self.ttvs
                 ]
             else:
                 self.transit_inds = [
-                    at.cast(as_tensor_variable(inds, ndim=1), "int64")
+                    pt.cast(as_tensor_variable(inds, ndim=1), "int64")
                     for inds in transit_inds
                 ]
 
@@ -99,19 +99,19 @@ class TTVOrbit(KeplerianOrbit):
             for i, times in enumerate(transit_times):
                 times = as_tensor_variable(times, ndim=1)
                 if transit_inds is None:
-                    inds = at.arange(times.shape[0])
+                    inds = pt.arange(times.shape[0])
                 else:
-                    inds = at.cast(
+                    inds = pt.cast(
                         as_tensor_variable(transit_inds[i]), "int64"
                     )
                 self.transit_inds.append(inds)
 
                 # A convoluted version of linear regression; don't ask
                 N = times.shape[0]
-                sumx = at.sum(inds)
-                sumx2 = at.sum(inds**2)
-                sumy = at.sum(times)
-                sumxy = at.sum(inds * times)
+                sumx = pt.sum(inds)
+                sumx2 = pt.sum(inds**2)
+                sumy = pt.sum(times)
+                sumxy = pt.sum(inds * times)
                 denom = N * sumx2 - sumx**2
                 slope = (N * sumxy - sumx * sumy) / denom
                 intercept = (sumx2 * sumy - sumx * sumxy) / denom
@@ -122,18 +122,18 @@ class TTVOrbit(KeplerianOrbit):
                 self.ttvs.append(times - expect)
                 self.transit_times.append(times)
 
-            kwargs["t0"] = at.stack(t0)
+            kwargs["t0"] = pt.stack(t0)
 
             # We'll have two different periods: one that is the mean difference
             # between transit times and one that is a parameter that sets the
             # transit shape. If a "period" parameter is not given, these will
             # be the same. Users will probably want to put a prior relating the
             # two periods if they use separate values.
-            self.ttv_period = at.stack(period)
+            self.ttv_period = pt.stack(period)
             if "period" not in kwargs:
                 if "delta_log_period" in kwargs:
-                    kwargs["period"] = at.exp(
-                        at.log(self.ttv_period)
+                    kwargs["period"] = pt.exp(
+                        pt.log(self.ttv_period)
                         + kwargs.pop("delta_log_period")
                     )
                 else:
@@ -151,14 +151,14 @@ class TTVOrbit(KeplerianOrbit):
         # Compute the full set of transit times
         self.all_transit_times = []
         for i, inds in enumerate(self.transit_inds):
-            expect = self.t0[i] + self.period[i] * at.arange(inds.max() + 1)
+            expect = self.t0[i] + self.period[i] * pt.arange(inds.max() + 1)
             self.all_transit_times.append(
-                at.set_subtensor(expect[inds], self.transit_times[i])
+                pt.set_subtensor(expect[inds], self.transit_times[i])
             )
 
         # Set up a histogram for identifying the transit offsets
         self._bin_edges = [
-            at.concatenate(
+            pt.concatenate(
                 (
                     [tts[0] - 0.5 * self.ttv_period[i]],
                     0.5 * (tts[1:] + tts[:-1]),
@@ -168,20 +168,20 @@ class TTVOrbit(KeplerianOrbit):
             for i, tts in enumerate(self.all_transit_times)
         ]
         self._bin_values = [
-            at.concatenate(([tts[0]], tts, [tts[-1]]))
+            pt.concatenate(([tts[0]], tts, [tts[-1]]))
             for i, tts in enumerate(self.all_transit_times)
         ]
 
     def _get_model_dt(self, t):
         vals = []
         for i in range(len(self.ttvs)):
-            inds = at.extra_ops.searchsorted(self._bin_edges[i], t)
+            inds = pt.extra_ops.searchsorted(self._bin_edges[i], t)
             vals.append(self._bin_values[i][inds])
-        return at.stack(vals, -1)
+        return pt.stack(vals, -1)
 
     def _warp_times(self, t, _pad=True):
         # This is the key function that takes the TTVs into account by
         # stretching the time axis around each transit
         if _pad:
-            return at.shape_padright(t) - self._get_model_dt(t)
+            return pt.shape_padright(t) - self._get_model_dt(t)
         return t - self._get_model_dt(t)

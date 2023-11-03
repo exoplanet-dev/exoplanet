@@ -2,7 +2,7 @@ __all__ = ["SimpleTransitOrbit"]
 
 import numpy as np
 
-from exoplanet.compat import tensor as at
+from exoplanet.compat import tensor as pt
 from exoplanet.utils import as_tensor_variable
 
 
@@ -36,7 +36,7 @@ class SimpleTransitOrbit:
         self._ref_time = self.t0 - self._half_period
 
     def get_star_position(self, t, light_delay=False):
-        nothing = at.zeros_like(as_tensor_variable(t))
+        nothing = pt.zeros_like(as_tensor_variable(t))
         return nothing, nothing, nothing
 
     def get_planet_position(self, t, light_delay=False):
@@ -57,12 +57,12 @@ class SimpleTransitOrbit:
             raise NotImplementedError(
                 "Light travel time delay is not implemented for simple orbits"
             )
-        dt = at.mod(at.shape_padright(t) - self._ref_time, self.period)
+        dt = pt.mod(pt.shape_padright(t) - self._ref_time, self.period)
         dt -= self._half_period
-        x = at.squeeze(self.speed * dt)
-        y = at.squeeze(self._b_norm + at.zeros_like(dt))
-        m = at.abs(dt) < 0.5 * self.duration
-        z = at.squeeze(m * 1.0 - (~m) * 1.0)
+        x = pt.squeeze(self.speed * dt)
+        y = pt.squeeze(self._b_norm + pt.zeros_like(dt))
+        m = pt.abs(dt) < 0.5 * self.duration
+        z = pt.squeeze(m * 1.0 - (~m) * 1.0)
         return x, y, z
 
     def get_planet_velocity(self, t):
@@ -90,14 +90,14 @@ class SimpleTransitOrbit:
             raise NotImplementedError(
                 "Light travel time delay is not implemented for simple orbits"
             )
-        dt = at.mod(at.shape_padright(t) - self._ref_time, self.period)
+        dt = pt.mod(pt.shape_padright(t) - self._ref_time, self.period)
         dt -= self._half_period
         if r is None:
             tol = 0.5 * self.duration
         else:
             x = (r + self.r_star) ** 2 - self._b_norm**2
-            tol = at.sqrt(x) / self.speed
+            tol = pt.sqrt(x) / self.speed
         if texp is not None:
             tol += 0.5 * texp
-        mask = at.any(at.abs(dt) < tol, axis=-1)
-        return at.arange(t.size)[mask]
+        mask = pt.any(pt.abs(dt) < tol, axis=-1)
+        return pt.arange(t.size)[mask]

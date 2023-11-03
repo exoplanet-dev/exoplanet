@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from exoplanet.compat import change_flags, function, grad
-from exoplanet.compat import tensor as at
+from exoplanet.compat import tensor as pt
 from exoplanet.compat import verify_grad
 from exoplanet.light_curves import (
     LimbDarkLightCurve,
@@ -54,7 +54,7 @@ def test_light_curve_grad(caplog):
 
 
 def test_vector_params():
-    u = at.vector()
+    u = pt.vector()
     u.tag.test_value = u_val = np.array([0.3, 0.2])
     b = np.linspace(-1.5, 1.5, 20)
     r = 0.1 + np.zeros_like(b)
@@ -219,9 +219,9 @@ def test_small_star():
 
 def test_singular_points():
     u = np.array([0.2, 0.3])
-    b = at.vector()
+    b = pt.vector()
     b.tag.test_value = np.array([0.5])
-    r = at.vector()
+    r = pt.vector()
     r.tag.test_value = np.array([0.1])
     lc = LimbDarkLightCurve(u[0], u[1])
     f = lc._compute_light_curve(b, r)
@@ -276,10 +276,10 @@ def test_approx_transit_depth():
         (np.array([0.1, 0.9]), np.array([0.1, 0.5])),
         (np.array([0.1, 0.9, 0.3]), np.array([0.1, 0.5, 0.0234])),
     ]:
-        dv = at.as_tensor_variable(delta)
+        dv = pt.as_tensor_variable(delta)
         ror, jac = lc.get_ror_from_approx_transit_depth(dv, b, jac=True)
         _check_quad(u, b, delta, ror.eval())
-        assert np.allclose(grad(at.sum(ror), dv).eval(), jac.eval())
+        assert np.allclose(grad(pt.sum(ror), dv).eval(), jac.eval())
 
 
 def test_secondary_eclipse():

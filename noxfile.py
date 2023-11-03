@@ -20,8 +20,8 @@ def test_pymc3(session):
 def test_pymc(session):
     session.install(".[test,pymc]")
     session.install("batman-package")
-    session.run("python", "-c", "import aesara")
-    session.run("python", "-c", "import exoplanet_core.pymc4.ops")
+    session.run("python", "-c", "import pytensor")
+    session.run("python", "-c", "import exoplanet_core.pymc.ops")
     session.run("pytest", "-v", *session.posargs)
 
 
