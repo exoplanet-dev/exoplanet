@@ -144,7 +144,7 @@ with pm.Model() as model:
 
 
 # Then sample the same model using emcee
-func = pmx.utils.Evaluator(model.logp())
+func = pmx.utils.Evaluator(model.logp(), model=model)
 
 
 def logp(theta):
