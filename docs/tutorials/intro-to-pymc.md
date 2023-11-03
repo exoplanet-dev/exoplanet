@@ -106,7 +106,6 @@ The documentation for the distributions available in PyMC's modeling language ca
 import pymc as pm
 
 with pm.Model() as model:
-
     # Define the priors on each parameter:
     m = pm.Uniform("m", lower=-5, upper=5)
     b = pm.Uniform("b", lower=-5, upper=5)
@@ -245,7 +244,6 @@ import aesara.tensor as at
 import exoplanet as xo
 
 with pm.Model() as model:
-
     # Parameters
     logK = pm.Uniform(
         "logK",
