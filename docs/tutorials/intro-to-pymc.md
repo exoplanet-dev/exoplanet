@@ -129,7 +129,7 @@ with pm.Model() as model:
 Now since we now have samples, let's make some diagnostic plots.
 The first plot to look at is the "traceplot" implemented in PyMC.
 In this plot, you'll see the marginalized distribution for each parameter on the left and the trace plot (parameter value as a function of step number) on the right.
-In each panel, you should see two lines with different colors.
+In each panel, you should see two lines with different colors or linestyles.
 These are the results of different independent chains and if the results are substantially different in the different chains then there is probably something going wrong.
 
 ```{code-cell}
@@ -171,7 +171,7 @@ _ = corner.corner(
 While the above example was cute, it doesn't really fully exploit the power of PyMC and it doesn't really show some of the real issues that you will face when you use PyMC as an astronomer.
 To get a better sense of how you might use PyMC in Real Life™, let's take a look at a more realistic example: fitting a Keplerian orbit to radial velocity observations.
 
-One of the key aspects of this problem that I want to highlight is the fact that PyMC (and the underlying model-building framework [Aesara](https://aesara.readthedocs.io/)) don't have out-of-the-box support for the root-finding that is required to solve Kepler's equation.
+One of the key aspects of this problem that I want to highlight is the fact that PyMC (and the underlying model-building framework [PyTensor](https://pytensor.readthedocs.io/)) don't have out-of-the-box support for the root-finding that is required to solve Kepler's equation.
 As part of the process of computing a Keplerian RV model, we must solve the equation:
 
 $$
@@ -179,7 +179,7 @@ M = E - e\,\sin E
 $$
 
 for the eccentric anomaly $E$ given some mean anomaly $M$ and eccentricity $e$.
-There are commonly accepted methods of solving this equation using [Newton's method](https://en.wikipedia.org/wiki/Newton%27s_method), but if we want to expose that to PyMC, we have to define a [custom Aesara operation](https://aesara.readthedocs.io/en/latest/extending/index.html) with a custom gradient.
+There are commonly accepted methods of solving this equation using [Newton's method](https://en.wikipedia.org/wiki/Newton%27s_method), but if we want to expose that to PyMC, we have to define a [custom Pytensor operation](https://pytensor.readthedocs.io/en/latest/extending/index.html) with a custom gradient.
 I won't go into the details of the math (because [I blogged about it](https://dfm.io/posts/stan-c++/)) and I won't go into the details of the implementation.
 So, for this tutorial, we'll use the custom Kepler solver that is implemented as part of _exoplanet_ and fit the publicly available radial velocity observations of the famous exoplanetary system 51 Peg using PyMC.
 
@@ -233,14 +233,14 @@ Some of this will look familiar after the Hello World example, but things are a 
 Take a minute to take a look through this and see if you can follow it.
 There's a lot going on, so I want to point out a few things to pay attention to:
 
-1. All of the mathematical operations (for example `exp` and `sqrt`) are being performed using [Aesara](https://aesara.readthedocs.io) instead of NumPy.
+1. All of the mathematical operations (for example `exp` and `sqrt`) are being performed using [PyTensor](https://pytensor.readthedocs.io) instead of NumPy.
 2. All of the parameters have initial guesses provided. This is an example where this makes a big difference because some of the parameters (like period) are very tightly constrained.
 3. Some of the lines are wrapped in `Deterministic` distributions. This can be useful because it allows us to track values as the chain progresses even if they're not parameters. For example, after sampling, we will have a sample for `bkg` (the background RV trend) for each step in the chain. This can be especially useful for making plots of the results.
 4. Similarly, at the end of the model definition, we compute the RV curve for a single orbit on a fine grid. This can be very useful for diagnosing fits gone wrong.
 5. For parameters that specify angles (like $\omega$, called `w` in the model below), it can be inefficient to sample in the angle directly because of the fact that the value wraps around at $2\pi$. Instead, it can be better to sample the unit vector specified by the angle or as a parameter in a unit disk, when combined with eccentricity. There are some helper functions like {func}`exoplanet.distributions.angle` and {func}`exoplanet.distributions.unit_disk` to help with this.
 
 ```{code-cell}
-import aesara.tensor as at
+import pytensor.tensor as pt
 import exoplanet as xo
 
 with pm.Model() as model:
@@ -261,17 +261,17 @@ with pm.Model() as model:
     #  k = sqrt(e) * cos(w)
     h, k = xo.unit_disk("h", "k", initval=np.array([0.01, 0.01]))
     e = pm.Deterministic("e", h**2 + k**2)
-    w = pm.Deterministic("w", at.arctan2(k, h))
+    w = pm.Deterministic("w", pt.arctan2(k, h))
 
     rv0 = pm.Normal("rv0", mu=0.0, sigma=10.0, initval=0.0)
     rvtrend = pm.Normal("rvtrend", mu=0.0, sigma=10.0, initval=0.0)
 
     # Deterministic transformations
-    n = 2 * np.pi * at.exp(-logP)
-    P = pm.Deterministic("P", at.exp(logP))
-    K = pm.Deterministic("K", at.exp(logK))
-    cosw = at.cos(w)
-    sinw = at.sin(w)
+    n = 2 * np.pi * pt.exp(-logP)
+    P = pm.Deterministic("P", pt.exp(logP))
+    K = pm.Deterministic("K", pt.exp(logK))
+    cosw = pt.cos(w)
+    sinw = pt.sin(w)
     t0 = (phi + w) / n
 
     # The RV model
@@ -279,9 +279,9 @@ with pm.Model() as model:
     M = n * t - (phi + w)
 
     # This is the line that uses the custom Kepler solver
-    f = xo.orbits.get_true_anomaly(M, e + at.zeros_like(M))
+    f = xo.orbits.get_true_anomaly(M, e + pt.zeros_like(M))
     rvmodel = pm.Deterministic(
-        "rvmodel", bkg + K * (cosw * (at.cos(f) + e) - sinw * at.sin(f))
+        "rvmodel", bkg + K * (cosw * (pt.cos(f) + e) - sinw * pt.sin(f))
     )
 
     # Condition on the observations
@@ -290,9 +290,9 @@ with pm.Model() as model:
     # Compute the phased RV signal
     phase = np.linspace(0, 1, 500)
     M_pred = 2 * np.pi * phase - (phi + w)
-    f_pred = xo.orbits.get_true_anomaly(M_pred, e + at.zeros_like(M_pred))
+    f_pred = xo.orbits.get_true_anomaly(M_pred, e + pt.zeros_like(M_pred))
     rvphase = pm.Deterministic(
-        "rvphase", K * (cosw * (at.cos(f_pred) + e) - sinw * at.sin(f_pred))
+        "rvphase", K * (cosw * (pt.cos(f_pred) + e) - sinw * pt.sin(f_pred))
     )
 ```
 

@@ -28,7 +28,7 @@ exoplanet.utils.docs_setup()
 print(f"exoplanet.__version__ = '{exoplanet.__version__}'")
 ```
 
-That cell also includes a call to the `exoplanet.utils.docs_setup` function that will squash some warnings (these are generally caused by Theano/Aesara) and set up our `matplotlib` style.
+That cell also includes a call to the `exoplanet.utils.docs_setup` function that will squash some warnings (these are generally caused by Theano/PyTensor) and set up our `matplotlib` style.
 
 To execute a tutorial on your own, you can click on the buttons at the top right or this page to launch the notebook using [Binder](https://mybinder.org) or download the `.ipynb` file directly.
 

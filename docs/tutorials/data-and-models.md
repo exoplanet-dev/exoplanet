@@ -63,7 +63,7 @@ vx, vy, vz = orbit.get_star_velocity(t)
 
 # Plot the coordinates
 # Note the use of `.eval()` throughout since the coordinates are all
-# Aesara objects
+# PyTensor objects
 fig, axes = plt.subplots(2, 1, figsize=(8, 8), sharex=True)
 ax = axes[0]
 ax.plot(t, x.eval(), label="x")
@@ -82,7 +82,7 @@ ax.set_ylabel("velocity of central [$R_*$/day]")
 _ = ax.legend(fontsize=10, loc=1)
 ```
 
-The key feture of `exoplanet` is that all of the parameters to a `KeplerianOrbit` can be `PyMC` variables.
+The key feature of `exoplanet` is that all of the parameters to a `KeplerianOrbit` can be `PyMC` variables.
 This means that these elements are now something that you can _infer_.
 For example, if we want to fit for the orbital period, we can define a `PyMC` model like the following:
 
@@ -228,7 +228,7 @@ One typical parameterization for a radial velocity fit would look something like
 ```{code-cell}
 import arviz as az
 import pymc_ext as pmx
-import aesara.tensor as at
+import pytensor.tensor as pt
 
 # Create a dummy dataset
 random = np.random.default_rng(1234)
@@ -242,9 +242,9 @@ rv_obs = 5.0 * np.sin(2 * np.pi * t / 10.0) + np.sqrt(
 with pm.Model():
     # Period, semi-amplitude, and eccentricity
     log_period = pm.Normal("log_period", mu=np.log(10.0), sigma=1.0)
-    period = pm.Deterministic("period", at.exp(log_period))
+    period = pm.Deterministic("period", pt.exp(log_period))
     log_semiamp = pm.Normal("log_semiamp", mu=np.log(5.0), sigma=2.0)
-    semiamp = pm.Deterministic("semiamp", at.exp(log_semiamp))
+    semiamp = pm.Deterministic("semiamp", pt.exp(log_semiamp))
     ecc = pm.Uniform("ecc", lower=0, upper=0.5, initval=0.01)
 
     # At low eccentricity, omega and the phase of periastron (phi) are
@@ -259,7 +259,7 @@ with pm.Model():
     #
     #     h, k = xo.unit_disk("h", "k")
     #     ecc = pm.Deterministic("ecc", h**2 + k**2)
-    #     omega = pm.Deterministic("omega", at.arctan2(h, k))
+    #     omega = pm.Deterministic("omega", pt.arctan2(h, k))
     #     phi = xo.angle("phi")
 
     # Jitter & the system mean velocity offset
@@ -276,7 +276,7 @@ with pm.Model():
     rv_model = zero_point + orbit.get_radial_velocity(t, K=semiamp)
 
     # Finally add in the observation model
-    err = at.sqrt(rv_err**2 + at.exp(2 * log_jitter))
+    err = pt.sqrt(rv_err**2 + pt.exp(2 * log_jitter))
     pm.Normal("obs", mu=rv_model, sigma=rv_err, observed=rv_obs)
 
     # We'll also track the model just for plotting purposes
@@ -335,9 +335,9 @@ theta_err = random.uniform(0.05, 0.1, len(t))
 with pm.Model():
     # Period, semi-major axis, eccentricity, and t0
     log_period = pm.Normal("log_period", mu=np.log(25.0 * 365.25), sigma=1.0)
-    period = pm.Deterministic("period", at.exp(log_period))
+    period = pm.Deterministic("period", pt.exp(log_period))
     log_a = pm.Normal("log_a", mu=np.log(0.3), sigma=2.0)
-    a = pm.Deterministic("a", at.exp(log_a))
+    a = pm.Deterministic("a", pt.exp(log_a))
     ecc = pm.Uniform("ecc", lower=0, upper=1)
     tperi = pm.Normal("tperi", mu=3500.0, sigma=1000.0)
 
@@ -350,7 +350,7 @@ with pm.Model():
 
     # We'll use a uniform prior on cos(incl)
     cos_incl = pm.Uniform("cos_incl", lower=-1.0, upper=1.0, testval=0.3)
-    incl = pm.Deterministic("incl", at.arccos(cos_incl))
+    incl = pm.Deterministic("incl", pt.arccos(cos_incl))
 
     # Then we define the orbit
     orbit = xo.orbits.KeplerianOrbit(
@@ -384,8 +384,8 @@ with pm.Model():
     #   pm.Normal("obs_theta", mu=theta_model, observed=theta_obs, sigma=theta_err)
     #
     # but takes into account the wrapping
-    theta_diff = at.arctan2(
-        at.sin(theta_model - theta_obs), at.cos(theta_model - theta_obs)
+    theta_diff = pt.arctan2(
+        pt.sin(theta_model - theta_obs), pt.cos(theta_model - theta_obs)
     )
     pm.Normal(
         "theta_obs",
@@ -444,7 +444,7 @@ If you provide parallax as an argument, `a` should be provided in the usual unit
 ## Transits, occultations, and eclipses
 
 `exoplanet` has built in support for evaluating quadratically limb darkened light curve models using the algorithm from [Agol et al. (2020)](https://arxiv.org/abs/1908.03222).
-If you need flexible surface models or higher order limb darkening, check out the [`starry` package](https://starry.readthedocs.io) which also integrates with `PyMC`.
+If you need flexible surface models or higher order limb darkening, check out the [`starry` package](https://starry.readthedocs.io) which also integrates with `PyMC` (3, but not 5 at the time of writing this).
 
 Transit and occultation modeling is one of the primary applications of `exoplanet` so there are quite a few options (including transit timing variations, detached eclipsing binary modeling, and much more) that are highlighted on the [Case Studies](https://gallery.exoplanet.codes) page.
 But, a bread-and-butter transit model implemented in `exoplanet` might look something like the following:
@@ -473,7 +473,7 @@ with pm.Model():
     # introduce pretty serious covariances and are ripe for
     # reparameterization
     log_r = pm.Normal("log_r", mu=np.log(0.04), sigma=2.0)
-    r = pm.Deterministic("r", at.exp(log_r))
+    r = pm.Deterministic("r", pt.exp(log_r))
     b = xo.distributions.impact_parameter("b", r, testval=0.35)
 
     # Set up a Keplerian orbit for the planets
@@ -528,7 +528,7 @@ az.summary(trace, var_names=["^(?!__).*"], filter_vars="regex")
 
 ## Combining datasets
 
-Since `exoplanet` is built on top of `PyMC`, it has the capacity to support essentially arbitrariliy complicated models.
+Since `exoplanet` is built on top of `PyMC`, it has the capacity to support essentially arbitrarily complicated models.
 This means that you can share parameters or fit multiple datasets however you want.
 We won't go into too many details about this here, but you can see some examples on the [Case Studies](https://gallery.exoplanet.codes) of joint transit/radial velocity fits, or inferences based on datasets from multiple instruments.
 

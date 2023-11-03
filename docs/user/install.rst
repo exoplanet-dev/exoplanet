@@ -3,6 +3,8 @@
 Installation
 ============
 
+.. TODO: Is this still true? Even for the PyMC >= 5 version?
+
 .. note:: ``exoplanet`` requires Python 3.6 and later.
 
 Using pip
@@ -34,7 +36,7 @@ Both of these installation methods will install the required dependencies:
 Compatibility with PyMC3
 ------------------------
 
-Although now updated to work with ``PyMC`` version 4, ``exoplanet`` is still
+Although now updated to work with ``PyMC`` version 5, ``exoplanet`` is still
 backwards compatible with ``PyMC3``. To install the ``PyMC3`` compatible version
 of ``exoplanet``, use the following command:
 
