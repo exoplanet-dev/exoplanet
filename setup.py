@@ -28,6 +28,7 @@ INSTALL_REQUIRES = ["exoplanet-core>=0.2.0", "astropy>=3.1"]
 EXTRA_REQUIRE = {
     "pymc3": ["pymc3>=3.9", "numpy<1.22", "aesara-theano-fallback>=0.0.2", "xarray<2023.10.0"],
     "pymc": ["pymc>=5.0.0"],
+    # TODO: Update pymc-ext and celerite2 versions for pymc5
     "extras": ["pymc>=5.0.0", "pymc-ext>=1.0.0", "celerite2>=0.2.0"],
     "test": ["scipy", "pytest", "pytest-env"],
     # TODO: Update pymc-ext version for pymc5
