@@ -291,7 +291,7 @@ with pm.Model():
         draws=1000,
         cores=2,
         chains=2,
-        start=soln,
+        initvals=soln,
         target_accept=0.9,
         init="adapt_full",
     )
@@ -349,7 +349,7 @@ with pm.Model():
     omega = pm.Deterministic("omega", plus - minus)
 
     # We'll use a uniform prior on cos(incl)
-    cos_incl = pm.Uniform("cos_incl", lower=-1.0, upper=1.0, testval=0.3)
+    cos_incl = pm.Uniform("cos_incl", lower=-1.0, upper=1.0, initval=0.3)
     incl = pm.Deterministic("incl", pt.arccos(cos_incl))
 
     # Then we define the orbit
@@ -467,14 +467,14 @@ with pm.Model():
 
     # The Kipping (2013) parameterization for quadratic limb darkening
     # paramters
-    u = xo.distributions.quad_limb_dark("u", testval=np.array([0.3, 0.2]))
+    u = xo.distributions.quad_limb_dark("u", initval=np.array([0.3, 0.2]))
 
     # The radius ratio and impact parameter; these parameters can
     # introduce pretty serious covariances and are ripe for
     # reparameterization
     log_r = pm.Normal("log_r", mu=np.log(0.04), sigma=2.0)
     r = pm.Deterministic("r", pt.exp(log_r))
-    b = xo.distributions.impact_parameter("b", r, testval=0.35)
+    b = xo.distributions.impact_parameter("b", r, initval=0.35)
 
     # Set up a Keplerian orbit for the planets
     orbit = xo.orbits.KeplerianOrbit(period=period, t0=t0, b=b)
