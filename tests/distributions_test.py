@@ -186,6 +186,33 @@ class TestEccentricity(_Base):
             & (ecc <= kwargs.get("upper", 1.0))
         )
 
+    def test_vaneylen19_observed(self):
+        with self._model() as model:
+            secosw, sesinw = unit_disk(
+                "secosw", "sesinw", initval=0.01 * np.ones(2)
+            )
+            ecc = pm.Deterministic("ecc", secosw**2 + sesinw**2)
+            ecc_prior = vaneylen19(
+                "ecc_prior", fixed=True, multi=False, observed=ecc
+            )
+
+            # Is the prior added to the model as a potential?
+            assert "ecc_prior" in model.named_vars
+            assert ecc_prior in model.potentials
+
+            trace = self._sample()
+
+        ecc = trace.posterior["ecc"].values.flatten()
+        assert np.all((0 <= ecc) & (ecc <= 1))
+
+        f = 0.76
+        cdf = lambda x: (  # NOQA
+            (1 - f) * halfnorm.cdf(x, scale=0.049)
+            + f * rayleigh.cdf(x, scale=0.26)
+        )
+        s, p = kstest(ecc, cdf)
+        assert s < 0.05
+
 
 class TestPhysical(_Base):
     random_seed = 19860925
