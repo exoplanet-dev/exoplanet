@@ -162,12 +162,25 @@ def vaneylen19(
         frac_sd = 0.2
 
     with model:
-        ecc = pm.Uniform(
-            name,
-            lower=0.0 if lower is None else lower,
-            upper=1.0 if upper is None else upper,
-            **kwargs,
-        )
+        ecc = kwargs.pop("observed", None)
+        _lower = 0.0 if lower is None else lower
+        _upper = 1.0 if upper is None else upper
+        if ecc is None:
+            ecc = pm.Uniform(
+                name,
+                lower=_lower,
+                upper=_upper,
+                **kwargs,
+            )
+            ecc_prior = ecc
+        else:
+            # TODO: Still define uniform here or put it in a single potential with other distributions below?
+            # TODO: Would there be any advantage to remove this unnecessary uniform when ecc already constrained 0 < e < 1 by, for e.g., unit_disk?
+            unif = pm.Uniform.dist(lower=_lower, upper=_upper, **kwargs)
+            ecc_prior = pm.Potential(
+                name,
+                _logp(unif, ecc),
+            )
 
         with pm.Model(name=name):
             if fixed:
@@ -214,7 +227,7 @@ def vaneylen19(
                 ),
             )
 
-        return ecc
+        return ecc_prior
 
 
 def _with_initval(**kwargs):
