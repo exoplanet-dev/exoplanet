@@ -239,3 +239,18 @@ def _truncate(name, dist, *, lower=None, upper=None, **kwargs):
     return pm.Truncated(
         name, dist.dist(**kwargs), lower=lower, upper=upper, initval=initval
     )
+
+
+def _truncate_dist(dist, *, lower=None, upper=None, **kwargs):
+    if USING_PYMC3:
+        # TODO: Implement for PyMC3
+        # return pm.Bound(dist, lower=lower, upper=upper)(
+        #     name, **_with_initval(**kwargs)
+        # )
+        raise NotImplementedError(
+            "_truncate_dist not implemented for PyMC 3 yet"
+        )
+    initval = kwargs.pop("initval", kwargs.pop("testval", None))
+    return pm.Truncated.dist(
+        dist.dist(**kwargs), lower=lower, upper=upper, initval=initval
+    )
