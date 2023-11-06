@@ -8,6 +8,7 @@ from exoplanet.compat import USING_PYMC3, pm
 from exoplanet.distributions.distributions import (
     impact_parameter,
     quad_limb_dark,
+    unit_disk,
 )
 from exoplanet.distributions.eccentricity import kipping13, vaneylen19
 
@@ -99,6 +100,25 @@ class TestEccentricity(_Base):
             (kwargs.get("lower", 0.0) <= ecc)
             & (ecc <= kwargs.get("upper", 1.0))
         )
+
+    def test_kipping13_observed(self):
+        with self._model() as model:
+            secosw, sesinw = unit_disk(
+                "secosw", "sesinw", shape=2, initval=0.01 * np.ones((2, 2))
+            )
+            ecc = pm.Deterministic("ecc", secosw**2 + sesinw**2)
+            ecc_prior = kipping13("ecc_prior", shape=2, observed=ecc)
+
+            # Is the prior added to the model as a potential?
+            assert "ecc_prior" in model.named_vars
+            assert ecc_prior in model.potentials
+
+            # Is the prior taken into account when sampling the "posterior"?
+            idata = self._sample()
+            ecc = idata.posterior["ecc"].values.flatten()
+            cdf = lambda x: beta.cdf(x, 1.12, 3.09)  # NOQA
+            s, p = kstest(ecc, cdf)
+            assert s < 0.05
 
     @pytest.mark.parametrize("kwargs", [dict(fixed=False), dict(multi=True)])
     def test_vaneylen19(self, kwargs):
