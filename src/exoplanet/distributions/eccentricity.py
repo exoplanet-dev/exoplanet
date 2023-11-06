@@ -80,23 +80,39 @@ def kipping13(
                 )
 
         # Allow for upper and lower bounds
+        ecc = kwargs.pop("observed", None)
         if lower is not None or upper is not None:
             lower = 0.0 if lower is None else lower
             upper = 1.0 if upper is None else upper
             kwargs["initval"] = kwargs.pop(
                 "initval", kwargs.pop("testval", 0.5 * (lower + upper))
             )
-            return _truncate(
-                name,
-                pm.Beta,
-                lower=lower,
-                upper=upper,
-                alpha=alpha,
-                beta=beta,
-                **_with_initval(**kwargs),
-            )
+            if ecc is None:
+                return _truncate(
+                    name,
+                    pm.Beta,
+                    lower=lower,
+                    upper=upper,
+                    alpha=alpha,
+                    beta=beta,
+                    **_with_initval(**kwargs),
+                )
+            else:
+                dist = _truncate_dist(
+                    pm.Beta,
+                    lower=lower,
+                    upper=upper,
+                    alpha=alpha,
+                    beta=beta,
+                    **_with_initval(**kwargs),
+                )
+        else:
+            if ecc is None:
+                return pm.Beta(name, alpha=alpha, beta=beta, **kwargs)
+            else:
+                dist = pm.Beta.dist(alpha=alpha, beta=beta, **kwargs)
 
-        return pm.Beta(name, alpha=alpha, beta=beta, **kwargs)
+        return pm.Potential(name, _logp(dist, ecc))
 
 
 def vaneylen19(
