@@ -21,7 +21,8 @@ def angle(name, *, regularization=10.0, **kwargs):
     angle is poorly constrained, but better performance when it is. The default
     value of ``10.0`` is a good starting point.
     """
-    initval = kwargs.pop("initval", kwargs.pop("testval", 0.0))
+    shape_arg = kwargs.get("shape", ())
+    initval = kwargs.pop("initval", kwargs.pop("testval", np.zeros(shape_arg)))
     x1 = pm.Normal(
         f"__{name}_angle1", **_with_initval(initval=np.sin(initval), **kwargs)
     )
@@ -52,7 +53,14 @@ def unit_disk(name_x, name_y, **kwargs):
         name_x: The name of the first distribution.
         name_y: The name of the second distribution.
     """
-    initval = kwargs.pop("initval", kwargs.pop("testval", [0.0, 0.0]))
+    shape_kwarg = kwargs.get("shape", ())
+    if isinstance(shape_kwarg, int):
+        shape_kwarg = (shape_kwarg,)
+    init_shape = (2,) + shape_kwarg
+    initval = kwargs.pop(
+        "initval", kwargs.pop("testval", np.zeros(init_shape))
+    )
+    # initval = kwargs.pop("initval", kwargs.pop("testval", [0.0, 0.0]))
     kwargs["lower"] = -1.0
     kwargs["upper"] = 1.0
     x1 = pm.Uniform(name_x, **_with_initval(initval=initval[0], **kwargs))

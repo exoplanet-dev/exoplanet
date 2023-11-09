@@ -6,6 +6,7 @@ from scipy.stats import beta, halfnorm, kstest, rayleigh
 
 from exoplanet.compat import USING_PYMC3, pm
 from exoplanet.distributions.distributions import (
+    angle,
     impact_parameter,
     quad_limb_dark,
     unit_disk,
@@ -212,6 +213,105 @@ class TestEccentricity(_Base):
         )
         s, p = kstest(ecc, cdf)
         assert s < 0.05
+
+
+class TestUnitDisk(_Base):
+    random_seed = 19930609
+
+    def test_unit_disk(self):
+        with self._model():
+            h, k = unit_disk("h", "k")
+            pm.Deterministic("ecc", h**2 + k**2)
+            trace = self._sample()
+
+        h_samples = trace.posterior["h"].values.flatten()
+        k_samples = trace.posterior["k"].values.flatten()
+        ecc_samples = trace.posterior["ecc"].values.flatten()
+
+        # Check h and k in expected intervals
+        assert np.all(h_samples < 1.0)
+        assert np.all(h_samples > -1.0)
+        assert np.all(k_samples < 1.0)
+        assert np.all(k_samples > -1.0)
+
+        # Check radius (eccentricity) is physical
+        assert np.all(ecc_samples >= 0.0)
+        assert np.all(ecc_samples < 1.0)
+
+        # Check radius (eccentricity) is uniform
+        cdf = lambda x: np.clip(x, 0, 1)  # NOQA
+        s, p = kstest(ecc_samples, cdf)
+        assert s < 0.05
+
+    @pytest.mark.parametrize(
+        "shape",
+        [2, (1, 3), (4, 5)],
+    )
+    def test_unit_disk_shape(self, shape):
+        shape_as_tuple = (shape,) if isinstance(shape, int) else shape
+        with self._model():
+            h, k = unit_disk("h", "k", shape=shape)
+
+        assert h.type.shape == shape_as_tuple
+        assert k.type.shape == h.type.shape
+
+    @pytest.mark.parametrize(
+        "shape",
+        [3, (4, 1), (4, 5)],
+    )
+    def test_unit_disk_initval(self, shape):
+        shape_as_tuple = (shape,) if isinstance(shape, int) else shape
+
+        with self._model():
+            h, k = unit_disk(
+                "h", "k", shape=shape, initval=np.zeros((2,) + shape_as_tuple)
+            )
+
+        assert h.type.shape == shape_as_tuple
+        assert k.type.shape == h.type.shape
+
+
+class TestAngle(_Base):
+    random_seed = 19900101
+
+    def test_angle(self):
+        with self._model():
+            angle("theta")
+            trace = self._sample()
+
+        theta_samples = trace.posterior["theta"].values.flatten()
+
+        # Check h and k in expected intervals
+        assert np.all(np.abs(theta_samples) < np.pi)
+
+        # Check theta is uniform
+        cdf = lambda x: np.clip(  # NOQA
+            (x + np.pi) / (2 * np.pi), -np.pi, np.pi
+        )
+        s, p = kstest(theta_samples, cdf)
+        assert s < 0.05
+
+    @pytest.mark.parametrize(
+        "shape",
+        [2, (1, 3), (4, 5)],
+    )
+    def test_angle_shape(self, shape):
+        shape_as_tuple = (shape,) if isinstance(shape, int) else shape
+        with self._model():
+            theta = angle("theta", shape=shape)
+
+        assert theta.type.shape == shape_as_tuple
+
+    @pytest.mark.parametrize(
+        "shape",
+        [3, (4, 1), (4, 5)],
+    )
+    def test_angle_initval(self, shape):
+        shape_as_tuple = (shape,) if isinstance(shape, int) else shape
+        with self._model():
+            theta = angle("theta", shape=shape, initval=np.zeros(shape))
+
+        assert theta.type.shape == shape_as_tuple
 
 
 class TestPhysical(_Base):
