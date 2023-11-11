@@ -98,14 +98,21 @@ def kipping13(
                     **_with_initval(**kwargs),
                 )
             else:
-                dist = _truncate_dist(
-                    pm.Beta,
-                    lower=lower,
-                    upper=upper,
-                    alpha=alpha,
-                    beta=beta,
-                    **_with_initval(**kwargs),
-                )
+                if USING_PYMC3:
+                    raise NotImplementedError(
+                        "Passing an 'observed' eccentricity to a bounded prior is not "
+                        "implemented with PyMC <= 3."
+                    )
+                else:
+                    dist = _truncate_dist(
+                        pm.Beta,
+                        lower=lower,
+                        upper=upper,
+                        alpha=alpha,
+                        beta=beta,
+                        # **_with_initval(**kwargs),
+                        **kwargs,
+                    )
         else:
             if ecc is None:
                 return pm.Beta(name, alpha=alpha, beta=beta, **kwargs)
