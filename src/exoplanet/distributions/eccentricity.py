@@ -84,10 +84,10 @@ def kipping13(
         if lower is not None or upper is not None:
             lower = 0.0 if lower is None else lower
             upper = 1.0 if upper is None else upper
-            kwargs["initval"] = kwargs.pop(
-                "initval", kwargs.pop("testval", 0.5 * (lower + upper))
-            )
             if ecc is None:
+                kwargs["initval"] = kwargs.pop(
+                    "initval", kwargs.pop("testval", 0.5 * (lower + upper))
+                )
                 return _truncate(
                     name,
                     pm.Beta,
