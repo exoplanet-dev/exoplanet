@@ -102,13 +102,23 @@ class TestEccentricity(_Base):
             & (ecc <= kwargs.get("upper", 1.0))
         )
 
-    def test_kipping13_observed(self):
+    @pytest.mark.parametrize(
+        "kwargs", [dict(lower=None, upper=None), dict(lower=0.2, upper=0.4)]
+    )
+    def test_kipping13_observed(self, kwargs):
         with self._model() as model:
+            # We want  to make sure to seed h and k inside the ecc_prior bounds
+            _lower = kwargs.get("lower", 0.0) or 0.0
+            _upper = kwargs.get("upper", 1.0) or 1.0
+            init_ecc = 0.5 * (_lower + _upper)
+            # Argument of periastron arbitrary to derive consistent h and k
+            init_h = np.sqrt(init_ecc) * np.cos(np.pi / 4)
+            init_k = np.sqrt(init_ecc) * np.sin(np.pi / 4)
             secosw, sesinw = unit_disk(
-                "secosw", "sesinw", shape=2, initval=0.01 * np.ones((2, 2))
+                "secosw", "sesinw", initval=[init_h, init_k]
             )
             ecc = pm.Deterministic("ecc", secosw**2 + sesinw**2)
-            ecc_prior = kipping13("ecc_prior", shape=2, observed=ecc)
+            ecc_prior = kipping13("ecc_prior", shape=2, observed=ecc, **kwargs)
 
             # Is the prior added to the model as a potential?
             assert "ecc_prior" in model.named_vars
@@ -116,10 +126,17 @@ class TestEccentricity(_Base):
 
             # Is the prior taken into account when sampling the "posterior"?
             idata = self._sample()
-            ecc = idata.posterior["ecc"].values.flatten()
-            cdf = lambda x: beta.cdf(x, 1.12, 3.09)  # NOQA
-            s, p = kstest(ecc, cdf)
-            assert s < 0.05
+            ecc_samples = idata.posterior["ecc"].values.flatten()
+
+            if kwargs.get("lower") is None and kwargs.get("upper") is None:
+                cdf = lambda x: beta.cdf(x, 1.12, 3.09)  # NOQA
+                s, p = kstest(ecc_samples, cdf)
+                assert s < 0.05
+            else:
+                assert np.all(
+                    (kwargs.get("lower", 0.0) <= ecc_samples)
+                    & (ecc_samples <= kwargs.get("upper", 1.0))
+                )
 
     @pytest.mark.parametrize("kwargs", [dict(fixed=False), dict(multi=True)])
     def test_vaneylen19(self, kwargs):
@@ -187,14 +204,29 @@ class TestEccentricity(_Base):
             & (ecc <= kwargs.get("upper", 1.0))
         )
 
-    def test_vaneylen19_observed(self):
+    @pytest.mark.parametrize(
+        "kwargs", [dict(lower=None, upper=None), dict(lower=0.2, upper=0.4)]
+    )
+    def test_vaneylen19_observed(self, kwargs):
         with self._model() as model:
+            # We want  to make sure to seed h and k inside the ecc_prior bounds
+            _lower = kwargs.get("lower", 0.0) or 0.0
+            _upper = kwargs.get("upper", 1.0) or 1.0
+            init_ecc = 0.5 * (_lower + _upper)
+            # Argument of periastron arbitrary to derive consistent h and k
+            init_h = np.sqrt(init_ecc) * np.cos(np.pi / 4)
+            init_k = np.sqrt(init_ecc) * np.sin(np.pi / 4)
+            print(init_h, init_k)
             secosw, sesinw = unit_disk(
-                "secosw", "sesinw", initval=0.01 * np.ones(2)
+                "secosw", "sesinw", initval=[init_h, init_k]
             )
             ecc = pm.Deterministic("ecc", secosw**2 + sesinw**2)
             ecc_prior = vaneylen19(
-                "ecc_prior", fixed=True, multi=False, observed=ecc
+                "ecc_prior",
+                fixed=True,
+                multi=False,
+                observed=ecc,
+                **kwargs,
             )
 
             # Is the prior added to the model as a potential?
@@ -203,16 +235,22 @@ class TestEccentricity(_Base):
 
             trace = self._sample()
 
-        ecc = trace.posterior["ecc"].values.flatten()
-        assert np.all((0 <= ecc) & (ecc <= 1))
+        ecc_samples = trace.posterior["ecc"].values.flatten()
 
-        f = 0.76
-        cdf = lambda x: (  # NOQA
-            (1 - f) * halfnorm.cdf(x, scale=0.049)
-            + f * rayleigh.cdf(x, scale=0.26)
-        )
-        s, p = kstest(ecc, cdf)
-        assert s < 0.05
+        if kwargs.get("lower") is None and kwargs.get("upper") is None:
+            assert np.all((0 <= ecc_samples) & (ecc_samples <= 1))
+            f = 0.76
+            cdf = lambda x: (  # NOQA
+                (1 - f) * halfnorm.cdf(x, scale=0.049)
+                + f * rayleigh.cdf(x, scale=0.26)
+            )
+            s, p = kstest(ecc_samples, cdf)
+            assert s < 0.05
+        else:
+            assert np.all(
+                (kwargs.get("lower", 0.0) <= ecc_samples)
+                & (ecc_samples <= kwargs.get("upper", 1.0))
+            )
 
 
 class TestUnitDisk(_Base):
