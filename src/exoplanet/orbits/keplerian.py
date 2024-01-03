@@ -13,7 +13,7 @@ import aesara_theano_fallback.tensor as tt
 import numpy as np
 from aesara_theano_fallback import ifelse
 from astropy import units as u
-from exoplanet_core.pymc import ops
+from exoplanet_core.pymc3 import ops
 
 from ..citations import add_citations_to_model
 from ..units import has_unit, to_unit, with_unit
