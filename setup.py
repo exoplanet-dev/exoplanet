@@ -36,7 +36,7 @@ EXTRA_REQUIRE = {
     "test": [
         "scipy",
         "pytest",
-        "coverage[toml]",
+        "coverage",
         "pytest-env",
     ],
     "docs": [
