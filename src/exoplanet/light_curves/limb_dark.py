@@ -5,7 +5,7 @@ __all__ = ["LimbDarkLightCurve"]
 import aesara_theano_fallback.tensor as tt
 import numpy as np
 from aesara_theano_fallback import aesara as theano
-from exoplanet_core.pymc import ops
+from exoplanet_core.pymc3 import ops
 
 from ..citations import add_citations_to_model
 from ..utils import as_tensor_variable, deprecation_warning
