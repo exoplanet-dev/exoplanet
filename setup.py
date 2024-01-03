@@ -24,11 +24,12 @@ CLASSIFIERS = [
     "Programming Language :: Python :: 3",
 ]
 INSTALL_REQUIRES = [
-    "exoplanet-core>=0.1,<0.2",
-    "pymc3>=3.9",
+    "exoplanet-core>=0.1",
     "aesara-theano-fallback>=0.0.2",
     "astropy>=3.1",
+    "pymc3>=3.9",
     "numpy<1.22",
+    "xarray<2023.10.0",
 ]
 EXTRA_REQUIRE = {
     "extras": ["pymc3-ext>=0.1.0", "celerite2>=0.2.0"],
