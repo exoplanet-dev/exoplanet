@@ -3,9 +3,7 @@
 Installation
 ============
 
-.. TODO: Is this still true? Even for the PyMC >= 5 version?
-
-.. note:: ``exoplanet`` requires Python 3.6 and later.
+.. note:: ``exoplanet`` requires Python 3.8 and later.
 
 Using pip
 ---------
