@@ -115,6 +115,8 @@ def impact_parameter(name, ror, **kwargs):
     bhat = kwargs.pop("initval", kwargs.pop("testval", 0.5))
     if not USING_PYMC3:
         shape = kwargs.setdefault("shape", ror.shape)
+        if isinstance(shape, int):
+            shape = (shape,)
         bhat = pt.broadcast_to(bhat, shape)
     kwargs["lower"] = 0.0
     kwargs["upper"] = 1.0
