@@ -46,16 +46,7 @@ def docs_setup():
     """Set some environment variables and ignore some warnings for the docs"""
     import logging
 
-    # TODO: Remove?
-    # import warnings
     import matplotlib.pyplot as plt
-
-    # TODO: Remove? None of these warnings in the docs (did not check case studies yet)
-    # warnings.filterwarnings("ignore", category=DeprecationWarning)
-    # warnings.filterwarnings("ignore", category=FutureWarning)
-    # Remove when arviz is updated
-    # TODO: Remove? Only warning left is from PyMC about QuadPotentialFullAdapt
-    # warnings.filterwarnings("ignore", category=UserWarning)
 
     logger = logging.getLogger("theano.gof.compilelock")
     logger.setLevel(logging.ERROR)
