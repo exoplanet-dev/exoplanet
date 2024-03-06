@@ -54,8 +54,7 @@ class LimbDarkLightCurve:
             try:
                 assert_op = Assert(msg)
             except AttributeError:
-                # TODO: No longer exists. Should this just be removed? Seems handled by compat
-                assert_op = pt.opt.Assert(msg)
+                assert_op = Assert(msg)
             u1 = as_tensor_variable(u1)
             u1 = assert_op(
                 u1, pt.and_(pt.eq(u1.ndim, 1), pt.eq(u1.shape[0], 2))
