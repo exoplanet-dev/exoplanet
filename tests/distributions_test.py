@@ -304,8 +304,12 @@ class TestUnitDisk(_Base):
         with self._model():
             h, k = unit_disk("h", "k", shape=shape)
 
-        assert h.type.shape == shape_as_tuple
-        assert k.type.shape == h.type.shape
+        if USING_PYMC3:
+            assert h.tag.test_value.shape == shape_as_tuple
+            assert k.tag.test_value.shape == h.tag.test_value.shape
+        else:
+            assert h.type.shape == shape_as_tuple
+            assert k.type.shape == h.type.shape
 
     @pytest.mark.parametrize(
         "shape",
@@ -319,8 +323,12 @@ class TestUnitDisk(_Base):
                 "h", "k", shape=shape, initval=np.zeros((2,) + shape_as_tuple)
             )
 
-        assert h.type.shape == shape_as_tuple
-        assert k.type.shape == h.type.shape
+        if USING_PYMC3:
+            assert h.tag.test_value.shape == shape_as_tuple
+            assert k.tag.test_value.shape == h.tag.test_value.shape
+        else:
+            assert h.type.shape == shape_as_tuple
+            assert k.type.shape == h.type.shape
 
 
 class TestAngle(_Base):
@@ -352,7 +360,10 @@ class TestAngle(_Base):
         with self._model():
             theta = angle("theta", shape=shape)
 
-        assert theta.type.shape == shape_as_tuple
+        if USING_PYMC3:
+            assert theta.tag.test_value.shape == shape_as_tuple
+        else:
+            assert theta.type.shape == shape_as_tuple
 
     @pytest.mark.parametrize(
         "shape",
@@ -363,7 +374,10 @@ class TestAngle(_Base):
         with self._model():
             theta = angle("theta", shape=shape, initval=np.zeros(shape))
 
-        assert theta.type.shape == shape_as_tuple
+        if USING_PYMC3:
+            assert theta.tag.test_value.shape == shape_as_tuple
+        else:
+            assert theta.type.shape == shape_as_tuple
 
 
 class TestPhysical(_Base):
