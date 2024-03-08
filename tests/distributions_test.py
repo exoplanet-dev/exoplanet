@@ -234,18 +234,28 @@ class TestEccentricity(_Base):
             secosw, sesinw = unit_disk(
                 "secosw", "sesinw", initval=[init_h, init_k]
             )
-            ecc = pm.Deterministic("ecc", secosw**2 + sesinw**2)
-            ecc_prior = vaneylen19(
-                "ecc_prior",
-                fixed=True,
-                multi=False,
-                observed=ecc,
-                **kwargs,
-            )
+            if USING_PYMC3:
+                ecc_prior = vaneylen19(
+                    "ecc",
+                    fixed=True,
+                    multi=False,
+                    observed=secosw**2 + sesinw**2,
+                    **kwargs,
+                )
+            else:
+                ecc = pm.Deterministic("ecc", secosw**2 + sesinw**2)
+                ecc_prior = vaneylen19(
+                    "ecc_prior",
+                    fixed=True,
+                    multi=False,
+                    observed=ecc,
+                    **kwargs,
+                )
 
-            # Is the prior added to the model as a potential?
-            assert "ecc_prior" in model.named_vars
-            assert ecc_prior in model.potentials
+            if not USING_PYMC3:
+                # Is the prior added to the model as a potential?
+                assert "ecc_prior" in model.named_vars
+                assert ecc_prior in model.potentials
 
             trace = self._sample()
 

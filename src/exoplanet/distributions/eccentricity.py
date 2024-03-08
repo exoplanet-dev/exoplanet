@@ -172,7 +172,7 @@ def vaneylen19(
         ecc = kwargs.pop("observed", None)
         _lower = 0.0 if lower is None else lower
         _upper = 1.0 if upper is None else upper
-        if ecc is None:
+        if ecc is None or USING_PYMC3:
             ecc = pm.Uniform(
                 name,
                 lower=_lower,
