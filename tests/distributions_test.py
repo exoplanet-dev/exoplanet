@@ -106,6 +106,9 @@ class TestEccentricity(_Base):
         "kwargs", [dict(lower=None, upper=None), dict(lower=0.2, upper=0.4)]
     )
     def test_kipping13_observed(self, kwargs):
+        has_bounds = (
+            kwargs.get("lower") is not None or kwargs.get("upper") is not None
+        )
         with self._model() as model:
             # We want  to make sure to seed h and k inside the ecc_prior bounds
             _lower = kwargs.get("lower", 0.0) or 0.0
@@ -118,6 +121,17 @@ class TestEccentricity(_Base):
                 "secosw", "sesinw", initval=[init_h, init_k]
             )
             ecc = pm.Deterministic("ecc", secosw**2 + sesinw**2)
+            if has_bounds and USING_PYMC3:
+                with pytest.raises(
+                    NotImplementedError,
+                    match="Passing an 'observed' eccentricity to a bounded prior is not"
+                    " implemented with PyMC <= 3.",
+                ):
+                    ecc_prior = kipping13(
+                        "ecc_prior", shape=2, observed=ecc, **kwargs
+                    )
+                return
+
             ecc_prior = kipping13("ecc_prior", shape=2, observed=ecc, **kwargs)
 
             # Is the prior added to the model as a potential?
@@ -128,7 +142,7 @@ class TestEccentricity(_Base):
             idata = self._sample()
             ecc_samples = idata.posterior["ecc"].values.flatten()
 
-            if kwargs.get("lower") is None and kwargs.get("upper") is None:
+            if not has_bounds:
                 cdf = lambda x: beta.cdf(x, 1.12, 3.09)  # NOQA
                 s, p = kstest(ecc_samples, cdf)
                 assert s < 0.05
