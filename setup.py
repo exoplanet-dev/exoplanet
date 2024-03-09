@@ -41,6 +41,7 @@ EXTRA_REQUIRE = {
     ],
     "test": ["scipy", "pytest", "pytest-env"],
     "docs": [
+        "exoplanet-core>=0.3.0",
         "pymc>=5.0.0",
         "pymc-ext>=1.0.1",
         "sphinx-book-theme",
