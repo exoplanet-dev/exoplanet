@@ -1,17 +1,15 @@
-# -*- coding: utf-8 -*-
-
 __all__ = ["with_unit", "has_unit", "to_unit"]
 
-from .utils import as_tensor_variable
+from exoplanet.utils import as_tensor_variable
 
 UNIT_ATTR_NAME = "__exoplanet_unit__"
 
 
 def with_unit(obj, unit):
-    """Decorate a Theano tensor with Astropy units
+    """Decorate an PyTensor tensor with Astropy units
 
     Args:
-        obj: The Theano tensor
+        obj: The PyTensor tensor
         unit (astropy.Unit): The units for this object
 
     Raises:
@@ -31,14 +29,14 @@ def has_unit(obj):
 
 
 def to_unit(obj, target):
-    """Convert a Theano tensor with units to a target set of units
+    """Convert an PyTensor tensor with units to a target set of units
 
     Args:
-        obj: The Theano tensor
+        obj: The PyTensor tensor
         target (astropy.Unit): The target units
 
     Returns:
-        A Theano tensor in the right units
+        A PyTensor tensor in the right units
 
     """
     if not has_unit(obj):

@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
-
 __all__ = ["InterpolatedLightCurve"]
 
-import aesara_theano_fallback.tensor as tt
 import numpy as np
+
+from exoplanet.compat import tensor as pt
 
 
 def interp(n, x, xmin, xmax, dx, func):
@@ -20,7 +19,7 @@ def interp(n, x, xmin, xmax, dx, func):
     Returns:
         y: The function ``func`` interpolated to the coordinates ``x``
     """
-    xp = tt.arange(xmin - dx, xmax + 2.5 * dx, dx)
+    xp = pt.arange(xmin - dx, xmax + 2.5 * dx, dx)
     yp = func(xp)
 
     y0 = yp[:-3, n]
@@ -33,7 +32,7 @@ def interp(n, x, xmin, xmax, dx, func):
     a2 = 0.5 * (y0 + y2) - y1
     a3 = 0.5 * ((y1 - y2) + (y3 - y0) / 3.0)
 
-    inds = tt.cast(tt.floor((x - xmin) / dx), "int64")
+    inds = pt.cast(pt.floor((x - xmin) / dx), "int64")
     x0 = (x - xp[inds + 1]) / dx
     return a0[inds] + a1[inds] * x0 + a2[inds] * x0**2 + a3[inds] * x0**3
 
@@ -91,7 +90,7 @@ class InterpolatedLightCurve:
             mx = orbit.t0 + orbit.period
             return interp(
                 0,
-                tt.mod(t - orbit.t0, orbit.period) + orbit.t0,
+                pt.mod(t - orbit.t0, orbit.period) + orbit.t0,
                 mn,
                 mx,
                 (mx - mn) / (self.num_phase + 1),
@@ -115,7 +114,7 @@ class InterpolatedLightCurve:
             ys.append(
                 interp(
                     n,
-                    tt.mod(t - orbit.t0[n], orbit.period[n]) + orbit.t0[n],
+                    pt.mod(t - orbit.t0[n], orbit.period[n]) + orbit.t0[n],
                     mn,
                     mx,
                     (mx - mn) / (self.num_phase + 1),
@@ -123,7 +122,7 @@ class InterpolatedLightCurve:
                 )
             )
 
-        return tt.stack(ys, axis=-1)
+        return pt.stack(ys, axis=-1)
 
 
 class _wrapper:

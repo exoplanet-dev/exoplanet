@@ -6,7 +6,7 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.15.2
 kernelspec:
-  display_name: Python 3
+  display_name: Python 3 (ipykernel)
   language: python
   name: python3
 ---
@@ -131,4 +131,8 @@ plt.legend(fontsize=10, loc="lower right")
 _ = plt.title(
     "Light delay causes transits to occur 8.32 minutes early", fontsize=14
 )
+```
+
+```{code-cell}
+
 ```

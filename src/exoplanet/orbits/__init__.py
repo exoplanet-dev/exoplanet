@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 __all__ = [
     "KeplerianOrbit",
     "get_true_anomaly",
@@ -8,7 +6,7 @@ __all__ = [
     "duration_to_eccentricity",
 ]
 
-from .dur_to_ecc import duration_to_eccentricity
-from .keplerian import KeplerianOrbit, get_true_anomaly
-from .simple import SimpleTransitOrbit
-from .ttv import TTVOrbit
+from exoplanet.orbits.dur_to_ecc import duration_to_eccentricity
+from exoplanet.orbits.keplerian import KeplerianOrbit, get_true_anomaly
+from exoplanet.orbits.simple import SimpleTransitOrbit
+from exoplanet.orbits.ttv import TTVOrbit

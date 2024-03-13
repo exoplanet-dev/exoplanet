@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-
 import numpy as np
-from aesara_theano_fallback import aesara as theano
 
+from exoplanet.compat import function
 from exoplanet.orbits.keplerian import KeplerianOrbit
 from exoplanet.orbits.ttv import TTVOrbit, compute_expected_transit_times
 
@@ -35,7 +33,7 @@ def test_consistency(seed=6934104):
     orbit = TTVOrbit(
         period=periods, t0=[t[0] for t in expected_times], ttvs=ttvs
     )
-    calc_times = theano.function([], orbit.transit_times)()
+    calc_times = function([], orbit.transit_times)()
     for i in range(len(expected_times)):
         assert np.allclose(calc_times[i], expected_times[i] + ttvs[i])
 
@@ -77,9 +75,9 @@ def test_no_ttvs():
         "get_planet_velocity",
         "get_radial_velocity",
     ]:
-        expect = theano.function([], getattr(orbit0, arg)(time))()
-        calc1 = theano.function([], getattr(orbit1, arg)(time))()
-        calc2 = theano.function([], getattr(orbit2, arg)(time))()
+        expect = function([], getattr(orbit0, arg)(time))()
+        calc1 = function([], getattr(orbit1, arg)(time))()
+        calc2 = function([], getattr(orbit2, arg)(time))()
 
         assert np.allclose(expect, calc1), arg
         assert np.allclose(expect, calc2), arg
