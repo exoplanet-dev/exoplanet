@@ -32,7 +32,7 @@ repos:
   - id: black_nbconvert
 
 - repo: https://github.com/mwouts/jupytext
-  rev: v1.16.1
+  rev: v1.15.2
   hooks:
   - id: jupytext
     files: |
