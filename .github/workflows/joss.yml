@@ -32,7 +32,7 @@ jobs:
           JOURNAL: joss
 
       - name: Upload the generated files as an artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: joss
           name: joss
