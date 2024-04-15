@@ -22,11 +22,7 @@ try:
 
     day_per_yr_over_2pi = (
         (1.0 * u.au) ** (3 / 2)
-        / (
-            np.sqrt(
-                c.G.to(u.au**3 / (u.M_sun * u.day**2)) * (1.0 * u.M_sun)
-            )
-        )
+        / (np.sqrt(c.G.to(u.au**3 / (u.M_sun * u.day**2)) * (1.0 * u.M_sun)))
     ).value
 
 except TypeError:

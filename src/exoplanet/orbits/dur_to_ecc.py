@@ -39,9 +39,7 @@ def duration_to_eccentricity(
     s = tt.sin(kwargs["omega"])
     umax_inv = tt.switch(tt.lt(s, 0), tt.sqrt(1 - s**2), 1.0)
 
-    const = (
-        period * tt.shape_padright(r_star) * tt.sqrt((1 + ror) ** 2 - b**2)
-    )
+    const = period * tt.shape_padright(r_star) * tt.sqrt((1 + ror) ** 2 - b**2)
     const /= np.pi * a
 
     u = duration / const
