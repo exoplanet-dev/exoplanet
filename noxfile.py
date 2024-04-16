@@ -3,7 +3,7 @@ from pathlib import Path
 
 import nox
 
-ALL_PYTHON_VS = ["3.8", "3.9", "3.10"]
+ALL_PYTHON_VS = ["3.9", "3.10", "3.11"]
 
 
 @nox.session(python=ALL_PYTHON_VS)

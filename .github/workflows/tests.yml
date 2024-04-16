@@ -45,7 +45,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip
-          python -m pip install -U coveralls coverage[toml] nox
+          python -m pip install -U nox
 
       - name: Run tests
         run: |
