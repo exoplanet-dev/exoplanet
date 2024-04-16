@@ -23,30 +23,32 @@ CLASSIFIERS = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
 ]
-INSTALL_REQUIRES = [
-    "exoplanet-core>=0.2",
-    "aesara-theano-fallback>=0.0.2",
-    "astropy>=3.1",
-    "pymc3>=3.9",
-    "numpy<1.22",
-    "xarray<2023.10.0",
-]
+INSTALL_REQUIRES = ["astropy>=3.1"]
 EXTRA_REQUIRE = {
-    "extras": ["pymc3-ext>=0.1.0", "celerite2>=0.2.0"],
-    "test": [
-        "scipy",
-        "pytest",
-        "coverage",
-        "pytest-env",
+    "pymc3": [
+        "pymc3>=3.9",
+        "numpy<1.22",
+        "aesara-theano-fallback>=0.0.2",
+        "xarray<2023.10.0",
+        "exoplanet-core>=0.2.0",
     ],
+    "pymc": ["pymc>=5.0.0", "exoplanet-core>=0.3.0"],
+    "extras": ["pymc>=5.0.0", "pymc-ext>=1.0.1", "celerite2>=0.3.1"],
+    "extras-pymc3": [
+        "pymc3>=3.9",
+        "pymc3-ext>=0.1.0",
+        "celerite2>=0.2.0,<0.3.1",
+    ],
+    "test": ["scipy", "pytest", "pytest-env"],
     "docs": [
+        "exoplanet-core>=0.3.0",
+        "pymc>=5.0.0",
+        "pymc-ext>=1.0.1",
         "sphinx-book-theme",
         "myst-nb",
         "ipython",
         "matplotlib",
         "corner",
-        "lightkurve",
-        "pymc3-ext>=0.1.0",
         "emcee",
     ],
 }

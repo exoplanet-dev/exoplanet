@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 __all__ = [
     "G_grav",
     "gcc_per_sun",

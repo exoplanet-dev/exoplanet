@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 __all__ = ["SecondaryEclipseLightCurve"]
 
-from ..utils import as_tensor_variable
-from .limb_dark import LimbDarkLightCurve
+from exoplanet.light_curves.limb_dark import LimbDarkLightCurve
+from exoplanet.utils import as_tensor_variable
 
 
 class SecondaryEclipseLightCurve:
