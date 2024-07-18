@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 from pkg_resources import DistributionNotFound, get_distribution
 
 try:
@@ -8,6 +9,10 @@ try:
 except DistributionNotFound:
     __version__ = "unknown version"
 
+# Support canonical URL
+html_baseurl = os.environ.get("READTHEDOCS_CANONICAL_URL", "")
+if os.environ.get("READTHEDOCS", "") == "True":
+    html_context["READTHEDOCS"] = True
 
 # General stuff
 extensions = [
