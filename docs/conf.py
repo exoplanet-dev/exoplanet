@@ -12,7 +12,7 @@ except DistributionNotFound:
 # Support canonical URL
 html_baseurl = os.environ.get("READTHEDOCS_CANONICAL_URL", "")
 if os.environ.get("READTHEDOCS", "") == "True":
-    html_context["READTHEDOCS"] = True
+    html_context = {"READTHEDOCS", True}
 
 # General stuff
 extensions = [
