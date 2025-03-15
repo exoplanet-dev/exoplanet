@@ -8,6 +8,9 @@ API documentation
 Orbits
 ------
 
+.. figure:: ../_static/elements.png
+   :align: center
+
 .. autoclass:: exoplanet.orbits.KeplerianOrbit
    :inherited-members:
 
