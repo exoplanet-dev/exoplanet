@@ -3,9 +3,8 @@ import logging
 import numpy as np
 import pytest
 
-from exoplanet.compat import change_flags, function, grad
+from exoplanet.compat import change_flags, function, grad, verify_grad
 from exoplanet.compat import tensor as pt
-from exoplanet.compat import verify_grad
 from exoplanet.light_curves import (
     LimbDarkLightCurve,
     SecondaryEclipseLightCurve,
